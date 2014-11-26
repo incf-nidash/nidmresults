@@ -11,10 +11,10 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 from prov.model import ProvBundle, ProvDocument
 import os
 import datetime
-from nidmfsl.exporter.objects.constants import *
-from nidmfsl.exporter.objects.modelfitting import *
-from nidmfsl.exporter.objects.contrast import *
-from nidmfsl.exporter.objects.inference import *
+from nidmresults.objects.constants import *
+from nidmresults.objects.modelfitting import *
+from nidmresults.objects.contrast import *
+from nidmresults.objects.inference import *
 import uuid 
 from subprocess import call
 
