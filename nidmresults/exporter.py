@@ -16,6 +16,7 @@ from nidmresults.objects.modelfitting import *
 from nidmresults.objects.contrast import *
 from nidmresults.objects.inference import *
 import uuid 
+from rdflib import Graph
 from subprocess import call
 
 class NIDMExporter():
@@ -188,7 +189,12 @@ class NIDMExporter():
         provn_fid = open(provn_file, 'w');
         # FIXME None
         provn_fid.write(self.doc.get_provn(4).replace("None", "-"))
+        provn_fid.close()
 
         ttl_file = provn_file.replace(".provn", ".ttl")
-        print "provconvert -infile "+provn_file+" -outfile "+ttl_file
-        call("provconvert -infile "+provn_file+" -outfile "+ttl_file, shell=True)
+        ttl_fid = open(ttl_file, 'w');
+        # serialization is done in xlm rdf
+        graph = Graph()
+        graph.parse(data=self.doc.serialize(format='rdf'), format="xml")
+        ttl_fid.write(graph.serialize(format="turtle"))
+        ttl_fid.close()
