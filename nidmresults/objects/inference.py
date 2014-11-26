@@ -51,26 +51,27 @@ class Inference(NIDMObject):
         # Inference activity
         self.p.update(self.inference_act.export())
 
-        # Peak Definition
-        self.p.update(self.peak_criteria.export())
-        self.p.used(self.inference_act.id, self.peak_criteria.id)
+        if self.clusters:
+            # Peak Definition
+            self.p.update(self.peak_criteria.export())
+            self.p.used(self.inference_act.id, self.peak_criteria.id)
 
-        # Display Mask
-        self.p.update(self.disp_mask.export())
-        self.p.used(self.inference_act.id, self.disp_mask.id)
+            # Display Mask
+            self.p.update(self.disp_mask.export())
+            self.p.used(self.inference_act.id, self.disp_mask.id)
 
-        # Search Space
-        self.p.update(self.search_space.export())
-        self.p.wasGeneratedBy(self.search_space.id, self.inference_act.id)
+            # Search Space
+            self.p.update(self.search_space.export())
+            self.p.wasGeneratedBy(self.search_space.id, self.inference_act.id)
 
-        # Cluster Definition
-        self.p.update(self.cluster_criteria.export())
-        self.p.used(self.inference_act.id, self.cluster_criteria.id)
+            # Cluster Definition
+            self.p.update(self.cluster_criteria.export())
+            self.p.used(self.inference_act.id, self.cluster_criteria.id)
 
-        # Clusters and peaks
-        for cluster in self.clusters:
-            self.p.update(cluster.export())
-            self.p.wasDerivedFrom(cluster.id, self.excursion_set.id)
+            # Clusters and peaks
+            for cluster in self.clusters:
+                self.p.update(cluster.export())
+                self.p.wasDerivedFrom(cluster.id, self.excursion_set.id)
 
         self.p.wasGeneratedBy(self.excursion_set.id, self.inference_act.id)
 
@@ -249,6 +250,11 @@ class ExtentThreshold(NIDMObject):
         elif not self.p_corr is None:
             thresh_desc = "p<"+str(self.p_corr)+" corr."
             user_threshold_type = "p-value FWE"
+        else:
+            thresh_desc = "k>=0"
+            self.extent = 0
+            user_threshold_type = "No threshold set by user"
+
         extent_thresh_all_fields = {
             PROV['type']: NIDM['ExtentThreshold'], 
             PROV['label']: "Extent Threshold: "+thresh_desc, 
