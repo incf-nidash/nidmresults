@@ -206,10 +206,10 @@ class HeightThreshold(NIDMObject):
             thresh_desc = "Z>"+str(self.stat_threshold)
             user_threshold_type = "Z-Statistic"
         elif self.p_uncorr_threshold is not None:
-            thresh_desc = "p<"+str(self.p_uncorr_threshold)+" uncorr."
+            thresh_desc = "p<"+str(self.p_uncorr_threshold)+" (uncorrected)"
             user_threshold_type = "p-value uncorrected"
         elif self.p_corr_threshold is not None:
-            thresh_desc = "p<"+str(self.p_corr_threshold)+" (GRF)"
+            thresh_desc = "p<"+str(self.p_corr_threshold)+" (FWE)"
             user_threshold_type = "p-value FWE"
 
         # FIXME: Do we want to calculate an uncorrected p equivalent to the Z thresh? 
@@ -247,10 +247,10 @@ class ExtentThreshold(NIDMObject):
             thresh_desc = "k>"+str(self.extent)
             user_threshold_type = "Cluster-size in voxels"
         elif not self.p_uncorr is None:
-            thresh_desc = "p<"+str(self.p_uncorr)+" uncorr."
+            thresh_desc = "p<"+str(self.p_uncorr)+" (uncorrected)"
             user_threshold_type = "p-value uncorrected"
         elif not self.p_corr is None:
-            thresh_desc = "p<"+str(self.p_corr)+" corr."
+            thresh_desc = "p<"+str(self.p_corr)+" (FWE)"
             user_threshold_type = "p-value FWE"
         else:
             thresh_desc = "k>=0"
