@@ -255,7 +255,9 @@ class ExtentThreshold(NIDMObject):
         else:
             thresh_desc = "k>=0"
             self.extent = 0
-            user_threshold_type = "No threshold set by user"
+            self.p_uncorr = 1.0
+            self.p_corr = 1.0
+            user_threshold_type = None
 
         extent_thresh_all_fields = {
             PROV['type']: NIDM['ExtentThreshold'], 
