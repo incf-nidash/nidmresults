@@ -146,7 +146,6 @@ class NIDMExporter():
         """ 
         Initialise NIDM-Results bundle.
         """
-        software_lc = self.software.name.lower()
         software_uc = self.software.name.upper()
 
         bundle_id = NIIRI[str(uuid.uuid4())]
@@ -160,7 +159,7 @@ class NIDMExporter():
                                (NIDM['version'], version))
             )
 
-        self.doc.wasGeneratedBy(NIIRI[software_lc+'_results_id'], 
+        self.doc.wasGeneratedBy(bundle_id, 
             time=str(datetime.datetime.now().time()))
 
     def _get_model_parameters_estimations(self, error_model):
