@@ -192,9 +192,12 @@ class NIDMExporter():
         provn_fid.close()
 
         ttl_file = provn_file.replace(".provn", ".ttl")
-        ttl_fid = open(ttl_file, 'w');
+        # ttl_fid = open(ttl_file, 'w');
         # serialization is done in xlm rdf
-        graph = Graph()
-        graph.parse(data=self.doc.serialize(format='rdf'), format="xml")
-        ttl_fid.write(graph.serialize(format="turtle"))
-        ttl_fid.close()
+        # graph = Graph()
+        # graph.parse(data=self.doc.serialize(format='rdf'), format="xml")
+        # ttl_fid.write(graph.serialize(format="turtle"))
+        # ttl_fid.write(self.doc.serialize(format='rdf').replace("inf", '"INF"'))
+        # ttl_fid.close()
+        print "provconvert -infile "+provn_file+" -outfile "+ttl_file
+        call("provconvert -infile "+provn_file+" -outfile "+ttl_file, shell=True)
