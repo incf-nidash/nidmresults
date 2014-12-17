@@ -51,26 +51,27 @@ class Inference(NIDMObject):
         # Inference activity
         self.p.update(self.inference_act.export())
 
-        # Peak Definition
-        self.p.update(self.peak_criteria.export())
-        self.p.used(self.inference_act.id, self.peak_criteria.id)
+        if self.clusters:
+            # Peak Definition
+            self.p.update(self.peak_criteria.export())
+            self.p.used(self.inference_act.id, self.peak_criteria.id)
 
-        # Display Mask
-        self.p.update(self.disp_mask.export())
-        self.p.used(self.inference_act.id, self.disp_mask.id)
+            # Display Mask
+            self.p.update(self.disp_mask.export())
+            self.p.used(self.inference_act.id, self.disp_mask.id)
 
-        # Search Space
-        self.p.update(self.search_space.export())
-        self.p.wasGeneratedBy(self.search_space.id, self.inference_act.id)
+            # Search Space
+            self.p.update(self.search_space.export())
+            self.p.wasGeneratedBy(self.search_space.id, self.inference_act.id)
 
-        # Cluster Definition
-        self.p.update(self.cluster_criteria.export())
-        self.p.used(self.inference_act.id, self.cluster_criteria.id)
+            # Cluster Definition
+            self.p.update(self.cluster_criteria.export())
+            self.p.used(self.inference_act.id, self.cluster_criteria.id)
 
-        # Clusters and peaks
-        for cluster in self.clusters:
-            self.p.update(cluster.export())
-            self.p.wasDerivedFrom(cluster.id, self.excursion_set.id)
+            # Clusters and peaks
+            for cluster in self.clusters:
+                self.p.update(cluster.export())
+                self.p.wasDerivedFrom(cluster.id, self.excursion_set.id)
 
         self.p.wasGeneratedBy(self.excursion_set.id, self.inference_act.id)
 
@@ -194,6 +195,7 @@ class HeightThreshold(NIDMObject):
         self.stat_threshold = stat_threshold
         self.p_corr_threshold = p_corr_threshold
         self.p_uncorr_threshold = p_uncorr_threshold
+        self.id = NIIRI[str(uuid.uuid4())]
 
     def export(self):
         """
@@ -204,10 +206,10 @@ class HeightThreshold(NIDMObject):
             thresh_desc = "Z>"+str(self.stat_threshold)
             user_threshold_type = "Z-Statistic"
         elif self.p_uncorr_threshold is not None:
-            thresh_desc = "p<"+str(self.p_uncorr_threshold)+" uncorr."
+            thresh_desc = "p<"+str(self.p_uncorr_threshold)+" (uncorrected)"
             user_threshold_type = "p-value uncorrected"
         elif self.p_corr_threshold is not None:
-            thresh_desc = "p<"+str(self.p_corr_threshold)+" (GRF)"
+            thresh_desc = "p<"+str(self.p_corr_threshold)+" (FWE)"
             user_threshold_type = "p-value FWE"
 
         # FIXME: Do we want to calculate an uncorrected p equivalent to the Z thresh? 
@@ -220,7 +222,7 @@ class HeightThreshold(NIDMObject):
             NIDM['pValueUncorrected']: self.p_uncorr_threshold, 
             NIDM['pValueFWER']: self.p_corr_threshold
             }
-        self.p.entity(NIIRI['height_threshold_id'], other_attributes=dict((k,v) \
+        self.p.entity(self.id, other_attributes=dict((k,v) \
             for k,v in heightThreshAllFields.iteritems() if v is not None))
 
         return self.p
@@ -234,6 +236,7 @@ class ExtentThreshold(NIDMObject):
         self.extent = extent
         self.p_corr = p_corr
         self.p_uncorr = p_uncorr
+        self.id = NIIRI[str(uuid.uuid4())]
 
     def export(self):
         """
@@ -244,11 +247,18 @@ class ExtentThreshold(NIDMObject):
             thresh_desc = "k>"+str(self.extent)
             user_threshold_type = "Cluster-size in voxels"
         elif not self.p_uncorr is None:
-            thresh_desc = "p<"+str(self.p_uncorr)+" uncorr."
+            thresh_desc = "p<"+str(self.p_uncorr)+" (uncorrected)"
             user_threshold_type = "p-value uncorrected"
         elif not self.p_corr is None:
-            thresh_desc = "p<"+str(self.p_corr)+" corr."
+            thresh_desc = "p<"+str(self.p_corr)+" (FWE)"
             user_threshold_type = "p-value FWE"
+        else:
+            thresh_desc = "k>=0"
+            self.extent = 0
+            self.p_uncorr = 1.0
+            self.p_corr = 1.0
+            user_threshold_type = None
+
         extent_thresh_all_fields = {
             PROV['type']: NIDM['ExtentThreshold'], 
             PROV['label']: "Extent Threshold: "+thresh_desc, 
@@ -257,7 +267,7 @@ class ExtentThreshold(NIDMObject):
             NIDM['pValueUncorrected']: self.p_uncorr, 
             NIDM['pValueFWER']: self.p_corr
         }
-        self.p.entity(NIIRI['extent_threshold_id'], other_attributes=\
+        self.p.entity(self.id, other_attributes=\
             dict((k,v) for k,v in extent_thresh_all_fields.iteritems() \
                 if v is not None))
 
@@ -410,8 +420,7 @@ class CenterOfGravity(NIDMObject):
         self.p.entity(self.id, other_attributes=( 
                      (PROV['type'] , FSL['CenterOfGravity']), 
                      (PROV['label'], label),
-                     (PROV['location'] , 
-                        NIIRI['COG_coordinate_000'+str(self.cluster_num)]))   )
+                     (PROV['location'] , self.coordinate.id))   )
 
         return self.p
 

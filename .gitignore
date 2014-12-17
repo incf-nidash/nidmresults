@@ -1,3 +1,5 @@
 build/*
 *egg*/*
 dist/*
+.DS_Store
+*.pyc
