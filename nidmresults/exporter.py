@@ -17,7 +17,7 @@ from nidmresults.objects.contrast import *
 from nidmresults.objects.inference import *
 import uuid 
 from rdflib import Graph
-from subprocess import call
+from subprocess import check_call
 
 class NIDMExporter():
     """ 
