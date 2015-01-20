@@ -199,4 +199,4 @@ class NIDMExporter():
         # ttl_fid.write(self.doc.serialize(format='rdf').replace("inf", '"INF"'))
         # ttl_fid.close()
         print "provconvert -infile "+provn_file+" -outfile "+ttl_file
-        call("provconvert -infile "+provn_file+" -outfile "+ttl_file, shell=True)
+        check_call("provconvert -infile "+provn_file+" -outfile "+ttl_file, shell=True)
