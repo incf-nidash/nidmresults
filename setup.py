@@ -5,15 +5,16 @@ readme = open('README.md').read()
 requirements = [
     'prov',
     'nibabel',
-    'numpy'    
+    'numpy'
 ]
 
 setup(
-    name = "nidmresults",
-    version = "0.1.0",
-    author = "Camille Maumet",
-    author_email = "c.m.j.maumet@warwick.ac.uk",
-    description = ("Export of neuroimaging statistical results using NIDM"
+    name="nidmresults",
+    version="0.1.0",
+    author="Camille Maumet",
+    author_email="c.m.j.maumet@warwick.ac.uk",
+    description=(
+        "Export of neuroimaging statistical results using NIDM"
         " as specified at http://nidm.nidash.org/specs/nidm-results.html."),
     license = "MIT",
     url='https://github.com/incf-nidash/nidmresults',

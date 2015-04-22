@@ -6,11 +6,12 @@ Definition of constants.
 """
 
 from prov.model import Namespace
-from prov.model import PROV
 
 NIDM = Namespace('nidm', "http://www.incf.org/ns/nidash/nidm#")
 NIIRI = Namespace("niiri", "http://iri.nidash.org/")
-CRYPTO = Namespace("crypto", "http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions#")
+CRYPTO = Namespace(
+    "crypto",
+    "http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions#")
 FSL = Namespace("fsl", "http://www.incf.org/ns/nidash/fsl#")
 DCT = Namespace("dct", "http://purl.org/dc/terms/")
 
@@ -21,22 +22,22 @@ SERIALLY_CORR = NIDM['SeriallyCorrelatedError']
 COMPOUND_SYMMETRY_CORR = NIDM['CompoundSymmetricError']
 ARBITRARILY_CORR = NIDM['ArbitriralyCorrelatedError']
 
-CORRELATION_ENUM = {
+CORRELATION_ENUM = (
     INDEPEDENT_CORR,
     SERIALLY_CORR,
     COMPOUND_SYMMETRY_CORR,
     ARBITRARILY_CORR
-}
+)
 
 SPATIALLY_GLOBAL = NIDM['SpatiallyGlocal']
 SPATIALLY_LOCAL = NIDM['SpatiallyLocal']
 SPATIALLY_REGUL = NIDM['SpatiallyRegularized']
 
-SPATIAL_DEPENDENCY_ENUM = {
-    SPATIALLY_GLOBAL, 
+SPATIAL_DEPENDENCY_ENUM = (
+    SPATIALLY_GLOBAL,
     SPATIALLY_LOCAL,
     SPATIALLY_REGUL
-}
+)
 
 ESTIMATION_OLS = NIDM['OrdinaryLeastSquares']
 ESTIMATION_WLS = NIDM['WeightedLeastSquares']
