@@ -101,11 +101,11 @@ class DesignMatrix(NIDMObject):
         # Create "design matrix" entity
         self.p.entity(
             self.id,
-            other_attributes=((PROV['type'], NIDM['DesignMatrix']),
+            other_attributes=((PROV['type'], NIDM_DESIGN_MATRIX),
                               (PROV['label'], "Design Matrix"),
                               (DCT['format'], "text/csv"),
-                              (NIDM['filename'], "DesignMatrix.csv"),
-                              (NIDM['visualisation'], self.image.id),
+                              (NFO['fileName'], "DesignMatrix.csv"),
+                              (DC['description'], self.image.id),
                               (PROV['location'],
                                Identifier("file://./" + design_matrix_csv))))
         return self.p
@@ -131,12 +131,12 @@ class Data(NIDMObject):
         # FIXME: grand mean scaling?
         # FIXME: medianIntensity
         self.p.entity(self.id,
-                      other_attributes=((PROV['type'], NIDM['Data']),
+                      other_attributes=((PROV['type'], NIDM_DATA),
                                         (PROV['type'], PROV['Collection']),
                                         (PROV['label'], "Data"),
-                                        (NIDM['grandMeanScaling'],
+                                        (NIDM_GRAND_MEAN_SCALING,
                                          self.grand_mean_sc),
-                                        (NIDM['targetIntensity'],
+                                        (NIDM_TARGET_INTENSITY,
                                          self.target_intensity)))
         return self.p
 
@@ -163,16 +163,16 @@ class ErrorModel(NIDMObject):
         """
         # Create "Error Model" entity
         self.p.entity(self.id,
-                      other_attributes=((PROV['type'], NIDM['ErrorModel']),
-                                        (NIDM['hasErrorDistribution'],
+                      other_attributes=((PROV['type'], NIDM_ERROR_MODEL),
+                                        (NIDM_HAS_ERROR_DISTRIBUTION,
                                          self.error_distribution),
-                                        (NIDM['errorVarianceHomogeneous'],
+                                        (NIDM_ERROR_VARIANCE_HOMOGENEOUS,
                                          self.variance_homo),
-                                        (NIDM['varianceSpatialModel'],
+                                        (NIDM_VARIANCE_SPATIAL_MODEL,
                                          self.variance_spatial),
-                                        (NIDM['hasErrorDependence'],
+                                        (NIDM_HAS_ERROR_DEPENDENCE,
                                          self.dependance),
-                                        (NIDM['dependenceSpatialModel'],
+                                        (NIDM_DEPENDENCE_SPATIAL_MODEL,
                                          self.dependance_spatial)))
 
         return self.p
@@ -196,8 +196,8 @@ class ModelParametersEstimation(NIDMObject):
         """
         # Create "Model Parameter estimation" activity
         self.p.activity(self.id, other_attributes=(
-            (PROV['type'], NIDM['ModelParametersEstimation']),
-            (NIDM['withEstimationMethod'], self.estimation_method),
+            (PROV['type'], NIDM_MODEL_PARAMETERS_ESTIMATION),
+            (NIDM_WITH_ESTIMATION_METHOD, self.estimation_method),
             (PROV['label'], "Model Parameters Estimation")))
 
         return self.p
@@ -232,12 +232,12 @@ class ParameterEstimateMap(NIDMObject):
         # Parameter estimate entity
         self.p.entity(
             self.id,
-            other_attributes=((PROV['type'], NIDM['ParameterEstimateMap']),
+            other_attributes=((PROV['type'], NIDM_PARAMETER_ESTIMATE_MAP),
                               # (DCT['format'], "image/nifti"),
                               # (PROV['location'],
                               # Identifier("file://./"+pe_filename)),
-                              (NIDM['filename'], pe_filename),
-                              (NIDM['inCoordinateSpace'],
+                              (NFO['fileName'], pe_filename),
+                              (NIDM_IN_COORDINATE_SPACE,
                                self.coord_space.id),
                               # (CRYPTO['sha512'], self.get_sha_sum(pe_file)),
                               (PROV['label'],
@@ -275,18 +275,18 @@ class ResidualMeanSquares(NIDMObject):
         self.p.entity(
             self.id,
             other_attributes=(
-                (PROV['type'], NIDM['ResidualMeanSquaresMap'],),
+                (PROV['type'], NIDM_RESIDUAL_MEAN_SQUARES_MAP,),
                 (DCT['format'], "image/nifti"),
                 (PROV['location'],
                  Identifier("file://./" + residuals_filename)),
                 (PROV['label'],
                  "Residual Mean Squares Map"),
-                (NIDM['filename'],
+                (NFO['fileName'],
                  residuals_original_filename),
-                (NIDM['filename'], residuals_filename),
+                (NFO['fileName'], residuals_filename),
                 (CRYPTO['sha512'],
                  self.get_sha_sum(residuals_file)),
-                (NIDM['inCoordinateSpace'], self.coord_space.id)))
+                (NIDM_IN_COORDINATE_SPACE, self.coord_space.id)))
 
         return self.p
 
@@ -319,17 +319,17 @@ class MaskMap(NIDMObject):
         self.p.entity(
             self.id,
             other_attributes=(
-                (PROV['type'], NIDM['MaskMap'],),
+                (PROV['type'], NIDM_MASK_MAP,),
                 (DCT['format'], "image/nifti"),
                 (PROV['location'],
                  Identifier("file://./" + mask_filename)),
                 (PROV['label'], "Mask"),
-                (NIDM['filename'],
+                (NFO['fileName'],
                  original_mask_filename),
-                (NIDM['filename'], mask_filename),
+                (NFO['fileName'], mask_filename),
                 (CRYPTO['sha512'],
                  self.get_sha_sum(mask_file)),
-                (NIDM['inCoordinateSpace'], self.coord_space.id)))
+                (NIDM_IN_COORDINATE_SPACE, self.coord_space.id)))
 
         return self.p
 
@@ -372,15 +372,15 @@ class GrandMeanMap(NIDMObject):
 
         self.p.entity(
             self.id,
-            other_attributes=((PROV['type'], NIDM['GrandMeanMap']),
+            other_attributes=((PROV['type'], NIDM_GRAND_MEAN_MAP),
                               (DCT['format'], "image/nifti"),
                               (PROV['label'], "Grand Mean Map"),
-                              (NIDM['maskedMedian'], masked_median),
-                              (NIDM['filename'],
+                              (NIDM_MASKED_MEDIAN, masked_median),
+                              (NFO['fileName'],
                                grand_mean_filename),
-                              (NIDM['filename'],
+                              (NFO['fileName'],
                                grand_mean_original_filename),
-                              (NIDM['inCoordinateSpace'],
+                              (NIDM_IN_COORDINATE_SPACE,
                                self.coord_space.id),
                               (CRYPTO['sha512'],
                                self.get_sha_sum(grand_mean_file)),

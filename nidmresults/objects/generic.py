@@ -75,17 +75,17 @@ class CoordinateSpace(NIDMObject):
             map(str, thresImgHdr['pixdim'][1:(numDim + 1)]))
 
         self.p.entity(self.id, other_attributes={
-            PROV['type']: NIDM['CoordinateSpace'],
-            NIDM['dimensionsInVoxels']: dimension,
-            NIDM['numberOfDimensions']: numDim,
-            NIDM['voxelToWorldMapping']: voxel_to_world,
-            NIDM['inWorldCoordinateSystem']: self.coordinate_system,
+            PROV['type']: NIDM_COORDINATE_SPACE,
+            NIDM_DIMENSIONS_IN_VOXELS: dimension,
+            NIDM_NUMBER_OF_DIMENSIONS: numDim,
+            NIDM_VOXEL_TO_WORLD_MAPPING: voxel_to_world,
+            NIDM_IN_WORLD_COORDINATE_SYSTEM: self.coordinate_system,
             # FIXME: this gives mm, sec => what is wrong: FSL file, nibabel,
             # other?
-            # NIDM['voxelUnits']:
+            # NIDM_VOXEL_UNITS:
             # '[%s]'%str(thresImgHdr.get_xyzt_units()).strip('()'),
-            NIDM['voxelUnits']: "['mm', 'mm', 'mm']",
-            NIDM['voxelSize']: voxel_size,
+            NIDM_VOXEL_UNITS: "['mm', 'mm', 'mm']",
+            NIDM_VOXEL_SIZE: voxel_size,
             PROV['label']: "Coordinate space"})
         return self.p
 
@@ -111,10 +111,10 @@ class Image(NIDMObject):
             orig_filename, filename = self.copy_nifti(self.file, new_file)
 
             self.p.entity(self.id, other_attributes={
-                PROV['type']: NIDM['Image'],
+                PROV['type']: DCTYPE['Image'],
                 PROV['atLocation']: Identifier("file://./" + filename),
-                NIDM['filename']: orig_filename,
-                NIDM['filename']: filename,
+                NFO['fileName']: orig_filename,
+                NFO['fileName']: filename,
                 DCT['format']: "image/png",
             })
 

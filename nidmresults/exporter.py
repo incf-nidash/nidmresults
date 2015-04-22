@@ -157,9 +157,9 @@ class NIDMExporter():
                         other_attributes=((PROV['type'], PROV['Bundle'],),
                                           (PROV['label'],
                                            software_uc + " Results"),
-                                          (NIDM['objectModel'],
+                                          (NIDM_OBJECT_MODEL,
                                            NIDM[software_uc + 'Results']),
-                                          (NIDM['version'], version))
+                                          (NIDM_VERSION, version))
                         )
 
         self.doc.wasGeneratedBy(bundle_id,

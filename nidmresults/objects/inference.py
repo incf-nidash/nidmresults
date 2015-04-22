@@ -111,10 +111,10 @@ class InferenceActivity(NIDMObject):
         # contrasts
         # FIXME: Deal with two-tailed inference?
         self.p.activity(self.id,
-                        other_attributes=((PROV['type'], NIDM['Inference']),
+                        other_attributes=((PROV['type'], NIDM_INFERENCE),
                                           (PROV['label'], label),
-                                          (NIDM['hasAlternativeHypothesis'],
-                                           NIDM['OneTailedTest'])))
+                                          (NIDM_HAS_ALTERNATIVE_HYPOTHESIS,
+                                           NIDM_ONE_TAILED_TEST)))
         return self.p
 
 
@@ -151,14 +151,14 @@ class ExcursionSet(NIDMObject):
 
         # Create "Excursion set" entity
         self.p.entity(self.id, other_attributes=(
-            (PROV['type'], NIDM['ExcursionSet']),
+            (PROV['type'], NIDM_EXCURSION_SET_MAP),
             (DCT['format'], "image/nifti"),
             (PROV['location'], Identifier("file://./" + exc_set_filename)),
-            (NIDM['filename'], exc_set_orig_filename),
-            (NIDM['filename'], exc_set_filename),
-            (NIDM['inCoordinateSpace'], self.coord_space.id),
+            (NFO['fileName'], exc_set_orig_filename),
+            (NFO['fileName'], exc_set_filename),
+            (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
             (PROV['label'], "Excursion Set"),
-            (NIDM['visualisation'], self.visu.id),
+            (DC['description'], self.visu.id),
             (CRYPTO['sha512'], self.get_sha_sum(exc_set_file)),
         ))
 
@@ -189,8 +189,8 @@ class Visualisation(NIDMObject):
 
         # Create "png visualisation of Excursion set" entity
         self.p.entity(self.id, other_attributes=(
-            (PROV['type'], NIDM['Image']),
-            (NIDM['filename'], visu_filename),
+            (PROV['type'], DCTYPE['Image']),
+            (NFO['fileName'], visu_filename),
             (PROV['location'], Identifier("file://./" + visu_filename)),
             (DCT['format'], "image/png"),
         ))
@@ -237,12 +237,12 @@ class HeightThreshold(NIDMObject):
         # FIXME: Do we want/Can we find a corrected p equivalent to the Z
         # thresh?
         heightThreshAllFields = {
-            PROV['type']: NIDM['HeightThreshold'],
+            PROV['type']: NIDM_HEIGHT_THRESHOLD,
             PROV['label']: "Height Threshold: " + thresh_desc,
-            NIDM['userSpecifiedThresholdType']: user_threshold_type,
+            NIDM_USER_SPECIFIED_THRESHOLD_TYPE: user_threshold_type,
             PROV['value']: self.stat_threshold,
-            NIDM['pValueUncorrected']: self.p_uncorr_threshold,
-            NIDM['pValueFWER']: self.p_corr_threshold
+            NIDM_P_VALUE_UNCORRECTED: self.p_uncorr_threshold,
+            NIDM_P_VALUE_FWER: self.p_corr_threshold
         }
         self.p.entity(self.id, other_attributes=dict(
             (k, v) for k, v in heightThreshAllFields.iteritems()
@@ -286,12 +286,12 @@ class ExtentThreshold(NIDMObject):
             user_threshold_type = None
 
         extent_thresh_all_fields = {
-            PROV['type']: NIDM['ExtentThreshold'],
+            PROV['type']: NIDM_EXTENT_THRESHOLD,
             PROV['label']: "Extent Threshold: " + thresh_desc,
-            NIDM['clusterSizeInVoxels']: self.extent,
-            NIDM['userSpecifiedThresholdType']: user_threshold_type,
-            NIDM['pValueUncorrected']: self.p_uncorr,
-            NIDM['pValueFWER']: self.p_corr
+            NIDM_CLUSTER_SIZE_IN_VOXELS: self.extent,
+            NIDM_USER_SPECIFIED_THRESHOLD_TYPE: user_threshold_type,
+            NIDM_P_VALUE_UNCORRECTED: self.p_uncorr,
+            NIDM_P_VALUE_FWER: self.p_corr
         }
         self.p.entity(self.id, other_attributes=dict(
             (k, v) for k, v in extent_thresh_all_fields.iteritems()
@@ -311,7 +311,8 @@ class Cluster(NIDMObject):
         super(Cluster, self).__init__()
         self.num = cluster_num
         self.id = NIIRI[str(uuid.uuid4())]
-        self.cog = CenterOfGravity(cluster_num, x, y, z, x_std, y_std, z_std)
+        self.cog = CenterOfGravity(
+            cluster_num, x=x, y=y, z=z, x_std=x_std, y_std=y_std, z_std=z_std)
         self.peaks = peaks
         self.size = size
         self.pFWER = pFWER
@@ -329,11 +330,11 @@ class Cluster(NIDMObject):
 
         # FIXME deal with multiple contrasts
         self.p.entity(self.id, other_attributes=(
-            (PROV['type'], NIDM['Cluster']),
+            (PROV['type'], NIDM_CLUSTER),
             (PROV['label'], "Cluster 000" + str(self.num)),
-            (NIDM['clusterLabelId'], self.num),
-            (NIDM['clusterSizeInVoxels'], self.size),
-            (NIDM['pValueFWER'], self.pFWER)))
+            (NIDM_CLUSTER_LABEL_ID, self.num),
+            (NIDM_CLUSTER_SIZE_IN_VOXELS, self.size),
+            (NIDM_P_VALUE_FWER, self.pFWER)))
         return self.p
 
 
@@ -363,12 +364,12 @@ class DisplayMaskMap(NIDMObject):
 
         self.p.entity(self.id,
                       other_attributes=(
-                          (PROV['type'], NIDM['DisplayMaskMap']),
+                          (PROV['type'], NIDM_DISPLAY_MASK_MAP),
                           (PROV['label'], "Display Mask Map"),
                           (DCT['format'], "image/nifti"),
-                          (NIDM['inCoordinateSpace'], self.coord_space.id),
-                          (NIDM['filename'], disp_mask_orig_filename),
-                          (NIDM['filename'], disp_mask_filename),
+                          (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
+                          (NFO['fileName'], disp_mask_orig_filename),
+                          (NFO['fileName'], disp_mask_filename),
                           (PROV['location'],
                               Identifier("file://./" + disp_mask_filename)),
                           (CRYPTO['sha512'], self.get_sha_sum(disp_mask_file)))
@@ -394,14 +395,14 @@ class PeakCriteria(NIDMObject):
         """
         num_peak = ()
         if self.num_peak:
-            num_peak = (NIDM['maxNumberOfPeaksPerCluster'], self.num_peak)
+            num_peak = (NIDM_MAXNUMBEROFPEAKSPERCLUSTER, self.num_peak)
 
         # Create "Peak definition criteria" entity
         self.p.entity(self.id,
                       other_attributes=(
-                          (PROV['type'], NIDM['PeakDefinitionCriteria']),
+                          (PROV['type'], NIDM_PEAK_DEFINITION_CRITERIA),
                           (PROV['label'], "Peak Definition Criteria"),
-                          (NIDM['minDistanceBetweenPeaks'], self.peak_dist)) +
+                          (NIDM_MIN_DISTANCE_BETWEEN_PEAKS, self.peak_dist)) +
                       num_peak)
 
         return self.p
@@ -423,15 +424,20 @@ class ClusterCriteria(NIDMObject):
         Create prov entities and activities.
         """
         # Create "Cluster definition criteria" entity
-        voxel_conn = NIDM['voxel' + str(self.connectivity) + 'Connected']
+        if self.connectivity == 6:
+            voxel_conn = NIDM_VOXEL6CONNECTED
+        elif self.connectivity == 18:
+            voxel_conn = NIDM_VOXEL18CONNECTED
+        elif self.connectivity == 26:
+            voxel_conn = NIDM_VOXEL26CONNECTED
 
         label = "Cluster Connectivity Criterion: " + str(self.connectivity)
 
         self.p.entity(self.id,
                       other_attributes=((PROV['type'],
-                                         NIDM['ClusterDefinitionCriteria']),
+                                         NIDM_CLUSTER_DEFINITION_CRITERIA),
                                         (PROV['label'], label),
-                                        (NIDM['hasConnectivityCriterion'],
+                                        (NIDM_HAS_CONNECTIVITY_CRITERION,
                                             voxel_conn)))
 
         return self.p
@@ -489,6 +495,8 @@ class SearchSpace(NIDMObject):
         """
         Create prov entities and activities.
         """
+        print "-----> Export search space\n\n\n\n"
+
         self.p.update(self.coord_space.export())
 
         # Copy "Mask map" in export directory
@@ -499,19 +507,19 @@ class SearchSpace(NIDMObject):
 
         # Crate "Mask map" entity
         self.p.entity(self.id, other_attributes=(
-            (PROV['label'], "Search Space Map"),
+            (PROV['label'], "Search Space Mask Map"),
             (DCT['format'], "image/nifti"),
-            (PROV['type'], NIDM['SearchSpaceMap']),
+            (PROV['type'], NIDM_SEARCH_SPACE_MASK_MAP),
             (PROV['location'],
              Identifier("file://./" + search_space_filename)),
-            (NIDM['filename'], search_space_orig_filename),
-            (NIDM['filename'], search_space_filename),
-            (NIDM['randomFieldStationarity'], self.rf_stationarity),
-            (NIDM['inCoordinateSpace'], self.coord_space.id),
-            (FSL['searchVolumeInVoxels'], self.search_volume),
+            (NFO['fileName'], search_space_orig_filename),
+            (NFO['fileName'], search_space_filename),
+            (NIDM_RANDOM_FIELD_STATIONARITY, self.rf_stationarity),
+            (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
+            (NIDM_SEARCH_VOLUME_IN_VOXELS, self.search_volume),
             (CRYPTO['sha512'], self.get_sha_sum(search_space_file)),
-            (FSL['reselSizeInVoxels'], self.resel_size_in_voxels),
-            (FSL['dlh'], self.dlh)))
+            (NIDM_RESEL_SIZE_IN_VOXELS, self.resel_size_in_voxels),
+            (NIDM_NOISE_ROUGHNESS_IN_VOXELS, self.dlh)))
 
         return self.p
 
@@ -522,18 +530,22 @@ class Coordinate(NIDMObject):
     Object representing a Coordinate entity.
     """
 
-    def __init__(self, label_id, x=None, y=None, z=None,
-                 x_std=None, y_std=None, z_std=None):
+    def __init__(self, label_id, coord_vector=None, coord_vector_std=None,
+                 x=None, y=None, z=None, x_std=None, y_std=None, z_std=None):
         super(Coordinate, self).__init__()
         # FIXME: coordiinate_id should not be determined externally
         self.id = NIIRI[str(uuid.uuid4())]
         self.label_id = label_id
-        self.x = x
-        self.y = y
-        self.z = z
-        self.x_std = x_std
-        self.y_std = y_std
-        self.z_std = z_std
+        if x is not None and y is not None and z is not None:
+            self.coord_vector = \
+                "[" + str(x) + ", " + str(y) + ", " + str(z) + "]"
+        else:
+            self.coord_vector = coord_vector
+        if x_std is not None and y_std is not None and z_std is not None:
+            self.coord_vector_std = \
+                "[" + str(x_std) + ", " + str(y_std) + ", " + str(z_std) + "]"
+        else:
+            self.coord_vector_std = coord_vector_std
 
     def export(self):
         """
@@ -542,16 +554,12 @@ class Coordinate(NIDMObject):
         # We can not have this in the dictionnary because we want to keep the
         # duplicate prov:type attribute
         typeAndLabelAttributes = [  # (PROV['type'],PROV['Location']),
-            (PROV['type'], NIDM['Coordinate']),
+            (PROV['type'], NIDM_COORDINATE),
             (PROV['label'], "Coordinate " + self.label_id)]
 
         coordinateAttributes = {
-            FSL['coordinate1InVoxels']: self.x,
-            FSL['coordinate2InVoxels']: self.y,
-            FSL['coordinate3InVoxels']: self.z,
-            NIDM['coordinate1']: self.x_std,
-            NIDM['coordinate2']: self.y_std,
-            NIDM['coordinate3']: self.z_std
+            NIDM_COORDINATE_IN_VOXELS: self.coord_vector,
+            NIDM_COORDINATE_VECTOR: self.coord_vector_std,
         }
 
         self.p.entity(
@@ -589,10 +597,10 @@ class Peak(NIDMObject):
         self.p.update(self.coordinate.export())
 
         other_attributes = [
-            (PROV['type'], NIDM['Peak']),
+            (PROV['type'], NIDM_PEAK),
             (PROV['label'], "Peak " + str(self.num)),
-            (NIDM['equivalentZStatistic'], self.equiv_z),
-            (NIDM['pValueUncorrected'], 1 - norm.cdf(self.equiv_z)),
+            (NIDM_EQUIVALENT_ZSTATISTIC, self.equiv_z),
+            (NIDM_P_VALUE_UNCORRECTED, 1 - norm.cdf(self.equiv_z)),
             (PROV['location'], self.coordinate.id)]
 
         if self.max_peak:

@@ -88,13 +88,18 @@ class ContrastWeights(NIDMObject):
         """
         label = "Contrast Weights: " + self.contrast_name
 
+        if self.stat_type.lower() == "t":
+            stat = STATO_TSTATISTIC
+        elif self.stat_type.lower() == "z":
+            stat = STATO_ZSTATISTIC
+
         self.p.entity(
             self.id,
             other_attributes=(
-                (PROV['type'], NIDM['ContrastWeights']),
-                (NIDM['statisticType'], NIDM[self.stat_type + 'Statistic']),
+                (PROV['type'], STATO_CONTRAST_WEIGHT_MATRIX),
+                (NIDM_STATISTIC_TYPE, stat),
                 (PROV['label'], label),
-                (NIDM['contrastName'], self.contrast_name),
+                (NIDM_CONTRAST_NAME, self.contrast_name),
                 (PROV['value'], self.contrast_weights)))
         return self.p
 
@@ -129,13 +134,13 @@ class ContrastMap(NIDMObject):
         # Contrast Map entity
         path, filename = os.path.split(cope_file)
         self.p.entity(self.id, other_attributes=(
-            (PROV['type'], NIDM['ContrastMap']),
+            (PROV['type'], NIDM_CONTRAST_MAP),
             (DCT['format'], "image/nifti"),
-            (NIDM['inCoordinateSpace'], self.coord_space.id),
+            (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
             (PROV['location'], Identifier("file://./" + cope_filename)),
-            (NIDM['filename'], cope_original_filename),
-            (NIDM['filename'], cope_filename),
-            (NIDM['contrastName'], self.name),
+            (NFO['fileName'], cope_original_filename),
+            (NFO['fileName'], cope_filename),
+            (NIDM_CONTRAST_NAME, self.name),
             (CRYPTO['sha512'], self.get_sha_sum(cope_file)),
             (PROV['label'], "Contrast Map: " + self.name)))
         return self.p
@@ -185,10 +190,10 @@ class ContrastStdErrMap(NIDMObject):
 
             self.p.entity(contrast_var_id, other_attributes=(
                 (PROV['type'], FSL['ContrastVarianceMap']),
-                # (NIDM['inCoordinateSpace'], self.var_coord_space.id),
+                # (NIDM_IN_COORDINATE_SPACE, self.var_coord_space.id),
                 (DCT['format'], "image/nifti"),
                 (CRYPTO['sha512'], self.get_sha_sum(self.file)),
-                (NIDM['filename'], var_cope_filename)))
+                (NFO['fileName'], var_cope_filename)))
 
             # Create standard error map from contrast variance map
             var_cope_img = nib.load(self.file)
@@ -204,12 +209,12 @@ class ContrastStdErrMap(NIDMObject):
 
         path, filename = os.path.split(standard_error_file)
         self.p.entity(self.id, other_attributes=(
-            (PROV['type'], NIDM['ContrastStandardErrorMap']),
+            (PROV['type'], NIDM_CONTRAST_STANDARD_ERROR_MAP),
             (DCT['format'], "image/nifti"),
-            (NIDM['inCoordinateSpace'], self.coord_space.id),
+            (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
             (PROV['location'], Identifier("file://./" + filename)),
             (CRYPTO['sha512'], self.get_sha_sum(standard_error_file)),
-            (NIDM['filename'], filename),
+            (NFO['fileName'], filename),
             (PROV['label'], "Contrast Standard Error Map")))
 
         if self.is_variance:
@@ -252,27 +257,31 @@ class StatisticMap(NIDMObject):
         if self.stat_type == 'Z':
             label = self.stat_type + '-' + label
 
-        attributes = [(PROV['type'], NIDM['StatisticMap']),
+        if self.stat_type.lower() == "t":
+            stat = STATO_TSTATISTIC
+        elif self.stat_type.lower() == "z":
+            stat = STATO_ZSTATISTIC
+
+        attributes = [(PROV['type'], NIDM_STATISTIC_MAP),
                       (DCT['format'], "image/nifti"),
                       (PROV['label'], label),
                       (PROV['location'], Identifier(
                           "file://./" + stat_filename)),
-                      (NIDM['statisticType'], NIDM[
-                       self.stat_type + 'Statistic']),
-                      (NIDM['filename'], stat_filename),
-                      (NIDM['filename'], stat_orig_filename),
-                      (NIDM['contrastName'], self.name),
+                      (NIDM_STATISTIC_TYPE, stat),
+                      (NFO['fileName'], stat_filename),
+                      (NFO['fileName'], stat_orig_filename),
+                      (NIDM_CONTRAST_NAME, self.name),
                       (CRYPTO['sha512'], self.get_sha_sum(stat_file)),
-                      (NIDM['inCoordinateSpace'], self.coord_space.id)]
+                      (NIDM_IN_COORDINATE_SPACE, self.coord_space.id)]
 
         if not self.stat_type == 'Z':
-            attributes.insert(0, (NIDM['errorDegreesOfFreedom'], self.dof))
+            attributes.insert(0, (NIDM_ERROR_DEGREES_OF_FREEDOM, self.dof))
             # FIXME: this should not be 1 for F-test
-            attributes.insert(0, (NIDM['effectDegreesOfFreedom'], 1.0))
+            attributes.insert(0, (NIDM_EFFECT_DEGREES_OF_FREEDOM, 1.0))
         else:
             # For Z-Statistic error dof is infinity and effect dof is 1
-            attributes.insert(0, (NIDM['errorDegreesOfFreedom'], float("inf")))
-            attributes.insert(0, (NIDM['effectDegreesOfFreedom'], 1.0))
+            attributes.insert(0, (NIDM_ERROR_DEGREES_OF_FREEDOM, float("inf")))
+            attributes.insert(0, (NIDM_EFFECT_DEGREES_OF_FREEDOM, 1.0))
 
         # Create "Statistic Map" entity
         # FIXME: Deal with other than t-contrast maps: dof + statisticType
@@ -298,7 +307,7 @@ class ContrastEstimation(NIDMObject):
         Create prov graph.
         """
         self.p.activity(self.id, other_attributes=(
-            (PROV['type'], NIDM['ContrastEstimation']),
+            (PROV['type'], NIDM_CONTRAST_ESTIMATION),
             (PROV['label'], "Contrast estimation: " + self.name)))
 
         return self.p
