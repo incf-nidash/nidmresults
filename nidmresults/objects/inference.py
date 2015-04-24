@@ -495,8 +495,6 @@ class SearchSpace(NIDMObject):
         """
         Create prov entities and activities.
         """
-        print "-----> Export search space\n\n\n\n"
-
         self.p.update(self.coord_space.export())
 
         # Copy "Mask map" in export directory
@@ -578,7 +576,7 @@ class Peak(NIDMObject):
     Object representing a Peak entity.
     """
 
-    def __init__(self, cluster_index, peak_index, equiv_z, stat_num, max_peak,
+    def __init__(self, cluster_index, peak_index, equiv_z, stat_num,
                  *args, **kwargs):
         super(Peak, self).__init__()
         # FIXME: Currently assumes less than 10 clusters per contrast
@@ -588,7 +586,6 @@ class Peak(NIDMObject):
         self.id = NIIRI[str(uuid.uuid4())]
         self.num = peak_unique_id
         self.equiv_z = equiv_z
-        self.max_peak = max_peak
         self.coordinate = Coordinate(str(peak_unique_id), **kwargs)
 
     def export(self):
@@ -603,10 +600,6 @@ class Peak(NIDMObject):
             (NIDM_EQUIVALENT_ZSTATISTIC, self.equiv_z),
             (NIDM_P_VALUE_UNCORRECTED, 1 - norm.cdf(self.equiv_z)),
             (PROV['location'], self.coordinate.id)]
-
-        if self.max_peak:
-            other_attributes.insert(0, (PROV['type'],
-                                        FSL['ClusterMaximumStatistic']))
 
         self.p.entity(self.id, other_attributes=other_attributes)
 
