@@ -8,12 +8,12 @@ Definition of constants.
 from prov.model import Namespace
 from prov.model import PROV
 
-NIDM = Namespace('nidm', "http://www.incf.org/ns/nidash/nidm#")
+NIDM = Namespace('nidm', "http://purl.org/nidash/nidm#")
 NIIRI = Namespace("niiri", "http://iri.nidash.org/")
 CRYPTO = Namespace(
     "crypto",
     "http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions#")
-FSL = Namespace("fsl", "http://www.incf.org/ns/nidash/fsl#")
+FSL = Namespace("fsl", "http://purl.org/nidash/fsl#")
 DCT = Namespace("dct", "http://purl.org/dc/terms/")
 OBO = Namespace("obo", "http://purl.obolibrary.org/obo/")
 DCTYPE = Namespace("dctype", "http://purl.org/dc/dcmitype/")
