@@ -148,17 +148,13 @@ class NIDMExporter():
         """
         Initialise NIDM-Results bundle.
         """
-        software_uc = self.software.name.upper()
-
         bundle_id = NIIRI[str(uuid.uuid4())]
         self.bundle = ProvBundle(identifier=bundle_id)
 
         self.doc.entity(bundle_id,
                         other_attributes=((PROV['type'], PROV['Bundle'],),
-                                          (PROV['label'],
-                                           software_uc + " Results"),
-                                          (NIDM_OBJECT_MODEL,
-                                           NIDM[software_uc + 'Results']),
+                                          (PROV['label'], "NIDM-Results"),
+                                          (PROV['type'], NIDM_RESULTS),
                                           (NIDM_VERSION, version))
                         )
 
