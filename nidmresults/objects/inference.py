@@ -557,7 +557,7 @@ class Coordinate(NIDMObject):
             (PROV['label'], "Coordinate " + self.label_id)]
 
         coordinateAttributes = {
-            NIDM_COORDINATE_IN_VOXELS: self.coord_vector,
+            NIDM_COORDINATE_VECTOR_IN_VOXELS: self.coord_vector,
             NIDM_COORDINATE_VECTOR: self.coord_vector_std,
         }
 
