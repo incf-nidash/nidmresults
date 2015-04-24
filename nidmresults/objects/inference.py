@@ -157,7 +157,7 @@ class ExcursionSet(NIDMObject):
             (NFO['fileName'], exc_set_orig_filename),
             (NFO['fileName'], exc_set_filename),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
-            (PROV['label'], "Excursion Set"),
+            (PROV['label'], "Excursion Set Map"),
             (DC['description'], self.visu.id),
             (CRYPTO['sha512'], self.get_sha_sum(exc_set_file)),
         ))
@@ -501,7 +501,8 @@ class SearchSpace(NIDMObject):
 
         # Copy "Mask map" in export directory
         search_space_orig_file = self.file
-        search_space_file = os.path.join(self.export_dir, 'SearchSpace.nii.gz')
+        search_space_file = os.path.join(self.export_dir,
+                                         'SearchSpaceMask.nii.gz')
         search_space_orig_filename, search_space_filename = self.copy_nifti(
             search_space_orig_file, search_space_file)
 
