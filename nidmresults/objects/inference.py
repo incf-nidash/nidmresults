@@ -330,8 +330,8 @@ class Cluster(NIDMObject):
 
         # FIXME deal with multiple contrasts
         self.p.entity(self.id, other_attributes=(
-            (PROV['type'], NIDM_CLUSTER),
-            (PROV['label'], "Cluster 000" + str(self.num)),
+            (PROV['type'], NIDM_SIGNIFICANT_CLUSTER),
+            (PROV['label'], "Significant Cluster %04d" % self.num),
             (NIDM_CLUSTER_LABEL_ID, self.num),
             (NIDM_CLUSTER_SIZE_IN_VOXELS, self.size),
             (NIDM_P_VALUE_FWER, self.pFWER)))
