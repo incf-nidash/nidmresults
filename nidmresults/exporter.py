@@ -172,11 +172,11 @@ class NIDMExporter():
         """
         if error_model.dependance == INDEPEDENT_CORR:
             if error_model.variance_homo:
-                estimation_method = ESTIMATION_OLS
+                estimation_method = STATO_OLS
             else:
-                estimation_method = ESTIMATION_WLS
+                estimation_method = STATO_WLS
         else:
-            estimation_method = ESTIMATION_GLS
+            estimation_method = STATO_GLS
 
         mpe = ModelParametersEstimation(estimation_method, self.software.id)
 

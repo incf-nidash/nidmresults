@@ -17,37 +17,13 @@ FSL = Namespace("fsl", "http://purl.org/nidash/fsl#")
 DCT = Namespace("dct", "http://purl.org/dc/terms/")
 OBO = Namespace("obo", "http://purl.obolibrary.org/obo/")
 DCTYPE = Namespace("dctype", "http://purl.org/dc/dcmitype/")
+NLX = Namespace("nlx", "http://neurolex.org/wiki/")
 DC = Namespace("dc", "http://purl.org/dc/elements/1.1/")
 NFO = Namespace(
     "nfo", "http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#")
 
-GAUSSIAN_DISTRIBUTION = NIDM['GaussianDistribution']
-
-INDEPEDENT_CORR = NIDM['IndependentError']
-SERIALLY_CORR = NIDM['SeriallyCorrelatedError']
-COMPOUND_SYMMETRY_CORR = NIDM['CompoundSymmetricError']
-ARBITRARILY_CORR = NIDM['ArbitriralyCorrelatedError']
-
-CORRELATION_ENUM = (
-    INDEPEDENT_CORR,
-    SERIALLY_CORR,
-    COMPOUND_SYMMETRY_CORR,
-    ARBITRARILY_CORR
-)
-
-SPATIALLY_GLOBAL = NIDM['SpatiallyGlocal']
-SPATIALLY_LOCAL = NIDM['SpatiallyLocal']
-SPATIALLY_REGUL = NIDM['SpatiallyRegularized']
-
-SPATIAL_DEPENDENCY_ENUM = (
-    SPATIALLY_GLOBAL,
-    SPATIALLY_LOCAL,
-    SPATIALLY_REGUL
-)
-
-ESTIMATION_OLS = NIDM['OrdinaryLeastSquares']
-ESTIMATION_WLS = NIDM['WeightedLeastSquares']
-ESTIMATION_GLS = NIDM['GeneralizedLeastSquares']
+# NeuroLex constants
+NLX_FSL = NLX['birnlex_2067']
 
 # NIDM constants
 FSL_FEAT_VERSION = FSL['FSL_0000005']
@@ -191,7 +167,7 @@ NIDM_GAMMA_HRF = NIDM['NIDM_0000031']
 NIDM_GAMMA_HRB = NIDM['NIDM_0000030']
 NIDM_GAMMA_DIFFERENCE_HRF = NIDM['NIDM_0000029']
 NIDM_FINITE_IMPULSE_RESPONSE_HRB = NIDM['NIDM_0000028']
-NIDM_FSL_RESULTS = NIDM['NIDM_0000027']
+NIDM_RESULTS = NIDM['NIDM_0000027']
 NIDM_EXTENT_THRESHOLD = NIDM['NIDM_0000026']
 NIDM_EXCURSION_SET_MAP = NIDM['NIDM_0000025']
 NIDM_EXCHANGEABLE_ERROR = NIDM['NIDM_0000024']
@@ -224,3 +200,25 @@ STATO_GLS = OBO['STATO_0000372']
 STATO_TSTATISTIC = OBO['STATO_0000176']
 STATO_ZSTATISTIC = OBO['STATO_0000376']
 STATO_CONTRAST_WEIGHT_MATRIX = OBO['STATO_0000323']
+
+INDEPEDENT_CORR = NIDM['IndependentError']
+SERIALLY_CORR = OBO['STATO_0000357']  # stato:'Toeplitz covariance structure'
+COMPOUND_SYMMETRY_CORR = NIDM['CompoundSymmetricError']
+ARBITRARILY_CORR = NIDM['ArbitriralyCorrelatedError']
+
+CORRELATION_ENUM = (
+    INDEPEDENT_CORR,
+    SERIALLY_CORR,
+    COMPOUND_SYMMETRY_CORR,
+    ARBITRARILY_CORR
+)
+
+SPATIALLY_GLOBAL = NIDM_SPATIALLY_GLOBAL_MODEL
+SPATIALLY_LOCAL = NIDM_SPATIALLY_LOCAL_MODEL
+SPATIALLY_REGUL = NIDM_SPATIALLY_REGULARIZED_MODEL
+
+SPATIAL_DEPENDENCY_ENUM = (
+    SPATIALLY_GLOBAL,
+    SPATIALLY_LOCAL,
+    SPATIALLY_REGUL
+)

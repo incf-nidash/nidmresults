@@ -466,7 +466,7 @@ class CenterOfGravity(NIDMObject):
         label = "Center of gravity " + str(self.cluster_num)
 
         self.p.entity(self.id, other_attributes=(
-                     (PROV['type'], FSL['CenterOfGravity']),
+                     (PROV['type'], NIDM_CLUSTER_CENTER_OF_GRAVITY),
                      (PROV['label'], label),
                      (PROV['location'], self.coordinate.id)))
 
