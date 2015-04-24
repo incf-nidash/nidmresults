@@ -65,13 +65,13 @@ class CoordinateSpace(NIDMObject):
 
         numDim = len(thresImg.shape)
 
-        dimension = str(thresImg.shape).replace('(', '[').replace(')', ']')
+        dimension = str(thresImg.shape).replace('(', '[ ').replace(')', ' ]')
         voxel_to_world = '%s' \
             % ', '.join(str(thresImg.get_qform())
                         .strip('()')
                         .replace('. ', '')
                         .split()).replace('[,', '[').replace('\n', '')
-        voxel_size = '[%s]' % ', '.join(
+        voxel_size = '[ %s ]' % ', '.join(
             map(str, thresImgHdr['pixdim'][1:(numDim + 1)]))
 
         self.p.entity(self.id, other_attributes={
@@ -84,7 +84,7 @@ class CoordinateSpace(NIDMObject):
             # other?
             # NIDM_VOXEL_UNITS:
             # '[%s]'%str(thresImgHdr.get_xyzt_units()).strip('()'),
-            NIDM_VOXEL_UNITS: "['mm', 'mm', 'mm']",
+            NIDM_VOXEL_UNITS: "[ 'mm', 'mm', 'mm' ]",
             NIDM_VOXEL_SIZE: voxel_size,
             PROV['label']: "Coordinate space"})
         return self.p

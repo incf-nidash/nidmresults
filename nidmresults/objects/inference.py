@@ -454,8 +454,8 @@ class CenterOfGravity(NIDMObject):
         super(CenterOfGravity, self).__init__()
         self.cluster_num = cluster_num
         self.id = NIIRI[str(uuid.uuid4())]
-        self.coordinate = Coordinate(
-            '000' + str(cluster_num), x, y, z, x_std, y_std, z_std)
+        self.coordinate = Coordinate("%04d" % cluster_num, x=x, y=y, z=z,
+                                     x_std=x_std, y_std=y_std, z_std=z_std)
 
     def export(self):
         """
@@ -537,12 +537,13 @@ class Coordinate(NIDMObject):
         self.label_id = label_id
         if x is not None and y is not None and z is not None:
             self.coord_vector = \
-                "[" + str(x) + ", " + str(y) + ", " + str(z) + "]"
+                "[ " + str(x) + ", " + str(y) + ", " + str(z) + " ]"
         else:
             self.coord_vector = coord_vector
         if x_std is not None and y_std is not None and z_std is not None:
             self.coord_vector_std = \
-                "[" + str(x_std) + ", " + str(y_std) + ", " + str(z_std) + "]"
+                "[ " + str(x_std) + ", " + str(y_std) + ", " + \
+                str(z_std) + " ]"
         else:
             self.coord_vector_std = coord_vector_std
 
