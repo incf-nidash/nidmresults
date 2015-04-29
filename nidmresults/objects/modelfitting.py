@@ -80,11 +80,12 @@ class DesignMatrix(NIDMObject):
     Object representing a DesignMatrix entity.
     """
 
-    def __init__(self, matrix, image_file, export_dir):
+    def __init__(self, matrix, image_file, export_dir, regressors):
         super(DesignMatrix, self).__init__(export_dir=export_dir)
         self.matrix = matrix
         self.id = NIIRI[str(uuid.uuid4())]
         self.image = Image(export_dir, image_file)
+        self.regressors = regressors
 
     def export(self):
         """
@@ -103,6 +104,8 @@ class DesignMatrix(NIDMObject):
             self.id,
             other_attributes=((PROV['type'], NIDM_DESIGN_MATRIX),
                               (PROV['label'], "Design Matrix"),
+                              (NIDM_REGRESSOR_NAMES,
+                               str(self.regressors).replace("'", '\\"')),
                               (DCT['format'], "text/csv"),
                               (NFO['fileName'], "DesignMatrix.csv"),
                               (DC['description'], self.image.id),
