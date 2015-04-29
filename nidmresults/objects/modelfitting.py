@@ -300,11 +300,12 @@ class MaskMap(NIDMObject):
     Object representing an MaskMap entity.
     """
 
-    def __init__(self, export_dir, mask_file, coord_space):
+    def __init__(self, export_dir, mask_file, coord_space, user_defined):
         super(MaskMap, self).__init__(export_dir)
         self.file = mask_file
         self.coord_space = coord_space
         self.id = NIIRI[str(uuid.uuid4())]
+        self.user_defined = user_defined
 
     def export(self):
         """
@@ -327,6 +328,7 @@ class MaskMap(NIDMObject):
                 (PROV['location'],
                  Identifier("file://./" + mask_filename)),
                 (PROV['label'], "Mask"),
+                (NIDM_IS_USER_DEFINED, self.user_defined),
                 (NFO['fileName'],
                  original_mask_filename),
                 (NFO['fileName'], mask_filename),
