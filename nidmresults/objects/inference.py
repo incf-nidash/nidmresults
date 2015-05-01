@@ -433,12 +433,20 @@ class ClusterCriteria(NIDMObject):
 
         label = "Cluster Connectivity Criterion: " + str(self.connectivity)
 
-        self.p.entity(self.id,
-                      other_attributes=((PROV['type'],
-                                         NIDM_CLUSTER_DEFINITION_CRITERIA),
-                                        (PROV['label'], label),
-                                        (NIDM_HAS_CONNECTIVITY_CRITERION,
-                                            voxel_conn)))
+        # FIXME if connectivity is missing
+        if self.connectivity is not None:
+            self.p.entity(self.id,
+                          other_attributes=((PROV['type'],
+                                             NIDM_CLUSTER_DEFINITION_CRITERIA),
+                                            (PROV['label'], label),
+                                            (NIDM_HAS_CONNECTIVITY_CRITERION,
+                                                voxel_conn)))
+        else:
+            self.p.entity(
+                self.id,
+                other_attributes=(
+                    (PROV['type'], NIDM_CLUSTER_DEFINITION_CRITERIA),
+                    (PROV['label'], label)))
 
         return self.p
 
