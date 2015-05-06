@@ -84,7 +84,7 @@ class CoordinateSpace(NIDMObject):
             # other?
             # NIDM_VOXEL_UNITS:
             # '[%s]'%str(thresImgHdr.get_xyzt_units()).strip('()'),
-            NIDM_VOXEL_UNITS: "[ 'mm', 'mm', 'mm' ]",
+            NIDM_VOXEL_UNITS: "[ \\\"mm\\\", \\\"mm\\\", \\\"mm\\\" ]",
             NIDM_VOXEL_SIZE: self.voxel_size,
             PROV['label']: "Coordinate space"})
         return self.p
