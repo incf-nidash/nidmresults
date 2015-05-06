@@ -53,39 +53,39 @@ class CoordinateSpace(NIDMObject):
     def __init__(self, coordinate_system, nifti_file):
         super(CoordinateSpace, self).__init__()
         self.coordinate_system = coordinate_system
-        self.nifti_file = nifti_file
         self.id = NIIRI[str(uuid.uuid4())]
+
+        thresImg = nib.load(nifti_file)
+        thresImgHdr = thresImg.get_header()
+
+        self.number_of_dimensions = len(thresImg.shape)
+
+        self.dimension = str(thresImg.shape).replace(
+            '(', '[ ').replace(')', ' ]')
+        self.voxel_to_world = '%s' \
+            % ', '.join(str(thresImg.get_qform())
+                        .strip('()')
+                        .replace('. ', '')
+                        .split()).replace('[,', '[').replace('\n', '')
+        self.voxel_size = '[ %s ]' % ', '.join(
+            map(str, thresImgHdr['pixdim'][1:(self.number_of_dimensions + 1)]))
 
     def export(self):
         """
         Create prov entities and activities.
         """
-        thresImg = nib.load(self.nifti_file)
-        thresImgHdr = thresImg.get_header()
-
-        numDim = len(thresImg.shape)
-
-        dimension = str(thresImg.shape).replace('(', '[ ').replace(')', ' ]')
-        voxel_to_world = '%s' \
-            % ', '.join(str(thresImg.get_qform())
-                        .strip('()')
-                        .replace('. ', '')
-                        .split()).replace('[,', '[').replace('\n', '')
-        voxel_size = '[ %s ]' % ', '.join(
-            map(str, thresImgHdr['pixdim'][1:(numDim + 1)]))
-
         self.p.entity(self.id, other_attributes={
             PROV['type']: NIDM_COORDINATE_SPACE,
-            NIDM_DIMENSIONS_IN_VOXELS: dimension,
-            NIDM_NUMBER_OF_DIMENSIONS: numDim,
-            NIDM_VOXEL_TO_WORLD_MAPPING: voxel_to_world,
+            NIDM_DIMENSIONS_IN_VOXELS: self.dimension,
+            NIDM_NUMBER_OF_DIMENSIONS: self.number_of_dimensions,
+            NIDM_VOXEL_TO_WORLD_MAPPING: self.voxel_to_world,
             NIDM_IN_WORLD_COORDINATE_SYSTEM: self.coordinate_system,
             # FIXME: this gives mm, sec => what is wrong: FSL file, nibabel,
             # other?
             # NIDM_VOXEL_UNITS:
             # '[%s]'%str(thresImgHdr.get_xyzt_units()).strip('()'),
             NIDM_VOXEL_UNITS: "[ 'mm', 'mm', 'mm' ]",
-            NIDM_VOXEL_SIZE: voxel_size,
+            NIDM_VOXEL_SIZE: self.voxel_size,
             PROV['label']: "Coordinate space"})
         return self.p
 
