@@ -532,6 +532,8 @@ class SearchSpace(NIDMObject):
             (NIDM_SEARCH_VOLUME_IN_VOXELS, self.search_volume_in_voxels),
             (NIDM_SEARCH_VOLUME_IN_UNITS, self.search_volume_in_units),
             (NIDM_SEARCH_VOLUME_IN_RESELS, self.search_volume_in_resels),
+            (SPM_NOISE_FWHM_IN_VOXELS, self.noise_fwhm_in_voxels),
+            (SPM_NOISE_FWHM_IN_UNITS, self.noise_fwhm_in_units),
             (CRYPTO['sha512'], self.get_sha_sum(search_space_file)),
             (NIDM_RESEL_SIZE_IN_VOXELS, self.resel_size_in_voxels),
             (NIDM_NOISE_ROUGHNESS_IN_VOXELS, self.dlh)))

@@ -14,6 +14,7 @@ CRYPTO = Namespace(
     "crypto",
     "http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions#")
 FSL = Namespace("fsl", "http://purl.org/nidash/fsl#")
+SPM = Namespace("fsl", "http://purl.org/nidash/spm#")
 DCT = Namespace("dct", "http://purl.org/dc/terms/")
 OBO = Namespace("obo", "http://purl.obolibrary.org/obo/")
 DCTYPE = Namespace("dctype", "http://purl.org/dc/dcmitype/")
@@ -194,6 +195,12 @@ NIDM_BINARY_MAP = NIDM['NIDM_0000004']
 NIDM_ARBITRARILY_CORRELATED_ERROR = NIDM['NIDM_0000003']
 NIDM_CONTRAST_ESTIMATION = NIDM['NIDM_0000001']
 NIDM_CONTRAST_MAP = NIDM['NIDM_0000002']
+
+# SPM constants (to be moved to NIDM namespace)
+SPM_NOISE_FWHM_IN_VOXELS = SPM['SPM_0000009']
+SPM_NOISE_FWHM_IN_VERTICES = SPM['SPM_0000008']
+SPM_NOISE_FWHM_IN_UNITS = SPM['SPM_0000007']
+
 
 STATO_OLS = OBO['STATO_0000370']
 STATO_WLS = OBO['STATO_0000371']
