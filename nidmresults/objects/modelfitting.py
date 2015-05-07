@@ -81,7 +81,7 @@ class DesignMatrix(NIDMObject):
     """
 
     def __init__(self, matrix, image_file, export_dir, regressors,
-                 design_type=None, hrf_model=None):
+                 design_type=None, hrf_model=None, drift_model=None):
         super(DesignMatrix, self).__init__(export_dir=export_dir)
         self.matrix = matrix
         self.id = NIIRI[str(uuid.uuid4())]
@@ -89,6 +89,7 @@ class DesignMatrix(NIDMObject):
         self.regressors = regressors
         self.design_type = design_type
         self.hrf_model = hrf_model
+        self.drift_model = drift_model
 
     def export(self):
         """
@@ -116,7 +117,40 @@ class DesignMatrix(NIDMObject):
             attributes.append((NIDM_HAS_FMRI_DESIGN, self.design_type))
             attributes.append((NIDM_HAS_HRF_BASIS, self.hrf_model))
 
+            # Export drift model
+            self.p.update(self.drift_model.export())
+            attributes.append((NIDM_HAS_DRIFT_MODEL, self.drift_model.id))
+
         # Create "design matrix" entity
+        self.p.entity(self.id, other_attributes=attributes)
+
+        return self.p
+
+
+class DriftModel(NIDMObject):
+
+    """
+    Object representing a DriftModel entity.
+    """
+
+    def __init__(self, drift_type, parameter):
+        super(DriftModel, self).__init__()
+        self.drift_type = drift_type
+        self.id = NIIRI[str(uuid.uuid4())]
+        self.parameter = parameter
+
+    def export(self):
+        """
+        Create prov entities and activities.
+        """
+        attributes = [(PROV['type'], self.drift_type)]
+
+        if self.drift_type == FSL_GAUSSIAN_RUNNING_LINE_DRIFT_MODEL:
+            attributes.append(
+                (PROV['label'], "FSL's Gaussian Running Line Drift Model"))
+            attributes.append((FSL_DRIFT_CUTOFF_PERIOD, self.parameter))
+
+        # Create "drift model" entity
         self.p.entity(self.id, other_attributes=attributes)
 
         return self.p
