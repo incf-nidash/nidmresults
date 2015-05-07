@@ -59,9 +59,10 @@ class Inference(NIDMObject):
             self.p.update(self.peak_criteria.export())
             self.p.used(self.inference_act.id, self.peak_criteria.id)
 
-            # Display Mask
-            self.p.update(self.disp_mask.export())
-            self.p.used(self.inference_act.id, self.disp_mask.id)
+            if self.disp_mask is not None:
+                # Display Mask
+                self.p.update(self.disp_mask.export())
+                self.p.used(self.inference_act.id, self.disp_mask.id)
 
             # Search Space
             self.p.update(self.search_space.export())
@@ -518,7 +519,7 @@ class SearchSpace(NIDMObject):
         search_space_orig_filename, search_space_filename = self.copy_nifti(
             search_space_orig_file, search_space_file)
 
-        # Crate "Mask map" entity
+        # Create "Search Space Mask map" entity
         self.p.entity(self.id, other_attributes=(
             (PROV['label'], "Search Space Mask Map"),
             (DCT['format'], "image/nifti"),
