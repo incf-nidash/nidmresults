@@ -80,12 +80,15 @@ class DesignMatrix(NIDMObject):
     Object representing a DesignMatrix entity.
     """
 
-    def __init__(self, matrix, image_file, export_dir, regressors):
+    def __init__(self, matrix, image_file, export_dir, regressors,
+                 design_type=None, hrf_model=None):
         super(DesignMatrix, self).__init__(export_dir=export_dir)
         self.matrix = matrix
         self.id = NIIRI[str(uuid.uuid4())]
         self.image = Image(export_dir, image_file)
         self.regressors = regressors
+        self.design_type = design_type
+        self.hrf_model = hrf_model
 
     def export(self):
         """
@@ -99,18 +102,23 @@ class DesignMatrix(NIDMObject):
         np.savetxt(os.path.join(self.export_dir, design_matrix_csv),
                    np.asarray(self.matrix), delimiter=",")
 
+        attributes = [(PROV['type'], NIDM_DESIGN_MATRIX),
+                      (PROV['label'], "Design Matrix"),
+                      (NIDM_REGRESSOR_NAMES,
+                       str(self.regressors).replace("'", '\\"')),
+                      (DCT['format'], "text/csv"),
+                      (NFO['fileName'], "DesignMatrix.csv"),
+                      (DC['description'], self.image.id),
+                      (PROV['location'],
+                       Identifier("file://./" + design_matrix_csv))]
+
+        if self.design_type is not None:
+            attributes.append((NIDM_HAS_FMRI_DESIGN, self.design_type))
+            attributes.append((NIDM_HAS_HRF_BASIS, self.hrf_model))
+
         # Create "design matrix" entity
-        self.p.entity(
-            self.id,
-            other_attributes=((PROV['type'], NIDM_DESIGN_MATRIX),
-                              (PROV['label'], "Design Matrix"),
-                              (NIDM_REGRESSOR_NAMES,
-                               str(self.regressors).replace("'", '\\"')),
-                              (DCT['format'], "text/csv"),
-                              (NFO['fileName'], "DesignMatrix.csv"),
-                              (DC['description'], self.image.id),
-                              (PROV['location'],
-                               Identifier("file://./" + design_matrix_csv))))
+        self.p.entity(self.id, other_attributes=attributes)
+
         return self.p
 
 
