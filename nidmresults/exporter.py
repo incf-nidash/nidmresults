@@ -9,6 +9,7 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 """
 
 from prov.model import ProvBundle, ProvDocument
+import rdflib
 import os
 import datetime
 from nidmresults.objects.constants import *
@@ -16,7 +17,6 @@ from nidmresults.objects.modelfitting import *
 from nidmresults.objects.contrast import *
 from nidmresults.objects.inference import *
 import uuid
-from subprocess import check_call
 
 
 class NIDMExporter():
@@ -26,6 +26,30 @@ class NIDMExporter():
     information to be stored in NIDM-Results and to generate a NIDM-Results
     export.
     """
+
+    def __init__(self):
+        # Initialise prov document
+        self.doc = ProvDocument()
+        self._add_namespaces()
+
+        # Initialise rdf document
+        self.g = rdflib.Graph()
+        self.g.bind("nidm", "http://purl.org/nidash/nidm#")
+        self.g.bind("niiri", "http://iri.nidash.org/")
+        self.g.bind(
+            "crypto",
+            "http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions#")
+        self.g.bind("fsl", "http://purl.org/nidash/fsl#")
+        self.g.bind("spm", "http://purl.org/nidash/spm#")
+        self.g.bind("dct", "http://purl.org/dc/terms/")
+        self.g.bind("obo", "http://purl.obolibrary.org/obo/")
+        self.g.bind("dctype", "http://purl.org/dc/dcmitype/")
+        self.g.bind("nlx", "http://neurolex.org/wiki/")
+        self.g.bind("prov", "http://www.w3.org/ns/prov#")
+        self.g.bind("dc", "http://purl.org/dc/elements/1.1/")
+        self.g.bind(
+            "nfo",
+            "http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#")
 
     def parse(self):
         """
@@ -59,9 +83,15 @@ class NIDMExporter():
         # Inference)
         self.inferences = self._find_inferences()
 
-        # Initialise prov document
-        self.doc = ProvDocument()
-        self._add_namespaces()
+    def add_object(self, nidm_object):
+        """
+        Add a NIDMObject to a NIDM-Results export.
+        """
+        nidm_object.export()
+        # ProvDocument: add object to the bundle
+        self.bundle.update(nidm_object.p)
+        # RDF document: add object to the main graph
+        self.g += nidm_object.g
 
     def export(self):
         """
@@ -72,40 +102,39 @@ class NIDMExporter():
 
         # Initialise main bundle
         self._create_bundle(self.version)
-        self.bundle.update(self.software.export())
+        self.add_object(self.software)
 
         # Add model fitting steps
         for model_fitting in self.model_fittings.values():
-            self.bundle.update(model_fitting.export())
-            self.bundle.wasAssociatedWith(model_fitting.activity.id,
-                                          self.software.id)
+            model_fitting.activity.wasAssociatedWith(self.software)
+            self.add_object(model_fitting)
 
         # Add contrast estimation steps
         for (model_fitting_id, pe_ids), contrasts in self.contrasts.items():
             model_fitting = self._get_model_fitting(model_fitting_id)
             for contrast in contrasts:
-                self.bundle.update(contrast.export())
-                self.bundle.used(contrast.estimation.id,
-                                 model_fitting.rms_map.id)
-                self.bundle.used(contrast.estimation.id,
-                                 model_fitting.mask_map.id)
-                self.bundle.wasAssociatedWith(contrast.estimation.id,
-                                              self.software.id)
+                contrast.estimation.used(model_fitting.rms_map)
+                contrast.estimation.used(model_fitting.mask_map)
+                contrast.estimation.wasAssociatedWith(self.software)
+
                 for pe_id in pe_ids:
-                    self.bundle.used(contrast.estimation.id, pe_id)
+                    contrast.estimation.used(pe_id)
+
+                self.add_object(contrast)
 
         # Add inference steps
         for contrast_id, inferences in self.inferences.items():
             contrast = self._get_contrast(contrast_id)
+
             for inference in inferences:
-                self.bundle.update(inference.export())
                 if contrast.z_stat_map:
                     used_id = contrast.z_stat_map.id
                 else:
                     used_id = contrast.stat_map.id
-                self.bundle.used(inference.inference_act.id, used_id)
-                self.bundle.wasAssociatedWith(
-                    inference.inference_act.id, self.software.id)
+                inference.inference_act.used(used_id)
+                inference.inference_act.wasAssociatedWith(self.software)
+
+                self.add_object(inference)
 
         # Write-out prov file
         self.save_prov_to_files()
@@ -158,8 +187,33 @@ class NIDMExporter():
                                           (NIDM_VERSION, version))
                         )
 
-        self.doc.wasGeneratedBy(bundle_id,
-                                time=str(datetime.datetime.now().time()))
+        ctime = datetime.datetime.now().time()
+        self.doc.wasGeneratedBy(bundle_id, time=str(ctime))
+
+        # In RDF
+        bundle_uri = rdflib.URIRef(bundle_id.uri)
+        self.g.add((
+            bundle_uri, RDF.type, rdflib.URIRef(PROV["Bundle"].uri)))
+        self.g.add((
+            bundle_uri, RDF.type, rdflib.URIRef(PROV["Entity"].uri)))
+        self.g.add((
+            bundle_uri, RDF.type, rdflib.URIRef(NIDM_RESULTS.uri)))
+        self.g.add((
+            bundle_uri, RDFS.label, rdflib.Literal("NIDM-Results")))
+        self.g.add((
+            bundle_uri,
+            rdflib.URIRef(NIDM_VERSION.uri),
+            rdflib.Literal(version, datatype=XSD.string)))
+        # Qualified generation
+        bnode = rdflib.BNode()
+        self.g.add((
+            bnode, RDF.type, rdflib.URIRef(PROV["Generation"].uri)))
+        self.g.add((
+            bnode,
+            rdflib.URIRef(PROV["atTime"].uri),
+            rdflib.Literal(str(ctime), datatype=XSD.dateTime)))
+        self.g.add((
+            bundle_uri, rdflib.URIRef(PROV["qualifiedGeneration"].uri), bnode))
 
     def _get_model_parameters_estimations(self, error_model):
         """
@@ -190,6 +244,7 @@ class NIDMExporter():
         provn_fid.close()
 
         ttl_file = provn_file.replace(".provn", ".ttl")
+        self.g.serialize(destination=ttl_file, format='turtle')
         # ttl_fid = open(ttl_file, 'w');
         # serialization is done in xlm rdf
         # graph = Graph()
@@ -198,6 +253,6 @@ class NIDMExporter():
         # ttl_fid.write(self.doc.serialize(format='rdf').
             # replace("inf", '"INF"'))
         # ttl_fid.close()
-        print "provconvert -infile " + provn_file + " -outfile " + ttl_file
-        check_call("provconvert -infile " + provn_file +
-                   " -outfile " + ttl_file, shell=True)
+        # print "provconvert -infile " + provn_file + " -outfile " + ttl_file
+        # check_call("provconvert -infile " + provn_file +
+        #            " -outfile " + ttl_file, shell=True)

@@ -43,47 +43,46 @@ class Inference(NIDMObject):
         Create prov entities and activities.
         """
         # Excursion set
-        self.p.update(self.excursion_set.export())
+        self.excursion_set.wasGeneratedBy(self.inference_act)
+        self.add_object(self.excursion_set)
 
         # Height threshold
-        self.p.update(self.height_thresh.export())
+        self.add_object(self.height_thresh)
 
         # Extent threshold
-        self.p.update(self.extent_thresh.export())
-
-        # Inference activity
-        self.p.update(self.inference_act.export())
+        self.add_object(self.extent_thresh)
 
         if self.clusters:
             # Peak Definition
-            self.p.update(self.peak_criteria.export())
-            self.p.used(self.inference_act.id, self.peak_criteria.id)
+            self.inference_act.used(self.peak_criteria)
+            self.add_object(self.peak_criteria)
 
             if self.disp_mask is not None:
                 # Display Mask
-                self.p.update(self.disp_mask.export())
-                self.p.used(self.inference_act.id, self.disp_mask.id)
+                self.inference_act.used(self.disp_mask)
+                self.add_object(self.disp_mask)
 
             # Search Space
-            self.p.update(self.search_space.export())
-            self.p.wasGeneratedBy(self.search_space.id, self.inference_act.id)
+            self.search_space.wasGeneratedBy(self.inference_act)
+            self.add_object(self.search_space)
 
             # Cluster Definition
-            self.p.update(self.cluster_criteria.export())
-            self.p.used(self.inference_act.id, self.cluster_criteria.id)
+            self.inference_act.used(self.cluster_criteria)
+            self.add_object(self.cluster_criteria)
 
             # Clusters and peaks
             for cluster in self.clusters:
-                self.p.update(cluster.export())
-                self.p.wasDerivedFrom(cluster.id, self.excursion_set.id)
+                cluster.wasDerivedFrom(self.excursion_set)
+                self.add_object(cluster)
 
-        self.p.wasGeneratedBy(self.excursion_set.id, self.inference_act.id)
+        # Inference activity
+        self.inference_act.wasAssociatedWith(self.software_id)
+        self.inference_act.used(self.height_thresh)
+        self.inference_act.used(self.extent_thresh)
+        self.add_object(self.inference_act)
 
-        self.p.wasAssociatedWith(self.inference_act.id, self.software_id)
         # self.p.wasGeneratedBy(NIIRI['search_space_id'],
             # self.inference_act.id)
-        self.p.used(self.inference_act.id, self.height_thresh.id)
-        self.p.used(self.inference_act.id, self.extent_thresh.id)
         # self.p.used(self.inference_act.id, NIIRI['z_statistic_map_id_'+
             # contrast_num])
         # self.p.used(self.inference_act.id, NIIRI['mask_id_1'])
@@ -101,6 +100,8 @@ class InferenceActivity(NIDMObject):
         super(InferenceActivity, self).__init__()
         self.id = NIIRI[str(uuid.uuid4())]
         self.contrast_name = contrast_name
+        self.type = NIDM_INFERENCE
+        self.prov_type = PROV['Activity']
 
     def export(self):
         """
@@ -111,11 +112,11 @@ class InferenceActivity(NIDMObject):
         # In FSL we have a single thresholding (extent, height) applied to all
         # contrasts
         # FIXME: Deal with two-tailed inference?
-        self.p.activity(self.id,
-                        other_attributes=((PROV['type'], NIDM_INFERENCE),
-                                          (PROV['label'], label),
-                                          (NIDM_HAS_ALTERNATIVE_HYPOTHESIS,
-                                           NIDM_ONE_TAILED_TEST)))
+        self.add_attributes((
+            (PROV['type'], self.type),
+            (PROV['label'], label),
+            (NIDM_HAS_ALTERNATIVE_HYPOTHESIS, NIDM_ONE_TAILED_TEST)))
+
         return self.p
 
 
@@ -131,6 +132,8 @@ class ExcursionSet(NIDMObject):
         self.num = stat_num
         self.file = filename
         self.id = NIIRI[str(uuid.uuid4())]
+        self.type = NIDM_EXCURSION_SET_MAP
+        self.prov_type = PROV['Entity']
         self.visu = Visualisation(visualisation, stat_num, export_dir)
 
         self.coord_space = coord_space
@@ -139,9 +142,8 @@ class ExcursionSet(NIDMObject):
         """
         Create prov entities and activities.
         """
-        self.p.update(self.coord_space.export())
-
-        self.p.update(self.visu.export())
+        self.add_object(self.coord_space)
+        self.add_object(self.visu)
 
         # Copy "Excursion set map" in export directory
         exc_set_orig_file = self.file
@@ -151,8 +153,8 @@ class ExcursionSet(NIDMObject):
             exc_set_orig_file, exc_set_file)
 
         # Create "Excursion set" entity
-        self.p.entity(self.id, other_attributes=(
-            (PROV['type'], NIDM_EXCURSION_SET_MAP),
+        self.add_attributes((
+            (PROV['type'], self.type),
             (DCT['format'], "image/nifti"),
             (PROV['location'], Identifier("file://./" + exc_set_filename)),
             (NFO['fileName'], exc_set_orig_filename),
@@ -179,6 +181,8 @@ class Visualisation(NIDMObject):
         super(Visualisation, self).__init__(export_dir)
         self.file = visu_filename
         self.id = NIIRI[str(uuid.uuid4())]
+        self.type = DCTYPE['Image']
+        self.prov_type = PROV['Entity']
 
     def export(self):
         """
@@ -189,7 +193,7 @@ class Visualisation(NIDMObject):
         path, visu_filename = os.path.split(self.file)
 
         # Create "png visualisation of Excursion set" entity
-        self.p.entity(self.id, other_attributes=(
+        self.add_attributes((
             (PROV['type'], DCTYPE['Image']),
             (NFO['fileName'], visu_filename),
             (PROV['location'], Identifier("file://./" + visu_filename)),
@@ -216,6 +220,8 @@ class HeightThreshold(NIDMObject):
         self.p_corr_threshold = p_corr_threshold
         self.p_uncorr_threshold = p_uncorr_threshold
         self.id = NIIRI[str(uuid.uuid4())]
+        self.type = NIDM_HEIGHT_THRESHOLD
+        self.prov_type = PROV['Entity']
 
     def export(self):
         """
@@ -238,16 +244,16 @@ class HeightThreshold(NIDMObject):
         # FIXME: Do we want/Can we find a corrected p equivalent to the Z
         # thresh?
         heightThreshAllFields = {
-            PROV['type']: NIDM_HEIGHT_THRESHOLD,
+            PROV['type']: self.type,
             PROV['label']: "Height Threshold: " + thresh_desc,
             NIDM_USER_SPECIFIED_THRESHOLD_TYPE: user_threshold_type,
             PROV['value']: self.stat_threshold,
             NIDM_P_VALUE_UNCORRECTED: self.p_uncorr_threshold,
             NIDM_P_VALUE_FWER: self.p_corr_threshold
         }
-        self.p.entity(self.id, other_attributes=dict(
-            (k, v) for k, v in heightThreshAllFields.iteritems()
-            if v is not None))
+        self.add_attributes(
+            dict((k, v) for k, v in heightThreshAllFields.iteritems()
+                 if v is not None))
 
         return self.p
 
@@ -264,6 +270,8 @@ class ExtentThreshold(NIDMObject):
         self.p_corr = p_corr
         self.p_uncorr = p_uncorr
         self.id = NIIRI[str(uuid.uuid4())]
+        self.type = NIDM_EXTENT_THRESHOLD
+        self.prov_type = PROV['Entity']
 
     def export(self):
         """
@@ -287,14 +295,15 @@ class ExtentThreshold(NIDMObject):
             user_threshold_type = None
 
         extent_thresh_all_fields = {
-            PROV['type']: NIDM_EXTENT_THRESHOLD,
+            PROV['type']: self.type,
             PROV['label']: "Extent Threshold: " + thresh_desc,
             NIDM_CLUSTER_SIZE_IN_VOXELS: self.extent,
             NIDM_USER_SPECIFIED_THRESHOLD_TYPE: user_threshold_type,
             NIDM_P_VALUE_UNCORRECTED: self.p_uncorr,
             NIDM_P_VALUE_FWER: self.p_corr
         }
-        self.p.entity(self.id, other_attributes=dict(
+
+        self.add_attributes(dict(
             (k, v) for k, v in extent_thresh_all_fields.iteritems()
             if v is not None))
 
@@ -317,25 +326,28 @@ class Cluster(NIDMObject):
         self.peaks = peaks
         self.size = size
         self.pFWER = pFWER
+        self.type = NIDM_SIGNIFICANT_CLUSTER
+        self.prov_type = PROV['Entity']
 
     def export(self):
         """
         Create prov entities and activities.
         """
         for peak in self.peaks:
-            self.p.update(peak.export())
-            self.p.wasDerivedFrom(peak.id, self.id)
+            peak.wasDerivedFrom(self)
+            self.add_object(peak)
 
-        self.p.update(self.cog.export())
-        self.p.wasDerivedFrom(self.cog.id, self.id)
+        self.cog.wasDerivedFrom(self)
+        self.add_object(self.cog)
 
         # FIXME deal with multiple contrasts
-        self.p.entity(self.id, other_attributes=(
+        self.add_attributes((
             (PROV['type'], NIDM_SIGNIFICANT_CLUSTER),
             (PROV['label'], "Significant Cluster %04d" % self.num),
             (NIDM_CLUSTER_LABEL_ID, self.num),
             (NIDM_CLUSTER_SIZE_IN_VOXELS, self.size),
             (NIDM_P_VALUE_FWER, self.pFWER)))
+
         return self.p
 
 
@@ -350,31 +362,32 @@ class DisplayMaskMap(NIDMObject):
         self.id = NIIRI[str(uuid.uuid4())]
         self.filename = filename
         self.coord_space = coord_space
+        self.type = NIDM_DISPLAY_MASK_MAP
+        self.prov_type = PROV['Entity']
 
     def export(self):
         """
         Create prov entities and activities.
         """
         # Create coordinate space entity
-        self.p.update(self.coord_space.export())
+        self.add_object(self.coord_space)
 
         # Create "Display Mask Map" entity
         disp_mask_file = os.path.join(self.export_dir, 'DisplayMask.nii.gz')
         disp_mask_orig_filename, disp_mask_filename = self.copy_nifti(
             self.filename, disp_mask_file)
 
-        self.p.entity(self.id,
-                      other_attributes=(
-                          (PROV['type'], NIDM_DISPLAY_MASK_MAP),
-                          (PROV['label'], "Display Mask Map"),
-                          (DCT['format'], "image/nifti"),
-                          (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
-                          (NFO['fileName'], disp_mask_orig_filename),
-                          (NFO['fileName'], disp_mask_filename),
-                          (PROV['location'],
-                              Identifier("file://./" + disp_mask_filename)),
-                          (CRYPTO['sha512'], self.get_sha_sum(disp_mask_file)))
-                      )
+        self.add_attributes((
+            (PROV['type'], self.type),
+            (PROV['label'], "Display Mask Map"),
+            (DCT['format'], "image/nifti"),
+            (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
+            (NFO['fileName'], disp_mask_orig_filename),
+            (NFO['fileName'], disp_mask_filename),
+            (PROV['location'], Identifier("file://./" + disp_mask_filename)),
+            (CRYPTO['sha512'], self.get_sha_sum(disp_mask_file))
+            ))
+
         return self.p
 
 
@@ -389,6 +402,8 @@ class PeakCriteria(NIDMObject):
         self.id = NIIRI[str(uuid.uuid4())]
         self.num_peak = num_peak
         self.peak_dist = peak_dist
+        self.type = NIDM_PEAK_DEFINITION_CRITERIA
+        self.prov_type = PROV['Entity']
 
     def export(self):
         """
@@ -399,12 +414,11 @@ class PeakCriteria(NIDMObject):
             num_peak = (NIDM_MAXNUMBEROFPEAKSPERCLUSTER, self.num_peak)
 
         # Create "Peak definition criteria" entity
-        self.p.entity(self.id,
-                      other_attributes=(
-                          (PROV['type'], NIDM_PEAK_DEFINITION_CRITERIA),
-                          (PROV['label'], "Peak Definition Criteria"),
-                          (NIDM_MIN_DISTANCE_BETWEEN_PEAKS, self.peak_dist)) +
-                      num_peak)
+        self.add_attributes((
+            (PROV['type'], self.type),
+            (PROV['label'], "Peak Definition Criteria"),
+            (NIDM_MIN_DISTANCE_BETWEEN_PEAKS, self.peak_dist)
+            ) + num_peak)
 
         return self.p
 
@@ -419,6 +433,8 @@ class ClusterCriteria(NIDMObject):
         super(ClusterCriteria, self).__init__()
         self.id = NIIRI[str(uuid.uuid4())]
         self.connectivity = connectivity
+        self.type = NIDM_CLUSTER_DEFINITION_CRITERIA
+        self.prov_type = PROV['Entity']
 
     def export(self):
         """
@@ -436,18 +452,16 @@ class ClusterCriteria(NIDMObject):
 
         # FIXME if connectivity is missing
         if self.connectivity is not None:
-            self.p.entity(self.id,
-                          other_attributes=((PROV['type'],
-                                             NIDM_CLUSTER_DEFINITION_CRITERIA),
-                                            (PROV['label'], label),
-                                            (NIDM_HAS_CONNECTIVITY_CRITERION,
-                                                voxel_conn)))
+            atts = (
+                (PROV['type'], self.type),
+                (PROV['label'], label),
+                (NIDM_HAS_CONNECTIVITY_CRITERION, voxel_conn))
         else:
-            self.p.entity(
-                self.id,
-                other_attributes=(
-                    (PROV['type'], NIDM_CLUSTER_DEFINITION_CRITERIA),
-                    (PROV['label'], label)))
+            atts = (
+                (PROV['type'], NIDM_CLUSTER_DEFINITION_CRITERIA),
+                (PROV['label'], label))
+
+        self.add_attributes(atts)
 
         return self.p
 
@@ -465,19 +479,21 @@ class CenterOfGravity(NIDMObject):
         self.id = NIIRI[str(uuid.uuid4())]
         self.coordinate = Coordinate("%04d" % cluster_num, x=x, y=y, z=z,
                                      x_std=x_std, y_std=y_std, z_std=z_std)
+        self.type = NIDM_CLUSTER_CENTER_OF_GRAVITY
+        self.prov_type = PROV['Entity']
 
     def export(self):
         """
         Create prov entities and activities.
         """
-        self.p.update(self.coordinate.export())
+        self.add_object(self.coordinate)
 
         label = "Center of gravity " + str(self.cluster_num)
 
-        self.p.entity(self.id, other_attributes=(
-                     (PROV['type'], NIDM_CLUSTER_CENTER_OF_GRAVITY),
-                     (PROV['label'], label),
-                     (PROV['location'], self.coordinate.id)))
+        self.add_attributes((
+            (PROV['type'], self.type),
+            (PROV['label'], label),
+            (PROV['location'], self.coordinate.id)))
 
         return self.p
 
@@ -504,13 +520,15 @@ class SearchSpace(NIDMObject):
         self.noise_fwhm_in_voxels = noise_fwhm_in_voxels
         self.noise_fwhm_in_units = noise_fwhm_in_units
         self.id = NIIRI[str(uuid.uuid4())]
+        self.type = NIDM_SEARCH_SPACE_MASK_MAP
+        self.prov_type = PROV['Entity']
 
     # Generate prov for search space entity generated by the inference activity
     def export(self):
         """
         Create prov entities and activities.
         """
-        self.p.update(self.coord_space.export())
+        self.add_object(self.coord_space)
 
         # Copy "Mask map" in export directory
         search_space_orig_file = self.file
@@ -520,7 +538,7 @@ class SearchSpace(NIDMObject):
             search_space_orig_file, search_space_file)
 
         # Create "Search Space Mask map" entity
-        self.p.entity(self.id, other_attributes=(
+        self.add_attributes((
             (PROV['label'], "Search Space Mask Map"),
             (DCT['format'], "image/nifti"),
             (PROV['type'], NIDM_SEARCH_SPACE_MASK_MAP),
@@ -565,6 +583,8 @@ class Coordinate(NIDMObject):
                 str(z_std) + " ]"
         else:
             self.coord_vector_std = coord_vector_std
+        self.type = NIDM_COORDINATE
+        self.prov_type = PROV['Entity']
 
     def export(self):
         """
@@ -572,19 +592,18 @@ class Coordinate(NIDMObject):
         """
         # We can not have this in the dictionnary because we want to keep the
         # duplicate prov:type attribute
-        typeAndLabelAttributes = [  # (PROV['type'],PROV['Location']),
+        type_label = [  # (PROV['type'],PROV['Location']),
             (PROV['type'], NIDM_COORDINATE),
             (PROV['label'], "Coordinate " + self.label_id)]
 
-        coordinateAttributes = {
+        coordinate = {
             NIDM_COORDINATE_VECTOR_IN_VOXELS: self.coord_vector,
             NIDM_COORDINATE_VECTOR: self.coord_vector_std,
         }
 
-        self.p.entity(
-            self.id,
-            other_attributes=typeAndLabelAttributes +
-            list(dict((k, v) for k, v in coordinateAttributes.iteritems()
+        self.add_attributes(
+            type_label +
+            list(dict((k, v) for k, v in coordinate.iteritems()
                       if not v is None).items()))
 
         return self.p
@@ -607,20 +626,20 @@ class Peak(NIDMObject):
         self.num = peak_unique_id
         self.equiv_z = equiv_z
         self.coordinate = Coordinate(str(peak_unique_id), **kwargs)
+        self.type = NIDM_PEAK
+        self.prov_type = PROV['Entity']
 
     def export(self):
         """
         Create prov entities and activities.
         """
-        self.p.update(self.coordinate.export())
+        self.add_object(self.coordinate)
 
-        other_attributes = [
-            (PROV['type'], NIDM_PEAK),
+        self.add_attributes([
+            (PROV['type'], self.type),
             (PROV['label'], "Peak " + str(self.num)),
             (NIDM_EQUIVALENT_ZSTATISTIC, self.equiv_z),
             (NIDM_P_VALUE_UNCORRECTED, 1 - norm.cdf(self.equiv_z)),
-            (PROV['location'], self.coordinate.id)]
-
-        self.p.entity(self.id, other_attributes=other_attributes)
+            (PROV['location'], self.coordinate.id)])
 
         return self.p
