@@ -89,8 +89,11 @@ class NIDMObject(object):
 
         self.g.add((rdflib.URIRef(s.uri), p, o))
 
-    def add_object(self, nidm_object):
-        nidm_object.export()
+    def add_object(self, nidm_object, version=None):
+        if version is not None:
+            nidm_object.export(version)
+        else:
+            nidm_object.export()
         # Prov graph (=> provn)
         self.p.update(nidm_object.p)
         # RDF graph (=> turtle)
