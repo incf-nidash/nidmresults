@@ -10,7 +10,7 @@ requirements = [
 
 setup(
     name="nidmresults",
-    version="0.1.0",
+    version="0.2.0",
     author="Camille Maumet",
     author_email="c.m.j.maumet@warwick.ac.uk",
     description=(
@@ -29,4 +29,5 @@ setup(
         "Topic :: Utilities",
         "License :: OSI Approved :: MIT License",
     ],
+    install_requires=requirements,
 )
