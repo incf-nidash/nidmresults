@@ -66,7 +66,8 @@ class NIDMObject(object):
         elif isinstance(o, prov.identifier.Identifier):
             o = rdflib.Literal(o, datatype=XSD.anyURI)
         else:
-            if isinstance(o, str) and not str(p) == "prov:label":
+            if (isinstance(o, str) or isinstance(o, unicode)) and \
+                    not str(p) == "prov:label":
                 o = rdflib.Literal(o, datatype=XSD.string)
             elif isinstance(o, float):
                 o = rdflib.Literal(o, datatype=XSD.float)
