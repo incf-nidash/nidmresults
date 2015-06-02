@@ -8,7 +8,6 @@ readme = open('README.rst').read()
 requirements = [
     'rdflib>=4.2.0',
     'prov>=1.0.0',
-    'scipy',
     'nibabel',
     'numpy'
 ]

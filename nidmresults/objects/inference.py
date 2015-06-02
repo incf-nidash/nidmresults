@@ -12,8 +12,8 @@ import os
 from constants import *
 import shutil
 from generic import *
-from scipy.stats import norm
 import uuid
+from math import erf, sqrt
 
 
 class Inference(NIDMObject):
@@ -647,11 +647,13 @@ class Peak(NIDMObject):
         """
         self.add_object(self.coordinate)
 
+        norm_cdf_z = (1.0 + erf(self.equiv_z / sqrt(2.0))) / 2.0
+
         self.add_attributes([
             (PROV['type'], self.type),
             (PROV['label'], "Peak " + str(self.num)),
             (NIDM_EQUIVALENT_ZSTATISTIC, self.equiv_z),
-            (NIDM_P_VALUE_UNCORRECTED, 1 - norm.cdf(self.equiv_z)),
+            (NIDM_P_VALUE_UNCORRECTED, 1 - norm_cdf_z),
             (PROV['location'], self.coordinate.id)])
 
         return self.p

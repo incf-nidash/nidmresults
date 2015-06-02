@@ -2,4 +2,3 @@ rdflib>=4.2.0
 prov>=1.0.0
 nibabel
 numpy
-scipy
