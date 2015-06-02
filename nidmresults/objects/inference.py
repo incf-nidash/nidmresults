@@ -28,7 +28,13 @@ class Inference(NIDMObject):
             peak_criteria, cluster_criteria, disp_mask, excursion_set,
             clusters, search_space, software_id):
         super(Inference, self).__init__()
-        self.version = version
+        if version == "dev":
+            self.version = {'major': 10000, 'minor': 0, 'revision': 0,
+                            'num': version}
+        else:
+            major, minor, revision = version.split(".")
+            self.version = {'major': int(major), 'minor': int(minor),
+                            'revision': int(revision), 'num': version}
         self.excursion_set = excursion_set
         self.inference_act = inference
         self.height_thresh = height_thresh
@@ -49,10 +55,10 @@ class Inference(NIDMObject):
         self.add_object(self.excursion_set)
 
         # Height threshold
-        self.add_object(self.height_thresh)
+        self.add_object(self.height_thresh, self.version)
 
         # Extent threshold
-        self.add_object(self.extent_thresh)
+        self.add_object(self.extent_thresh, self.version)
 
         if self.clusters:
             # Peak Definition
@@ -225,38 +231,53 @@ class HeightThreshold(NIDMObject):
         self.type = NIDM_HEIGHT_THRESHOLD
         self.prov_type = PROV['Entity']
 
-    def export(self):
+    def export(self, version):
         """
         Create prov entities and activities.
         """
         thresh_desc = ""
         if self.stat_threshold is not None:
             thresh_desc = "Z>" + str(self.stat_threshold)
-            user_threshold_type = "Z-Statistic"
+            if version['num'] == "1.0.0":
+                user_threshold_type = "Z-Statistic"
+            else:
+                threshold_type = OBO_STATISTIC
+                value = self.stat_threshold
         elif self.p_uncorr_threshold is not None:
             thresh_desc = "p<" + \
                 str(self.p_uncorr_threshold) + " (uncorrected)"
-            user_threshold_type = "p-value uncorrected"
+            if version['num'] == "1.0.0":
+                user_threshold_type = "p-value uncorrected"
+            else:
+                threshold_type = NIDM_P_VALUE_UNCORRECTED_CLASS
+                value = self.p_uncorr_threshold
         elif self.p_corr_threshold is not None:
             thresh_desc = "p<" + str(self.p_corr_threshold) + " (FWE)"
-            user_threshold_type = "p-value FWE"
+            if version['num'] == "1.0.0":
+                user_threshold_type = "p-value FWE"
+            else:
+                threshold_type = OBO_P_VALUE_FWER
+                value = self.p_corr_threshold
 
-        # FIXME: Do we want to calculate an uncorrected p equivalent to the Z
-        # thresh?
-        # FIXME: Do we want/Can we find a corrected p equivalent to the Z
-        # thresh?
-        heightThreshAllFields = {
-            PROV['type']: self.type,
-            PROV['label']: "Height Threshold: " + thresh_desc,
-            NIDM_USER_SPECIFIED_THRESHOLD_TYPE: user_threshold_type,
-            PROV['value']: self.stat_threshold,
-            NIDM_P_VALUE_UNCORRECTED: self.p_uncorr_threshold,
-            NIDM_P_VALUE_FWER: self.p_corr_threshold
-        }
-        self.add_attributes(
-            dict((k, v) for k, v in heightThreshAllFields.iteritems()
-                 if v is not None))
+        atts = [
+            (PROV['type'], self.type),
+            (PROV['label'], "Height Threshold: " + thresh_desc),
+        ]
 
+        if version['num'] == "1.0.0":
+            atts += [
+                (NIDM_USER_SPECIFIED_THRESHOLD_TYPE, user_threshold_type),
+                (PROV['value'], self.stat_threshold),
+                (NIDM_P_VALUE_UNCORRECTED, self.p_uncorr_threshold),
+                (NIDM_P_VALUE_FWER, self.p_corr_threshold)
+                ]
+        else:
+            atts += [
+                (PROV['type'], threshold_type),
+                (PROV['value'], value)
+                ]
+
+        self.add_attributes([(k, v) for k, v in atts if v is not None])
         return self.p
 
 
@@ -275,40 +296,70 @@ class ExtentThreshold(NIDMObject):
         self.type = NIDM_EXTENT_THRESHOLD
         self.prov_type = PROV['Entity']
 
-    def export(self):
+    def export(self, version):
         """
         Create prov entities and activities.
         """
+        atts = [
+            (PROV['type'], self.type),
+        ]
+
         thresh_desc = ""
         if self.extent is not None:
             thresh_desc = "k>" + str(self.extent)
+            # NIDM-Results 1.0.0
             user_threshold_type = "Cluster-size in voxels"
+            # NIDM-Results > 1.0.0
+            threshold_type = OBO_STATISTIC
         elif not self.p_uncorr is None:
             thresh_desc = "p<" + str(self.p_uncorr) + " (uncorrected)"
+            # NIDM-Results 1.0.0
             user_threshold_type = "p-value uncorrected"
+            # NIDM-Results > 1.0.0
+            threshold_type = NIDM_P_VALUE_UNCORRECTED_CLASS
+            value = self.p_uncorr
         elif not self.p_corr is None:
             thresh_desc = "p<" + str(self.p_corr) + " (FWE)"
+            # NIDM-Results 1.0.0
             user_threshold_type = "p-value FWE"
+            # NIDM-Results > 1.0.0
+            threshold_type = OBO_P_VALUE_FWER
+            value = self.p_corr
         else:
             thresh_desc = "k>=0"
             self.extent = 0
-            self.p_uncorr = 1.0
-            self.p_corr = 1.0
-            user_threshold_type = None
+            if version['num'] == "1.0.0":
+                self.p_uncorr = 1.0
+                self.p_corr = 1.0
+                user_threshold_type = None
+            else:
+                threshold_type = OBO_STATISTIC
 
-        extent_thresh_all_fields = {
-            PROV['type']: self.type,
-            PROV['label']: "Extent Threshold: " + thresh_desc,
-            NIDM_CLUSTER_SIZE_IN_VOXELS: self.extent,
-            NIDM_USER_SPECIFIED_THRESHOLD_TYPE: user_threshold_type,
-            NIDM_P_VALUE_UNCORRECTED: self.p_uncorr,
-            NIDM_P_VALUE_FWER: self.p_corr
-        }
+        atts += [
+            (PROV['label'], "Extent Threshold: " + thresh_desc)
+        ]
 
-        self.add_attributes(dict(
-            (k, v) for k, v in extent_thresh_all_fields.iteritems()
-            if v is not None))
+        if self.extent is not None:
+            atts += [
+                (NIDM_CLUSTER_SIZE_IN_VOXELS, self.extent),
+            ]
 
+        if version['num'] == "1.0.0":
+            atts += [
+                (NIDM_USER_SPECIFIED_THRESHOLD_TYPE, user_threshold_type),
+                (NIDM_P_VALUE_UNCORRECTED, self.p_uncorr),
+                (NIDM_P_VALUE_FWER, self.p_corr)
+            ]
+        else:
+            atts += [
+                (PROV['type'], threshold_type)
+            ]
+            if self.extent is None:
+                atts += [
+                    (PROV['value'], value)
+                ]
+
+        self.add_attributes([(k, v) for k, v in atts if v is not None])
         return self.p
 
 
@@ -556,15 +607,13 @@ class SearchSpace(NIDMObject):
             (NIDM_RESEL_SIZE_IN_VOXELS, self.resel_size_in_voxels),
             (NIDM_NOISE_ROUGHNESS_IN_VOXELS, self.dlh))
 
-        # Noise FWHM was introduced after NIDM-Results 1.0.0
-        major, minor, revision = version.split(".")
-        major = int(major)
-        minor = int(minor)
-        revision = int(revision)
-        if (major > 1) or (major >= 1 and (minor > 0 or revision > 0)):
+        # Noise FWHM was introduced in NIDM-Results 1.1.0
+        if (version['major'] > 1) or \
+           (version['major'] >= 1 and
+                (version['minor'] > 0 or version['revision'] > 0)):
             atts = atts + (
-                (SPM_NOISE_FWHM_IN_VOXELS, self.noise_fwhm_in_voxels),
-                (SPM_NOISE_FWHM_IN_UNITS, self.noise_fwhm_in_units))
+                (NIDM_NOISE_FWHM_IN_VOXELS, self.noise_fwhm_in_voxels),
+                (NIDM_NOISE_FWHM_IN_UNITS, self.noise_fwhm_in_units))
 
         # Create "Search Space Mask map" entity
         self.add_attributes(atts)
