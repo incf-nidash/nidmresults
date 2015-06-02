@@ -1,10 +1,9 @@
 from setuptools import setup, find_packages
-from pip.req import parse_requirements
 
 readme = open('README.rst').read()
 
-install_reqs = parse_requirements('requirements.txt')
-requirements = [str(ir.req) for ir in install_reqs]
+reqs = [line.strip() for line in open('requirements.txt').readlines()]
+requirements = list(filter(None, reqs))
 
 setup(
     name="nidmresults",
