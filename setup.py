@@ -2,17 +2,8 @@ from setuptools import setup, find_packages
 
 readme = open('README.rst').read()
 
-# reqs = [line.strip() for line in open('requirements.txt').readlines()]
-# requirements = list(filter(None, reqs))
-
-requirements = [
-    'rdflib>=4.2.0',
-    'prov>=1.0.0',
-    'nibabel',
-    'numpy'
-]
-
-print requirements
+reqs = [line.strip() for line in open('requirements.txt').readlines()]
+requirements = list(filter(None, reqs))
 
 setup(
     name="nidmresults",
