@@ -15,6 +15,7 @@ from constants import *
 import nibabel as nib
 from generic import *
 import json
+import warnings
 
 
 class ModelFitting(NIDMObject):
@@ -115,11 +116,15 @@ class DesignMatrix(NIDMObject):
                       (PROV['location'],
                        Identifier("file://./" + design_matrix_csv))]
 
-        if self.design_type is not None:
-            attributes.append((NIDM_HAS_FMRI_DESIGN, self.design_type))
-            attributes.append((NIDM_HAS_HRF_BASIS, self.hrf_model))
+        if self.hrf_model is not None:
+
+            if self.design_type is not None:
+                attributes.append((NIDM_HAS_FMRI_DESIGN, self.design_type))
+            else:
+                warnings.warn("Design type is missing")
 
             # Export drift model
+            attributes.append((NIDM_HAS_HRF_BASIS, self.hrf_model))
             self.add_object(self.drift_model)
             attributes.append((NIDM_HAS_DRIFT_MODEL, self.drift_model.id))
 
