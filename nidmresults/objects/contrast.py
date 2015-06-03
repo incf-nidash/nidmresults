@@ -24,7 +24,8 @@ class Contrast(NIDMObject):
     """
 
     def __init__(self, contrast_num, contrast_name, weights, estimation,
-                 contrast_map, stderr_map, stat_map, z_stat_map=None):
+                 contrast_map, stderr_or_expl_mean_sq_map, stat_map,
+                 z_stat_map=None):
         super(Contrast, self).__init__()
         # FIXME: contrast_num migth only be defined in FSL if this is not
         # generic the class should be overloaded in fsl_objects
@@ -33,7 +34,7 @@ class Contrast(NIDMObject):
         self.weights = weights
         self.estimation = estimation
         self.contrast_map = contrast_map
-        self.stderr_map = stderr_map
+        self.stderr_or_expl_mean_sq_map = stderr_or_expl_mean_sq_map
         self.stat_map = stat_map
         self.z_stat_map = z_stat_map
 
@@ -47,13 +48,14 @@ class Contrast(NIDMObject):
         # Create contrast weights
         self.add_object(self.weights)
 
-        # Create contrast Map
-        self.contrast_map.wasGeneratedBy(self.estimation)
-        self.add_object(self.contrast_map)
+        if self.contrast_map is not None:
+            # Create contrast Map
+            self.contrast_map.wasGeneratedBy(self.estimation)
+            self.add_object(self.contrast_map)
 
-        # Create Standard Error Map
-        self.stderr_map.wasGeneratedBy(self.estimation)
-        self.add_object(self.stderr_map)
+        # Create Std Err. Map (T-tests) or Explained Mean Sq. Map (F-tests)
+        self.stderr_or_expl_mean_sq_map.wasGeneratedBy(self.estimation)
+        self.add_object(self.stderr_or_expl_mean_sq_map)
 
         # Create Statistic Map
         self.stat_map.wasGeneratedBy(self.estimation)
@@ -94,6 +96,8 @@ class ContrastWeights(NIDMObject):
             stat = STATO_TSTATISTIC
         elif self.stat_type.lower() == "z":
             stat = STATO_ZSTATISTIC
+        elif self.stat_type.lower() == "f":
+            stat = STATO_FSTATISTIC
 
         self.add_attributes((
             (PROV['type'], STATO_CONTRAST_WEIGHT_MATRIX),
@@ -145,6 +149,56 @@ class ContrastMap(NIDMObject):
             (NIDM_CONTRAST_NAME, self.name),
             (CRYPTO['sha512'], self.get_sha_sum(cope_file)),
             (PROV['label'], "Contrast Map: " + self.name)))
+        return self.p
+
+
+class ContrastExplainedMeanSquareMap(NIDMObject):
+    """
+    Object representing a ContrastExplainedMeanSquareMap entity.
+    """
+    def __init__(self, stat_file, sigma_sq_file, contrast_num,
+                 coord_space, export_dir):
+        super(ContrastExplainedMeanSquareMap, self).__init__(export_dir)
+        self.stat_file = stat_file
+        self.sigma_sq_file = sigma_sq_file
+        self.num = contrast_num
+        self.id = NIIRI[str(uuid.uuid4())]
+        self.coord_space = coord_space
+        self.type = NIDM_CONTRAST_EXPLAINED_MEAN_SQUARE_MAP
+        self.prov_type = PROV['Entity']
+
+    def export(self):
+        """
+        Create prov graph.
+        """
+        self.p.update(self.coord_space.export())
+
+        # Create Contrast Explained Mean Square Map as fstat<num>.nii.gz
+        # multiplied by sigmasquareds.nii.gz and save it in export_dir
+        fstat_img = nib.load(self.stat_file)
+        fstat = fstat_img.get_data()
+
+        sigma_sq_img = nib.load(self.sigma_sq_file)
+        sigma_sq = sigma_sq_img.get_data()
+
+        expl_mean_sq = nib.Nifti1Image(fstat*sigma_sq, fstat_img.get_qform())
+
+        expl_mean_sq_filename = \
+            "ContrastExplainedMeanSquareMap" + self.num + ".nii.gz"
+        expl_mean_sq_file = os.path.join(
+            self.export_dir, expl_mean_sq_filename)
+        nib.save(expl_mean_sq, expl_mean_sq_file)
+
+        # Contrast Explained Mean Square Map entity
+        path, filename = os.path.split(expl_mean_sq_file)
+        self.add_attributes((
+            (PROV['type'], self.type),
+            (DCT['format'], "image/nifti"),
+            (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
+            (PROV['location'], Identifier("file://./"+filename)),
+            (NFO['fileName'], filename),
+            (CRYPTO['sha512'], self.get_sha_sum(expl_mean_sq_file)),
+            (PROV['label'], "Contrast Explained Mean Square Map")))
         return self.p
 
 
@@ -284,6 +338,8 @@ class StatisticMap(NIDMObject):
             stat = STATO_TSTATISTIC
         elif self.stat_type.lower() == "z":
             stat = STATO_ZSTATISTIC
+        elif self.stat_type.lower() == "f":
+            stat = STATO_FSTATISTIC
 
         attributes = [(PROV['type'], NIDM_STATISTIC_MAP),
                       (DCT['format'], "image/nifti"),
