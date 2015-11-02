@@ -115,12 +115,15 @@ class ContrastMap(NIDMObject):
     """
 
     def __init__(self, contrast_file, contrast_num, contrast_name,
-                 coord_space, export_dir):
+                 coord_space, export_dir, ident=None):
         super(ContrastMap, self).__init__(export_dir)
         self.file = contrast_file
         self.num = contrast_num
         self.name = contrast_name
-        self.id = NIIRI[str(uuid.uuid4())]
+        if ident is None:
+            self.id = NIIRI[str(uuid.uuid4())]
+        else:
+            self.id = ident
         self.coord_space = coord_space
         self.type = NIDM_CONTRAST_MAP
         self.prov_type = PROV['Entity']

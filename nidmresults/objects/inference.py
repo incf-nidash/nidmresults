@@ -14,6 +14,7 @@ import shutil
 from generic import *
 import uuid
 from math import erf, sqrt
+from pandas import DataFrame
 
 
 class Inference(NIDMObject):
@@ -677,7 +678,7 @@ class Peak(NIDMObject):
     """
 
     def __init__(self, cluster_index, peak_index, equiv_z, stat_num,
-                 *args, **kwargs):
+                 cluster_id=None, p_unc=None, p_fwer=None, *args, **kwargs):
         super(Peak, self).__init__()
         # FIXME: Currently assumes less than 10 clusters per contrast
         # cluster_num = cluster_index
@@ -686,9 +687,12 @@ class Peak(NIDMObject):
         self.id = NIIRI[str(uuid.uuid4())]
         self.num = peak_unique_id
         self.equiv_z = equiv_z
+        self.p_unc = p_unc
+        self.p_fwer = p_fwer
         self.coordinate = Coordinate(str(peak_unique_id), **kwargs)
         self.type = NIDM_PEAK
         self.prov_type = PROV['Entity']
+        self.cluster = cluster_id
 
     def export(self):
         """
@@ -696,13 +700,24 @@ class Peak(NIDMObject):
         """
         self.add_object(self.coordinate)
 
-        norm_cdf_z = (1.0 + erf(self.equiv_z / sqrt(2.0))) / 2.0
+        if self.p_unc is None:
+            norm_cdf_z = (1.0 + erf(self.equiv_z / sqrt(2.0))) / 2.0
+            self.p_unc = 1 - norm_cdf_z
 
         self.add_attributes([
             (PROV['type'], self.type),
             (PROV['label'], "Peak " + str(self.num)),
             (NIDM_EQUIVALENT_ZSTATISTIC, self.equiv_z),
-            (NIDM_P_VALUE_UNCORRECTED, 1 - norm_cdf_z),
+            (NIDM_P_VALUE_UNCORRECTED, self.p_unc),
             (PROV['location'], self.coordinate.id)])
 
         return self.p
+
+    def dataframe(self):
+        """
+        Create a dataframe
+        """
+        df = DataFrame(columns=('peak', 'coordinate', 'z', 'p_fwer'))
+        df.loc[0] = [self.id, self.coordinate.coord_vector, self.equiv_z,
+                     self.p_fwer]
+        return df
