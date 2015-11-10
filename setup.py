@@ -27,5 +27,7 @@ setup(
         "Topic :: Utilities",
         "License :: OSI Approved :: MIT License",
     ],
+    package_data={'': ['prefixes.csv']},
+    include_package_data=True,
     install_requires=requirements,
 )
