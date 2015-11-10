@@ -17,6 +17,7 @@ from nidmresults.objects.modelfitting import *
 from nidmresults.objects.contrast import *
 from nidmresults.objects.inference import *
 import uuid
+import csv
 
 
 class NIDMExporter():
@@ -232,6 +233,16 @@ class NIDMExporter():
 
         return mpe
 
+    def use_prefixes(self, ttl):
+        prefix_file = os.path.join(os.path.dirname(__file__), 'prefixes.csv')
+        with open(prefix_file, 'rb') as csvfile:
+            reader = csv.reader(csvfile)
+            for alphanum_id, prefix, uri in reader:
+                if alphanum_id in ttl:
+                    ttl = "@prefix " + prefix + ": <" + uri + "> .\n" + ttl
+                    ttl = ttl.replace(alphanum_id, prefix)
+        return ttl
+
     def save_prov_to_files(self, showattributes=False):
         """
         Write-out provn serialisation to nidm.provn.
@@ -244,7 +255,12 @@ class NIDMExporter():
         provn_fid.close()
 
         ttl_file = provn_file.replace(".provn", ".ttl")
-        self.g.serialize(destination=ttl_file, format='turtle')
+        ttl_txt = self.g.serialize(format='turtle')
+
+        self.use_prefixes(ttl_txt)
+        with open(ttl_file, 'w') as ttl_fid:
+            ttl_fid.write(ttl_txt)
+
         # ttl_fid = open(ttl_file, 'w');
         # serialization is done in xlm rdf
         # graph = Graph()
