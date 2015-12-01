@@ -240,7 +240,7 @@ class NIDMExporter():
             for alphanum_id, prefix, uri in reader:
                 if alphanum_id in ttl:
                     ttl = "@prefix " + prefix + ": <" + uri + "> .\n" + ttl
-                    ttl = ttl.replace(alphanum_id, prefix)
+                    ttl = ttl.replace(alphanum_id, prefix + ":")
         return ttl
 
     def save_prov_to_files(self, showattributes=False):
@@ -257,7 +257,7 @@ class NIDMExporter():
         ttl_file = provn_file.replace(".provn", ".ttl")
         ttl_txt = self.g.serialize(format='turtle')
 
-        self.use_prefixes(ttl_txt)
+        ttl_txt = self.use_prefixes(ttl_txt)
         with open(ttl_file, 'w') as ttl_fid:
             ttl_fid.write(ttl_txt)
 
