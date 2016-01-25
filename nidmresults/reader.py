@@ -15,6 +15,8 @@ from nidmresults.objects.inference import *
 from pandas import DataFrame
 import pandas as pd
 
+from rdflib.plugins.parsers.notation3 import BadSyntax
+
 
 class NIDMReader():
     """
@@ -22,17 +24,60 @@ class NIDMReader():
     """
 
     def __init__(self, rdf_file, format="turtle"):
-        g = rdflib.Graph()
-        g.parse(rdf_file, format=format)
-        self.g = g
-
         # self.contrast_query()
-        self.peak_query()
+        self.get_statistic_maps(rdf_file, format)
+        # print self.contrasts
+        # self.peak_query()
 
         # for peak in self.peaks:
         #     print self.contrasts[peak.cluster].name
 
-    def peak_query(self):
+    def load_graph(self, rdf_file, format="turtle"):
+        g = rdflib.Graph()
+        try:
+            g.parse(rdf_file, format=format)
+        except BadSyntax:
+            raise self.ParseException(
+                "RDFLib was unable to parse the RDF file.")
+        return g
+
+    def get_statistic_maps(self, rdf_file, format="turtle"):
+        """
+        Read a NIDM-Results document and return a list of Statistic Maps.
+        """
+
+        query = """
+        prefix prov: <http://www.w3.org/ns/prov#>
+        prefix nidm_contrastName: <http://purl.org/nidash/nidm#NIDM_0000085>
+        prefix nidm_StatisticMap: <http://purl.org/nidash/nidm#NIDM_0000076>
+        prefix nidm_statisticType: <http://purl.org/nidash/nidm#NIDM_0000123>
+        prefix nidm_errorDegreesOfFreedom: <http://purl.org/nidash/nidm#NIDM_0\
+000093>
+
+        SELECT ?label ?contrastName ?statType ?statFile ?dof WHERE {
+         ?sid a nidm_StatisticMap: ;
+              nidm_contrastName: ?contrastName ;
+              nidm_statisticType: ?statType ;
+              rdfs:label ?label ;
+              nidm_errorDegreesOfFreedom: ?dof ;
+              prov:atLocation ?statFile .
+        }
+        """
+        g = self.load_graph(rdf_file)
+        sd = g.query(query)
+
+        stat_maps = list()
+        if sd:
+            for label, contrast_name, stat_type, stat_file, dof in sd:
+                contrast_num = None
+                coord_space = None
+                export_dir = None
+                stat_maps.append(StatisticMap(
+                    stat_file, stat_type, contrast_num, contrast_name, dof,
+                    coord_space, export_dir, label))
+        return stat_maps
+
+    def peak_query(self, rdf_file, format="turtle"):
         query = """
         prefix prov: <http://www.w3.org/ns/prov#>
         prefix spm: <http://purl.org/nidash/spm#>
@@ -69,7 +114,8 @@ wasGeneratedBy ?conest .
         }
         ORDER BY ?cluster ?peak
         """
-        sd = self.g.query(query)
+        g = self.load_graph(rdf_file)
+        sd = g.query(query)
 
         peaks_df = pd.DataFrame()
         if sd:
@@ -92,18 +138,18 @@ wasGeneratedBy ?conest .
     #     prefix contrast_estimation: <http://purl.org/nidash/\
     # nidm#NIDM_0000001>
     #     prefix contrast_map: <http://purl.org/nidash/nidm#NIDM_0000002>
-    #     prefix contrast_name: <http://purl.org/nidash/nidm#NIDM_0000085>
-    #     prefix statistic_map: <http://purl.org/nidash/nidm#NIDM_0000076>
-    #     prefix statistic_type: <http://purl.org/nidash/nidm#NIDM_0000123>
+    #     prefix nidm_contrastName: <http://purl.org/nidash/nidm#NIDM_0000085>
+    #     prefix nidm_StatisticMap:: <http://purl.org/nidash/nidm#NIDM_0000076>
+    #     prefix nidm_statisticType: <http://purl.org/nidash/nidm#NIDM_0000123>
 
     #     SELECT ?cid ?contrastName
     #     WHERE {
     #      ?cid a contrast_map: ;
-    #           contrast_name: ?contrastName .
+    #           nidm_contrastName: ?contrastName .
     #      ?cea a contrast_estimation: .
     #      ?cid prov:wasGeneratedBy ?cea .
-    #      ?sid a statistic_map: ;
-    #           statistic_type: ?statType ;
+    #      ?sid a nidm_StatisticMap:: ;
+    #           nidm_statisticType: ?statType ;
     #           prov:atLocation ?statFile .
     #     }
     #     """
