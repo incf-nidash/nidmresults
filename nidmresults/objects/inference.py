@@ -678,7 +678,8 @@ class Peak(NIDMObject):
     """
 
     def __init__(self, cluster_index, peak_index, equiv_z, stat_num,
-                 cluster_id=None, p_unc=None, p_fwer=None, *args, **kwargs):
+                 cluster_id=None, p_unc=None, p_fwer=None, label=None,
+                 *args, **kwargs):
         super(Peak, self).__init__()
         # FIXME: Currently assumes less than 10 clusters per contrast
         # cluster_num = cluster_index
@@ -693,6 +694,10 @@ class Peak(NIDMObject):
         self.type = NIDM_PEAK
         self.prov_type = PROV['Entity']
         self.cluster = cluster_id
+        if label is not None:
+            self.label = label
+        else:
+            self.label = "Peak " + str(self.num)
 
     def export(self):
         """
@@ -706,7 +711,7 @@ class Peak(NIDMObject):
 
         self.add_attributes([
             (PROV['type'], self.type),
-            (PROV['label'], "Peak " + str(self.num)),
+            (PROV['label'], self.label),
             (NIDM_EQUIVALENT_ZSTATISTIC, self.equiv_z),
             (NIDM_P_VALUE_UNCORRECTED, self.p_unc),
             (PROV['location'], self.coordinate.id)])

@@ -34,6 +34,12 @@ class NIDMObject(object):
         self.g = rdflib.Graph()
         self.id = None
 
+    def __str__(self):
+        value = ""
+        if hasattr(self, 'value'):
+            value = ": " + self.value
+        return '"' + self.label + '"' + value
+
     def copy_nifti(self, original_file, new_file):
         shutil.copy(original_file, new_file)
         path, new_filename = os.path.split(new_file)

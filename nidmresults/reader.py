@@ -12,8 +12,6 @@ from nidmresults.objects.constants import *
 from nidmresults.objects.modelfitting import *
 from nidmresults.objects.contrast import *
 from nidmresults.objects.inference import *
-from pandas import DataFrame
-import pandas as pd
 
 from rdflib.plugins.parsers.notation3 import BadSyntax
 
@@ -25,7 +23,7 @@ class NIDMReader():
 
     def __init__(self, rdf_file, format="turtle"):
         # self.contrast_query()
-        self.get_statistic_maps(rdf_file, format)
+        self.get_peaks(rdf_file, format)
         # print self.contrasts
         # self.peak_query()
 
@@ -77,6 +75,50 @@ class NIDMReader():
                     coord_space, export_dir, label))
         return stat_maps
 
+    def get_peaks(self, rdf_file, format="turtle"):
+        """
+        Read a NIDM-Results document and return a list of Peaks.
+        """
+        query = """
+        prefix prov: <http://www.w3.org/ns/prov#>
+        prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+        prefix nidm_pValueUncorrected: <http://purl.org/nidash/nidm#NIDM_00001\
+16>
+        prefix nidm_equivalentZStatistic: <http://purl.org/nidash/nidm#NIDM_00\
+00092>
+        prefix nidm_coordinateVector: <http://purl.org/nidash/nidm#NIDM_000008\
+6>
+        prefix nidm_Coordinate: <http://purl.org/nidash/nidm#NIDM_0000015>
+
+        SELECT DISTINCT ?coord_label ?coord_vector ?z ?peak_label ?p_unc
+        ?peak_id WHERE {
+            ?coord a nidm_Coordinate: ;
+                rdfs:label ?coord_label ;
+                nidm_coordinateVector: ?coord_vector .
+            ?peak prov:atLocation ?coord ;
+                rdfs:label ?peak_label ;
+                nidm_equivalentZStatistic: ?z ;
+                nidm_pValueUncorrected: ?pvalue_uncorrected .
+        }
+        ORDER BY ?peak_label
+        """
+        g = self.load_graph(rdf_file)
+        sd = g.query(query)
+
+        peaks = list()
+        if sd:
+            for coord_label, coord_vector, z, peak_label, p_unc, peak_id in sd:
+                cluster_index = None
+                stat_num = None
+                cluster_id = None
+                peak = Peak(cluster_index, peak_id, z, stat_num, cluster_id,
+                            coord_vector=coord_vector, p_unc=p_unc,
+                            label=peak_label)
+                peaks.append(peak)
+        print peaks
+        return peaks
+
     def peak_query(self, rdf_file, format="turtle"):
         query = """
         prefix prov: <http://www.w3.org/ns/prov#>
@@ -117,16 +159,12 @@ wasGeneratedBy ?conest .
         g = self.load_graph(rdf_file)
         sd = g.query(query)
 
-        peaks_df = pd.DataFrame()
+        peaks = list()
         if sd:
             for peak_id, xyz, cluster, zstat, pfwer, conname in sd:
                 peak = Peak(None, peak_id, zstat, 1, cluster_id=cluster,
                             coord_vector=xyz, p_fwer=pfwer)
-                peaks_df = peaks_df.append(
-                    pd.concat([peak.dataframe(),
-                               DataFrame({'conname': [conname]})], axis=1))
-
-        print peaks_df
+                peaks.append(peak)
         return peaks_df
 
     #     # print pd.concat(peaks_df)
