@@ -22,24 +22,29 @@ class NIDMReader():
     """
 
     def __init__(self, rdf_file, format="turtle"):
+        self.rdf_file = rdf_file
+        self.format = format
+        self.graph = self.load_graph()
+
         # self.contrast_query()
-        self.get_peaks(rdf_file, format)
+        self.peaks = self.get_peaks()
+        self.statistic_maps = self.get_statistic_maps()
         # print self.contrasts
         # self.peak_query()
 
         # for peak in self.peaks:
         #     print self.contrasts[peak.cluster].name
 
-    def load_graph(self, rdf_file, format="turtle"):
+    def load_graph(self):
         g = rdflib.Graph()
         try:
-            g.parse(rdf_file, format=format)
+            g.parse(self.rdf_file, format=self.format)
         except BadSyntax:
             raise self.ParseException(
                 "RDFLib was unable to parse the RDF file.")
         return g
 
-    def get_statistic_maps(self, rdf_file, format="turtle"):
+    def get_statistic_maps(self):
         """
         Read a NIDM-Results document and return a list of Statistic Maps.
         """
@@ -61,8 +66,7 @@ class NIDMReader():
               prov:atLocation ?statFile .
         }
         """
-        g = self.load_graph(rdf_file)
-        sd = g.query(query)
+        sd = self.graph.query(query)
 
         stat_maps = list()
         if sd:
@@ -75,7 +79,7 @@ class NIDMReader():
                     coord_space, export_dir, label))
         return stat_maps
 
-    def get_peaks(self, rdf_file, format="turtle"):
+    def get_peaks(self):
         """
         Read a NIDM-Results document and return a list of Peaks.
         """
@@ -99,12 +103,11 @@ class NIDMReader():
             ?peak prov:atLocation ?coord ;
                 rdfs:label ?peak_label ;
                 nidm_equivalentZStatistic: ?z ;
-                nidm_pValueUncorrected: ?pvalue_uncorrected .
+                nidm_pValueUncorrected: ?p_unc .
         }
         ORDER BY ?peak_label
         """
-        g = self.load_graph(rdf_file)
-        sd = g.query(query)
+        sd = self.graph.query(query)
 
         peaks = list()
         if sd:
@@ -112,14 +115,14 @@ class NIDMReader():
                 cluster_index = None
                 stat_num = None
                 cluster_id = None
-                peak = Peak(cluster_index, peak_id, z, stat_num, cluster_id,
-                            coord_vector=coord_vector, p_unc=p_unc,
-                            label=peak_label)
+                peak = Peak(cluster_index, peak_id, float(z), stat_num,
+                            cluster_id,
+                            coord_vector=coord_vector, p_unc=float(p_unc),
+                            label=peak_label, coord_label=coord_label)
                 peaks.append(peak)
-        print peaks
         return peaks
 
-    def peak_query(self, rdf_file, format="turtle"):
+    def peak_query(self):
         query = """
         prefix prov: <http://www.w3.org/ns/prov#>
         prefix spm: <http://purl.org/nidash/spm#>
@@ -156,8 +159,7 @@ wasGeneratedBy ?conest .
         }
         ORDER BY ?cluster ?peak
         """
-        g = self.load_graph(rdf_file)
-        sd = g.query(query)
+        sd = self.graph.query(query)
 
         peaks = list()
         if sd:

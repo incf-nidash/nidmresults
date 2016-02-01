@@ -327,8 +327,7 @@ class StatisticMap(NIDMObject):
                 self.label = self.stat_type + '-' + self.label
 
     def __str__(self):
-        return '"' + self.label + '"' + self.file + " (" + \
-            str(self.stat_type) + ")"
+        return '%s\t%s' % (self.label, self.file)
 
     def export(self):
         """

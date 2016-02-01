@@ -629,7 +629,8 @@ class Coordinate(NIDMObject):
     """
 
     def __init__(self, label_id, coord_vector=None, coord_vector_std=None,
-                 x=None, y=None, z=None, x_std=None, y_std=None, z_std=None):
+                 x=None, y=None, z=None, x_std=None, y_std=None, z_std=None,
+                 label=None):
         super(Coordinate, self).__init__()
         # FIXME: coordiinate_id should not be determined externally
         self.id = NIIRI[str(uuid.uuid4())]
@@ -647,6 +648,13 @@ class Coordinate(NIDMObject):
             self.coord_vector_std = coord_vector_std
         self.type = NIDM_COORDINATE
         self.prov_type = PROV['Entity']
+        if label is not None:
+            self.label = label
+        else:
+            self.label = "Coordinate " + self.label_id
+
+    def __str__(self):
+        return '%s\t%s' % (self.label, self.coord_vector)
 
     def export(self):
         """
@@ -656,7 +664,7 @@ class Coordinate(NIDMObject):
         # duplicate prov:type attribute
         type_label = [  # (PROV['type'],PROV['Location']),
             (PROV['type'], NIDM_COORDINATE),
-            (PROV['label'], "Coordinate " + self.label_id)]
+            (PROV['label'], self.label)]
 
         coordinate = {
             NIDM_COORDINATE_VECTOR_IN_VOXELS: self.coord_vector,
@@ -679,7 +687,7 @@ class Peak(NIDMObject):
 
     def __init__(self, cluster_index, peak_index, equiv_z, stat_num,
                  cluster_id=None, p_unc=None, p_fwer=None, label=None,
-                 *args, **kwargs):
+                 coord_label=None, *args, **kwargs):
         super(Peak, self).__init__()
         # FIXME: Currently assumes less than 10 clusters per contrast
         # cluster_num = cluster_index
@@ -690,7 +698,8 @@ class Peak(NIDMObject):
         self.equiv_z = equiv_z
         self.p_unc = p_unc
         self.p_fwer = p_fwer
-        self.coordinate = Coordinate(str(peak_unique_id), **kwargs)
+        self.coordinate = Coordinate(
+            str(peak_unique_id), label=coord_label, **kwargs)
         self.type = NIDM_PEAK
         self.prov_type = PROV['Entity']
         self.cluster = cluster_id
@@ -698,6 +707,10 @@ class Peak(NIDMObject):
             self.label = label
         else:
             self.label = "Peak " + str(self.num)
+
+    def __str__(self):
+        return '%s \tz=%.2f \tp=%.2e (unc.) \t%s' % (
+            self.label, self.equiv_z, self.p_unc, str(self.coordinate))
 
     def export(self):
         """

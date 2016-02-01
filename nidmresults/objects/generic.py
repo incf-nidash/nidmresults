@@ -40,6 +40,10 @@ class NIDMObject(object):
             value = ": " + self.value
         return '"' + self.label + '"' + value
 
+    def __repr__(self):
+        return '<"' + self.label + '" ' + \
+               str(self.id).replace("niiri:", "")[0:8] + '>'
+
     def copy_nifti(self, original_file, new_file):
         shutil.copy(original_file, new_file)
         path, new_filename = os.path.split(new_file)

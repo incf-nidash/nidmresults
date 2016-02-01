@@ -20,10 +20,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     rdf_file = args.rdf_file
-    print rdf_file
     if not os.path.isfile(rdf_file):
         raise Exception("Unknown file: "+str(rdf_file))
 
     nidmreader = NIDMReader(rdf_file=rdf_file)
-    # nidmreader.parse()
-    # export_dir = nidmreader.export()
+
+    for peak in nidmreader.peaks:
+        print peak
+
+    for stat_map in nidmreader.statistic_maps:
+        print stat_map
