@@ -37,41 +37,41 @@ class ModelFitting(NIDMObject):
         self.mask_map = mask_map
         self.grand_mean_map = grand_mean_map
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
         # Design Matrix
         self.activity.used(self.design_matrix)
-        self.add_object(self.design_matrix)
+        self.add_object(self.design_matrix, nidm_version)
 
         # Data
         self.activity.used(self.data)
-        self.add_object(self.data)
+        self.add_object(self.data, nidm_version)
 
         # Error Model
         self.activity.used(self.error_model)
-        self.add_object(self.error_model)
+        self.add_object(self.error_model, nidm_version)
 
         # Parameter Estimate Maps
         for param_estimate in self.param_estimates:
             param_estimate.wasGeneratedBy(self.activity)
-            self.add_object(param_estimate)
+            self.add_object(param_estimate, nidm_version)
 
         # Residual Mean Squares Map
         self.rms_map.wasGeneratedBy(self.activity)
-        self.add_object(self.rms_map)
+        self.add_object(self.rms_map, nidm_version)
 
         # Mask
         self.mask_map.wasGeneratedBy(self.activity)
-        self.add_object(self.mask_map)
+        self.add_object(self.mask_map, nidm_version)
 
         # Grand Mean map
         self.grand_mean_map.wasGeneratedBy(self.activity)
-        self.add_object(self.grand_mean_map)
+        self.add_object(self.grand_mean_map, nidm_version)
 
         # Model Parameters Estimation activity
-        self.add_object(self.activity)
+        self.add_object(self.activity, nidm_version)
 
         return self.p
 
@@ -95,17 +95,22 @@ class DesignMatrix(NIDMObject):
         self.hrf_model = hrf_model
         self.drift_model = drift_model
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
         # *** Export visualisation of the design matrix
-        self.add_object(self.image)
+        self.add_object(self.image, nidm_version)
 
         # Create cvs file containing design matrix
         design_matrix_csv = 'DesignMatrix.csv'
         np.savetxt(os.path.join(self.export_dir, design_matrix_csv),
                    np.asarray(self.matrix), delimiter=",")
+
+        if nidm_version['num'] in ["1.0.0", "1.1.0"]:
+            csv_location = Identifier("file://./" + design_matrix_csv)
+        else:
+            csv_location = Identifier(design_matrix_csv)
 
         attributes = [(PROV['type'], self.type),
                       (PROV['label'], "Design Matrix"),
@@ -113,8 +118,7 @@ class DesignMatrix(NIDMObject):
                       (DCT['format'], "text/csv"),
                       (NFO['fileName'], "DesignMatrix.csv"),
                       (DC['description'], self.image.id),
-                      (PROV['location'],
-                       Identifier("file://./" + design_matrix_csv))]
+                      (PROV['location'], csv_location)]
 
         if self.hrf_model is not None:
 
@@ -125,7 +129,7 @@ class DesignMatrix(NIDMObject):
 
             # Export drift model
             attributes.append((NIDM_HAS_HRF_BASIS, self.hrf_model))
-            self.add_object(self.drift_model)
+            self.add_object(self.drift_model, nidm_version)
             attributes.append((NIDM_HAS_DRIFT_MODEL, self.drift_model.id))
 
         # Create "design matrix" entity
@@ -148,7 +152,7 @@ class DriftModel(NIDMObject):
         self.type = drift_type
         self.prov_type = PROV['Entity']
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
@@ -179,7 +183,7 @@ class Data(NIDMObject):
         self.type = NIDM_DATA
         self.prov_type = PROV['Entity']
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
@@ -213,18 +217,25 @@ class ErrorModel(NIDMObject):
         self.type = NIDM_ERROR_MODEL
         self.prov_type = PROV['Entity']
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
-        # Create "Error Model" entity
-        self.add_attributes((
+        atts = (
             (PROV['type'], NIDM_ERROR_MODEL),
             (NIDM_HAS_ERROR_DISTRIBUTION, self.error_distribution),
             (NIDM_ERROR_VARIANCE_HOMOGENEOUS, self.variance_homo),
             (NIDM_VARIANCE_SPATIAL_MODEL, self.variance_spatial),
-            (NIDM_HAS_ERROR_DEPENDENCE, self.dependance),
-            (NIDM_DEPENDENCE_SPATIAL_MODEL, self.dependance_spatial)))
+            (NIDM_HAS_ERROR_DEPENDENCE, self.dependance))
+
+        # If the error covariance is independent then there is no associated
+        # spatial model
+        if self.dependance_spatial is not None:
+            atts = atts + (
+                ((NIDM_DEPENDENCE_SPATIAL_MODEL, self.dependance_spatial),))
+
+        # Create "Error Model" entity
+        self.add_attributes(atts)
 
         return self.p
 
@@ -243,7 +254,7 @@ class ModelParametersEstimation(NIDMObject):
         self.type = NIDM_MODEL_PARAMETERS_ESTIMATION
         self.prov_type = PROV['Activity']
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
@@ -273,11 +284,11 @@ class ParameterEstimateMap(NIDMObject):
         self.prov_type = PROV['Entity']
 
     # Generate prov for contrast map
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
-        self.p.update(self.coord_space.export())
+        self.p.update(self.coord_space.export(nidm_version))
 
         # Copy parameter estimate map in export directory
         # shutil.copy(pe_file, self.export_dir)
@@ -312,12 +323,12 @@ class ResidualMeanSquares(NIDMObject):
         self.type = NIDM_RESIDUAL_MEAN_SQUARES_MAP
         self.prov_type = PROV['Entity']
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
         # Create coordinate space export
-        self.p.update(self.coord_space.export())
+        self.p.update(self.coord_space.export(nidm_version))
 
         # Copy residuals map in export directory
         residuals_file = os.path.join(
@@ -354,12 +365,12 @@ class MaskMap(NIDMObject):
         self.type = NIDM_MASK_MAP
         self.prov_type = PROV['Entity']
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
         # Create coordinate space export
-        self.p.update(self.coord_space.export())
+        self.p.update(self.coord_space.export(nidm_version))
 
         # Create "Mask map" entity
         original_mask_file = self.file
@@ -397,12 +408,12 @@ class GrandMeanMap(NIDMObject):
         self.type = NIDM_GRAND_MEAN_MAP
         self.prov_type = PROV['Entity']
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
         # Coordinate space entity
-        self.p.update(self.coord_space.export())
+        self.p.update(self.coord_space.export(nidm_version))
 
         # Grand Mean Map entity
         grand_mean_file = os.path.join(self.export_dir, 'GrandMean.nii.gz')

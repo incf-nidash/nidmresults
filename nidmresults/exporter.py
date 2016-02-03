@@ -28,7 +28,15 @@ class NIDMExporter():
     export.
     """
 
-    def __init__(self):
+    def __init__(self, version):
+        if version == "dev":
+            self.version = {'major': 10000, 'minor': 0, 'revision': 0,
+                            'num': version}
+        else:
+            major, minor, revision = version.split(".")
+            self.version = {'major': int(major), 'minor': int(minor),
+                            'revision': int(revision), 'num': version}
+
         # Initialise prov document
         self.doc = ProvDocument()
         self._add_namespaces()
@@ -39,7 +47,8 @@ class NIDMExporter():
         self.g.bind("niiri", "http://iri.nidash.org/")
         self.g.bind(
             "crypto",
-            "http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions#")
+            "http://id.loc.gov/vocabulary/preservation/cryptographicHashFuncti\
+ons#")
         self.g.bind("fsl", "http://purl.org/nidash/fsl#")
         self.g.bind("spm", "http://purl.org/nidash/spm#")
         self.g.bind("dct", "http://purl.org/dc/terms/")
@@ -88,7 +97,7 @@ class NIDMExporter():
         """
         Add a NIDMObject to a NIDM-Results export.
         """
-        nidm_object.export()
+        nidm_object.export(self.version)
         # ProvDocument: add object to the bundle
         self.bundle.update(nidm_object.p)
         # RDF document: add object to the main graph
@@ -185,7 +194,7 @@ class NIDMExporter():
                         other_attributes=((PROV['type'], PROV['Bundle'],),
                                           (PROV['label'], "NIDM-Results"),
                                           (PROV['type'], NIDM_RESULTS),
-                                          (NIDM_VERSION, version))
+                                          (NIDM_VERSION, version['num']))
                         )
 
         ctime = datetime.datetime.now().time()
@@ -204,7 +213,7 @@ class NIDMExporter():
         self.g.add((
             bundle_uri,
             rdflib.URIRef(NIDM_VERSION.uri),
-            rdflib.Literal(version, datatype=XSD.string)))
+            rdflib.Literal(version['num'], datatype=XSD.string)))
         # Qualified generation
         bnode = rdflib.BNode()
         self.g.add((
@@ -221,7 +230,7 @@ class NIDMExporter():
         Infer model estimation method from the 'error_model'. Return an object
         of type ModelParametersEstimation.
         """
-        if error_model.dependance == INDEPEDENT_CORR:
+        if error_model.dependance == NIDM_INDEPEDENT_ERROR:
             if error_model.variance_homo:
                 estimation_method = STATO_OLS
             else:

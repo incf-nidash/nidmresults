@@ -49,7 +49,18 @@ class NIDMObject(object):
         path, new_filename = os.path.split(new_file)
         path, original_filename = os.path.split(original_file)
 
-        return original_filename, new_filename
+        return str(original_filename), str(new_filename)
+
+    def copy_file(self, new_name, nidm_version):
+        new_file = os.path.join(self.export_dir, new_name)
+        orig_filename, filename = self.copy_nifti(self.file, new_file)
+
+        if nidm_version['num'] in ["1.0.0", "1.1.0"]:
+            location = Identifier("file://./" + filename)
+        else:
+            location = Identifier(filename)
+
+        return location, filename, orig_filename
 
     def get_sha_sum(self, nifti_file):
         nifti_img = nib.load(nifti_file)
@@ -100,11 +111,9 @@ class NIDMObject(object):
 
         self.g.add((rdflib.URIRef(s.uri), p, o))
 
-    def add_object(self, nidm_object, version=None):
-        if version is not None:
-            nidm_object.export(version)
-        else:
-            nidm_object.export()
+    def add_object(self, nidm_object, nidm_version):
+        nidm_object.export(nidm_version)
+
         # Prov graph (=> provn)
         self.p.update(nidm_object.p)
         # RDF graph (=> turtle)
@@ -204,7 +213,7 @@ class CoordinateSpace(NIDMObject):
         self.voxel_size = '[ %s ]' % ', '.join(
             map(str, thresImgHdr['pixdim'][1:(self.number_of_dimensions + 1)]))
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
@@ -237,18 +246,18 @@ class Image(NIDMObject):
         self.file = image_file
         self.id = NIIRI[str(uuid.uuid4())]
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entity.
         """
         if self.file is not None:
             # FIXME: replace by another name
-            new_file = os.path.join(self.export_dir, "DesignMatrix.png")
-            orig_filename, filename = self.copy_nifti(self.file, new_file)
+            location, filename, orig_filename = self.copy_file(
+                "DesignMatrix.png", nidm_version)
 
             self.add_attributes([
                 (PROV['type'], self.type),
-                (PROV['atLocation'], Identifier("file://./" + filename)),
+                (PROV['atLocation'], location),
                 (NFO['fileName'], orig_filename),
                 (NFO['fileName'], filename),
                 (DCT['format'], "image/png"),

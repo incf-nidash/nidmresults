@@ -25,17 +25,10 @@ class Inference(NIDMObject):
     """
 
     def __init__(
-            self, version, inference, height_thresh, extent_thresh,
+            self, inference, height_thresh, extent_thresh,
             peak_criteria, cluster_criteria, disp_mask, excursion_set,
             clusters, search_space, software_id):
         super(Inference, self).__init__()
-        if version == "dev":
-            self.version = {'major': 10000, 'minor': 0, 'revision': 0,
-                            'num': version}
-        else:
-            major, minor, revision = version.split(".")
-            self.version = {'major': int(major), 'minor': int(minor),
-                            'revision': int(revision), 'num': version}
         self.excursion_set = excursion_set
         self.inference_act = inference
         self.height_thresh = height_thresh
@@ -47,48 +40,48 @@ class Inference(NIDMObject):
         self.disp_mask = disp_mask
         self.search_space = search_space
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
         # Excursion set
         self.excursion_set.wasGeneratedBy(self.inference_act)
-        self.add_object(self.excursion_set)
+        self.add_object(self.excursion_set, nidm_version)
 
         # Height threshold
-        self.add_object(self.height_thresh, self.version)
+        self.add_object(self.height_thresh, nidm_version)
 
         # Extent threshold
-        self.add_object(self.extent_thresh, self.version)
+        self.add_object(self.extent_thresh, nidm_version)
 
         if self.clusters:
             # Peak Definition
             self.inference_act.used(self.peak_criteria)
-            self.add_object(self.peak_criteria)
+            self.add_object(self.peak_criteria, nidm_version)
 
             if self.disp_mask is not None:
                 # Display Mask
                 self.inference_act.used(self.disp_mask)
-                self.add_object(self.disp_mask)
+                self.add_object(self.disp_mask, nidm_version)
 
             # Search Space
             self.search_space.wasGeneratedBy(self.inference_act)
-            self.add_object(self.search_space, self.version)
+            self.add_object(self.search_space, nidm_version)
 
             # Cluster Definition
             self.inference_act.used(self.cluster_criteria)
-            self.add_object(self.cluster_criteria)
+            self.add_object(self.cluster_criteria, nidm_version)
 
             # Clusters and peaks
             for cluster in self.clusters:
                 cluster.wasDerivedFrom(self.excursion_set)
-                self.add_object(cluster)
+                self.add_object(cluster, nidm_version)
 
         # Inference activity
         self.inference_act.wasAssociatedWith(self.software_id)
         self.inference_act.used(self.height_thresh)
         self.inference_act.used(self.extent_thresh)
-        self.add_object(self.inference_act)
+        self.add_object(self.inference_act, nidm_version)
 
         # self.p.wasGeneratedBy(NIIRI['search_space_id'],
             # self.inference_act.id)
@@ -112,7 +105,7 @@ class InferenceActivity(NIDMObject):
         self.type = NIDM_INFERENCE
         self.prov_type = PROV['Activity']
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
@@ -147,12 +140,12 @@ class ExcursionSet(NIDMObject):
 
         self.coord_space = coord_space
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
-        self.add_object(self.coord_space)
-        self.add_object(self.visu)
+        self.add_object(self.coord_space, nidm_version)
+        self.add_object(self.visu, nidm_version)
 
         # Copy "Excursion set map" in export directory
         exc_set_orig_file = self.file
@@ -193,7 +186,7 @@ class Visualisation(NIDMObject):
         self.type = DCTYPE['Image']
         self.prov_type = PROV['Entity']
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
@@ -383,16 +376,16 @@ class Cluster(NIDMObject):
         self.type = NIDM_SIGNIFICANT_CLUSTER
         self.prov_type = PROV['Entity']
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
         for peak in self.peaks:
             peak.wasDerivedFrom(self)
-            self.add_object(peak)
+            self.add_object(peak, nidm_version)
 
         self.cog.wasDerivedFrom(self)
-        self.add_object(self.cog)
+        self.add_object(self.cog, nidm_version)
 
         # FIXME deal with multiple contrasts
         self.add_attributes((
@@ -419,12 +412,12 @@ class DisplayMaskMap(NIDMObject):
         self.type = NIDM_DISPLAY_MASK_MAP
         self.prov_type = PROV['Entity']
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
         # Create coordinate space entity
-        self.add_object(self.coord_space)
+        self.add_object(self.coord_space, nidm_version)
 
         # Create "Display Mask Map" entity
         disp_mask_file = os.path.join(self.export_dir, 'DisplayMask.nii.gz')
@@ -459,7 +452,7 @@ class PeakCriteria(NIDMObject):
         self.type = NIDM_PEAK_DEFINITION_CRITERIA
         self.prov_type = PROV['Entity']
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
@@ -490,7 +483,7 @@ class ClusterCriteria(NIDMObject):
         self.type = NIDM_CLUSTER_DEFINITION_CRITERIA
         self.prov_type = PROV['Entity']
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
@@ -536,11 +529,11 @@ class CenterOfGravity(NIDMObject):
         self.type = NIDM_CLUSTER_CENTER_OF_GRAVITY
         self.prov_type = PROV['Entity']
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
-        self.add_object(self.coordinate)
+        self.add_object(self.coordinate, nidm_version)
 
         label = "Center of gravity " + str(self.cluster_num)
 
@@ -582,7 +575,7 @@ class SearchSpace(NIDMObject):
         """
         Create prov entities and activities.
         """
-        self.add_object(self.coord_space)
+        self.add_object(self.coord_space, version)
 
         # Copy "Mask map" in export directory
         search_space_orig_file = self.file
@@ -656,7 +649,7 @@ class Coordinate(NIDMObject):
     def __str__(self):
         return '%s\t%s' % (self.label, self.coord_vector)
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
@@ -712,11 +705,11 @@ class Peak(NIDMObject):
         return '%s \tz=%.2f \tp=%.2e (unc.) \t%s' % (
             self.label, self.equiv_z, self.p_unc, str(self.coordinate))
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
-        self.add_object(self.coordinate)
+        self.add_object(self.coordinate, nidm_version)
 
         if self.p_unc is None:
             norm_cdf_z = (1.0 + erf(self.equiv_z / sqrt(2.0))) / 2.0
