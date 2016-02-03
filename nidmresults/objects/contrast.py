@@ -115,12 +115,15 @@ class ContrastMap(NIDMObject):
     """
 
     def __init__(self, contrast_file, contrast_num, contrast_name,
-                 coord_space, export_dir):
+                 coord_space, export_dir, ident=None):
         super(ContrastMap, self).__init__(export_dir)
         self.file = contrast_file
         self.num = contrast_num
         self.name = contrast_name
-        self.id = NIIRI[str(uuid.uuid4())]
+        if ident is None:
+            self.id = NIIRI[str(uuid.uuid4())]
+        else:
+            self.id = ident
         self.coord_space = coord_space
         self.type = NIDM_CONTRAST_MAP
         self.prov_type = PROV['Entity']
@@ -305,7 +308,7 @@ class StatisticMap(NIDMObject):
     """
 
     def __init__(self, stat_file, stat_type, contrast_num, contrast_name, dof,
-                 coord_space, export_dir):
+                 coord_space, export_dir, label):
         super(StatisticMap, self).__init__(export_dir)
         self.num = contrast_num
         self.name = contrast_name
@@ -316,6 +319,15 @@ class StatisticMap(NIDMObject):
         self.dof = dof
         self.type = NIDM_STATISTIC_MAP
         self.prov_type = PROV['Entity']
+        if label is not None:
+            self.label = label
+        else:
+            self.label = "Statistic Map: " + self.name
+            if self.stat_type == 'Z':
+                self.label = self.stat_type + '-' + self.label
+
+    def __str__(self):
+        return '%s\t%s' % (self.label, self.file)
 
     def export(self):
         """
@@ -330,10 +342,6 @@ class StatisticMap(NIDMObject):
         stat_orig_filename, stat_filename = self.copy_nifti(
             self.file, stat_file)
 
-        label = "Statistic Map: " + self.name
-        if self.stat_type == 'Z':
-            label = self.stat_type + '-' + label
-
         if self.stat_type.lower() == "t":
             stat = STATO_TSTATISTIC
         elif self.stat_type.lower() == "z":
@@ -343,7 +351,7 @@ class StatisticMap(NIDMObject):
 
         attributes = [(PROV['type'], NIDM_STATISTIC_MAP),
                       (DCT['format'], "image/nifti"),
-                      (PROV['label'], label),
+                      (PROV['label'], self.label),
                       (PROV['location'], Identifier(
                           "file://./" + stat_filename)),
                       (NIDM_STATISTIC_TYPE, stat),

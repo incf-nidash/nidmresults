@@ -14,6 +14,7 @@ import shutil
 from generic import *
 import uuid
 from math import erf, sqrt
+from pandas import DataFrame
 
 
 class Inference(NIDMObject):
@@ -628,7 +629,8 @@ class Coordinate(NIDMObject):
     """
 
     def __init__(self, label_id, coord_vector=None, coord_vector_std=None,
-                 x=None, y=None, z=None, x_std=None, y_std=None, z_std=None):
+                 x=None, y=None, z=None, x_std=None, y_std=None, z_std=None,
+                 label=None):
         super(Coordinate, self).__init__()
         # FIXME: coordiinate_id should not be determined externally
         self.id = NIIRI[str(uuid.uuid4())]
@@ -646,6 +648,13 @@ class Coordinate(NIDMObject):
             self.coord_vector_std = coord_vector_std
         self.type = NIDM_COORDINATE
         self.prov_type = PROV['Entity']
+        if label is not None:
+            self.label = label
+        else:
+            self.label = "Coordinate " + self.label_id
+
+    def __str__(self):
+        return '%s\t%s' % (self.label, self.coord_vector)
 
     def export(self):
         """
@@ -655,7 +664,7 @@ class Coordinate(NIDMObject):
         # duplicate prov:type attribute
         type_label = [  # (PROV['type'],PROV['Location']),
             (PROV['type'], NIDM_COORDINATE),
-            (PROV['label'], "Coordinate " + self.label_id)]
+            (PROV['label'], self.label)]
 
         coordinate = {
             NIDM_COORDINATE_VECTOR_IN_VOXELS: self.coord_vector,
@@ -677,7 +686,8 @@ class Peak(NIDMObject):
     """
 
     def __init__(self, cluster_index, peak_index, equiv_z, stat_num,
-                 *args, **kwargs):
+                 cluster_id=None, p_unc=None, p_fwer=None, label=None,
+                 coord_label=None, *args, **kwargs):
         super(Peak, self).__init__()
         # FIXME: Currently assumes less than 10 clusters per contrast
         # cluster_num = cluster_index
@@ -686,9 +696,21 @@ class Peak(NIDMObject):
         self.id = NIIRI[str(uuid.uuid4())]
         self.num = peak_unique_id
         self.equiv_z = equiv_z
-        self.coordinate = Coordinate(str(peak_unique_id), **kwargs)
+        self.p_unc = p_unc
+        self.p_fwer = p_fwer
+        self.coordinate = Coordinate(
+            str(peak_unique_id), label=coord_label, **kwargs)
         self.type = NIDM_PEAK
         self.prov_type = PROV['Entity']
+        self.cluster = cluster_id
+        if label is not None:
+            self.label = label
+        else:
+            self.label = "Peak " + str(self.num)
+
+    def __str__(self):
+        return '%s \tz=%.2f \tp=%.2e (unc.) \t%s' % (
+            self.label, self.equiv_z, self.p_unc, str(self.coordinate))
 
     def export(self):
         """
@@ -696,13 +718,24 @@ class Peak(NIDMObject):
         """
         self.add_object(self.coordinate)
 
-        norm_cdf_z = (1.0 + erf(self.equiv_z / sqrt(2.0))) / 2.0
+        if self.p_unc is None:
+            norm_cdf_z = (1.0 + erf(self.equiv_z / sqrt(2.0))) / 2.0
+            self.p_unc = 1 - norm_cdf_z
 
         self.add_attributes([
             (PROV['type'], self.type),
-            (PROV['label'], "Peak " + str(self.num)),
+            (PROV['label'], self.label),
             (NIDM_EQUIVALENT_ZSTATISTIC, self.equiv_z),
-            (NIDM_P_VALUE_UNCORRECTED, 1 - norm_cdf_z),
+            (NIDM_P_VALUE_UNCORRECTED, self.p_unc),
             (PROV['location'], self.coordinate.id)])
 
         return self.p
+
+    def dataframe(self):
+        """
+        Create a dataframe
+        """
+        df = DataFrame(columns=('peak', 'coordinate', 'z', 'p_fwer'))
+        df.loc[0] = [self.id, self.coordinate.coord_vector, self.equiv_z,
+                     self.p_fwer]
+        return df
