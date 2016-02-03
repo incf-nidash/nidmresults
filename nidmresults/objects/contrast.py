@@ -308,7 +308,7 @@ class StatisticMap(NIDMObject):
     """
 
     def __init__(self, stat_file, stat_type, contrast_num, contrast_name, dof,
-                 coord_space, export_dir, label):
+                 coord_space, export_dir, label=None):
         super(StatisticMap, self).__init__(export_dir)
         self.num = contrast_num
         self.name = contrast_name
