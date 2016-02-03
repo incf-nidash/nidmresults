@@ -602,12 +602,13 @@ class SearchSpace(NIDMObject):
             (NIDM_NOISE_ROUGHNESS_IN_VOXELS, self.dlh))
 
         # Noise FWHM was introduced in NIDM-Results 1.1.0
-        if (version['major'] > 1) or \
-           (version['major'] >= 1 and
-                (version['minor'] > 0 or version['revision'] > 0)):
-            atts = atts + (
-                (NIDM_NOISE_FWHM_IN_VOXELS, self.noise_fwhm_in_voxels),
-                (NIDM_NOISE_FWHM_IN_UNITS, self.noise_fwhm_in_units))
+        if self.noise_fwhm_in_voxels is not None:
+            if (version['major'] > 1) or \
+               (version['major'] >= 1 and
+                    (version['minor'] > 0 or version['revision'] > 0)):
+                atts = atts + (
+                    (NIDM_NOISE_FWHM_IN_VOXELS, self.noise_fwhm_in_voxels),
+                    (NIDM_NOISE_FWHM_IN_UNITS, self.noise_fwhm_in_units))
 
         # Create "Search Space Mask map" entity
         self.add_attributes(atts)
