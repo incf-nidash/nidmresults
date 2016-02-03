@@ -14,7 +14,6 @@ import shutil
 from generic import *
 import uuid
 from math import erf, sqrt
-from pandas import DataFrame
 
 
 class Inference(NIDMObject):
@@ -728,12 +727,3 @@ class Peak(NIDMObject):
             (PROV['location'], self.coordinate.id)])
 
         return self.p
-
-    def dataframe(self):
-        """
-        Create a dataframe
-        """
-        df = DataFrame(columns=('peak', 'coordinate', 'z', 'p_fwer'))
-        df.loc[0] = [self.id, self.coordinate.coord_vector, self.equiv_z,
-                     self.p_fwer]
-        return df
