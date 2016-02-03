@@ -54,15 +54,16 @@ class Inference(NIDMObject):
         # Extent threshold
         self.add_object(self.extent_thresh, nidm_version)
 
+        # Display Mask (potentially more than 1)
+        if self.disp_mask:
+            for mask in self.disp_mask:
+                self.inference_act.used(mask)
+                self.add_object(mask, nidm_version)
+
         if self.clusters:
             # Peak Definition
             self.inference_act.used(self.peak_criteria)
             self.add_object(self.peak_criteria, nidm_version)
-
-            if self.disp_mask is not None:
-                # Display Mask
-                self.inference_act.used(self.disp_mask)
-                self.add_object(self.disp_mask, nidm_version)
 
             # Search Space
             self.search_space.wasGeneratedBy(self.inference_act)
@@ -403,14 +404,16 @@ class DisplayMaskMap(NIDMObject):
     """
     Object representing a DisplayMaskMap entity.
     """
-
-    def __init__(self, contrast_num, filename, coord_space, export_dir):
+    def __init__(self, contrast_num, filename, mask_num, coord_space,
+                 export_dir):
         super(DisplayMaskMap, self).__init__(export_dir)
         self.id = NIIRI[str(uuid.uuid4())]
         self.filename = filename
         self.coord_space = coord_space
         self.type = NIDM_DISPLAY_MASK_MAP
         self.prov_type = PROV['Entity']
+        self.label = "Display Mask Map " + str(mask_num)
+        self.mask_num = mask_num
 
     def export(self, nidm_version):
         """
@@ -420,13 +423,14 @@ class DisplayMaskMap(NIDMObject):
         self.add_object(self.coord_space, nidm_version)
 
         # Create "Display Mask Map" entity
-        disp_mask_file = os.path.join(self.export_dir, 'DisplayMask.nii.gz')
+        disp_mask_file = os.path.join(
+            self.export_dir, 'DisplayMask' + str(self.mask_num) + '.nii.gz')
         disp_mask_orig_filename, disp_mask_filename = self.copy_nifti(
             self.filename, disp_mask_file)
 
         self.add_attributes((
             (PROV['type'], self.type),
-            (PROV['label'], "Display Mask Map"),
+            (PROV['label'], self.label),
             (DCT['format'], "image/nifti"),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
             (NFO['fileName'], disp_mask_orig_filename),
