@@ -7,10 +7,7 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>
 @copyright: University of Warwick 2013-2014
 """
-from prov.model import Identifier
-import os
 from constants import *
-import shutil
 from generic import *
 import uuid
 from math import erf, sqrt
@@ -128,12 +125,13 @@ class ExcursionSet(NIDMObject):
     Object representing a ExcursionSet entity.
     """
 
-    def __init__(self, filename, stat_num, visualisation, coord_space,
+    def __init__(self, exc_file, stat_num, visualisation, coord_space,
                  export_dir):
         super(ExcursionSet, self).__init__(export_dir)
         self.num = stat_num
-        self.file = filename
         self.id = NIIRI[str(uuid.uuid4())]
+        filename = 'ExcursionSet' + self.num + '.nii.gz'
+        self.file = NIDMFile(self.id, exc_file, filename, export_dir)
         self.type = NIDM_EXCURSION_SET_MAP
         self.prov_type = PROV['Entity']
         self.visu = Visualisation(visualisation, stat_num, export_dir)
@@ -147,24 +145,15 @@ class ExcursionSet(NIDMObject):
         self.add_object(self.coord_space, nidm_version)
         self.add_object(self.visu, nidm_version)
 
-        # Copy "Excursion set map" in export directory
-        exc_set_orig_file = self.file
-        exc_set_file = os.path.join(self.export_dir, 'ExcursionSet' +
-                                    self.num + '.nii.gz')
-        exc_set_orig_filename, exc_set_filename = self.copy_nifti(
-            exc_set_orig_file, exc_set_file)
+        # Copy "Excursion set map" file in export directory
+        self.add_object(self.file, nidm_version)
 
         # Create "Excursion set" entity
         self.add_attributes((
             (PROV['type'], self.type),
-            (DCT['format'], "image/nifti"),
-            (PROV['location'], Identifier("file://./" + exc_set_filename)),
-            (NFO['fileName'], exc_set_orig_filename),
-            (NFO['fileName'], exc_set_filename),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
             (PROV['label'], "Excursion Set Map"),
-            (DC['description'], self.visu.id),
-            (CRYPTO['sha512'], self.get_sha_sum(exc_set_file)),
+            (DC['description'], self.visu.id)
         ))
 
         return self.p
@@ -181,8 +170,8 @@ class Visualisation(NIDMObject):
 
     def __init__(self, visu_filename, stat_num, export_dir):
         super(Visualisation, self).__init__(export_dir)
-        self.file = visu_filename
         self.id = NIIRI[str(uuid.uuid4())]
+        self.file = NIDMFile(self.id, visu_filename, export_dir=export_dir)
         self.type = DCTYPE['Image']
         self.prov_type = PROV['Entity']
 
@@ -191,14 +180,11 @@ class Visualisation(NIDMObject):
         Create prov entities and activities.
         """
         # Copy visualisation of excursion set in export directory
-        shutil.copy(self.file, self.export_dir)
-        path, visu_filename = os.path.split(self.file)
+        self.add_object(self.file, nidm_version)
 
         # Create "png visualisation of Excursion set" entity
         self.add_attributes((
             (PROV['type'], DCTYPE['Image']),
-            (NFO['fileName'], visu_filename),
-            (PROV['location'], Identifier("file://./" + visu_filename)),
             (DCT['format'], "image/png"),
         ))
 
@@ -387,10 +373,15 @@ class Cluster(NIDMObject):
         self.cog.wasDerivedFrom(self)
         self.add_object(self.cog, nidm_version)
 
+        if nidm_version['num'] in ["1.0.0", "1.1.0"]:
+            cluster_naming = "Significant Cluster"
+        else:
+            cluster_naming = "Supra-Threshold Cluster"
+
         # FIXME deal with multiple contrasts
         self.add_attributes((
             (PROV['type'], NIDM_SIGNIFICANT_CLUSTER),
-            (PROV['label'], "Significant Cluster %04d" % self.num),
+            (PROV['label'], "%s %04d" % (cluster_naming, self.num)),
             (NIDM_CLUSTER_LABEL_ID, self.num),
             (NIDM_CLUSTER_SIZE_IN_VOXELS, self.size),
             (NIDM_P_VALUE_FWER, self.pFWER)))
@@ -403,11 +394,12 @@ class DisplayMaskMap(NIDMObject):
     """
     Object representing a DisplayMaskMap entity.
     """
-    def __init__(self, contrast_num, filename, mask_num, coord_space,
+    def __init__(self, contrast_num, mask_file, mask_num, coord_space,
                  export_dir):
         super(DisplayMaskMap, self).__init__(export_dir)
         self.id = NIIRI[str(uuid.uuid4())]
-        self.filename = filename
+        filename = 'DisplayMask' + str(self.mask_num) + '.nii.gz'
+        self.file = NIDMFile(self.id, mask_file, filename, export_dir)
         self.coord_space = coord_space
         self.type = NIDM_DISPLAY_MASK_MAP
         self.prov_type = PROV['Entity']
@@ -422,20 +414,12 @@ class DisplayMaskMap(NIDMObject):
         self.add_object(self.coord_space, nidm_version)
 
         # Create "Display Mask Map" entity
-        disp_mask_file = os.path.join(
-            self.export_dir, 'DisplayMask' + str(self.mask_num) + '.nii.gz')
-        disp_mask_orig_filename, disp_mask_filename = self.copy_nifti(
-            self.filename, disp_mask_file)
+        self.add_object(self.file, nidm_version)
 
         self.add_attributes((
             (PROV['type'], self.type),
             (PROV['label'], self.label),
-            (DCT['format'], "image/nifti"),
-            (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
-            (NFO['fileName'], disp_mask_orig_filename),
-            (NFO['fileName'], disp_mask_filename),
-            (PROV['location'], Identifier("file://./" + disp_mask_filename)),
-            (CRYPTO['sha512'], self.get_sha_sum(disp_mask_file))
+            (NIDM_IN_COORDINATE_SPACE, self.coord_space.id)
             ))
 
         return self.p
@@ -559,7 +543,9 @@ class SearchSpace(NIDMObject):
                  random_field_stationarity, noise_fwhm_in_voxels,
                  noise_fwhm_in_units, coord_space, export_dir):
         super(SearchSpace, self).__init__(export_dir)
-        self.file = search_space_file
+        self.id = NIIRI[str(uuid.uuid4())]
+        filename = 'SearchSpaceMask.nii.gz'
+        self.file = NIDMFile(self.id, search_space_file, filename, export_dir)
         self.coord_space = coord_space
         self.resel_size_in_voxels = resel_size_in_voxels
         self.dlh = dlh
@@ -569,7 +555,6 @@ class SearchSpace(NIDMObject):
         self.rf_stationarity = random_field_stationarity
         self.noise_fwhm_in_voxels = noise_fwhm_in_voxels
         self.noise_fwhm_in_units = noise_fwhm_in_units
-        self.id = NIIRI[str(uuid.uuid4())]
         self.type = NIDM_SEARCH_SPACE_MASK_MAP
         self.prov_type = PROV['Entity']
 
@@ -581,26 +566,16 @@ class SearchSpace(NIDMObject):
         self.add_object(self.coord_space, version)
 
         # Copy "Mask map" in export directory
-        search_space_orig_file = self.file
-        search_space_file = os.path.join(self.export_dir,
-                                         'SearchSpaceMask.nii.gz')
-        search_space_orig_filename, search_space_filename = self.copy_nifti(
-            search_space_orig_file, search_space_file)
+        self.add_object(self.file, version)
 
         atts = (
             (PROV['label'], "Search Space Mask Map"),
-            (DCT['format'], "image/nifti"),
             (PROV['type'], NIDM_SEARCH_SPACE_MASK_MAP),
-            (PROV['location'],
-             Identifier("file://./" + search_space_filename)),
-            (NFO['fileName'], search_space_orig_filename),
-            (NFO['fileName'], search_space_filename),
             (NIDM_RANDOM_FIELD_STATIONARITY, self.rf_stationarity),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
             (NIDM_SEARCH_VOLUME_IN_VOXELS, self.search_volume_in_voxels),
             (NIDM_SEARCH_VOLUME_IN_UNITS, self.search_volume_in_units),
             (NIDM_SEARCH_VOLUME_IN_RESELS, self.search_volume_in_resels),
-            (CRYPTO['sha512'], self.get_sha_sum(search_space_file)),
             (NIDM_RESEL_SIZE_IN_VOXELS, self.resel_size_in_voxels),
             (NIDM_NOISE_ROUGHNESS_IN_VOXELS, self.dlh))
 
