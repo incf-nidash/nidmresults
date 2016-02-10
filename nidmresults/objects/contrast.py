@@ -183,18 +183,15 @@ class ContrastExplainedMeanSquareMap(NIDMObject):
             self.export_dir, expl_mean_sq_filename)
         nib.save(expl_mean_sq, expl_mean_sq_file)
 
-        self.file = NIDMFile(self.id, expl_mean_sq_file)
+        self.file = NIDMFile(self.id, expl_mean_sq_file,
+                             expl_mean_sq_filename, self.export_dir)
         self.add_object(self.file, nidm_version)
 
         # Contrast Explained Mean Square Map entity
         path, filename = os.path.split(expl_mean_sq_file)
         self.add_attributes((
             (PROV['type'], self.type),
-            (DCT['format'], "image/nifti"),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
-            (PROV['location'], loc),
-            (NFO['fileName'], filename),
-            (CRYPTO['sha512'], self.get_sha_sum(expl_mean_sq_file)),
             (PROV['label'], "Contrast Explained Mean Square Map")))
         return self.p
 

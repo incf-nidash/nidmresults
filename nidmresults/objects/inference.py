@@ -398,13 +398,13 @@ class DisplayMaskMap(NIDMObject):
                  export_dir):
         super(DisplayMaskMap, self).__init__(export_dir)
         self.id = NIIRI[str(uuid.uuid4())]
+        self.mask_num = mask_num
         filename = 'DisplayMask' + str(self.mask_num) + '.nii.gz'
         self.file = NIDMFile(self.id, mask_file, filename, export_dir)
         self.coord_space = coord_space
         self.type = NIDM_DISPLAY_MASK_MAP
         self.prov_type = PROV['Entity']
         self.label = "Display Mask Map " + str(mask_num)
-        self.mask_num = mask_num
 
     def export(self, nidm_version):
         """
