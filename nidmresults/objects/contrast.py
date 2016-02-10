@@ -7,7 +7,6 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>
 @copyright: University of Warwick 2013-2014
 """
-from prov.model import Identifier
 import numpy as np
 import os
 from constants import *
@@ -38,33 +37,33 @@ class Contrast(NIDMObject):
         self.stat_map = stat_map
         self.z_stat_map = z_stat_map
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
         # Create estimation activity
-        self.add_object(self.estimation)
+        self.add_object(self.estimation, nidm_version)
 
         # Create contrast weights
-        self.add_object(self.weights)
+        self.add_object(self.weights, nidm_version)
 
         if self.contrast_map is not None:
             # Create contrast Map
             self.contrast_map.wasGeneratedBy(self.estimation)
-            self.add_object(self.contrast_map)
+            self.add_object(self.contrast_map, nidm_version)
 
         # Create Std Err. Map (T-tests) or Explained Mean Sq. Map (F-tests)
         self.stderr_or_expl_mean_sq_map.wasGeneratedBy(self.estimation)
-        self.add_object(self.stderr_or_expl_mean_sq_map)
+        self.add_object(self.stderr_or_expl_mean_sq_map, nidm_version)
 
         # Create Statistic Map
         self.stat_map.wasGeneratedBy(self.estimation)
-        self.add_object(self.stat_map)
+        self.add_object(self.stat_map, nidm_version)
 
         # Create Z Statistic Map
         if self.z_stat_map:
             self.z_stat_map.wasGeneratedBy(self.estimation)
-            self.add_object(self.z_stat_map)
+            self.add_object(self.z_stat_map, nidm_version)
 
         return self.p
 
@@ -86,7 +85,7 @@ class ContrastWeights(NIDMObject):
         self.type = STATO_CONTRAST_WEIGHT_MATRIX
         self.prov_type = PROV['Entity']
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov graph.
         """
@@ -117,40 +116,32 @@ class ContrastMap(NIDMObject):
     def __init__(self, contrast_file, contrast_num, contrast_name,
                  coord_space, export_dir, ident=None):
         super(ContrastMap, self).__init__(export_dir)
-        self.file = contrast_file
         self.num = contrast_num
         self.name = contrast_name
         if ident is None:
             self.id = NIIRI[str(uuid.uuid4())]
         else:
             self.id = ident
+        filename = 'Contrast' + self.num + '.nii.gz'
+        self.file = NIDMFile(self.id, contrast_file, filename, export_dir)
         self.coord_space = coord_space
         self.type = NIDM_CONTRAST_MAP
         self.prov_type = PROV['Entity']
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov graph.
         """
-        self.p.update(self.coord_space.export())
+        self.add_object(self.coord_space, nidm_version)
 
         # Copy contrast map in export directory
-        cope_file = os.path.join(self.export_dir,
-                                 'Contrast' + self.num + '.nii.gz')
-        cope_original_filename, cope_filename = self.copy_nifti(self.file,
-                                                                cope_file)
+        self.add_object(self.file, nidm_version)
 
         # Contrast Map entity
-        path, filename = os.path.split(cope_file)
         self.add_attributes((
             (PROV['type'], NIDM_CONTRAST_MAP),
-            (DCT['format'], "image/nifti"),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
-            (PROV['location'], Identifier("file://./" + cope_filename)),
-            (NFO['fileName'], cope_original_filename),
-            (NFO['fileName'], cope_filename),
             (NIDM_CONTRAST_NAME, self.name),
-            (CRYPTO['sha512'], self.get_sha_sum(cope_file)),
             (PROV['label'], "Contrast Map: " + self.name)))
         return self.p
 
@@ -170,11 +161,11 @@ class ContrastExplainedMeanSquareMap(NIDMObject):
         self.type = NIDM_CONTRAST_EXPLAINED_MEAN_SQUARE_MAP
         self.prov_type = PROV['Entity']
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov graph.
         """
-        self.p.update(self.coord_space.export())
+        self.add_object(self.coord_space, nidm_version)
 
         # Create Contrast Explained Mean Square Map as fstat<num>.nii.gz
         # multiplied by sigmasquareds.nii.gz and save it in export_dir
@@ -192,15 +183,15 @@ class ContrastExplainedMeanSquareMap(NIDMObject):
             self.export_dir, expl_mean_sq_filename)
         nib.save(expl_mean_sq, expl_mean_sq_file)
 
+        self.file = NIDMFile(self.id, expl_mean_sq_file,
+                             expl_mean_sq_filename, self.export_dir)
+        self.add_object(self.file, nidm_version)
+
         # Contrast Explained Mean Square Map entity
         path, filename = os.path.split(expl_mean_sq_file)
         self.add_attributes((
             (PROV['type'], self.type),
-            (DCT['format'], "image/nifti"),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
-            (PROV['location'], Identifier("file://./"+filename)),
-            (NFO['fileName'], filename),
-            (CRYPTO['sha512'], self.get_sha_sum(expl_mean_sq_file)),
             (PROV['label'], "Contrast Explained Mean Square Map")))
         return self.p
 
@@ -211,10 +202,10 @@ class ContrastStdErrMap(NIDMObject):
     Object representing a ContrastStdErrMap entity.
     """
 
-    def __init__(self, contrast_num, filename, is_variance, coord_space,
+    def __init__(self, contrast_num, filepath, is_variance, coord_space,
                  var_coord_space, export_dir):
         super(ContrastStdErrMap, self).__init__(export_dir)
-        self.file = filename
+        self.file = filepath
         self.id = NIIRI[str(uuid.uuid4())]
         self.is_variance = is_variance
         self.num = contrast_num
@@ -224,23 +215,21 @@ class ContrastStdErrMap(NIDMObject):
         self.type = NIDM_CONTRAST_STANDARD_ERROR_MAP
         self.prov_type = PROV['Entity']
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov graph.
         """
-        self.p.update(self.coord_space.export())
+        self.add_object(self.coord_space, nidm_version)
 
-        standard_error_file = os.path.join(
-            self.export_dir,
-            "ContrastStandardError" + self.num + ".nii.gz")
+        filename = "ContrastStandardError" + self.num + ".nii.gz"
         if self.is_variance:
-            self.p.update(self.var_coord_space.export())
+            self.add_object(self.var_coord_space, nidm_version)
 
             # Copy contrast variance map in export directory
             path, var_cope_filename = os.path.split(self.file)
             contrast_var = ContrastVariance(
                 self.var_coord_space, self.file, var_cope_filename)
-            self.add_object(contrast_var)
+            self.add_object(contrast_var, nidm_version)
 
             # Create standard error map from contrast variance map
             var_cope_img = nib.load(self.file)
@@ -248,20 +237,21 @@ class ContrastStdErrMap(NIDMObject):
 
             standard_error_img = nib.Nifti1Image(np.sqrt(contrast_variance),
                                                  var_cope_img.get_qform())
-            nib.save(standard_error_img, standard_error_file)
+
+            stderr_file = os.path.join(self.export_dir, filename)
+            nib.save(standard_error_img, stderr_file)
+            self.file = NIDMFile(
+                self.id, stderr_file, filename, self.export_dir)
+            self.add_object(self.file, nidm_version)
 
         else:
-            standard_error_original_file, standard_error_file = \
-                self.copy_nifti(self.file, standard_error_file)
+            self.file = NIDMFile(self.id, self.file, None, self.export_dir)
+            self.add_object(self.file, nidm_version)
 
-        path, filename = os.path.split(standard_error_file)
         self.add_attributes((
             (PROV['type'], self.type),
             (DCT['format'], "image/nifti"),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
-            (PROV['location'], Identifier("file://./" + filename)),
-            (CRYPTO['sha512'], self.get_sha_sum(standard_error_file)),
-            (NFO['fileName'], filename),
             (PROV['label'], "Contrast Standard Error Map")))
 
         if self.is_variance:
@@ -276,27 +266,24 @@ class ContrastVariance(NIDMObject):
         self.id = NIIRI[str(uuid.uuid4())]
         self.coord_space = coord_space
         self.type = NIDM_CONTRAST_VARIANCE_MAP
-        self.file = var_file
+        self.file = NIDMFile(self.id, var_file)
         self.filename = filename
         self.prov_type = PROV['Entity']
 
-    def export(self):
+    def export(self, nidm_version):
         # FIXME: Use ContrastVariance.nii.gz?
         # var_cope_file = os.path.join(self.export_dir, var_cope_filename)
         # var_cope_original_filename, var_cope_filename =
-        # self.copy_nifti(var_cope_original_file, var_cope_file)
+        # self.copy_file(var_cope_original_file, var_cope_file)
 
         # Contrast Variance Map entity
         # self.provBundle.entity('niiri:'+'contrast_variance_map_id_'+
         # contrast_num,
         # other_attributes=(
 
-        self.add_attributes((
-            (PROV['type'], NIDM_CONTRAST_VARIANCE_MAP),
-            # (NIDM_IN_COORDINATE_SPACE, self.var_coord_space.id),
-            (DCT['format'], "image/nifti"),
-            (CRYPTO['sha512'], self.get_sha_sum(self.file)),
-            (NFO['fileName'], self.filename)))
+        self.add_object(self.file, nidm_version)
+
+        self.add_attributes([(PROV['type'], NIDM_CONTRAST_VARIANCE_MAP)])
 
         return self.p
 
@@ -308,14 +295,22 @@ class StatisticMap(NIDMObject):
     """
 
     def __init__(self, stat_file, stat_type, contrast_num, contrast_name, dof,
-                 coord_space, export_dir, label):
+                 coord_space, export_dir, label=None):
         super(StatisticMap, self).__init__(export_dir)
         self.num = contrast_num
         self.name = contrast_name
-        self.file = stat_file
         self.id = NIIRI[str(uuid.uuid4())]
-        self.coord_space = coord_space
         self.stat_type = stat_type
+        if self.stat_type.lower() == "t":
+            self.stat = STATO_TSTATISTIC
+        elif self.stat_type.lower() == "z":
+            self.stat = STATO_ZSTATISTIC
+        elif self.stat_type.lower() == "f":
+            self.stat = STATO_FSTATISTIC
+        # FIXME use new 'preferred mathematical notation from stato'
+        filename = self.stat_type.upper() + 'Statistic' + self.num + '.nii.gz'
+        self.file = NIDMFile(self.id, stat_file, filename, export_dir)
+        self.coord_space = coord_space
         self.dof = dof
         self.type = NIDM_STATISTIC_MAP
         self.prov_type = PROV['Entity']
@@ -329,36 +324,20 @@ class StatisticMap(NIDMObject):
     def __str__(self):
         return '%s\t%s' % (self.label, self.file)
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov graph.
         """
-        self.p.update(self.coord_space.export())
+        self.add_object(self.coord_space, nidm_version)
 
         # Copy Statistical map in export directory
-        stat_file = os.path.join(
-            self.export_dir,
-            self.stat_type + 'Statistic' + self.num + '.nii.gz')
-        stat_orig_filename, stat_filename = self.copy_nifti(
-            self.file, stat_file)
-
-        if self.stat_type.lower() == "t":
-            stat = STATO_TSTATISTIC
-        elif self.stat_type.lower() == "z":
-            stat = STATO_ZSTATISTIC
-        elif self.stat_type.lower() == "f":
-            stat = STATO_FSTATISTIC
+        self.add_object(self.file, nidm_version)
 
         attributes = [(PROV['type'], NIDM_STATISTIC_MAP),
                       (DCT['format'], "image/nifti"),
                       (PROV['label'], self.label),
-                      (PROV['location'], Identifier(
-                          "file://./" + stat_filename)),
-                      (NIDM_STATISTIC_TYPE, stat),
-                      (NFO['fileName'], stat_filename),
-                      (NFO['fileName'], stat_orig_filename),
+                      (NIDM_STATISTIC_TYPE, self.stat),
                       (NIDM_CONTRAST_NAME, self.name),
-                      (CRYPTO['sha512'], self.get_sha_sum(stat_file)),
                       (NIDM_IN_COORDINATE_SPACE, self.coord_space.id)]
 
         if not self.stat_type == 'Z':
@@ -390,7 +369,7 @@ class ContrastEstimation(NIDMObject):
         self.type = NIDM_CONTRAST_ESTIMATION
         self.prov_type = PROV['Activity']
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov graph.
         """

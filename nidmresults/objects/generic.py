@@ -44,23 +44,9 @@ class NIDMObject(object):
         return '<"' + self.label + '" ' + \
                str(self.id).replace("niiri:", "")[0:8] + '>'
 
-    def copy_nifti(self, original_file, new_file):
-        shutil.copy(original_file, new_file)
-        path, new_filename = os.path.split(new_file)
-        path, original_filename = os.path.split(original_file)
-
-        return original_filename, new_filename
-
-    def get_sha_sum(self, nifti_file):
-        nifti_img = nib.load(nifti_file)
-        data = nifti_img.get_data()
-        # Fix needed as in https://github.com/pymc-devs/pymc/issues/327
-        if not data.flags["C_CONTIGUOUS"]:
-            data = np.ascontiguousarray(data)
-        return hashlib.sha512(data).hexdigest()
-
     def _rdf_add_attributes(self, attributes):
-        self._rdf_add(self.id, RDF.type, self.type)
+        if self.type is not None:
+            self._rdf_add(self.id, RDF.type, self.type)
         self._rdf_add(self.id, RDF.type, self.prov_type)
 
         # If attributes is a dictionnary, convert to list
@@ -100,11 +86,9 @@ class NIDMObject(object):
 
         self.g.add((rdflib.URIRef(s.uri), p, o))
 
-    def add_object(self, nidm_object, version=None):
-        if version is not None:
-            nidm_object.export(version)
-        else:
-            nidm_object.export()
+    def add_object(self, nidm_object, nidm_version):
+        nidm_object.export(nidm_version)
+
         # Prov graph (=> provn)
         self.p.update(nidm_object.p)
         # RDF graph (=> turtle)
@@ -142,7 +126,7 @@ class NIDMObject(object):
         self._rdf_add(self.id, relation, object_id)
 
     def add_attributes(self, attributes):
-        if self.type == PROV['Activity']:
+        if self.prov_type == PROV['Activity']:
             self.p.activity(self.id, other_attributes=attributes)
         elif self.prov_type == PROV['Entity']:
             self.p.entity(self.id, other_attributes=attributes)
@@ -176,7 +160,6 @@ class NIDMObject(object):
 #         self.doc.wasGeneratedBy(bundle_id,
 #                                 time=str(datetime.datetime.now().time()))
 
-
 class CoordinateSpace(NIDMObject):
     """
     Object representing a CoordinateSpace entity.
@@ -204,7 +187,7 @@ class CoordinateSpace(NIDMObject):
         self.voxel_size = '[ %s ]' % ', '.join(
             map(str, thresImgHdr['pixdim'][1:(self.number_of_dimensions + 1)]))
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
@@ -224,6 +207,77 @@ class CoordinateSpace(NIDMObject):
         return self.p
 
 
+class NIDMFile(NIDMObject):
+    """
+    Object representing a File (to be used as attribute of another class)
+    """
+    def __init__(self, rdf_id, org_file, new_filename=None, export_dir=None):
+        super(NIDMFile, self).__init__(export_dir)
+        self.prov_type = PROV['Entity']
+        self.path = org_file
+        if new_filename is None:
+            # Keep same file name
+            path, self.new_filename = os.path.split(self.path)
+        else:
+            self.new_filename = new_filename
+
+        # NIDMFile is not a NIDM class defined in the owl file
+        self.type = None
+        self.id = rdf_id
+        self.label = "'NIDM file'"  # used if display is called
+
+    def is_nifti(self):
+        return self.path.endswith(".nii") or \
+            self.path.endswith(".nii.gz") or \
+            self.path.endswith(".img") or \
+            self.path.endswith(".hrd")
+
+    def get_sha_sum(self, nifti_file):
+        nifti_img = nib.load(nifti_file)
+        data = nifti_img.get_data()
+        # Fix needed as in https://github.com/pymc-devs/pymc/issues/327
+        if not data.flags["C_CONTIGUOUS"]:
+            data = np.ascontiguousarray(data)
+
+        return hashlib.sha512(data).hexdigest()
+
+    def export(self, nidm_version):
+        """
+        Copy file over of export_dir and create corresponding triples
+        """
+        if self.path is not None:
+            path, org_filename = os.path.split(self.path)
+            if self.export_dir is not None:
+                new_file = os.path.join(self.export_dir, self.new_filename)
+                if not self.path == new_file:
+                    shutil.copy(self.path, new_file)
+            else:
+                new_file = self.path
+
+            if nidm_version['num'] in ["1.0.0", "1.1.0"]:
+                loc = Identifier("file://./" + self.new_filename)
+            else:
+                loc = Identifier(self.new_filename)
+
+            self.add_attributes([(NFO['fileName'], self.new_filename)])
+
+            if self.export_dir:
+                self.add_attributes([(PROV['atLocation'], loc)])
+
+            if nidm_version['num'] in ("1.0.0", "1.1.0"):
+                if org_filename is not self.new_filename:
+                    self.add_attributes([(NFO['fileName'], org_filename)])
+
+            if self.is_nifti():
+                sha = self.get_sha_sum(new_file)
+                self.add_attributes([
+                    (CRYPTO['sha512'], sha),
+                    (DCT['format'], "image/nifti")
+                ])
+
+            return self.p
+
+
 class Image(NIDMObject):
 
     """
@@ -234,24 +288,102 @@ class Image(NIDMObject):
         super(Image, self).__init__(export_dir)
         self.type = DCTYPE['Image']
         self.prov_type = PROV['Entity']
-        self.file = image_file
         self.id = NIIRI[str(uuid.uuid4())]
+        filename = "DesignMatrix.png"
+        self.file = NIDMFile(self.id, image_file, filename, export_dir)
 
-    def export(self):
+    def export(self, nidm_version):
         """
         Create prov entity.
         """
         if self.file is not None:
-            # FIXME: replace by another name
-            new_file = os.path.join(self.export_dir, "DesignMatrix.png")
-            orig_filename, filename = self.copy_nifti(self.file, new_file)
+            self.add_object(self.file, nidm_version)
 
             self.add_attributes([
                 (PROV['type'], self.type),
-                (PROV['atLocation'], Identifier("file://./" + filename)),
-                (NFO['fileName'], orig_filename),
-                (NFO['fileName'], filename),
                 (DCT['format'], "image/png"),
             ])
+
+        return self.p
+
+
+class NeuroimagingSoftware(NIDMObject):
+    """
+    Class representing a NeuroimagingSoftware entity.
+    """
+
+    def __init__(self, software_type, version):
+        super(NeuroimagingSoftware, self).__init__()
+        self.id = NIIRI[str(uuid.uuid4())]
+        self.version = version
+        # FIXME: get label from owl!
+        if software_type == NLX_FSL:
+            self.name = "FSL"
+        else:
+            raise Exception('Unrecognised software: ' + str(software_type))
+        self.type = software_type  # NLX_FSL
+        self.prov_type = PROV['Agent']
+
+    def export(self, nidm_version):
+        """
+        Create prov entities and activities.
+        """
+        self.add_attributes((
+            (PROV['type'], self.type),
+            (PROV['type'], PROV['SoftwareAgent']),
+            (PROV['label'], self.name),
+            (NIDM_SOFTWARE_VERSION, self.version))
+        )
+
+        return self.p
+
+
+class ExporterSoftware(NIDMObject):
+    """
+    Class representing a Software entity.
+    """
+
+    def __init__(self, software_type, version):
+        super(ExporterSoftware, self).__init__()
+        self.id = NIIRI[str(uuid.uuid4())]
+        self.type = software_type
+        self.prov_type = PROV['Agent']
+        self.version = version
+
+        if software_type == NIDM_FSL:
+            self.name = "nidmfsl"
+        else:
+            raise Exception('Unrecognised software: ' + str(software_type))
+
+    def export(self, nidm_version):
+        """
+        Create prov entities and activities.
+        """
+        self.add_attributes((
+            (PROV['type'], self.type),
+            (PROV['type'], PROV['SoftwareAgent']),
+            (PROV['label'], self.name),
+            (NIDM_SOFTWARE_VERSION, self.version))
+        )
+
+        return self.p
+
+
+class NIDMResultsExport(NIDMObject):
+    """
+    Class representing a NIDM-Results Export activity.
+    """
+    def __init__(self):
+        super(NIDMResultsExport, self).__init__()
+        self.id = NIIRI[str(uuid.uuid4())]
+        self.type = NIDM_NIDM_RESULTS_EXPORT
+        self.prov_type = PROV['Activity']
+        self.label = "NIDM-Results export"
+
+    def export(self, nidm_version):
+        """
+        Create prov entities and activities.
+        """
+        self.add_attributes([(PROV['label'], self.label)])
 
         return self.p
