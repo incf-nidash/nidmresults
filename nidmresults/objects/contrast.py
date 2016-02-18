@@ -308,7 +308,9 @@ class StatisticMap(NIDMObject):
         elif self.stat_type.lower() == "f":
             self.stat = STATO_FSTATISTIC
         # FIXME use new 'preferred mathematical notation from stato'
-        filename = self.stat_type.upper() + 'Statistic' + self.num + '.nii.gz'
+        filename = None
+        if self.num is not None:
+            filename = self.stat_type.upper() + 'Statistic' + self.num + '.nii.gz'
         self.file = NIDMFile(self.id, stat_file, filename, export_dir)
         self.coord_space = coord_space
         self.dof = dof

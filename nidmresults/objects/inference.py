@@ -659,7 +659,7 @@ class Peak(NIDMObject):
 
     def __init__(self, cluster_index, peak_index, equiv_z, stat_num,
                  cluster_id=None, p_unc=None, p_fwer=None, label=None,
-                 coord_label=None, *args, **kwargs):
+                 coord_label=None, exc_set_id=None, *args, **kwargs):
         super(Peak, self).__init__()
         # FIXME: Currently assumes less than 10 clusters per contrast
         # cluster_num = cluster_index
@@ -679,6 +679,7 @@ class Peak(NIDMObject):
             self.label = label
         else:
             self.label = "Peak " + str(self.num)
+        self.exc_set_id = exc_set_id
 
     def __str__(self):
         return '%s \tz=%.2f \tp=%.2e (unc.) \t%s' % (
