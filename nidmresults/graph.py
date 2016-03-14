@@ -200,7 +200,7 @@ wasGeneratedBy ?conest .
             for peak_id, xyz, cluster, zstat, pfwer, conname in sd:
                 local_peak_id = None
                 peak = Peak(None, local_peak_id, zstat, 1, cluster_id=cluster,
-                            coord_vector=xyz, p_fwer=pfwer)
+                            coord_vector=xyz, p_fwer=pfwer, oid=peak_id)
                 peaks.append(peak)
         return peaks_df
 

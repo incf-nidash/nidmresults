@@ -126,10 +126,9 @@ class ExcursionSet(NIDMObject):
     """
 
     def __init__(self, exc_file, stat_num, visualisation, coord_space,
-                 export_dir):
-        super(ExcursionSet, self).__init__(export_dir)
+                 export_dir, oid=None):
+        super(ExcursionSet, self).__init__(export_dir, oid)
         self.num = stat_num
-        self.id = NIIRI[str(uuid.uuid4())]
         filename = 'ExcursionSet' + self.num + '.nii.gz'
         self.file = NIDMFile(self.id, exc_file, filename, export_dir)
         self.type = NIDM_EXCURSION_SET_MAP
@@ -659,14 +658,19 @@ class Peak(NIDMObject):
 
     def __init__(self, cluster_index, peak_index, equiv_z, stat_num,
                  cluster_id=None, p_unc=None, p_fwer=None, label=None,
-                 coord_label=None, exc_set_id=None, *args, **kwargs):
-        super(Peak, self).__init__()
+                 coord_label=None, exc_set_id=None, oid=None, *args, **kwargs):
+        super(Peak, self).__init__(oid)
         # FIXME: Currently assumes less than 10 clusters per contrast
         # cluster_num = cluster_index
         # FIXME: Currently assumes less than 100 peaks
-        peak_unique_id = '000' + str(cluster_index) + '_' + str(peak_index)
-        self.id = NIIRI[str(uuid.uuid4())]
-        self.num = peak_unique_id
+        if oid is not None:
+            self.label = label
+            peak_unique_id = label[5:]
+            peak_index = peak_unique_id
+            # cluster_index, peak_index = peak_unique_id.split("_")
+        else:
+            peak_unique_id = '000' + str(cluster_index) + '_' + str(peak_index)
+            self.label = "Peak " + peak_unique_id
         self.equiv_z = equiv_z
         self.p_unc = p_unc
         self.p_fwer = p_fwer
@@ -675,10 +679,6 @@ class Peak(NIDMObject):
         self.type = NIDM_PEAK
         self.prov_type = PROV['Entity']
         self.cluster = cluster_id
-        if label is not None:
-            self.label = label
-        else:
-            self.label = "Peak " + str(self.num)
         self.exc_set_id = exc_set_id
 
     def __str__(self):

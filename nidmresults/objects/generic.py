@@ -27,12 +27,15 @@ class NIDMObject(object):
     or agent
     """
 
-    def __init__(self, export_dir=None):
+    def __init__(self, export_dir=None, oid=None):
         self.export_dir = export_dir
         self.p = ProvBundle()
 
         self.g = rdflib.Graph()
-        self.id = None
+        if oid is None:
+            self.id = NIIRI[str(uuid.uuid4())]
+        else:
+            self.id = oid
 
     def __str__(self):
         value = ""
@@ -42,7 +45,8 @@ class NIDMObject(object):
 
     def __repr__(self):
         return '<"' + self.label + '" ' + \
-               str(self.id).replace("niiri:", "")[0:8] + '>'
+               str(self.id).replace("niiri:", "").replace(NIIRI._uri, "")[0:8]\
+               + '>'
 
     def _rdf_add_attributes(self, attributes):
         if self.type is not None:
