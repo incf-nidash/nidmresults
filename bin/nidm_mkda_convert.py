@@ -9,7 +9,7 @@ Create a database suitable for use with MKDA toolbox
 
 import os
 import argparse
-from nidmresults.reader import *
+from nidmresults.graph import Graph
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -23,5 +23,5 @@ if __name__ == "__main__":
     if not os.path.isfile(nidmres):
         raise Exception("Unknown file: "+str(nidmres))
 
-    nidmreader = NIDMReader(nidm_zip=nidmres)
-    nidmreader.write_mkda_database(csvfile='this.csv')
+    nidmgraph = Graph(nidm_zip=nidmres)
+    nidmgraph.serialize('this.csv', "mkda")

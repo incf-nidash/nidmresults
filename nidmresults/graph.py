@@ -18,7 +18,7 @@ import zipfile
 import csv
 
 
-class NIDMReader():
+class Graph():
     """
     Generic class to read a NIDM-result archive and create a python object.
     """
@@ -32,7 +32,7 @@ class NIDMReader():
         self.rdf_data = rdf_data
 
         self.format = format
-        self.graph = self.load_graph()
+        self.graph = self.parse()
 
         self.objects = list()
 
@@ -47,7 +47,7 @@ class NIDMReader():
         # for peak in self.peaks:
         #     print self.contrasts[peak.cluster].name
 
-    def load_graph(self):
+    def parse(self):
         g = rdflib.Graph()
         try:
             g.parse(data=self.rdf_data, format=self.format)
@@ -141,13 +141,17 @@ ORDER BY ?peak_label
                 cluster_index = None
                 stat_num = None
                 cluster_id = None
-                print peak_id
-                peak = Peak(cluster_index, peak_id, float(z), stat_num,
+                local_peak_id = None
+                # print peak_id
+                # FIXME: need to pass peak index!!!
+                peak = Peak(cluster_index, local_peak_id, float(z), stat_num,
                             cluster_id,
                             coord_vector=coord_vector, p_unc=float(p_unc),
-                            label=peak_label, coord_label=coord_label) #,
+                            label=peak_label, coord_label=coord_label,
+                            oid=peak_id) #,
                             # excursion_set_id=exc_set_id)
                 peaks[peak_id] = (peak)
+                print peaks
 
         self.objects.append(peaks)
         return peaks
@@ -194,7 +198,8 @@ wasGeneratedBy ?conest .
         peaks = list()
         if sd:
             for peak_id, xyz, cluster, zstat, pfwer, conname in sd:
-                peak = Peak(None, peak_id, zstat, 1, cluster_id=cluster,
+                local_peak_id = None
+                peak = Peak(None, local_peak_id, zstat, 1, cluster_id=cluster,
                             coord_vector=xyz, p_fwer=pfwer)
                 peaks.append(peak)
         return peaks_df
@@ -216,12 +221,12 @@ prefix nidm_numberOfSignificantClusters: <http://purl.org/nidash/nidm#NIDM_000\
 0111>
 prefix nidm_pValue: <http://purl.org/nidash/nidm#NIDM_0000114>
 
-SELECT DISTINCT ?id ?label ?loc ?format ?filname ?cluster_label_map_id, ?mip_id
-?coord_space_id ?sha, ?num_signif_vox, ?p_value, ?inference_id WHERE {
+SELECT DISTINCT ?id ?label ?loc ?format ?filname ?cluster_label_map_id ?mip_id
+?coord_space_id ?sha ?num_signif_vox ?p_value ?inference_id WHERE {
 
-?id a prov:Entity , nidm_ExcursionSetMap: ;
-    rdfs:label ?label ;
+?id a nidm_ExcursionSetMap: ;
     prov:atLocation ?loc ;
+    rdfs:label ?label ;
     dct:format ?format ;
     nfo:fileName ?filename ;
     nidm_hasClusterLabelsMap: ?cluster_label_map_id ;
@@ -236,52 +241,58 @@ ORDER BY ?peak_label
         """
         sd = self.graph.query(query)
 
-        peaks = dict()
+        exc_sets = dict()
         if sd:
             for eid, label, loc, format, filname, clusterlabelmap_id, mip_id,\
                     coord_space_id, sha, num_signif_vox, p_value, inference_id\
                     in sd:
-                cluster_index = None
-                stat_num = None
-                cluster_id = None
-                print peak_id
-                peak = Peak(cluster_index, peak_id, float(z), stat_num,
-                            cluster_id,
-                            coord_vector=coord_vector, p_unc=float(p_unc),
-                            label=peak_label, coord_label=coord_label) #,
-                            # excursion_set_id=exc_set_id)
-                peaks[peak_id] = (peak)
+                exc_set = 1
+                # cluster_index = None
+                # stat_num = None
+                # cluster_id = None
+                # print peak_id
+                exc_set = ExcursionSet(exc_file, stat_num, visualisation, coord_space,
+                 export_dir)
+                #             cluster_id,
+                #             coord_vector=coord_vector, p_unc=float(p_unc),
+                #             label=peak_label, coord_label=coord_label) #,
+                #             # excursion_set_id=exc_set_id)
+                # peaks[peak_id] = (peak)
 
-        self.objects.append(peaks)
-        return peaks
+        self.objects.append(exc_sets)
+        return exc_sets
 
-    def write_mkda_database(self, csvfile):
+    def serialize(self, destination, format="mkda"):
         # We need the peaks, excursion set maps and contrast maps
         self.get_peaks()
         self.get_excursion_set_maps()
         # self.get_contrast_maps()
 
-        with open(csvfile, 'wb') as fid:
-            writer = csv.writer(fid, delimiter='\t')
-            writer.writerow(["8"])
-            writer.writerow(
-                ["x", "y", "z", "Study", "Contrast", "N",
-                 "FixedRandom", "CoordSys"])
+        if format == "mkda":
+            if not destination.endswith(".csv"):
+                destination = destination + ".csv"
+            csvfile = destination
+            with open(csvfile, 'wb') as fid:
+                writer = csv.writer(fid, delimiter='\t')
+                writer.writerow(["8"])
+                writer.writerow(
+                    ["x", "y", "z", "Study", "Contrast", "N",
+                     "FixedRandom", "CoordSys"])
 
-            self.N = 20  # FIXME
-            self.FixedRandom = "random"  # FIXME
+                self.N = 20  # FIXME
+                self.FixedRandom = "random"  # FIXME
 
-            if self.is_mni:
-                space = "MNI"
-            elif self.is_talairach:
-                space = "T88"
+                if self.is_mni:
+                    space = "MNI"
+                elif self.is_talairach:
+                    space = "T88"
 
-            # For anything that has a label
-            for peak in self.get_peaks():
-                writer.writerow([
-                    peak.x, peak.y, peak.z, self.study_name,
-                    peak.get_contrast.name(), self.N, self.FixedRandom,
-                    space])
+                # For anything that has a label
+                for peak in self.get_peaks():
+                    writer.writerow([
+                        peak.x, peak.y, peak.z, self.study_name,
+                        peak.get_contrast.name(), self.N, self.FixedRandom,
+                        space])
 
     #     # print pd.concat(peaks_df)
     # def contrast_query(self):
