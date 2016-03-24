@@ -18,6 +18,8 @@ from nidmresults.objects.contrast import *
 from nidmresults.objects.inference import *
 import uuid
 import csv
+import tempfile
+import zipfile
 
 
 class NIDMExporter():
@@ -28,7 +30,33 @@ class NIDMExporter():
     export.
     """
 
-    def __init__(self, version):
+    def __init__(self, version, out_dir, zipped=True):
+        out_dirname = os.path.basename(out_dir)
+        out_path = os.path.dirname(out_dir)
+
+        # Create output path from output name
+        self.zipped = zipped
+        if not self.zipped:
+            out_dirname = out_dirname+".nidm"
+        else:
+            out_dirname = out_dirname+".nidm.zip"
+        out_dir = os.path.join(out_path, out_dirname)
+
+        # Quit if output path already exists and user doesn't want to overwrite
+        # it
+        if os.path.exists(out_dir):
+            msg = out_dir+" already exists, overwrite?"
+            if not raw_input("%s (y/N) " % msg).lower() == 'y':
+                quit("Bye.")
+            if os.path.isdir(out_dir):
+                shutil.rmtree(out_dir)
+            else:
+                os.remove(out_dir)
+        self.out_dir = out_dir
+
+        # A temp directory that will contain the exported data
+        self.export_dir = tempfile.mkdtemp(prefix="nidm-", dir=out_path)
+
         if version == "dev":
             self.version = {'major': 10000, 'minor': 0, 'revision': 0,
                             'num': version}
@@ -149,7 +177,7 @@ ons#")
         # Write-out prov file
         self.save_prov_to_files()
 
-        return self.export_dir
+        return self.out_dir
 
     def _get_model_fitting(self, mf_id):
         """
@@ -260,7 +288,6 @@ ons#")
                 rdflib.URIRef(PROV['wasAssociatedWith'].uri),
                 rdflib.URIRef(self.exporter.id.uri)))
 
-
     def _get_model_parameters_estimations(self, error_model):
         """
         Infer model estimation method from the 'error_model'. Return an object
@@ -305,6 +332,23 @@ ons#")
         ttl_txt = self.use_prefixes(ttl_txt)
         with open(ttl_file, 'w') as ttl_fid:
             ttl_fid.write(ttl_txt)
+
+        # Post-processing
+        if not self.zipped:
+            # Just rename temp directory to output_path
+            os.rename(self.export_dir, self.out_dir)
+        else:
+            # Create a zip file that contains the content of the temp directory
+            os.chdir(self.export_dir)
+            zf = zipfile.ZipFile(os.path.join("..", self.out_dir), mode='w')
+            try:
+                for root, dirnames, filenames in os.walk("."):
+                    for filename in filenames:
+                        zf.write(os.path.join(filename))
+                shutil.rmtree(os.path.join("..", self.export_dir))
+            finally:
+                zf.close()
+                os.chdir("..")
 
         # ttl_fid = open(ttl_file, 'w');
         # serialization is done in xlm rdf
