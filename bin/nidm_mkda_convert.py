@@ -14,14 +14,24 @@ from nidmresults.graph import Graph
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Convert to MKDA')
-    parser.add_argument('nidmres',
-                        help='Path to NIDM-Results archive (.nidm.zip).')
+    parser.add_argument(
+        'nidmpacks',
+        help='Path to NIDM-Results packs (.nidm.zip) separated by spaces.',
+        nargs="+")
 
     args = parser.parse_args()
 
-    nidmres = args.nidmres
-    if not os.path.isfile(nidmres):
-        raise Exception("Unknown file: "+str(nidmres))
+    nidmpacks = args.nidmpacks
 
-    nidmgraph = Graph(nidm_zip=nidmres)
-    nidmgraph.serialize('this.csv', "mkda")
+    first = True
+    for nidmpack in nidmpacks:
+        overwrite = False
+        if first:
+            overwrite = True
+            first = False
+
+        if not os.path.isfile(nidmpack):
+            raise Exception("Unknown file: "+str(nidmpack))
+
+        nidmgraph = Graph(nidm_zip=nidmpack)
+        nidmgraph.serialize('this.csv', "mkda", overwrite=overwrite)

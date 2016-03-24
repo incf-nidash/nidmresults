@@ -398,7 +398,7 @@ ORDER BY ?peak_label
         self.objects.update(exc_sets)
         return exc_sets
 
-    def serialize(self, destination, format="mkda"):
+    def serialize(self, destination, format="mkda", overwrite=False):
         # We need the peaks, excursion set maps and contrast maps
         self.get_peaks()
         self.get_excursion_set_maps()
@@ -409,12 +409,21 @@ ORDER BY ?peak_label
             if not destination.endswith(".csv"):
                 destination = destination + ".csv"
             csvfile = destination
-            with open(csvfile, 'wb') as fid:
+
+            if overwrite:
+                add_header = True
+                open_mode = 'wb'
+            else:
+                add_header = False
+                open_mode = 'ab'
+
+            with open(csvfile, open_mode) as fid:
                 writer = csv.writer(fid, delimiter='\t')
-                writer.writerow(["9"])
-                writer.writerow(
-                    ["x", "y", "z", "Study", "Contrast", "N",
-                     "FixedRandom", "CoordSys", "Name"])
+                if add_header:
+                    writer.writerow(["9"])
+                    writer.writerow(
+                        ["x", "y", "z", "Study", "Contrast", "N",
+                         "FixedRandom", "CoordSys", "Name"])
 
                 self.N = 20  # FIXME
                 self.FixedRandom = "random"  # FIXME
@@ -425,9 +434,10 @@ ORDER BY ?peak_label
 
                 for oid, peak in self.get_peaks().items():
                     exc_set = self.objects[peak.exc_set_id]
-                    if exc_set.coord_space.is_mni:
+
+                    if exc_set.coord_space.is_mni():
                         space = "MNI"
-                    elif exc_set.coord_space.is_talairach:
+                    elif exc_set.coord_space.is_talairach():
                         space = "T88"
 
                     stat_map = exc_set.inference.stat_map
