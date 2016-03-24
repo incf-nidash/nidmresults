@@ -13,7 +13,11 @@ from nidmresults.graph import Graph
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description='Convert to MKDA')
+        description='Convert a set of NIDM-Results packs to an MKDA-compliant \
+        csv file.')
+    parser.add_argument(
+        '-outfile',
+        help='Name of the csv file.', default="mkda.csv")
     parser.add_argument(
         'nidmpacks',
         help='Path to NIDM-Results packs (.nidm.zip) separated by spaces.',
@@ -22,6 +26,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     nidmpacks = args.nidmpacks
+
+    outfile = args.outfile
+    if not outfile.endswith(".csv"):
+        outfile = outfile + ".csv"
 
     first = True
     for nidmpack in nidmpacks:
@@ -34,4 +42,4 @@ if __name__ == "__main__":
             raise Exception("Unknown file: "+str(nidmpack))
 
         nidmgraph = Graph(nidm_zip=nidmpack)
-        nidmgraph.serialize('this.csv', "mkda", overwrite=overwrite)
+        nidmgraph.serialize(outfile, "mkda", overwrite=overwrite)
