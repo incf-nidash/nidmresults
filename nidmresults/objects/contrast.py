@@ -294,11 +294,12 @@ class StatisticMap(NIDMObject):
     Object representing a StatisticMap entity.
     """
 
-    def __init__(self, stat_file, stat_type, contrast_num, contrast_name, dof,
-                 coord_space, export_dir, label=None):
-        super(StatisticMap, self).__init__(export_dir)
+    def __init__(self, location, stat_type, contrast_num, contrast_name, dof,
+                 coord_space, export_dir=None, label=None, oid=None,
+                 format="image/nifti", effdof=None, filename=None, sha=None):
+        super(StatisticMap, self).__init__(export_dir, oid=oid)
         self.num = contrast_num
-        self.name = contrast_name
+        self.contrast_name = contrast_name
         self.id = NIIRI[str(uuid.uuid4())]
         self.stat_type = stat_type
         if self.stat_type.lower() == "t":
@@ -308,10 +309,9 @@ class StatisticMap(NIDMObject):
         elif self.stat_type.lower() == "f":
             self.stat = STATO_FSTATISTIC
         # FIXME use new 'preferred mathematical notation from stato'
-        filename = None
         if self.num is not None:
             filename = self.stat_type.upper() + 'Statistic' + self.num + '.nii.gz'
-        self.file = NIDMFile(self.id, stat_file, filename, export_dir)
+        self.file = NIDMFile(self.id, location, filename, export_dir, sha=sha)
         self.coord_space = coord_space
         self.dof = dof
         self.type = NIDM_STATISTIC_MAP
@@ -319,9 +319,16 @@ class StatisticMap(NIDMObject):
         if label is not None:
             self.label = label
         else:
-            self.label = "Statistic Map: " + self.name
+            self.label = "Statistic Map: " + self.contrast_name
             if self.stat_type == 'Z':
                 self.label = self.stat_type + '-' + self.label
+
+        self.format = format
+        if effdof is None:
+            # FIXME: this should not be 1 for F-test
+            effdof = 1.0
+
+        self.effdof = effdof
 
     def __str__(self):
         return '%s\t%s' % (self.label, self.file)
@@ -336,20 +343,19 @@ class StatisticMap(NIDMObject):
         self.add_object(self.file, nidm_version)
 
         attributes = [(PROV['type'], NIDM_STATISTIC_MAP),
-                      (DCT['format'], "image/nifti"),
+                      (DCT['format'], self.format),
                       (PROV['label'], self.label),
                       (NIDM_STATISTIC_TYPE, self.stat),
-                      (NIDM_CONTRAST_NAME, self.name),
+                      (NIDM_CONTRAST_NAME, self.contrast_name),
                       (NIDM_IN_COORDINATE_SPACE, self.coord_space.id)]
 
         if not self.stat_type == 'Z':
             attributes.insert(0, (NIDM_ERROR_DEGREES_OF_FREEDOM, self.dof))
-            # FIXME: this should not be 1 for F-test
-            attributes.insert(0, (NIDM_EFFECT_DEGREES_OF_FREEDOM, 1.0))
+            attributes.insert(0, (NIDM_EFFECT_DEGREES_OF_FREEDOM, self.effdof))
         else:
             # For Z-Statistic error dof is infinity and effect dof is 1
             attributes.insert(0, (NIDM_ERROR_DEGREES_OF_FREEDOM, float("inf")))
-            attributes.insert(0, (NIDM_EFFECT_DEGREES_OF_FREEDOM, 1.0))
+            attributes.insert(0, (NIDM_EFFECT_DEGREES_OF_FREEDOM, self.effdof))
 
         # Create "Statistic Map" entity
         # FIXME: Deal with other than t-contrast maps: dof + statisticType

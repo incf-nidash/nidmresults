@@ -34,18 +34,7 @@ class Graph():
         self.format = format
         self.graph = self.parse()
 
-        self.objects = list()
-
-        # self.contrast_query()
-        # The peaks are the entry point
-        # self.get_peaks()
-        # print self.objects
-        # self.statistic_maps = self.get_statistic_maps()
-        # print self.contrasts
-        # self.peak_query()
-
-        # for peak in self.peaks:
-        #     print self.contrasts[peak.cluster].name
+        self.objects = dict()
 
     def parse(self):
         g = rdflib.Graph()
@@ -127,7 +116,8 @@ SELECT DISTINCT ?coord_label ?coord_vector ?z ?peak_label ?p_unc
     ?peak_id prov:atLocation ?coord ;
         rdfs:label ?peak_label ;
         nidm_equivalentZStatistic: ?z ;
-        nidm_pValueUncorrected: ?p_unc .
+        nidm_pValueUncorrected: ?p_unc ;
+        prov:wasDerivedFrom/prov:wasDerivedFrom ?exc_set_id .
     """ + query_extension + """
 }
 ORDER BY ?peak_label
@@ -142,18 +132,14 @@ ORDER BY ?peak_label
                 stat_num = None
                 cluster_id = None
                 local_peak_id = None
-                # print peak_id
-                # FIXME: need to pass peak index!!!
                 peak = Peak(cluster_index, local_peak_id, float(z), stat_num,
                             cluster_id,
                             coord_vector=coord_vector, p_unc=float(p_unc),
                             label=peak_label, coord_label=coord_label,
-                            oid=peak_id) #,
-                            # excursion_set_id=exc_set_id)
+                            oid=peak_id, exc_set_id=exc_set_id)
                 peaks[peak_id] = (peak)
-                print peaks
 
-        self.objects.append(peaks)
+        self.objects.update(peaks)
         return peaks
 
     def peak_query(self):
@@ -204,10 +190,161 @@ wasGeneratedBy ?conest .
                 peaks.append(peak)
         return peaks_df
 
+    def get_coordinate_spaces(self, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+prefix nidm_CoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000016>
+prefix nidm_voxelToWorldMapping: <http://purl.org/nidash/nidm#NIDM_0000132>
+prefix nidm_voxelUnits: <http://purl.org/nidash/nidm#NIDM_0000133>
+prefix nidm_voxelSize: <http://purl.org/nidash/nidm#NIDM_0000131>
+prefix nidm_inWorldCoordinateSystem: <http://purl.org/nidash/nidm#NIDM_0000105>
+prefix nidm_MNICoordinateSystem: <http://purl.org/nidash/nidm#NIDM_0000051>
+prefix nidm_numberOfDimensions: <http://purl.org/nidash/nidm#NIDM_0000112>
+prefix nidm_dimensionsInVoxels: <http://purl.org/nidash/nidm#NIDM_0000090>
+
+
+SELECT ?oid ?label ?vox_to_world ?units ?vox_size ?coordinate_system ?numdim
+?dimensions
+        WHERE
+        {
+    """ + oid_var + """ a nidm_CoordinateSpace: ;
+    rdfs:label ?label ;
+    nidm_voxelToWorldMapping: ?vox_to_world ;
+    nidm_voxelUnits: ?units ;
+    nidm_voxelSize: ?vox_size ;
+    nidm_inWorldCoordinateSystem: ?coordinate_system ;
+    nidm_numberOfDimensions: ?numdim ;
+    nidm_dimensionsInVoxels: ?dimensions .
+    }
+        """
+        sd = self.graph.query(query)
+
+        coord_spaces = dict()
+        if sd:
+            for row in sd:
+                args = row.asdict()
+                if oid is not None:
+                    args['oid'] = oid
+                coord_spaces[args['oid']] = CoordinateSpace(**args)
+
+        if oid is not None:
+            return coord_spaces[oid]
+        else:
+            return coord_spaces
+
+    def get_stat_maps(self, oid=None):
+        """
+        Read a NIDM-Results document and return a dict of Statistic Maps.
+        """
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+prefix nidm_StatisticMap: <http://purl.org/nidash/nidm#NIDM_0000076>
+prefix nidm_statisticType: <http://purl.org/nidash/nidm#NIDM_0000123>
+prefix nidm_contrastName: <http://purl.org/nidash/nidm#NIDM_0000085>
+prefix nidm_effectDegreesOfFreedom: <http://purl.org/nidash/nidm#NIDM_0000091>
+prefix nidm_inCoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000104>
+prefix nidm_errorDegreesOfFreedom: <http://purl.org/nidash/nidm#NIDM_0000093>
+prefix obo_tstatistic: <http://purl.obolibrary.org/obo/STATO_0000176>
+
+SELECT DISTINCT * WHERE {
+    """ + oid_var + """ a nidm_StatisticMap: ;
+        rdfs:label ?label ;
+        prov:atLocation ?location ;
+        nidm_statisticType: ?stat_type ;
+        nfo:fileName ?filename ;
+        dct:format ?format ;
+        nidm_contrastName: ?contrast_name ;
+        nidm_errorDegreesOfFreedom: ?dof ;
+        nidm_effectDegreesOfFreedom: ?effdof ;
+        nidm_inCoordinateSpace: ?coord_space_id ;
+        crypto:sha512 ?sha .
+}
+        """
+        sd = self.graph.query(query)
+
+        stat_maps = dict()
+        if sd:
+            for row in sd:
+                coord_space = self.get_coordinate_spaces(row.coord_space_id)
+                args = row.asdict()
+                args['coord_space'] = coord_space
+                if oid is not None:
+                    args['oid'] = oid
+                # FIXME: will have to be set by default but that will change
+                # position of arguments (check for compatibility)
+                args['contrast_num'] = None
+                args.pop("coord_space_id", None)
+                stat_maps[args['oid']] = StatisticMap(**args)
+
+        self.objects.update(stat_maps)
+        if oid is not None:
+            return stat_maps[oid]
+        else:
+            return stat_maps
+
+    def get_inferences(self, oid=None):
+        """
+        Read a NIDM-Results document and return a dict of Inference activities.
+        """
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+prefix nidm_Inference: <http://purl.org/nidash/nidm#NIDM_0000049>
+prefix nidm_hasAltHypothesis: <http://purl.org/nidash/nidm#NIDM_0000097>
+prefix nidm_OneTailedTest: <http://purl.org/nidash/nidm#NIDM_0000060>
+prefix nidm_StatisticMap: <http://purl.org/nidash/nidm#NIDM_0000076>
+
+SELECT DISTINCT ?oid ?label ?tail ?stat_map_id WHERE {
+    """ + oid_var + """ a nidm_Inference: ;
+        rdfs:label ?label ;
+        nidm_hasAltHypothesis: ?tail ;
+        prov:used ?stat_map_id .
+    ?stat_map_id a nidm_StatisticMap: .
+}
+        """
+        sd = self.graph.query(query)
+
+        inferences = dict()
+        if sd:
+            for row in sd:
+                stat_map = self.get_stat_maps(row.stat_map_id)
+                args = row.asdict()
+                args['stat_map'] = stat_map
+                args['contrast_num'] = None
+                args.pop("stat_map_id", None)
+                if oid is not None:
+                    args['oid'] = oid
+
+                inferences[args['oid']] = InferenceActivity(**args)
+
+        self.objects.update(inferences)
+        if oid is not None:
+            return inferences[oid]
+        else:
+            return inferences
+
     def get_excursion_set_maps(self):
         """
         Read a NIDM-Results document and return a dict of ExcursionSet.
         """
+
+        # We need to add optional
+    #         nidm_hasClusterLabelsMap: ?cluster_label_map_id ;
+    # nidm_hasMaximumIntensityProjection: ?mip_id ;
+        # nidm_numberOfSignificantClusters: ?num_signif_vox ;
+        # nidm_pValue: ?p_value ;
+        # visu
         query = """
 prefix prov: <http://www.w3.org/ns/prov#>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -221,21 +358,18 @@ prefix nidm_numberOfSignificantClusters: <http://purl.org/nidash/nidm#NIDM_000\
 0111>
 prefix nidm_pValue: <http://purl.org/nidash/nidm#NIDM_0000114>
 
-SELECT DISTINCT ?id ?label ?loc ?format ?filname ?cluster_label_map_id ?mip_id
-?coord_space_id ?sha ?num_signif_vox ?p_value ?inference_id WHERE {
+SELECT DISTINCT ?oid ?label ?location ?format ?filname ?cluster_label_map_id
+?mip_id ?coord_space_id ?sha ?num_signif_vox ?p_value ?inference_id WHERE {
 
-?id a nidm_ExcursionSetMap: ;
-    prov:atLocation ?loc ;
+?oid a nidm_ExcursionSetMap: ;
+    prov:atLocation ?location ;
     rdfs:label ?label ;
     dct:format ?format ;
     nfo:fileName ?filename ;
-    nidm_hasClusterLabelsMap: ?cluster_label_map_id ;
-    nidm_hasMaximumIntensityProjection: ?mip_id ;
     nidm_inCoordinateSpace: ?coord_space_id ;
     crypto:sha512 ?sha ;
-    nidm_numberOfSignificantClusters: ?num_signif_vox ;
-    nidm_pValue: ?p_value ;
     prov:wasGeneratedBy ?inference_id .
+    OPTIONAL {?oid dc:description ?visualisation } .
 }
 ORDER BY ?peak_label
         """
@@ -243,29 +377,32 @@ ORDER BY ?peak_label
 
         exc_sets = dict()
         if sd:
-            for eid, label, loc, format, filname, clusterlabelmap_id, mip_id,\
-                    coord_space_id, sha, num_signif_vox, p_value, inference_id\
-                    in sd:
-                exc_set = 1
-                # cluster_index = None
-                # stat_num = None
-                # cluster_id = None
-                # print peak_id
-                exc_set = ExcursionSet(exc_file, stat_num, visualisation, coord_space,
-                 export_dir)
+            for row in sd:
+                args = row.asdict()
+
+                coord_space = self.get_coordinate_spaces(row.coord_space_id)
+                args['coord_space'] = coord_space
+                args.pop("coord_space_id", None)
+
+                inference = self.get_inferences(row.inference_id)
+                args['inference'] = inference
+                args.pop("inference_id", None)
+
+                exc_sets[args['oid']] = ExcursionSet(**args)
                 #             cluster_id,
                 #             coord_vector=coord_vector, p_unc=float(p_unc),
                 #             label=peak_label, coord_label=coord_label) #,
                 #             # excursion_set_id=exc_set_id)
                 # peaks[peak_id] = (peak)
 
-        self.objects.append(exc_sets)
+        self.objects.update(exc_sets)
         return exc_sets
 
     def serialize(self, destination, format="mkda"):
         # We need the peaks, excursion set maps and contrast maps
         self.get_peaks()
         self.get_excursion_set_maps()
+        self.get_inferences()
         # self.get_contrast_maps()
 
         if format == "mkda":
@@ -274,62 +411,38 @@ ORDER BY ?peak_label
             csvfile = destination
             with open(csvfile, 'wb') as fid:
                 writer = csv.writer(fid, delimiter='\t')
-                writer.writerow(["8"])
+                writer.writerow(["9"])
                 writer.writerow(
                     ["x", "y", "z", "Study", "Contrast", "N",
-                     "FixedRandom", "CoordSys"])
+                     "FixedRandom", "CoordSys", "Name"])
 
                 self.N = 20  # FIXME
                 self.FixedRandom = "random"  # FIXME
 
-                if self.is_mni:
-                    space = "MNI"
-                elif self.is_talairach:
-                    space = "T88"
-
                 # For anything that has a label
-                for peak in self.get_peaks():
+                con_ids = dict()
+                con_ids[None] = 0
+
+                for oid, peak in self.get_peaks().items():
+                    exc_set = self.objects[peak.exc_set_id]
+                    if exc_set.coord_space.is_mni:
+                        space = "MNI"
+                    elif exc_set.coord_space.is_talairach:
+                        space = "T88"
+
+                    stat_map = exc_set.inference.stat_map
+
+                    if stat_map.id in con_ids:
+                        con_id = con_ids[stat_map.id]
+                    else:
+                        con_id = max(con_ids.values()) + 1
+
+                    con_name = stat_map.contrast_name.replace(" ", "_")
+
                     writer.writerow([
-                        peak.x, peak.y, peak.z, self.study_name,
-                        peak.get_contrast.name(), self.N, self.FixedRandom,
-                        space])
-
-    #     # print pd.concat(peaks_df)
-    # def contrast_query(self):
-    #     query = """
-    #     prefix prov: <http://www.w3.org/ns/prov#>
-    #     prefix nidm: <http://purl.org/nidash/nidm#>
-
-    #     prefix contrast_estimation: <http://purl.org/nidash/\
-    # nidm#NIDM_0000001>
-    #     prefix contrast_map: <http://purl.org/nidash/nidm#NIDM_0000002>
-    #     prefix nidm_contrastName: <http://purl.org/nidash/nidm#NIDM_0000085>
-    #     prefix nidm_StatisticMap:: <http://purl.org/nidash/nidm#NIDM_0000076>
-    #     prefix nidm_statisticType: <http://purl.org/nidash/nidm#NIDM_0000123>
-
-    #     SELECT ?cid ?contrastName
-    #     WHERE {
-    #      ?cid a contrast_map: ;
-    #           nidm_contrastName: ?contrastName .
-    #      ?cea a contrast_estimation: .
-    #      ?cid prov:wasGeneratedBy ?cea .
-    #      ?sid a nidm_StatisticMap:: ;
-    #           nidm_statisticType: ?statType ;
-    #           prov:atLocation ?statFile .
-    #     }
-    #     """
-    #     sd = self.g.query(query)
-
-    #     self.contrasts = dict()
-    #     if sd:
-    #         for con_id, con_name in sd:
-    #             self.contrasts[con_id] = ContrastMap(
-    #                 None, None, con_name, None, None, ident=con_id)
-
-
-
-    #             print self.contrasts
-    #             # peaks_df.append(peak.dataframe())
-    #             # print row
-
-    #     # print pd.concat(peaks_df)
+                        peak.coordinate.coord_vector[0],
+                        peak.coordinate.coord_vector[1],
+                        peak.coordinate.coord_vector[2], self.study_name,
+                        con_id,
+                        self.N, self.FixedRandom,
+                        space, con_name])
