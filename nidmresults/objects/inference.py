@@ -656,7 +656,7 @@ class Coordinate(NIDMObject):
 
         coordinate = {
             NIDM_COORDINATE_VECTOR_IN_VOXELS: json.dumps(self.coord_vector),
-            NIDM_COORDINATE_VECTOR: self.coord_vector_std,
+            NIDM_COORDINATE_VECTOR: json.dumps(self.coord_vector_std),
         }
 
         self.add_attributes(
