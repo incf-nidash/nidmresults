@@ -95,26 +95,34 @@ class InferenceActivity(NIDMObject):
     Object representing an Inference activity.
     """
 
-    def __init__(self, contrast_num, contrast_name):
-        super(InferenceActivity, self).__init__()
+    def __init__(self, contrast_num=None, contrast_name=None, oid=None,
+                 tail=None, label=None, stat_map=None):
+        super(InferenceActivity, self).__init__(oid=oid)
         self.id = NIIRI[str(uuid.uuid4())]
         self.contrast_name = contrast_name
         self.type = NIDM_INFERENCE
         self.prov_type = PROV['Activity']
+        if tail is None:
+            tail = NIDM_ONE_TAILED_TEST
+        self.tail = tail
+        if label is None:
+            label = "Inference: " + self.contrast_name
+        self.label = label
+        # FIXME: not used yet for export (only for reading)
+        self.stat_map = stat_map
 
     def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
 
-        label = "Inference: " + self.contrast_name
         # In FSL we have a single thresholding (extent, height) applied to all
         # contrasts
         # FIXME: Deal with two-tailed inference?
         self.add_attributes((
             (PROV['type'], self.type),
-            (PROV['label'], label),
-            (NIDM_HAS_ALTERNATIVE_HYPOTHESIS, NIDM_ONE_TAILED_TEST)))
+            (PROV['label'], self.label),
+            (NIDM_HAS_ALTERNATIVE_HYPOTHESIS, self.tail)))
 
         return self.p
 
@@ -125,18 +133,27 @@ class ExcursionSet(NIDMObject):
     Object representing a ExcursionSet entity.
     """
 
-    def __init__(self, exc_file, stat_num, visualisation, coord_space,
-                 export_dir):
-        super(ExcursionSet, self).__init__(export_dir)
-        self.num = stat_num
-        self.id = NIIRI[str(uuid.uuid4())]
-        filename = 'ExcursionSet' + self.num + '.nii.gz'
-        self.file = NIDMFile(self.id, exc_file, filename, export_dir)
+    def __init__(self, location, coord_space, visualisation=None,
+                 stat_num=None,
+                 export_dir=None, oid=None, format=None, label=None,
+                 sha=None, filename=None, inference=None):
+        super(ExcursionSet, self).__init__(export_dir, oid)
+        if location is None:
+            self.num = stat_num
+            filename = 'ExcursionSet' + self.num + '.nii.gz'
+        else:
+            filename = location
+        self.file = NIDMFile(self.id, location, filename, export_dir, sha)
         self.type = NIDM_EXCURSION_SET_MAP
         self.prov_type = PROV['Entity']
-        self.visu = Visualisation(visualisation, stat_num, export_dir)
-
+        if visualisation is not None:
+            self.visu = Visualisation(visualisation, export_dir)
+        if label is None:
+            label = "Excursion Set Map"
+        self.label = label
         self.coord_space = coord_space
+        # FIXME Not used for export yet (only for reading)
+        self.inference = inference
 
     def export(self, nidm_version):
         """
@@ -152,7 +169,7 @@ class ExcursionSet(NIDMObject):
         self.add_attributes((
             (PROV['type'], self.type),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
-            (PROV['label'], "Excursion Set Map"),
+            (PROV['label'], self.label),
             (DC['description'], self.visu.id)
         ))
 
@@ -168,7 +185,7 @@ class Visualisation(NIDMObject):
     Object representing an Image entity.
     """
 
-    def __init__(self, visu_filename, stat_num, export_dir):
+    def __init__(self, visu_filename, export_dir):
         super(Visualisation, self).__init__(export_dir)
         self.id = NIIRI[str(uuid.uuid4())]
         self.file = NIDMFile(self.id, visu_filename, export_dir=export_dir)
@@ -608,14 +625,13 @@ class Coordinate(NIDMObject):
         self.id = NIIRI[str(uuid.uuid4())]
         self.label_id = label_id
         if x is not None and y is not None and z is not None:
-            self.coord_vector = \
-                "[ " + str(x) + ", " + str(y) + ", " + str(z) + " ]"
+            self.coord_vector = [x, y, z]
         else:
+            if isinstance(coord_vector, rdflib.term.Literal):
+                coord_vector = json.loads(coord_vector)
             self.coord_vector = coord_vector
         if x_std is not None and y_std is not None and z_std is not None:
-            self.coord_vector_std = \
-                "[ " + str(x_std) + ", " + str(y_std) + ", " + \
-                str(z_std) + " ]"
+            self.coord_vector_std = [x_std, y_std, z_std]
         else:
             self.coord_vector_std = coord_vector_std
         self.type = NIDM_COORDINATE
@@ -639,7 +655,7 @@ class Coordinate(NIDMObject):
             (PROV['label'], self.label)]
 
         coordinate = {
-            NIDM_COORDINATE_VECTOR_IN_VOXELS: self.coord_vector,
+            NIDM_COORDINATE_VECTOR_IN_VOXELS: json.dumps(self.coord_vector),
             NIDM_COORDINATE_VECTOR: self.coord_vector_std,
         }
 
@@ -659,14 +675,19 @@ class Peak(NIDMObject):
 
     def __init__(self, cluster_index, peak_index, equiv_z, stat_num,
                  cluster_id=None, p_unc=None, p_fwer=None, label=None,
-                 coord_label=None, *args, **kwargs):
-        super(Peak, self).__init__()
+                 coord_label=None, exc_set_id=None, oid=None, *args, **kwargs):
+        super(Peak, self).__init__(oid)
         # FIXME: Currently assumes less than 10 clusters per contrast
         # cluster_num = cluster_index
         # FIXME: Currently assumes less than 100 peaks
-        peak_unique_id = '000' + str(cluster_index) + '_' + str(peak_index)
-        self.id = NIIRI[str(uuid.uuid4())]
-        self.num = peak_unique_id
+        if oid is not None:
+            self.label = label
+            peak_unique_id = label[5:]
+            peak_index = peak_unique_id
+            # cluster_index, peak_index = peak_unique_id.split("_")
+        else:
+            peak_unique_id = '000' + str(cluster_index) + '_' + str(peak_index)
+            self.label = "Peak " + peak_unique_id
         self.equiv_z = equiv_z
         self.p_unc = p_unc
         self.p_fwer = p_fwer
@@ -675,10 +696,7 @@ class Peak(NIDMObject):
         self.type = NIDM_PEAK
         self.prov_type = PROV['Entity']
         self.cluster = cluster_id
-        if label is not None:
-            self.label = label
-        else:
-            self.label = "Peak " + str(self.num)
+        self.exc_set_id = exc_set_id
 
     def __str__(self):
         return '%s \tz=%.2f \tp=%.2e (unc.) \t%s' % (

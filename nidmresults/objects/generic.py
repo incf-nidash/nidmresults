@@ -27,12 +27,15 @@ class NIDMObject(object):
     or agent
     """
 
-    def __init__(self, export_dir=None):
+    def __init__(self, export_dir=None, oid=None):
         self.export_dir = export_dir
         self.p = ProvBundle()
 
         self.g = rdflib.Graph()
-        self.id = None
+        if oid is None:
+            self.id = NIIRI[str(uuid.uuid4())]
+        else:
+            self.id = oid
 
     def __str__(self):
         value = ""
@@ -42,7 +45,8 @@ class NIDMObject(object):
 
     def __repr__(self):
         return '<"' + self.label + '" ' + \
-               str(self.id).replace("niiri:", "")[0:8] + '>'
+               str(self.id).replace("niiri:", "").replace(NIIRI._uri, "")[0:8]\
+               + '>'
 
     def _rdf_add_attributes(self, attributes):
         if self.type is not None:
@@ -165,27 +169,68 @@ class CoordinateSpace(NIDMObject):
     Object representing a CoordinateSpace entity.
     """
 
-    def __init__(self, coordinate_system, nifti_file):
-        super(CoordinateSpace, self).__init__()
+    def __init__(self, coordinate_system, nifti_file=None, vox_to_world=None,
+                 vox_size=None, dimensions=None, numdim=None, units=None,
+                 oid=None, label="Coordinate space"):
+        super(CoordinateSpace, self).__init__(oid)
         self.coordinate_system = coordinate_system
-        self.id = NIIRI[str(uuid.uuid4())]
         self.type = NIDM_COORDINATE_SPACE
         self.prov_type = PROV['Entity']
+        self.label = label
 
-        thresImg = nib.load(nifti_file)
-        thresImgHdr = thresImg.get_header()
+        if (vox_to_world is None) and (vox_size is None) and\
+                (dimensions is None) and (numdim is None) and\
+                (units is None) and \
+                (nifti_file is not None):
+            thresImg = nib.load(nifti_file)
+            thresImgHdr = thresImg.get_header()
 
-        self.number_of_dimensions = len(thresImg.shape)
+            numdim = len(thresImg.shape)
+            dimensions = str(thresImg.shape).replace(
+                '(', '[ ').replace(')', ' ]')
+            vox_to_world = '%s' \
+                % ', '.join(str(thresImg.get_qform())
+                            .strip('()')
+                            .replace('. ', '')
+                            .split()).replace('[,', '[').replace('\n', '')
+            vox_size = '[ %s ]' % ', '.join(
+                map(str, thresImgHdr['pixdim'][
+                    1:(self.number_of_dimensions + 1)]))
+            # FIXME: this gives mm, sec => what is wrong: FSL file, nibabel,
+            # other?
+            # units = str(thresImgHdr.get_xyzt_units()).strip('()')
+            units = json.dumps(["mm", "mm", "mm"])
 
-        self.dimension = str(thresImg.shape).replace(
-            '(', '[ ').replace(')', ' ]')
-        self.voxel_to_world = '%s' \
-            % ', '.join(str(thresImg.get_qform())
-                        .strip('()')
-                        .replace('. ', '')
-                        .split()).replace('[,', '[').replace('\n', '')
-        self.voxel_size = '[ %s ]' % ', '.join(
-            map(str, thresImgHdr['pixdim'][1:(self.number_of_dimensions + 1)]))
+        self.number_of_dimensions = numdim
+        self.voxel_to_world = vox_to_world
+        self.voxel_size = vox_size
+        self.dimensions = dimensions
+        self.units = units
+
+    def is_mni(self):
+        if str(self.coordinate_system) in [
+                NIDM_MNI_COORDINATE_SYSTEM.uri,
+                NIDM_ICBM_MNI152_LINEAR_COORDINATE_SYSTEM.uri,
+                NIDM_ICBM_MNI152_NON_LINEAR2009A_ASYMMETRIC_COORDINATE_SYSTEM.uri,
+                NIDM_ICBM_MNI152_NON_LINEAR2009A_SYMMETRIC_COORDINATE_SYSTEM.uri,
+                NIDM_ICBM_MNI152_NON_LINEAR2009B_ASYMMETRIC_COORDINATE_SYSTEM.uri,
+                NIDM_ICBM_MNI152_NON_LINEAR2009B_SYMMETRIC_COORDINATE_SYSTEM.uri,
+                NIDM_ICBM_MNI152_NON_LINEAR2009C_ASYMMETRIC_COORDINATE_SYSTEM.uri,
+                NIDM_ICBM_MNI152_NON_LINEAR2009C_SYMMETRIC_COORDINATE_SYSTEM.uri,
+                NIDM_ICBM_MNI152_NON_LINEAR6TH_GENERATION_COORDINATE_SYSTEM.uri,
+                NIDM_ICBM452_AIR_COORDINATE_SYSTEM.uri,
+                NIDM_ICBM452_WARP5_COORDINATE_SYSTEM.uri,
+                NIDM_IXI549_COORDINATE_SYSTEM.uri,
+                NIDM_MNI305_COORDINATE_SYSTEM.uri]:
+            return True
+        else:
+            return False
+
+    def is_talairach(self):
+        if str(self.coordinate_system) in [NIDM_TALAIRACH_COORDINATE_SYSTEM.uri]:
+            return True
+        else:
+            return False
 
     def export(self, nidm_version):
         """
@@ -193,17 +238,13 @@ class CoordinateSpace(NIDMObject):
         """
         self.add_attributes({
             PROV['type']: self.type,
-            NIDM_DIMENSIONS_IN_VOXELS: self.dimension,
+            NIDM_DIMENSIONS_IN_VOXELS: self.dimensions,
             NIDM_NUMBER_OF_DIMENSIONS: self.number_of_dimensions,
             NIDM_VOXEL_TO_WORLD_MAPPING: self.voxel_to_world,
             NIDM_IN_WORLD_COORDINATE_SYSTEM: self.coordinate_system,
-            # FIXME: this gives mm, sec => what is wrong: FSL file, nibabel,
-            # other?
-            # NIDM_VOXEL_UNITS:
-            # '[%s]'%str(thresImgHdr.get_xyzt_units()).strip('()'),
-            NIDM_VOXEL_UNITS: json.dumps(["mm", "mm", "mm"]),
+            NIDM_VOXEL_UNITS: self.units,
             NIDM_VOXEL_SIZE: self.voxel_size,
-            PROV['label']: "Coordinate space"})
+            PROV['label']: self.label})
         return self.p
 
 
@@ -211,10 +252,11 @@ class NIDMFile(NIDMObject):
     """
     Object representing a File (to be used as attribute of another class)
     """
-    def __init__(self, rdf_id, org_file, new_filename=None, export_dir=None):
+    def __init__(self, rdf_id, location, new_filename=None, export_dir=None,
+                 sha=None, format=None):
         super(NIDMFile, self).__init__(export_dir)
         self.prov_type = PROV['Entity']
-        self.path = org_file
+        self.path = location
         if new_filename is None:
             # Keep same file name
             path, self.new_filename = os.path.split(self.path)
@@ -225,6 +267,9 @@ class NIDMFile(NIDMObject):
         self.type = None
         self.id = rdf_id
         self.label = "'NIDM file'"  # used if display is called
+
+        self.sha = sha
+        self.format = format
 
     def is_nifti(self):
         return self.path.endswith(".nii") or \
@@ -248,6 +293,7 @@ class NIDMFile(NIDMObject):
         if self.path is not None:
             path, org_filename = os.path.split(self.path)
             if self.export_dir is not None:
+                # Copy file only if export_dir is not None
                 new_file = os.path.join(self.export_dir, self.new_filename)
                 if not self.path == new_file:
                     shutil.copy(self.path, new_file)
@@ -269,10 +315,14 @@ class NIDMFile(NIDMObject):
                     self.add_attributes([(NFO['fileName'], org_filename)])
 
             if self.is_nifti():
-                sha = self.get_sha_sum(new_file)
+                if self.sha is None:
+                    self.sha = self.get_sha_sum(new_file)
+                if self.format is None:
+                    self.format = "image/nifti"
+
                 self.add_attributes([
-                    (CRYPTO['sha512'], sha),
-                    (DCT['format'], "image/nifti")
+                    (CRYPTO['sha512'], self.sha),
+                    (DCT['format'], self.format)
                 ])
 
             return self.p
