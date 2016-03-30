@@ -186,20 +186,14 @@ class CoordinateSpace(NIDMObject):
             thresImgHdr = thresImg.get_header()
 
             numdim = len(thresImg.shape)
-            dimensions = str(thresImg.shape).replace(
-                '(', '[ ').replace(')', ' ]')
-            vox_to_world = '%s' \
-                % ', '.join(str(thresImg.get_qform())
-                            .strip('()')
-                            .replace('. ', '')
-                            .split()).replace('[,', '[').replace('\n', '')
-            vox_size = '[ %s ]' % ', '.join(
-                map(str, thresImgHdr['pixdim'][
-                    1:(self.number_of_dimensions + 1)]))
+            dimensions = thresImg.shape
+            # FIXME: is vox_to_world the qform?
+            vox_to_world = thresImg.get_qform()
+            vox_size = thresImgHdr['pixdim'][1:(numdim + 1)]
             # FIXME: this gives mm, sec => what is wrong: FSL file, nibabel,
             # other?
             # units = str(thresImgHdr.get_xyzt_units()).strip('()')
-            units = json.dumps(["mm", "mm", "mm"])
+            units = ["mm", "mm", "mm"]
 
         self.number_of_dimensions = numdim
         self.voxel_to_world = vox_to_world
@@ -238,12 +232,13 @@ class CoordinateSpace(NIDMObject):
         """
         self.add_attributes({
             PROV['type']: self.type,
-            NIDM_DIMENSIONS_IN_VOXELS: self.dimensions,
+            NIDM_DIMENSIONS_IN_VOXELS: json.dumps(self.dimensions),
             NIDM_NUMBER_OF_DIMENSIONS: self.number_of_dimensions,
-            NIDM_VOXEL_TO_WORLD_MAPPING: self.voxel_to_world,
+            NIDM_VOXEL_TO_WORLD_MAPPING:
+            json.dumps(self.voxel_to_world.tolist()),
             NIDM_IN_WORLD_COORDINATE_SYSTEM: self.coordinate_system,
-            NIDM_VOXEL_UNITS: self.units,
-            NIDM_VOXEL_SIZE: self.voxel_size,
+            NIDM_VOXEL_UNITS: json.dumps(self.units),
+            NIDM_VOXEL_SIZE: json.dumps(self.voxel_size.tolist()),
             PROV['label']: self.label})
         return self.p
 

@@ -138,11 +138,13 @@ class ExcursionSet(NIDMObject):
                  export_dir=None, oid=None, format=None, label=None,
                  sha=None, filename=None, inference=None):
         super(ExcursionSet, self).__init__(export_dir, oid)
-        if location is None:
+        # Excursion set is going to be copied over to export_dir folder
+        if export_dir is not None:
             self.num = stat_num
             filename = 'ExcursionSet' + self.num + '.nii.gz'
         else:
             filename = location
+        self.filename = filename
         self.file = NIDMFile(self.id, location, filename, export_dir, sha)
         self.type = NIDM_EXCURSION_SET_MAP
         self.prov_type = PROV['Entity']
@@ -656,7 +658,7 @@ class Coordinate(NIDMObject):
 
         coordinate = {
             NIDM_COORDINATE_VECTOR_IN_VOXELS: json.dumps(self.coord_vector),
-            NIDM_COORDINATE_VECTOR: self.coord_vector_std,
+            NIDM_COORDINATE_VECTOR: json.dumps(self.coord_vector_std),
         }
 
         self.add_attributes(
