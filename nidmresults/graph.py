@@ -446,6 +446,7 @@ ORDER BY ?peak_label
                         con_id = con_ids[stat_map.id]
                     else:
                         con_id = max(con_ids.values()) + 1
+                        con_ids[stat_map.id] = con_id
 
                     con_name = stat_map.contrast_name.replace(" ", "_")
 
