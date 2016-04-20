@@ -421,7 +421,8 @@ ORDER BY ?peak_label
             with open(csvfile, open_mode) as fid:
                 writer = csv.writer(fid, delimiter='\t')
                 if add_header:
-                    writer.writerow(["9"])
+                    writer.writerow(["9", "NaN", "NaN", "NaN", "NaN", "NaN",
+                                     "NaN", "NaN", "NaN"])
                     writer.writerow(
                         ["x", "y", "z", "Study", "Contrast", "N",
                          "FixedRandom", "CoordSys", "Name"])
