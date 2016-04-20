@@ -398,7 +398,8 @@ ORDER BY ?peak_label
         self.objects.update(exc_sets)
         return exc_sets
 
-    def serialize(self, destination, format="mkda", overwrite=False):
+    def serialize(self, destination, format="mkda", overwrite=False,
+                  con_ids=dict()):
         # We need the peaks, excursion set maps and contrast maps
         self.get_peaks()
         self.get_excursion_set_maps()
@@ -429,7 +430,6 @@ ORDER BY ?peak_label
                 self.FixedRandom = "random"  # FIXME
 
                 # For anything that has a label
-                con_ids = dict()
                 con_ids[None] = 0
 
                 for oid, peak in self.get_peaks().items():
@@ -442,13 +442,13 @@ ORDER BY ?peak_label
 
                     stat_map = exc_set.inference.stat_map
 
-                    if stat_map.id in con_ids:
-                        con_id = con_ids[stat_map.id]
+                    con_name = stat_map.contrast_name.replace(" ", "_")
+
+                    if con_name in con_ids:
+                        con_id = con_ids[con_name]
                     else:
                         con_id = max(con_ids.values()) + 1
-                        con_ids[stat_map.id] = con_id
-
-                    con_name = stat_map.contrast_name.replace(" ", "_")
+                        con_ids[con_name] = con_id
 
                     writer.writerow([
                         peak.coordinate.coord_vector[0],
@@ -457,3 +457,5 @@ ORDER BY ?peak_label
                         con_id,
                         self.N, self.FixedRandom,
                         space, con_name])
+
+        return con_ids
