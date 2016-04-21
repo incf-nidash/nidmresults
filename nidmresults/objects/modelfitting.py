@@ -154,7 +154,7 @@ class Person(NIDMObject):
     def __init__(self):
         super(Person, self).__init__()
         self.id = NIIRI[str(uuid.uuid4())]
-        self.prov_type = PROV['Entity']
+        self.prov_type = PROV['Agent']
         self.type = PROV['Person']
 
     def export(self, nidm_version):
