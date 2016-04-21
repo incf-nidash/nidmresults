@@ -26,7 +26,8 @@ class ModelFitting(NIDMObject):
     """
 
     def __init__(self, activity, design_matrix, data, error_model,
-                 param_estimates, rms_map, mask_map, grand_mean_map):
+                 param_estimates, rms_map, mask_map, grand_mean_map,
+                 machine, subjects):
         super(ModelFitting, self).__init__()
         self.activity = activity
         self.design_matrix = design_matrix
@@ -36,6 +37,8 @@ class ModelFitting(NIDMObject):
         self.rms_map = rms_map
         self.mask_map = mask_map
         self.grand_mean_map = grand_mean_map
+        self.machine = machine
+        self.subjects = subjects
 
     def export(self, nidm_version):
         """
@@ -48,6 +51,17 @@ class ModelFitting(NIDMObject):
         # Data
         self.activity.used(self.data)
         self.add_object(self.data, nidm_version)
+
+        if nidm_version['major'] > 1 or \
+                (nidm_version['major'] == 1 and nidm_version['minor'] >= 3):
+            # Machine
+            self.add_object(self.machine, nidm_version)
+            self.data.wasAttributedTo(self.machine)
+
+            # Imaged subject or group(s)
+            for sub in self.subjects:
+                self.add_object(sub, nidm_version)
+                self.data.wasAttributedTo(sub)
 
         # Error Model
         self.activity.used(self.error_model)
@@ -72,6 +86,79 @@ class ModelFitting(NIDMObject):
 
         # Model Parameters Estimation activity
         self.add_object(self.activity, nidm_version)
+
+        return self.p
+
+
+class ImagingInstrument(NIDMObject):
+    """
+    Object representing a ImagingInstrument entity.
+    """
+
+    def __init__(self, machine_type):
+        super(ImagingInstrument, self).__init__()
+        self.id = NIIRI[str(uuid.uuid4())]
+        machine_term = dict(
+            mri=NIF_MRI, eeg=NIF_EEG, meg=NIF_MEG, pet=NIF_PET,
+            spect=NIF_SPECT)
+        self.type = machine_term[machine_type.lower()]
+        self.prov_type = PROV['Entity']
+
+    def export(self, nidm_version):
+        """
+        Create prov entities and activities.
+        """
+        self.add_attributes((
+            (PROV['type'], self.type),
+            (PROV['label'], "Imaging Instrument")))
+
+        return self.p
+
+
+class Group(NIDMObject):
+    """
+    Object representing a ImagingInstrument entity.
+    """
+
+    def __init__(self, num_subjects, group_name):
+        super(Group, self).__init__()
+        self.id = NIIRI[str(uuid.uuid4())]
+        self.type = STATO_GROUP
+        self.prov_type = PROV['Entity']
+        self.group_name = group_name
+        self.num_subjects = num_subjects
+
+    def export(self, nidm_version):
+        """
+        Create prov entities and activities.
+        """
+        self.add_attributes((
+            (PROV['type'], self.type),
+            (NIDM_GROUP_NAME, self.group_name),
+            (NIDM_NUMBER_OF_SUBJECTS, self.num_subjects),
+            (PROV['label'], "Study group population")))
+
+        return self.p
+
+
+class Person(NIDMObject):
+    """
+    Object representing a ImagingInstrument entity.
+    """
+
+    def __init__(self):
+        super(Person, self).__init__()
+        self.id = NIIRI[str(uuid.uuid4())]
+        self.prov_type = PROV['Entity']
+        self.type = PROV['Person']
+
+    def export(self, nidm_version):
+        """
+        Create prov entities and activities.
+        """
+        self.add_attributes((
+            (PROV['type'], self.prov_type),
+            (PROV['label'], "Person")))
 
         return self.p
 
@@ -177,13 +264,14 @@ class Data(NIDMObject):
     Object representing a Data entity.
     """
 
-    def __init__(self, grand_mean_scaling, target):
+    def __init__(self, grand_mean_scaling, target, mri_protocol=None):
         super(Data, self).__init__()
         self.grand_mean_sc = grand_mean_scaling
         self.target_intensity = target
         self.id = NIIRI[str(uuid.uuid4())]
         self.type = NIDM_DATA
         self.prov_type = PROV['Entity']
+        self.mri_protocol = mri_protocol
 
     def export(self, nidm_version):
         """
@@ -201,6 +289,7 @@ class Data(NIDMObject):
             (PROV['label'], "Data"),
             (NIDM_GRAND_MEAN_SCALING, self.grand_mean_sc),
             (NIDM_TARGET_INTENSITY, self.target_intensity)))
+
         return self.p
 
 

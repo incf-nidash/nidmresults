@@ -22,6 +22,7 @@ DC = Namespace("dc", "http://purl.org/dc/elements/1.1/")
 NFO = Namespace(
     "nfo", "http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#")
 SCR = Namespace("scr", "http://scicrunch.org/resolver/")
+NIF = Namespace("nif", "http://uri.neuinfo.org/nif/nifstd/")
 
 # Sciencrunch constants
 SCR_FSL = SCR['SCR_002823']
@@ -31,7 +32,16 @@ SCR_SPM = SCR['SCR_007037']
 NLX_FSL = NLX['birnlex_2067']
 NIDM_FSL = NIDM['NIDM_0000167']
 
+# NIFSTD constants
+NIF_MRI = NIF['birnlex_2100']
+NIF_EEG = NIF['ixl_0050003']
+NIF_MEG = NIF['ixl_0050002']
+NIF_PET = NIF['ixl_0050000']
+NIF_SPECT = NIF['ixl_0050001']
+
 # NIDM constants
+NIDM_NUMBER_OF_SUBJECTS = NIDM['NIDM_0000171']
+NIDM_GROUP_NAME = NIDM['NIDM_0000170']
 NIDM_DATA = NIDM['NIDM_0000169']
 NIDM_NIDM_RESULTS_EXPORT = NIDM['NIDM_0000166']
 FSL_FEAT_VERSION = FSL['FSL_0000005']
@@ -218,6 +228,7 @@ STATO_ZSTATISTIC = OBO['STATO_0000376']
 STATO_FSTATISTIC = OBO['STATO_0000282']
 STATO_CONTRAST_WEIGHT_MATRIX = OBO['STATO_0000323']
 STATO_NORMAL_DISTRIBUTION = OBO['STATO_0000227']
+STATO_GROUP = OBO['STATO_0000193']
 
 OBO_STATISTIC = OBO['STATO_0000039']
 OBO_P_VALUE_FWER = OBO['OBI_0001265']

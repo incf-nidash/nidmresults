@@ -107,6 +107,9 @@ class NIDMObject(object):
     def wasDerivedFrom(self, nidm_object):
         self._add_prov_relation(PROV['wasDerivedFrom'], nidm_object)
 
+    def wasAttributedTo(self, nidm_object):
+        self._add_prov_relation(PROV['wasAttributedTo'], nidm_object)
+
     def wasAssociatedWith(self, nidm_object):
         self._add_prov_relation(PROV['wasAssociatedWith'], nidm_object)
 
@@ -124,6 +127,8 @@ class NIDMObject(object):
             self.p.wasDerivedFrom(self.id, object_id)
         elif relation == PROV['wasAssociatedWith']:
             self.p.wasAssociatedWith(self.id, object_id)
+        elif relation == PROV['wasAttributedTo']:
+            self.p.wasAttributedTo(self.id, object_id)
         else:
             raise Exception('Unrecognised prov relation')
 
