@@ -17,7 +17,7 @@ SPM = Namespace("fsl", "http://purl.org/nidash/spm#")
 DCT = Namespace("dct", "http://purl.org/dc/terms/")
 OBO = Namespace("obo", "http://purl.obolibrary.org/obo/")
 DCTYPE = Namespace("dctype", "http://purl.org/dc/dcmitype/")
-NLX = Namespace("nlx", "http://neurolex.org/wiki/")
+NLX_OLD = Namespace("nlx_old", "http://neurolex.org/wiki/")
 DC = Namespace("dc", "http://purl.org/dc/elements/1.1/")
 NFO = Namespace(
     "nfo", "http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#")
@@ -29,7 +29,7 @@ SCR_FSL = SCR['SCR_002823']
 SCR_SPM = SCR['SCR_007037']
 
 # NeuroLex constants
-NLX_FSL = NLX['birnlex_2067']
+NLX_FSL = NIF['birnlex_2067']
 NIDM_FSL = NIDM['NIDM_0000167']
 
 # NIFSTD constants
@@ -38,8 +38,10 @@ NIF_EEG = NIF['ixl_0050003']
 NIF_MEG = NIF['ixl_0050002']
 NIF_PET = NIF['ixl_0050000']
 NIF_SPECT = NIF['ixl_0050001']
+NLX_FMRI_PROTOCOL = NIF['birnlex_2250']
 
 # NIDM constants
+NIDM_HAS_MRI_PROTOCOL = NIDM['NIDM_0000172']
 NIDM_NUMBER_OF_SUBJECTS = NIDM['NIDM_0000171']
 NIDM_GROUP_NAME = NIDM['NIDM_0000170']
 NIDM_DATA = NIDM['NIDM_0000169']
