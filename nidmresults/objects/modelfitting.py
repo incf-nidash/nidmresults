@@ -408,12 +408,14 @@ class ResidualMeanSquares(NIDMObject):
     Object representing an ResidualMeanSquares entity.
     """
 
-    def __init__(self, export_dir, residual_file, coord_space):
+    def __init__(self, export_dir, residual_file, coord_space,
+                 temporary=False):
         super(ResidualMeanSquares, self).__init__(export_dir)
         self.coord_space = coord_space
         self.id = NIIRI[str(uuid.uuid4())]
         filename = 'ResidualMeanSquares.nii.gz'
-        self.file = NIDMFile(self.id, residual_file, filename, export_dir)
+        self.file = NIDMFile(self.id, residual_file, filename, export_dir,
+                             temporary=temporary)
         self.type = NIDM_RESIDUAL_MEAN_SQUARES_MAP
         self.prov_type = PROV['Entity']
 

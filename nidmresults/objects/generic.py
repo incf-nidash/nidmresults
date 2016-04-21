@@ -253,7 +253,7 @@ class NIDMFile(NIDMObject):
     Object representing a File (to be used as attribute of another class)
     """
     def __init__(self, rdf_id, location, new_filename=None, export_dir=None,
-                 sha=None, format=None):
+                 sha=None, format=None, temporary=False):
         super(NIDMFile, self).__init__(export_dir)
         self.prov_type = PROV['Entity']
         self.path = location
@@ -270,6 +270,7 @@ class NIDMFile(NIDMObject):
 
         self.sha = sha
         self.format = format
+        self.temporary = temporary
 
     def is_nifti(self):
         return self.path.endswith(".nii") or \
@@ -297,6 +298,8 @@ class NIDMFile(NIDMObject):
                 new_file = os.path.join(self.export_dir, self.new_filename)
                 if not self.path == new_file:
                     shutil.copy(self.path, new_file)
+                    if self.temporary:
+                        os.remove(self.path)
             else:
                 new_file = self.path
 
