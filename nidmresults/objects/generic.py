@@ -362,17 +362,21 @@ class NeuroimagingSoftware(NIDMObject):
         self.id = NIIRI[str(uuid.uuid4())]
         self.version = version
         # FIXME: get label from owl!
-        if software_type == NLX_FSL:
+        if software_type.lower() == "fsl":
             self.name = "FSL"
         else:
             raise Exception('Unrecognised software: ' + str(software_type))
-        self.type = software_type  # NLX_FSL
+        self.type = SCR_FSL  # NLX_FSL
         self.prov_type = PROV['Agent']
 
     def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
+        if nidm_version['major'] < 1 or \
+                (nidm_version['major'] == 1 and nidm_version['minor'] < 3):
+            self.type = NLX_FSL
+
         self.add_attributes((
             (PROV['type'], self.type),
             (PROV['type'], PROV['SoftwareAgent']),

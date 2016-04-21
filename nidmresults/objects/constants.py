@@ -21,6 +21,11 @@ NLX = Namespace("nlx", "http://neurolex.org/wiki/")
 DC = Namespace("dc", "http://purl.org/dc/elements/1.1/")
 NFO = Namespace(
     "nfo", "http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#")
+SCR = Namespace("scr", "http://scicrunch.org/resolver/")
+
+# Sciencrunch constants
+SCR_FSL = SCR['SCR_002823']
+SCR_SPM = SCR['SCR_007037']
 
 # NeuroLex constants
 NLX_FSL = NLX['birnlex_2067']
