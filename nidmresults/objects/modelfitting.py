@@ -292,8 +292,8 @@ class Data(NIDMObject):
             (NIDM_GRAND_MEAN_SCALING, self.grand_mean_sc),
             (NIDM_TARGET_INTENSITY, self.target_intensity)))
 
-        if nidm_version['major'] < 1 or \
-                (nidm_version['major'] == 1 and nidm_version['minor'] < 3):
+        if nidm_version['major'] > 1 or \
+                (nidm_version['major'] == 1 and nidm_version['minor'] > 2):
             if self.mri_protocol is not None:
                 self.add_attributes(
                     [(NIDM_HAS_MRI_PROTOCOL, self.mri_protocol)])
