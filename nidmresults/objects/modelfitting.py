@@ -106,7 +106,7 @@ class ImagingInstrument(NIDMObject):
             mri='MRI Scanner', eeg='EEG Machine', meg='MEG Machine',
             pet='PET Scanner', spect='SPECT Machine')
         self.type = machine_term[machine_type]
-        self.prov_type = PROV['Entity']
+        self.prov_type = PROV['Agent']
         self.label = machine_label[machine_type]
 
     def export(self, nidm_version):

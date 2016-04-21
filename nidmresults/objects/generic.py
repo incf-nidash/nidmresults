@@ -362,7 +362,7 @@ class Image(NIDMObject):
 
 class NeuroimagingSoftware(NIDMObject):
     """
-    Class representing a NeuroimagingSoftware entity.
+    Class representing a NeuroimagingSoftware Agent.
     """
 
     def __init__(self, software_type, version):
@@ -397,7 +397,7 @@ class NeuroimagingSoftware(NIDMObject):
 
 class ExporterSoftware(NIDMObject):
     """
-    Class representing a Software entity.
+    Class representing a Software Agent.
     """
 
     def __init__(self, software_type, version):
