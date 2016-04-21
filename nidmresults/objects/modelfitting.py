@@ -189,11 +189,14 @@ class Data(NIDMObject):
         """
         Create prov entities and activities.
         """
+        if nidm_version['major'] < 1 or \
+                (nidm_version['major'] == 1 and nidm_version['minor'] < 3):
+            self.type = NIDM_DATA_SCALING
     # Create "Data" entity
         # FIXME: grand mean scaling?
         # FIXME: medianIntensity
         self.add_attributes((
-            (PROV['type'], NIDM_DATA),
+            (PROV['type'], self.type),
             (PROV['type'], PROV['Collection']),
             (PROV['label'], "Data"),
             (NIDM_GRAND_MEAN_SCALING, self.grand_mean_sc),
