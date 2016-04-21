@@ -48,20 +48,20 @@ class ModelFitting(NIDMObject):
         self.activity.used(self.design_matrix)
         self.add_object(self.design_matrix, nidm_version)
 
-        # Data
-        self.activity.used(self.data)
-        self.add_object(self.data, nidm_version)
-
         if nidm_version['major'] > 1 or \
                 (nidm_version['major'] == 1 and nidm_version['minor'] >= 3):
             # Machine
-            self.add_object(self.machine, nidm_version)
             self.data.wasAttributedTo(self.machine)
+            self.add_object(self.machine, nidm_version)
 
             # Imaged subject or group(s)
             for sub in self.subjects:
                 self.add_object(sub, nidm_version)
                 self.data.wasAttributedTo(sub)
+
+        # Data
+        self.activity.used(self.data)
+        self.add_object(self.data, nidm_version)
 
         # Error Model
         self.activity.used(self.error_model)
