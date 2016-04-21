@@ -97,12 +97,17 @@ class ImagingInstrument(NIDMObject):
 
     def __init__(self, machine_type):
         super(ImagingInstrument, self).__init__()
+        machine_type = machine_type.lower()
         self.id = NIIRI[str(uuid.uuid4())]
         machine_term = dict(
             mri=NIF_MRI, eeg=NIF_EEG, meg=NIF_MEG, pet=NIF_PET,
             spect=NIF_SPECT)
-        self.type = machine_term[machine_type.lower()]
+        machine_label = dict(
+            mri='MRI Scanner', eeg='EEG Machine', meg='MEG Machine',
+            pet='PET Scanner', spect='SPECT Machine')
+        self.type = machine_term[machine_type]
         self.prov_type = PROV['Entity']
+        self.label = machine_label[machine_type]
 
     def export(self, nidm_version):
         """
