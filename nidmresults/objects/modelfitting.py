@@ -115,7 +115,7 @@ class ImagingInstrument(NIDMObject):
         """
         self.add_attributes((
             (PROV['type'], self.type),
-            (PROV['label'], "Imaging Instrument")))
+            (PROV['label'], self.label)))
 
         return self.p
 
