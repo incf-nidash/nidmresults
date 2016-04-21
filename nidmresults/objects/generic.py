@@ -380,7 +380,7 @@ class NeuroimagingSoftware(NIDMObject):
         """
         if nidm_version['major'] < 1 or \
                 (nidm_version['major'] == 1 and nidm_version['minor'] < 3):
-            self.type = NLX_FSL
+            self.type = NLX_OLD_FSL
 
         self.add_attributes((
             (PROV['type'], self.type),

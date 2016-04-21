@@ -29,7 +29,7 @@ SCR_FSL = SCR['SCR_002823']
 SCR_SPM = SCR['SCR_007037']
 
 # NeuroLex constants
-NLX_FSL = NIF['birnlex_2067']
+NLX_OLD_FSL = NLX_OLD['birnlex_2067']
 NIDM_FSL = NIDM['NIDM_0000167']
 
 # NIFSTD constants
