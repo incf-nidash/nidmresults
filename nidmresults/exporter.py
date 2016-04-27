@@ -62,8 +62,13 @@ class NIDMExporter():
                             'num': version}
         else:
             major, minor, revision = version.split(".")
+            if "-rc" in revision:
+                revision, rc = revision.split("-rc")
+            else:
+                rc = -1
             self.version = {'major': int(major), 'minor': int(minor),
-                            'revision': int(revision), 'num': version}
+                            'revision': int(revision), 'rc': int(rc),
+                            'num': version}
 
         # Initialise prov document
         self.doc = ProvDocument()

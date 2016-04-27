@@ -26,7 +26,8 @@ class ModelFitting(NIDMObject):
     """
 
     def __init__(self, activity, design_matrix, data, error_model,
-                 param_estimates, rms_map, mask_map, grand_mean_map):
+                 param_estimates, rms_map, mask_map, grand_mean_map,
+                 machine, subjects):
         super(ModelFitting, self).__init__()
         self.activity = activity
         self.design_matrix = design_matrix
@@ -36,6 +37,8 @@ class ModelFitting(NIDMObject):
         self.rms_map = rms_map
         self.mask_map = mask_map
         self.grand_mean_map = grand_mean_map
+        self.machine = machine
+        self.subjects = subjects
 
     def export(self, nidm_version):
         """
@@ -44,6 +47,17 @@ class ModelFitting(NIDMObject):
         # Design Matrix
         self.activity.used(self.design_matrix)
         self.add_object(self.design_matrix, nidm_version)
+
+        if nidm_version['major'] > 1 or \
+                (nidm_version['major'] == 1 and nidm_version['minor'] >= 3):
+            # Machine
+            self.data.wasAttributedTo(self.machine)
+            self.add_object(self.machine, nidm_version)
+
+            # Imaged subject or group(s)
+            for sub in self.subjects:
+                self.add_object(sub, nidm_version)
+                self.data.wasAttributedTo(sub)
 
         # Data
         self.activity.used(self.data)
@@ -72,6 +86,84 @@ class ModelFitting(NIDMObject):
 
         # Model Parameters Estimation activity
         self.add_object(self.activity, nidm_version)
+
+        return self.p
+
+
+class ImagingInstrument(NIDMObject):
+    """
+    Object representing a ImagingInstrument entity.
+    """
+
+    def __init__(self, machine_type):
+        super(ImagingInstrument, self).__init__()
+        machine_type = machine_type.lower()
+        self.id = NIIRI[str(uuid.uuid4())]
+        machine_term = dict(
+            mri=NIF_MRI, eeg=NIF_EEG, meg=NIF_MEG, pet=NIF_PET,
+            spect=NIF_SPECT)
+        machine_label = dict(
+            mri='MRI Scanner', eeg='EEG Machine', meg='MEG Machine',
+            pet='PET Scanner', spect='SPECT Machine')
+        self.type = machine_term[machine_type]
+        self.prov_type = PROV['Agent']
+        self.label = machine_label[machine_type]
+
+    def export(self, nidm_version):
+        """
+        Create prov entities and activities.
+        """
+        self.add_attributes((
+            (PROV['type'], self.type),
+            (PROV['label'], self.label)))
+
+        return self.p
+
+
+class Group(NIDMObject):
+    """
+    Object representing a ImagingInstrument entity.
+    """
+
+    def __init__(self, num_subjects, group_name):
+        super(Group, self).__init__()
+        self.id = NIIRI[str(uuid.uuid4())]
+        self.type = STATO_GROUP
+        self.prov_type = PROV['Entity']
+        self.group_name = group_name
+        self.num_subjects = num_subjects
+
+    def export(self, nidm_version):
+        """
+        Create prov entities and activities.
+        """
+        self.add_attributes((
+            (PROV['type'], self.type),
+            (NIDM_GROUP_NAME, self.group_name),
+            (NIDM_NUMBER_OF_SUBJECTS, self.num_subjects),
+            (PROV['label'], "Study group population")))
+
+        return self.p
+
+
+class Person(NIDMObject):
+    """
+    Object representing a ImagingInstrument entity.
+    """
+
+    def __init__(self):
+        super(Person, self).__init__()
+        self.id = NIIRI[str(uuid.uuid4())]
+        self.prov_type = PROV['Agent']
+        self.type = PROV['Person']
+
+    def export(self, nidm_version):
+        """
+        Create prov entities and activities.
+        """
+        self.add_attributes((
+            (PROV['type'], self.prov_type),
+            (PROV['label'], "Person")))
 
         return self.p
 
@@ -177,27 +269,40 @@ class Data(NIDMObject):
     Object representing a Data entity.
     """
 
-    def __init__(self, grand_mean_scaling, target):
+    def __init__(self, grand_mean_scaling, target, mri_protocol=None):
         super(Data, self).__init__()
         self.grand_mean_sc = grand_mean_scaling
         self.target_intensity = target
         self.id = NIIRI[str(uuid.uuid4())]
         self.type = NIDM_DATA
         self.prov_type = PROV['Entity']
+        self.mri_protocol = mri_protocol
+        if self.mri_protocol == "fmri":
+            self.mri_protocol = NLX_FMRI_PROTOCOL
 
     def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
+        if nidm_version['major'] < 1 or \
+                (nidm_version['major'] == 1 and nidm_version['minor'] < 3):
+            self.type = NIDM_DATA_SCALING
     # Create "Data" entity
         # FIXME: grand mean scaling?
         # FIXME: medianIntensity
         self.add_attributes((
-            (PROV['type'], NIDM_DATA),
+            (PROV['type'], self.type),
             (PROV['type'], PROV['Collection']),
             (PROV['label'], "Data"),
             (NIDM_GRAND_MEAN_SCALING, self.grand_mean_sc),
             (NIDM_TARGET_INTENSITY, self.target_intensity)))
+
+        if nidm_version['major'] > 1 or \
+                (nidm_version['major'] == 1 and nidm_version['minor'] > 2):
+            if self.mri_protocol is not None:
+                self.add_attributes(
+                    [(NIDM_HAS_MRI_PROTOCOL, self.mri_protocol)])
+
         return self.p
 
 
@@ -308,12 +413,14 @@ class ResidualMeanSquares(NIDMObject):
     Object representing an ResidualMeanSquares entity.
     """
 
-    def __init__(self, export_dir, residual_file, coord_space):
+    def __init__(self, export_dir, residual_file, coord_space,
+                 temporary=False):
         super(ResidualMeanSquares, self).__init__(export_dir)
         self.coord_space = coord_space
         self.id = NIIRI[str(uuid.uuid4())]
         filename = 'ResidualMeanSquares.nii.gz'
-        self.file = NIDMFile(self.id, residual_file, filename, export_dir)
+        self.file = NIDMFile(self.id, residual_file, filename, export_dir,
+                             temporary=temporary)
         self.type = NIDM_RESIDUAL_MEAN_SQUARES_MAP
         self.prov_type = PROV['Entity']
 

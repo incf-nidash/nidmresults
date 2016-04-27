@@ -107,6 +107,9 @@ class NIDMObject(object):
     def wasDerivedFrom(self, nidm_object):
         self._add_prov_relation(PROV['wasDerivedFrom'], nidm_object)
 
+    def wasAttributedTo(self, nidm_object):
+        self._add_prov_relation(PROV['wasAttributedTo'], nidm_object)
+
     def wasAssociatedWith(self, nidm_object):
         self._add_prov_relation(PROV['wasAssociatedWith'], nidm_object)
 
@@ -124,6 +127,8 @@ class NIDMObject(object):
             self.p.wasDerivedFrom(self.id, object_id)
         elif relation == PROV['wasAssociatedWith']:
             self.p.wasAssociatedWith(self.id, object_id)
+        elif relation == PROV['wasAttributedTo']:
+            self.p.wasAttributedTo(self.id, object_id)
         else:
             raise Exception('Unrecognised prov relation')
 
@@ -248,7 +253,7 @@ class NIDMFile(NIDMObject):
     Object representing a File (to be used as attribute of another class)
     """
     def __init__(self, rdf_id, location, new_filename=None, export_dir=None,
-                 sha=None, format=None):
+                 sha=None, format=None, temporary=False):
         super(NIDMFile, self).__init__(export_dir)
         self.prov_type = PROV['Entity']
         self.path = location
@@ -265,6 +270,7 @@ class NIDMFile(NIDMObject):
 
         self.sha = sha
         self.format = format
+        self.temporary = temporary
 
     def is_nifti(self):
         return self.path.endswith(".nii") or \
@@ -292,6 +298,8 @@ class NIDMFile(NIDMObject):
                 new_file = os.path.join(self.export_dir, self.new_filename)
                 if not self.path == new_file:
                     shutil.copy(self.path, new_file)
+                    if self.temporary:
+                        os.remove(self.path)
             else:
                 new_file = self.path
 
@@ -354,7 +362,7 @@ class Image(NIDMObject):
 
 class NeuroimagingSoftware(NIDMObject):
     """
-    Class representing a NeuroimagingSoftware entity.
+    Class representing a NeuroimagingSoftware Agent.
     """
 
     def __init__(self, software_type, version):
@@ -362,17 +370,21 @@ class NeuroimagingSoftware(NIDMObject):
         self.id = NIIRI[str(uuid.uuid4())]
         self.version = version
         # FIXME: get label from owl!
-        if software_type == NLX_FSL:
+        if software_type.lower() == "fsl":
             self.name = "FSL"
         else:
             raise Exception('Unrecognised software: ' + str(software_type))
-        self.type = software_type  # NLX_FSL
+        self.type = SCR_FSL  # NLX_FSL
         self.prov_type = PROV['Agent']
 
     def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
+        if nidm_version['major'] < 1 or \
+                (nidm_version['major'] == 1 and nidm_version['minor'] < 3):
+            self.type = NLX_OLD_FSL
+
         self.add_attributes((
             (PROV['type'], self.type),
             (PROV['type'], PROV['SoftwareAgent']),
@@ -385,7 +397,7 @@ class NeuroimagingSoftware(NIDMObject):
 
 class ExporterSoftware(NIDMObject):
     """
-    Class representing a Software entity.
+    Class representing a Software Agent.
     """
 
     def __init__(self, software_type, version):

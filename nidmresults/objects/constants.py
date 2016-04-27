@@ -17,16 +17,34 @@ SPM = Namespace("fsl", "http://purl.org/nidash/spm#")
 DCT = Namespace("dct", "http://purl.org/dc/terms/")
 OBO = Namespace("obo", "http://purl.obolibrary.org/obo/")
 DCTYPE = Namespace("dctype", "http://purl.org/dc/dcmitype/")
-NLX = Namespace("nlx", "http://neurolex.org/wiki/")
+NLX_OLD = Namespace("nlx_old", "http://neurolex.org/wiki/")
 DC = Namespace("dc", "http://purl.org/dc/elements/1.1/")
 NFO = Namespace(
     "nfo", "http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#")
+SCR = Namespace("scr", "http://scicrunch.org/resolver/")
+NIF = Namespace("nif", "http://uri.neuinfo.org/nif/nifstd/")
+
+# Sciencrunch constants
+SCR_FSL = SCR['SCR_002823']
+SCR_SPM = SCR['SCR_007037']
 
 # NeuroLex constants
-NLX_FSL = NLX['birnlex_2067']
+NLX_OLD_FSL = NLX_OLD['birnlex_2067']
 NIDM_FSL = NIDM['NIDM_0000167']
 
+# NIFSTD constants
+NIF_MRI = NIF['birnlex_2100']
+NIF_EEG = NIF['ixl_0050003']
+NIF_MEG = NIF['ixl_0050002']
+NIF_PET = NIF['ixl_0050000']
+NIF_SPECT = NIF['ixl_0050001']
+NLX_FMRI_PROTOCOL = NIF['birnlex_2250']
+
 # NIDM constants
+NIDM_HAS_MRI_PROTOCOL = NIDM['NIDM_0000172']
+NIDM_NUMBER_OF_SUBJECTS = NIDM['NIDM_0000171']
+NIDM_GROUP_NAME = NIDM['NIDM_0000170']
+NIDM_DATA = NIDM['NIDM_0000169']
 NIDM_NIDM_RESULTS_EXPORT = NIDM['NIDM_0000166']
 FSL_FEAT_VERSION = FSL['FSL_0000005']
 FSL_DRIFT_CUTOFF_PERIOD = FSL['FSL_0000004']
@@ -185,7 +203,7 @@ NIDM_ERROR_DISTRIBUTION = NIDM['NIDM_0000022']
 NIDM_REGRESSOR_NAMES = NIDM['NIDM_0000021']
 NIDM_DISPLAY_MASK_MAP = NIDM['NIDM_0000020']
 NIDM_DESIGN_MATRIX = NIDM['NIDM_0000019']
-NIDM_DATA = NIDM['NIDM_0000018']
+NIDM_DATA_SCALING = NIDM['NIDM_0000018']
 NIDM_CUSTOM_COORDINATE_SYSTEM = NIDM['NIDM_0000017']
 NIDM_COORDINATE_SPACE = NIDM['NIDM_0000016']
 NIDM_COORDINATE = NIDM['NIDM_0000015']
@@ -212,6 +230,7 @@ STATO_ZSTATISTIC = OBO['STATO_0000376']
 STATO_FSTATISTIC = OBO['STATO_0000282']
 STATO_CONTRAST_WEIGHT_MATRIX = OBO['STATO_0000323']
 STATO_NORMAL_DISTRIBUTION = OBO['STATO_0000227']
+STATO_GROUP = OBO['STATO_0000193']
 
 OBO_STATISTIC = OBO['STATO_0000039']
 OBO_P_VALUE_FWER = OBO['OBI_0001265']

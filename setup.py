@@ -27,7 +27,13 @@ setup(
         "Topic :: Utilities",
         "License :: OSI Approved :: MIT License",
     ],
-    package_data={'': ['prefixes.csv']},
+    package_data={'':
+                  ['prefixes.csv',
+                   'owl/nidm-results_020.owl',
+                   'owl/nidm-results_100.owl',
+                   'owl/nidm-results_110.owl',
+                   'owl/nidm-results_120.owl',
+                   'owl/nidm-results_130-rc2.owl']},
     include_package_data=True,
     install_requires=requirements,
 )
