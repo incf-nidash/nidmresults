@@ -32,6 +32,7 @@ if __name__ == "__main__":
         outfile = outfile + ".csv"
 
     first = True
+    con_ids = dict()
     for nidmpack in nidmpacks:
         overwrite = False
         if first:
@@ -42,4 +43,5 @@ if __name__ == "__main__":
             raise Exception("Unknown file: "+str(nidmpack))
 
         nidmgraph = Graph(nidm_zip=nidmpack)
-        nidmgraph.serialize(outfile, "mkda", overwrite=overwrite)
+        con_ids = nidmgraph.serialize(
+            outfile, "mkda", overwrite=overwrite, con_ids=con_ids)
