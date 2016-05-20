@@ -129,7 +129,7 @@ class Group(NIDMObject):
         super(Group, self).__init__()
         self.id = NIIRI[str(uuid.uuid4())]
         self.type = STATO_GROUP
-        self.prov_type = PROV['Entity']
+        self.prov_type = PROV['Agent']
         self.group_name = group_name
         self.num_subjects = num_subjects
 
