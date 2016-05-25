@@ -447,7 +447,8 @@ ORDER BY ?peak_label
 
                     stat_map = exc_set.inference.stat_map
 
-                    con_name = stat_map.contrast_name.replace(" ", "_")
+                    con_name = stat_map.contrast_name.replace(
+                        " ", "_").replace(":", "")
 
                     if con_name in con_ids:
                         con_id = con_ids[con_name]
