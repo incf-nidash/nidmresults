@@ -440,6 +440,10 @@ ORDER BY ?peak_label
                         space = "MNI"
                     elif exc_set.coord_space.is_talairach():
                         space = "T88"
+                    else:
+                        raise Exception(
+                            "Unrecognised space for " +
+                            str(exc_set.coord_space.coordinate_system))
 
                     stat_map = exc_set.inference.stat_map
 
