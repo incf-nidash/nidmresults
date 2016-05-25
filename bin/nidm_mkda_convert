@@ -15,7 +15,7 @@ if __name__ == "__main__":
         description='Convert a set of NIDM-Results packs to an MKDA-compliant \
         csv file.')
     parser.add_argument(
-        '-outfile',
+        '-o', '--outfile',
         help='Name of the csv file.', default="mkda.csv")
     parser.add_argument(
         'nidmpacks',
