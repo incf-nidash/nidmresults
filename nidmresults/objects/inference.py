@@ -56,19 +56,21 @@ class Inference(NIDMObject):
                 self.inference_act.used(mask)
                 self.add_object(mask, nidm_version)
 
-        if self.clusters:
-            # Peak Definition
+        # Search Space
+        self.search_space.wasGeneratedBy(self.inference_act)
+        self.add_object(self.search_space, nidm_version)                
+
+        # Peak Definition
+        if self.peak_criteria:
             self.inference_act.used(self.peak_criteria)
             self.add_object(self.peak_criteria, nidm_version)
 
-            # Search Space
-            self.search_space.wasGeneratedBy(self.inference_act)
-            self.add_object(self.search_space, nidm_version)
-
-            # Cluster Definition
+        # Cluster Definition
+        if self.cluster_criteria:
             self.inference_act.used(self.cluster_criteria)
             self.add_object(self.cluster_criteria, nidm_version)
 
+        if self.clusters:
             # Clusters and peaks
             for cluster in self.clusters:
                 cluster.wasDerivedFrom(self.excursion_set)
