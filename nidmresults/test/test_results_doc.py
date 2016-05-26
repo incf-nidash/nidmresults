@@ -6,7 +6,6 @@ The software-specific test classes must inherit from this class.
 @copyright: University of Warwick 2014
 '''
 import os
-import sys
 import rdflib
 import re
 import numpy as np
@@ -17,8 +16,6 @@ import logging
 
 # Append parent script directory to path
 RELPATH = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(RELPATH))), "scripts"))
 
 from nidmresults.objects.constants import *
 from nidmresults.owl.owl_reader import OwlReader
@@ -87,14 +84,9 @@ class TestResultDataModel(object):
     @copyright: University of Warwick 2014
     '''
 
-    def setUp(self, owl_file, owl_imports=None, test_files=None,
-              parent_test_dir=None, parent_gt_dir=None):
+    def setUp(self, parent_gt_dir=None):
         self.my_execption = ""
-
-        self.owl_file = owl_file
-        self.owl = OwlReader(owl_file, owl_imports)
         self.gt_dir = parent_gt_dir
-
         self.ex_graphs = dict()
 
     def load_graph(self, ttl_name):
@@ -127,7 +119,7 @@ class TestResultDataModel(object):
             name = ttl.replace(test_dir, "")
 
             self.ex_graphs[ttl_name] = ExampleGraph(
-                name, self.owl_file, ttl, gt_file, inclusive, version)
+                name, ttl, gt_file, inclusive, version)
 
         return self.ex_graphs[ttl_name]
 
@@ -541,12 +533,11 @@ class ExampleGraph(object):
     '''Class representing a NIDM-Results examples graph to be compared to some
     ground truth graph'''
 
-    def __init__(self, name, owl_file, ttl_file, gt_ttl_files,
+    def __init__(self, name, ttl_file, gt_ttl_files,
                  exact_comparison, version):
         self.name = name
         self.ttl_file = ttl_file
 
-        self.owl_file = owl_file
         self.gt_ttl_files = gt_ttl_files
         self.exact_comparison = exact_comparison
         self.graph = Graph()
@@ -560,10 +551,13 @@ class ExampleGraph(object):
                 x.replace(os.path.join("nidm", "nidm"),
                           os.path.join("nidm_releases", self.version, "nidm"))
                 for x in self.gt_ttl_files]
-            self.owl_file = os.path.join(
-                os.path.dirname(owl_file),
-                "releases",
-                "nidm-results_"+self.version.replace(".", "")+".owl")
+
+        # Owl file corresponding to version
+        owl_file = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), 'owl',
+            "nidm-results_" + version.replace(".", "") + ".owl")
+
+        self.owl_file = owl_file
 
         owl_imports = None
         if self.version == "dev":
