@@ -78,6 +78,7 @@ class Graph():
                 stat_maps.append(StatisticMap(
                     stat_file, stat_type, contrast_num, contrast_name, dof,
                     coord_space, export_dir, label))
+        self.stat_maps = stat_maps
         return stat_maps
 
     def get_peaks(self, contrast_name=None):
@@ -140,6 +141,7 @@ ORDER BY ?peak_label
                 peaks[peak_id] = (peak)
 
         self.objects.update(peaks)
+        self.peaks = peaks
         return peaks
 
     def peak_query(self):
