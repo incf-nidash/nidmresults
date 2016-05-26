@@ -14,7 +14,7 @@ setup(
         "Export of neuroimaging statistical results using NIDM"
         " as specified at http://nidm.nidash.org/specs/nidm-results.html."),
     license = "MIT",
-    scripts=['bin/nidmreader', 'bin/nidm_mkda_convert'],
+    scripts=['bin/nidmreader', 'bin/nidm_mkda_convert', 'bin/nidmresults'],
     url='https://github.com/incf-nidash/nidmresults',
     keywords = "Prov, NIDM, Provenance",
     packages=find_packages(),

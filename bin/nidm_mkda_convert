@@ -9,6 +9,7 @@ Create a database suitable for use with MKDA toolbox
 import os
 import argparse
 from nidmresults.graph import Graph
+from nidmresults import __version__
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -21,6 +22,9 @@ if __name__ == "__main__":
         'nidmpacks',
         help='Path to NIDM-Results packs (.nidm.zip) separated by spaces.',
         nargs="+")
+    parser.add_argument(
+        '--version', action='version',
+        version='{version}'.format(version=__version__))
 
     args = parser.parse_args()
 

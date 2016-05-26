@@ -1,4 +1,3 @@
-
 #!/usr/bin/python
 """
 Export neuroimaging results created with FSL feat following NIDM-Results
@@ -11,11 +10,15 @@ specification. The path to feat directory must be passed as first argument.
 import os
 import argparse
 from nidmresults.reader import *
+from nidmresults import __version__
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='NIDM-Results reader.')
     parser.add_argument('rdf_file', help='Path to NIDM-Results file.')
+    parser.add_argument(
+        '--version', action='version',
+        version='{version}'.format(version=__version__))
 
     args = parser.parse_args()
 

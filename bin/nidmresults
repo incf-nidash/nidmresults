@@ -1,0 +1,19 @@
+#!/usr/bin/python
+"""
+Return version of nidmresults module
+
+@author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>
+@copyright: University of Warwick 2016
+"""
+
+import argparse
+from nidmresults import __version__
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description='NIDM-Results module.')
+    parser.add_argument(
+        '-v', '--version', action='version',
+        version='{version}'.format(version=__version__))
+
+    args = parser.parse_args()
