@@ -440,10 +440,15 @@ ORDER BY ?peak_label
                         space = "MNI"
                     elif exc_set.coord_space.is_talairach():
                         space = "T88"
+                    else:
+                        raise Exception(
+                            "Unrecognised space for " +
+                            str(exc_set.coord_space.coordinate_system))
 
                     stat_map = exc_set.inference.stat_map
 
-                    con_name = stat_map.contrast_name.replace(" ", "_")
+                    con_name = stat_map.contrast_name.replace(
+                        " ", "_").replace(":", "")
 
                     if con_name in con_ids:
                         con_id = con_ids[con_name]

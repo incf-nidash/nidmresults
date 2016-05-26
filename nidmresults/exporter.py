@@ -325,13 +325,13 @@ ons#")
         Write-out provn serialisation to nidm.provn.
         """
         self.doc.add_bundle(self.bundle)
-        provn_file = os.path.join(self.export_dir, 'nidm.provn')
-        provn_fid = open(provn_file, 'w')
-        # FIXME None
-        provn_fid.write(self.doc.get_provn(4).replace("None", "-"))
-        provn_fid.close()
+        # provn_file = os.path.join(self.export_dir, 'nidm.provn')
+        # provn_fid = open(provn_file, 'w')
+        # # FIXME None
+        # provn_fid.write(self.doc.get_provn(4).replace("None", "-"))
+        # provn_fid.close()
 
-        ttl_file = provn_file.replace(".provn", ".ttl")
+        ttl_file = os.path.join(self.export_dir, 'nidm.ttl')
         ttl_txt = self.g.serialize(format='turtle')
 
         ttl_txt = self.use_prefixes(ttl_txt)
