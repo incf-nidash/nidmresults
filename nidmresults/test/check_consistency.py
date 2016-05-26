@@ -13,7 +13,7 @@ RELPATH = os.path.dirname(os.path.abspath(__file__))
 
 # Append parent script directory to path
 sys.path.append(os.path.join(RELPATH, os.pardir, os.pardir, os.pardir, "scripts"))
-from Constants import *
+from nidmresults.objects.constants import *
 
 # ignored_attributes = set([   
 #                         RDFS['label'], 
