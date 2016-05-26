@@ -8,7 +8,7 @@
 from rdflib import RDF, term
 from rdflib.graph import Graph
 from rdflib.term import Literal
-from nidmresults.objects.constants import *
+from nidmresults.objects.constants_rdflib import *
 import urllib2
 import warnings
 import vcr

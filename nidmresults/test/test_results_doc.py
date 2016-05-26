@@ -17,7 +17,7 @@ import logging
 # Append parent script directory to path
 RELPATH = os.path.dirname(os.path.abspath(__file__))
 
-from nidmresults.objects.constants import *
+from nidmresults.objects.constants_rdflib import *
 from nidmresults.owl.owl_reader import OwlReader
 from rdflib.namespace import RDF
 from rdflib.graph import Graph
