@@ -26,7 +26,8 @@ NIDM_PATH = os.path.join(NIDM_RESULTS_PATH, os.pardir, os.pardir)
 
 # Append parent script directory to path
 sys.path.append(os.path.join(NIDM_PATH, "scripts"))
-from Constants import NIDM_SOFTWARE_VERSION, FSL_FEAT_VERSION
+from nidmresults.objects.constants import \
+    NIDM_SOFTWARE_VERSION, FSL_FEAT_VERSION
 
 # Save debug info in a log file (debug.log)
 logging.basicConfig(filename='debug.log', level=logging.DEBUG, filemode='w')
