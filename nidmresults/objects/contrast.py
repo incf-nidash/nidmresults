@@ -376,6 +376,7 @@ class ContrastEstimation(NIDMObject):
         self.id = NIIRI[str(uuid.uuid4())]
         self.type = NIDM_CONTRAST_ESTIMATION
         self.prov_type = PROV['Activity']
+        self.label = "Contrast estimation: " + self.name
 
     def export(self, nidm_version):
         """
@@ -383,6 +384,6 @@ class ContrastEstimation(NIDMObject):
         """
         self.add_attributes((
             (PROV['type'], self.type),
-            (PROV['label'], "Contrast estimation: " + self.name)))
+            (PROV['label'], self.label)))
 
         return self.p

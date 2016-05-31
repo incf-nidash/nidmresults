@@ -41,7 +41,11 @@ class NIDMObject(object):
         value = ""
         if hasattr(self, 'value'):
             value = ": " + self.value
-        return '"' + self.label + '"' + value
+        location = ""
+        if hasattr(self, 'file'):
+            if hasattr(self.file, 'path'):
+                location = " - " + self.file.path
+        return '"' + self.label + '"' + value + location
 
     def __repr__(self):
         return '<"' + self.label + '" ' + \

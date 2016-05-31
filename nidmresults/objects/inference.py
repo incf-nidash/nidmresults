@@ -58,7 +58,7 @@ class Inference(NIDMObject):
 
         # Search Space
         self.search_space.wasGeneratedBy(self.inference_act)
-        self.add_object(self.search_space, nidm_version)                
+        self.add_object(self.search_space, nidm_version)
 
         # Peak Definition
         if self.peak_criteria:
@@ -382,6 +382,8 @@ class Cluster(NIDMObject):
         self.pFWER = pFWER
         self.type = NIDM_SIGNIFICANT_CLUSTER
         self.prov_type = PROV['Entity']
+        cluster_naming = "Supra-Threshold Cluster"
+        self.label = "%s %04d" % (cluster_naming, self.num)
 
     def export(self, nidm_version):
         """
@@ -678,7 +680,7 @@ class Peak(NIDMObject):
     Object representing a Peak entity.
     """
 
-    def __init__(self, cluster_index, peak_index, equiv_z, stat_num,
+    def __init__(self, cluster_index, peak_index, equiv_z, stat_num, stat_type,
                  cluster_id=None, p_unc=None, p_fwer=None, label=None,
                  coord_label=None, exc_set_id=None, oid=None, *args, **kwargs):
         super(Peak, self).__init__(oid)
@@ -691,7 +693,7 @@ class Peak(NIDMObject):
             peak_index = peak_unique_id
             # cluster_index, peak_index = peak_unique_id.split("_")
         else:
-            peak_unique_id = '000' + str(cluster_index) + '_' + str(peak_index)
+            peak_unique_id = stat_type + str(stat_num) + '_000' + str(cluster_index) + '_' + str(peak_index)
             self.label = "Peak " + peak_unique_id
         self.equiv_z = equiv_z
         self.p_unc = p_unc
