@@ -338,7 +338,8 @@ class Cluster(NIDMObject):
     """
 
     def __init__(self, cluster_num, size, pFWER, peaks,
-                 x=None, y=None, z=None, x_std=None, y_std=None, z_std=None):
+                 x=None, y=None, z=None, x_std=None, y_std=None, z_std=None,
+                 suffix=''):
         super(Cluster, self).__init__()
         self.num = cluster_num
         self.id = NIIRI[str(uuid.uuid4())]
@@ -647,9 +648,9 @@ class Peak(NIDMObject):
     Object representing a Peak entity.
     """
 
-    def __init__(self, cluster_index, peak_index, equiv_z, stat_num, stat_type,
-                 cluster_id=None, p_unc=None, p_fwer=None, label=None,
-                 coord_label=None, exc_set_id=None, oid=None, *args, **kwargs):
+    def __init__(self, equiv_z, p_unc=None, p_fwer=None, label=None,
+                 coord_label=None, exc_set_id=None, oid=None, suffix='',
+                 *args, **kwargs):
         super(Peak, self).__init__(oid)
         # FIXME: Currently assumes less than 10 clusters per contrast
         # cluster_num = cluster_index
@@ -660,8 +661,7 @@ class Peak(NIDMObject):
             peak_index = peak_unique_id
             # cluster_index, peak_index = peak_unique_id.split("_")
         else:
-            peak_unique_id = stat_type + str(stat_num) + '_000' + \
-                str(cluster_index) + '_' + str(peak_index)
+            peak_unique_id = suffix
             self.label = "Peak " + peak_unique_id
         self.equiv_z = equiv_z
         self.p_unc = p_unc
@@ -670,7 +670,7 @@ class Peak(NIDMObject):
             str(peak_unique_id), label=coord_label, **kwargs)
         self.type = NIDM_PEAK
         self.prov_type = PROV['Entity']
-        self.cluster = cluster_id
+        # self.cluster = cluster_id
         self.exc_set_id = exc_set_id
 
     def __str__(self):
