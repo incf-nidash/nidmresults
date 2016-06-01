@@ -341,12 +341,11 @@ class Image(NIDMObject):
     Object representing an Image entity.
     """
 
-    def __init__(self, export_dir, image_file):
+    def __init__(self, export_dir, image_file, filename):
         super(Image, self).__init__(export_dir)
         self.type = DCTYPE['Image']
         self.prov_type = PROV['Entity']
         self.id = NIIRI[str(uuid.uuid4())]
-        filename = "DesignMatrix.png"
         self.file = NIDMFile(self.id, image_file, filename, export_dir)
 
     def export(self, nidm_version):

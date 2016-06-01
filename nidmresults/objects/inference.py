@@ -136,14 +136,12 @@ class ExcursionSet(NIDMObject):
     """
 
     def __init__(self, location, coord_space, visualisation=None,
-                 stat_num=None,
                  export_dir=None, oid=None, format=None, label=None,
-                 sha=None, filename=None, inference=None):
+                 sha=None, filename=None, inference=None, suffix=''):
         super(ExcursionSet, self).__init__(export_dir, oid)
         # Excursion set is going to be copied over to export_dir folder
         if export_dir is not None:
-            self.num = stat_num
-            filename = 'ExcursionSet' + self.num + '.nii.gz'
+            filename = 'ExcursionSet' + suffix + '.nii.gz'
         else:
             filename = location
         self.filename = filename
@@ -151,7 +149,8 @@ class ExcursionSet(NIDMObject):
         self.type = NIDM_EXCURSION_SET_MAP
         self.prov_type = PROV['Entity']
         if visualisation is not None:
-            self.visu = Visualisation(visualisation, export_dir)
+            visu_filename = 'ExcursionSet' + suffix + '.png'
+            self.visu = Image(export_dir, visualisation, visu_filename)
         if label is None:
             label = "Excursion Set Map"
         self.label = label
@@ -175,38 +174,6 @@ class ExcursionSet(NIDMObject):
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
             (PROV['label'], self.label),
             (DC['description'], self.visu.id)
-        ))
-
-        return self.p
-
-# FIXME: When we decide how to compute URIs, this will need to be replaced by
-# Image
-
-
-class Visualisation(NIDMObject):
-
-    """
-    Object representing an Image entity.
-    """
-
-    def __init__(self, visu_filename, export_dir):
-        super(Visualisation, self).__init__(export_dir)
-        self.id = NIIRI[str(uuid.uuid4())]
-        self.file = NIDMFile(self.id, visu_filename, export_dir=export_dir)
-        self.type = DCTYPE['Image']
-        self.prov_type = PROV['Entity']
-
-    def export(self, nidm_version):
-        """
-        Create prov entities and activities.
-        """
-        # Copy visualisation of excursion set in export directory
-        self.add_object(self.file, nidm_version)
-
-        # Create "png visualisation of Excursion set" entity
-        self.add_attributes((
-            (PROV['type'], DCTYPE['Image']),
-            (DCT['format'], "image/png"),
         ))
 
         return self.p
@@ -693,7 +660,8 @@ class Peak(NIDMObject):
             peak_index = peak_unique_id
             # cluster_index, peak_index = peak_unique_id.split("_")
         else:
-            peak_unique_id = stat_type + str(stat_num) + '_000' + str(cluster_index) + '_' + str(peak_index)
+            peak_unique_id = stat_type + str(stat_num) + '_000' + \
+                str(cluster_index) + '_' + str(peak_index)
             self.label = "Peak " + peak_unique_id
         self.equiv_z = equiv_z
         self.p_unc = p_unc
