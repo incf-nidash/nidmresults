@@ -297,7 +297,8 @@ class StatisticMap(NIDMObject):
 
     def __init__(self, location, stat_type, contrast_num, contrast_name, dof,
                  coord_space, export_dir=None, label=None, oid=None,
-                 format="image/nifti", effdof=None, filename=None, sha=None):
+                 format="image/nifti", effdof=None, filename=None, sha=None,
+                 contrast_estimation=None):
         super(StatisticMap, self).__init__(export_dir, oid=oid)
         self.num = contrast_num
         self.contrast_name = contrast_name
@@ -310,7 +311,8 @@ class StatisticMap(NIDMObject):
             self.stat = STATO_FSTATISTIC
         # FIXME use new 'preferred mathematical notation from stato'
         if self.num is not None:
-            filename = self.stat_type.upper() + 'Statistic' + self.num + '.nii.gz'
+            filename = self.stat_type.upper() + \
+                'Statistic' + self.num + '.nii.gz'
         self.file = NIDMFile(self.id, location, filename, export_dir, sha=sha)
         self.coord_space = coord_space
         self.dof = dof
@@ -330,6 +332,8 @@ class StatisticMap(NIDMObject):
 
         self.effdof = effdof
 
+        # Only used when reading (so far)
+        self.contrast_estimation = contrast_estimation
 
     def __str__(self):
         return '%s\t%s' % (self.label, self.file)
@@ -370,7 +374,8 @@ class ContrastEstimation(NIDMObject):
     Object representing a ContrastEstimation entity.
     """
 
-    def __init__(self, contrast_num, contrast_name=None, label=None, oid=None):
+    def __init__(self, contrast_num, contrast_name=None, label=None,
+                 param_estimate=None, oid=None):
         super(ContrastEstimation, self).__init__(oid=oid)
         self.num = contrast_num
         self.type = NIDM_CONTRAST_ESTIMATION
@@ -379,6 +384,8 @@ class ContrastEstimation(NIDMObject):
             self.label = label
         else:
             self.label = "Contrast estimation: " + contrast_name
+        # Only used when reading (so far)
+        self.param_estimate = param_estimate
 
     def export(self, nidm_version):
         """

@@ -125,13 +125,15 @@ class Group(NIDMObject):
     Object representing a ImagingInstrument entity.
     """
 
-    def __init__(self, num_subjects, group_name):
-        super(Group, self).__init__()
-        self.id = NIIRI[str(uuid.uuid4())]
+    def __init__(self, num_subjects, group_name, label=None, oid=None):
+        super(Group, self).__init__(oid=oid)
         self.type = STATO_GROUP
         self.prov_type = PROV['Agent']
         self.group_name = group_name
         self.num_subjects = num_subjects
+        if not label:
+            label = "Study group population: " + group_name
+        self.label = label
 
     def export(self, nidm_version):
         """
@@ -141,7 +143,7 @@ class Group(NIDMObject):
             (PROV['type'], self.type),
             (NIDM_GROUP_NAME, self.group_name),
             (NIDM_NUMBER_OF_SUBJECTS, self.num_subjects),
-            (PROV['label'], "Study group population")))
+            (PROV['label'], self.label)))
 
         return self.p
 
@@ -271,16 +273,20 @@ class Data(NIDMObject):
     Object representing a Data entity.
     """
 
-    def __init__(self, grand_mean_scaling, target, mri_protocol=None):
-        super(Data, self).__init__()
+    def __init__(self, grand_mean_scaling, target, mri_protocol=None,
+                 label=None, group_or_sub=None, oid=None):
+        super(Data, self).__init__(oid=oid)
         self.grand_mean_sc = grand_mean_scaling
         self.target_intensity = target
-        self.id = NIIRI[str(uuid.uuid4())]
         self.type = NIDM_DATA
         self.prov_type = PROV['Entity']
         self.mri_protocol = mri_protocol
         if self.mri_protocol == "fmri":
             self.mri_protocol = NLX_FMRI_PROTOCOL
+        if label is None:
+            label = "Data"
+        self.label = label
+        self.group_or_sub = group_or_sub
 
     def export(self, nidm_version):
         """
@@ -295,7 +301,7 @@ class Data(NIDMObject):
         self.add_attributes((
             (PROV['type'], self.type),
             (PROV['type'], PROV['Collection']),
-            (PROV['label'], "Data"),
+            (PROV['label'], self.label),
             (NIDM_GRAND_MEAN_SCALING, self.grand_mean_sc),
             (NIDM_TARGET_INTENSITY, self.target_intensity)))
 
@@ -355,13 +361,18 @@ class ModelParametersEstimation(NIDMObject):
     Object representing an ModelParametersEstimation activity.
     """
 
-    def __init__(self, estimation_method, software_id):
-        super(ModelParametersEstimation, self).__init__()
+    def __init__(self, estimation_method, software_id, data=None, label=None,
+                 oid=None):
+        super(ModelParametersEstimation, self).__init__(oid=oid)
         self.estimation_method = estimation_method
         self.software_id = software_id
-        self.id = NIIRI[str(uuid.uuid4())]
         self.type = NIDM_MODEL_PARAMETERS_ESTIMATION
         self.prov_type = PROV['Activity']
+        # currenlty only used for reading
+        self.data = data
+        if label is None:
+            label = "Model Parameters Estimation"
+        self.label = label
 
     def export(self, nidm_version):
         """
@@ -371,7 +382,7 @@ class ModelParametersEstimation(NIDMObject):
         self.add_attributes((
             (PROV['type'], self.type),
             (NIDM_WITH_ESTIMATION_METHOD, self.estimation_method),
-            (PROV['label'], "Model Parameters Estimation")))
+            (PROV['label'], self.label)))
 
         return self.p
 
@@ -383,7 +394,7 @@ class ParameterEstimateMap(NIDMObject):
     """
 
     def __init__(self, pe_file, pe_num, coord_space, filename=None, sha=None,
-                 label=None, suffix='', oid=None):
+                 label=None, suffix='', model_param_estimation=None, oid=None):
         super(ParameterEstimateMap, self).__init__(oid=oid)
         # Column index in the corresponding design matrix
         self.num = pe_num
@@ -394,6 +405,8 @@ class ParameterEstimateMap(NIDMObject):
         if label is None:
             label = "Parameter estimate " + str(self.num)
         self.label = label
+        # Only used for reading (so far)
+        self.model_param_estimation = model_param_estimation
 
     # Generate prov for contrast map
     def export(self, nidm_version):
