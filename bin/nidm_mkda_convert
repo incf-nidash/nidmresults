@@ -37,6 +37,8 @@ if __name__ == "__main__":
     first = True
     con_ids = dict()
     for nidmpack in nidmpacks:
+        print "Exporting " + nidmpack
+
         overwrite = False
         if first:
             overwrite = True
