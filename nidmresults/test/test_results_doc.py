@@ -317,7 +317,8 @@ class TestResultDataModel(object):
 
         for s, p, o in diff_graph.triples((None,  None, None)):
             # If triple is found in other_graph
-            if (s,  p, o) in other_graph and (not p == NIDM_SOFTWARE_VERSION):
+            if (s,  p, o) in other_graph and (not p == NIDM_SOFTWARE_VERSION
+                                              and not p == RDFS['label']):
                 # If subject is *not* found in gt_graph
                 if (s,  None, None) not in gt_graph:
                     if not s in exlude:
@@ -451,7 +452,8 @@ class TestResultDataModel(object):
                            self.get_readable_name(owl, other_graph, o))
 
             # If subject and predicate are found in gt_graph
-            elif (s,  p, o) in gt_graph and (not p == NIDM_SOFTWARE_VERSION):
+            elif (s,  p, o) in gt_graph and (not p == NIDM_SOFTWARE_VERSION
+                                             and not p == RDFS['label']):
                 if include and (s,  p, None) in other_graph:
                     if isinstance(o, rdflib.term.Literal):
 
