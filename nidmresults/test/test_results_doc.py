@@ -215,6 +215,26 @@ class TestResultDataModel(object):
                     if g2_term in g2_match:
                         g2_match[g2_term] += 1
 
+                # If o is a string that is likely to be json check if we have
+                # an equivalent json string
+                if hasattr(o, 'datatype') and o.datatype == XSD['string']:
+                    try:
+                        o_json = json.loads(o)
+                        for g2_term, g2_o in graph2.subject_objects(p):
+                            if hasattr(g2_o, 'datatype') and \
+                                    o.datatype == XSD['string']:
+                                try:
+                                    o2_json = json.loads(g2_o)
+                                    if o2_json == o_json:
+                                        g2_match[g2_term] += 1
+                                except:
+                                    # Not a valid json string: do nothing
+                                    continue
+
+                    except:
+                        # Not a valid json string: do nothing
+                        o_json = None
+
             if activity or agent:
                 for s, p in graph1.subject_predicates(g1_term):
                     for g2_term in graph2.objects(s, p):
