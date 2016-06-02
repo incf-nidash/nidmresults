@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 class TestResultDataModel(object):
 
-    def get_readable_name(self, graph, item):
+    def get_readable_name(self, owl, graph, item):
         if isinstance(item, rdflib.term.Literal):
             if item.datatype:
                 typeStr = graph.qname(item.datatype)
@@ -39,7 +39,7 @@ class TestResultDataModel(object):
         elif isinstance(item, rdflib.term.URIRef):
             # Look for label
             # name = graph.label(item)
-            name = self.owl.graph.qname(item)
+            name = owl.graph.qname(item)
 
             if name.startswith("ns"):
                 # Namespace is not declared in the owl file, try with example
@@ -51,24 +51,24 @@ class TestResultDataModel(object):
                 # alphanumeric identifier
                 if m is not None:
                     name += " (i.e. " + \
-                        self.owl.get_label(item).split(":")[1] + ")"
+                        owl.get_label(item).split(":")[1] + ")"
         else:
             name = "unsupported type: " + item
         return name
 
-    def get_alternatives(self, graph, s=None, p=None, o=None):
+    def get_alternatives(self, owl, graph, s=None, p=None, o=None):
         found = ""
 
         for (s_in,  p_in, o_in) in graph.triples((s,  p, o)):
             if not o:
                 if not o_in.startswith(str(PROV)):
-                    found += "; " + self.get_readable_name(graph, o_in)
+                    found += "; " + self.get_readable_name(owl, graph, o_in,)
             if not p:
                 if not p_in.startswith(str(PROV)):
-                    found += "; " + self.get_readable_name(graph, p_in)
+                    found += "; " + self.get_readable_name(owl, graph, p_in)
             if not s:
                 if not s_in.startswith(str(PROV)):
-                    found += "; " + self.get_readable_name(graph, s_in)
+                    found += "; " + self.get_readable_name(owl, graph, s_in)
         if len(found) > 200:
             found = '<many alternatives>'
         else:
@@ -291,7 +291,7 @@ class TestResultDataModel(object):
 
         return list([graph1, graph2])
 
-    def compare_full_graphs(self, gt_graph, other_graph, include=False,
+    def compare_full_graphs(self, gt_graph, other_graph, owl, include=False,
                             raise_now=False):
         ''' Compare gt_graph and other_graph '''
 
@@ -323,13 +323,13 @@ class TestResultDataModel(object):
                     if not s in exlude:
                         if not isinstance(s, rdflib.term.BNode):
                             exc_added += "\nAdded s:\t'%s' should be removed" \
-                                % (self.get_readable_name(other_graph, s))
+                                % (self.get_readable_name(owl, other_graph, s))
                             exlude.append(s)
                 # If predicate p is *not* found in gt_graph
                 elif (None,  p, None) not in gt_graph:
                     if not p in exlude:
                         exc_added += "\nAdded p:\t'%s' should be removed" \
-                            % (self.get_readable_name(other_graph, p))
+                            % (self.get_readable_name(owl, other_graph, p))
                         exlude.append(p)
                 # If subject and predicate found in gt_graph, then object is
                 # wrong (unless there is twice the same attribute and one value
@@ -368,12 +368,15 @@ class TestResultDataModel(object):
                                 "\nWrong o:\t %s should be %s?" \
                                 "\n\t\t ... in '%s %s %s'" \
                                 % (
-                                    self.get_readable_name(other_graph, o),
+                                    self.get_readable_name(
+                                        owl, other_graph, o),
                                     self.get_alternatives(
-                                        gt_m_other, s=s, p=p),
-                                    self.get_readable_name(other_graph, s),
-                                    self.get_readable_name(other_graph, p),
-                                    self.get_readable_name(other_graph, o)
+                                        owl, gt_m_other, s=s, p=p),
+                                    self.get_readable_name(
+                                        owl, other_graph, s),
+                                    self.get_readable_name(
+                                        owl, other_graph, p),
+                                    self.get_readable_name(owl, other_graph, o)
                                 )
 
                     elif not isinstance(o, rdflib.term.BNode):
@@ -381,11 +384,11 @@ class TestResultDataModel(object):
                             "\nWrong o:\t %s should be %s?" \
                             "\n\t\t ... in '%s %s %s'" \
                             % (
-                                self.get_readable_name(other_graph, o),
-                                self.get_alternatives(gt_graph, s=s, p=p),
-                                self.get_readable_name(other_graph, s),
-                                self.get_readable_name(other_graph, p),
-                                self.get_readable_name(other_graph, o)
+                                self.get_readable_name(owl, other_graph, o),
+                                self.get_alternatives(owl, gt_graph, s=s, p=p),
+                                self.get_readable_name(owl, other_graph, s),
+                                self.get_readable_name(owl, other_graph, p),
+                                self.get_readable_name(owl, other_graph, o)
                             )
                         # If object o is *not* found in gt_graph (and o is a
                         # URI, i.e. not the value of an attribute)
@@ -393,17 +396,21 @@ class TestResultDataModel(object):
                         and isinstance(o, rdflib.term.URIRef):
                     if not o in exlude:
                         exc_added += "\nAdded o:\t'%s'" % (
-                            self.get_readable_name(other_graph, o))
+                            self.get_readable_name(owl, other_graph, o))
                         exlude.append(o)
                 # If subject and object found in gt_graph, then predicate is
                 # wrong
                 elif (s,  None, o) in gt_graph:
                     exc_wrong += "\nWrong p:\tBetween '%s' and '%s' " \
                                  "is '%s' (should be '%s'?)" \
-                                 % (self.get_readable_name(other_graph, s),
-                                    self.get_readable_name(other_graph, o),
-                                    self.get_readable_name(other_graph, p),
-                                    self.get_alternatives(gt_graph, s=s, o=o))
+                                 % (self.get_readable_name(
+                                    owl, other_graph, s),
+                                    self.get_readable_name(
+                                        owl, other_graph, o),
+                                    self.get_readable_name(
+                                        owl, other_graph, p),
+                                    self.get_alternatives(
+                                        owl, gt_graph, s=s, o=o))
                 # If predicate and object found in gt_graph, then subject is
                 # wrong
                 elif (None,  p, o) in gt_graph:
@@ -414,14 +421,17 @@ class TestResultDataModel(object):
                     else:
                         exc_wrong += "\nWrong s:\ts('%s') p('%s') o('%s')" \
                                      " not in gold std (should be s: '%s'?)" \
-                                     % (self.get_readable_name(other_graph, s),
-                                        self.get_readable_name(other_graph, p),
-                                        self.get_readable_name(other_graph, o),
+                                     % (self.get_readable_name(
+                                        owl, other_graph, s),
+                                        self.get_readable_name(
+                                            owl, other_graph, p),
+                                        self.get_readable_name(
+                                            owl, other_graph, o),
                                         self.get_alternatives(
-                                            gt_graph, p=p, o=o))
+                                            owl, gt_graph, p=p, o=o))
                         # exc_wrong += "\nWrong s:\t'%s' \tto '%s' \tis '%s'
                         # (instead of %s)."%(os.path.basename(p),
-                        # self.get_readable_name(other_graph, o),
+                        # self.get_readable_name(owl, other_graph, o),
                         #  os.path.basename(s),found_subject)
                 # If only subject found in gt_graph
                 elif (s,  None, None) in gt_graph:
@@ -431,14 +441,14 @@ class TestResultDataModel(object):
                     #     gt_graph_possible_value += "; "+
                     # os.path.basename(p_gt_graph)
                     exc_added += "\nAdded:\tin '%s', '%s' \t ('%s')." \
-                        % (self.get_readable_name(gt_graph, s),
-                           self.get_readable_name(other_graph, p),
-                           self.get_readable_name(other_graph, o))
+                        % (self.get_readable_name(owl, gt_graph, s),
+                           self.get_readable_name(owl, other_graph, p),
+                           self.get_readable_name(owl, other_graph, o))
                 else:
                     exc_added += "\nAdded:\tin '%s', '%s' \t ('%s')." \
-                        % (self.get_readable_name(gt_graph, s),
-                           self.get_readable_name(other_graph, p),
-                           self.get_readable_name(other_graph, o))
+                        % (self.get_readable_name(owl, gt_graph, s),
+                           self.get_readable_name(owl, other_graph, p),
+                           self.get_readable_name(owl, other_graph, o))
 
             # If subject and predicate are found in gt_graph
             elif (s,  p, o) in gt_graph and (not p == NIDM_SOFTWARE_VERSION):
@@ -463,27 +473,30 @@ class TestResultDataModel(object):
                                 "\n\t\t ... in '%s %s %s'" \
                                 % (
                                     self.get_alternatives(
-                                        other_graph, s=s, p=p),
-                                    self.get_readable_name(gt_graph, o),
-                                    self.get_readable_name(other_graph, s),
-                                    self.get_readable_name(other_graph, p),
+                                        owl, other_graph, s=s, p=p),
+                                    self.get_readable_name(owl, gt_graph, o),
+                                    self.get_readable_name(
+                                        owl, other_graph, s),
+                                    self.get_readable_name(
+                                        owl, other_graph, p),
                                     self.get_alternatives(
-                                        other_graph, s=s, p=p)
+                                        owl, other_graph, s=s, p=p)
                                 )
 
                         # exc_wrong_literal += "\nWrong literal o:\t p('%s') of
                         #  s('%s') is o(%s) but should be o(%s)." % (
-                        #     self.get_readable_name(other_graph, p),
-                        #     self.get_readable_name(other_graph, s),
-                        #     self.get_alternatives(other_graph, s=s, p=p),
-                        #     self.get_readable_name(gt_graph, o))
+                        #     self.get_readable_name(owl, other_graph, p),
+                        #     self.get_readable_name(owl, other_graph, s),
+                        #     self.get_alternatives(owl, other_graph, s=s,
+                            # p=p),
+                        #     self.get_readable_name(owl, gt_graph, o))
                     elif not isinstance(o, rdflib.term.BNode):
                         exc_wrong += "\nWrong o:\ts('%s') p('%s') o('%s') not\
                         in gold std, o should be o(%s)?)" % (
-                            self.get_readable_name(other_graph, p),
-                            self.get_readable_name(other_graph, s),
-                            self.get_alternatives(other_graph, s=s, p=p),
-                            self.get_readable_name(gt_graph, o))
+                            self.get_readable_name(owl, other_graph, p),
+                            self.get_readable_name(owl, other_graph, s),
+                            self.get_alternatives(owl, other_graph, s=s, p=p),
+                            self.get_readable_name(owl, gt_graph, o))
                         # If object o is *not* found in gt_graph (and o is a
                         # URI, i.e. not the value of an attribute)
 
@@ -492,34 +505,34 @@ class TestResultDataModel(object):
                     #         if (not exc_wrong_literal):
                     #             exc_wrong_literal += "\nWrong literal o:\t
                     # p('%s') of s('%s') is ('%s') (instead o: '%s'?)"
-                    # %(self.get_readable_name(gt_graph, p),
-                        # self.get_readable_name(gt_graph, s),
-                        # self.get_readable_name(gt_graph, o),
-                        # self.get_alternatives(other_graph,s=s,p=p))
+                    # %(self.get_readable_name(owl, gt_graph, p),
+                        # self.get_readable_name(owl, gt_graph, s),
+                        # self.get_readable_name(owl, gt_graph, o),
+                        # self.get_alternatives(owl, other_graph,s=s,p=p))
                     # else:
                     #     if (not exc_missing):
                     #         exc_missing += "\nMissing o (%s):\tp('%s')
-                    # o('%s') \ton '%s'"%(type(o), self.get_readable_name(
+                    # o('%s') \ton '%s'"%(type(o), self.get_readable_name(owl,
                         # gt_graph,
-                    # p),self.get_readable_name(gt_graph,o),
-                    # self.get_readable_name(gt_graph,s))
+                    # p),self.get_readable_name(owl, gt_graph,o),
+                    # self.get_readable_name(owl, gt_graph,s))
                     # If subject found in other_graph
                     if (s,  None, None) in other_graph:
                         exc_missing += "\nMissg p:\t %s is missing in %s?" \
                             "\n\t\t ... in %s %s %s'" \
                             % (
-                                self.get_readable_name(gt_graph, p),
-                                self.get_readable_name(gt_graph, s),
-                                self.get_readable_name(gt_graph, s),
-                                self.get_readable_name(gt_graph, p),
-                                self.get_readable_name(gt_graph, o),
+                                self.get_readable_name(owl, gt_graph, p),
+                                self.get_readable_name(owl, gt_graph, s),
+                                self.get_readable_name(owl, gt_graph, s),
+                                self.get_readable_name(owl, gt_graph, p),
+                                self.get_readable_name(owl, gt_graph, o),
                             )
                     # If subject is *not* found in other_graph
                     else:
                         if not s in missing_s:
                             if not isinstance(s, rdflib.term.BNode):
                                 exc_missing += "\nMissg s:\t%s is missing " % (
-                                    self.get_readable_name(gt_graph, s))
+                                    self.get_readable_name(owl, gt_graph, s))
                                 missing_s.append(s)
 
         self.my_execption += exc_missing + \
