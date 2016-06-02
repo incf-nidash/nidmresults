@@ -609,7 +609,7 @@ ORDER BY ?peak_label
         return exc_sets
 
     def serialize(self, destination, format="mkda", overwrite=False,
-                  con_ids=dict()):
+                  last_used_con_id=0):
         # We need the peaks, excursion set maps and contrast maps
         self.get_peaks()
         self.get_excursion_set_maps()
@@ -641,7 +641,8 @@ ORDER BY ?peak_label
                 self.FixedRandom = "random"
 
                 # For anything that has a label
-                con_ids[None] = 0
+                con_ids = dict()
+                con_ids[None] = last_used_con_id
 
                 for oid, peak in self.get_peaks().items():
                     exc_set = self.objects[peak.exc_set_id]
@@ -677,5 +678,7 @@ ORDER BY ?peak_label
                         con_id,
                         self.N, self.FixedRandom,
                         space, con_name])
+
+                return con_ids
 
         return con_ids
