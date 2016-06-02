@@ -217,23 +217,14 @@ class TestResultDataModel(object):
 
                 # If o is a string that is likely to be json check if we have
                 # an equivalent json string
+                same_json_array = False
+                close_float = False
                 if hasattr(o, 'datatype') and o.datatype == XSD['string']:
-                    try:
-                        o_json = json.loads(o)
-                        for g2_term, g2_o in graph2.subject_objects(p):
-                            if hasattr(g2_o, 'datatype') and \
-                                    o.datatype == XSD['string']:
-                                try:
-                                    o2_json = json.loads(g2_o)
-                                    if o2_json == o_json:
-                                        g2_match[g2_term] += 1
-                                except:
-                                    # Not a valid json string: do nothing
-                                    continue
-
-                    except:
-                        # Not a valid json string: do nothing
-                        o_json = None
+                    for g2_term, g2_o in graph2.subject_objects(p):
+                        same_json_array, close_float = \
+                            self._same_json_or_float(o, g2_o)
+                        if same_json_array or close_float:
+                            g2_match[g2_term] += 1
 
             if activity or agent:
                 for s, p in graph1.subject_predicates(g1_term):
@@ -362,25 +353,12 @@ class TestResultDataModel(object):
                         same_json_array = False
                         close_float = False
                         for o_gt in gt_m_other.objects(s,  p):
-                            # If string represents a json-array, then
-                            # compare as json data
-                            if o.startswith("[") and o.endswith("]"):
-                                try:
-                                    if json.loads(o) == json.loads(o_gt):
-                                        same_json_array = True
-                                except ValueError:
-                                    # Actually this string was not json
-                                    same_json_array = False
+                            same_json_array, close_float = \
+                                self._same_json_or_float(o, o_gt)
 
-                            # If literal is a float allow for a small
-                            # tolerance to deal with possibly different
-                            # roundings
-                            if o.datatype == XSD.float:
-                                if o_gt.datatype == XSD.float:
-                                    # Avoid None
-                                    if o.value and o_gt.value:
-                                        close_float = np.isclose(
-                                            o.value, o_gt.value)
+                            if same_json_array or close_float:
+                                # We found a match
+                                break
 
                         if not same_json_array and not close_float:
                             # Alternatives are o such as (s,p,o) in gt and
@@ -476,20 +454,18 @@ class TestResultDataModel(object):
                                              and not p == RDFS['label']):
                 if include and (s,  p, None) in other_graph:
                     if isinstance(o, rdflib.term.Literal):
-
-                        # If string represents a json-array, then spaces do not
-                        # matter
                         same_json_array = False
-                        if o.startswith("[") and o.endswith("]"):
-                            for o_gt in gt_graph.objects(s,  p):
-                                try:
-                                    if json.loads(o) == json.loads(o_gt):
-                                        same_json_array = True
-                                except ValueError:
-                                    # Actually this string was not json
-                                    same_json_array = False
+                        close_float = False
 
-                        if not same_json_array:
+                        for o_gt in gt_graph.objects(s,  p):
+                            same_json_array, close_float = \
+                                self._same_json_or_float(o, o_gt)
+
+                            if same_json_array or close_float:
+                                # We found a match
+                                break
+
+                        if not same_json_array and not close_float:
                             exc_wrong_literal += \
                                 "\nWrong o:\t %s should be %s?" \
                                 "\n\t\t ... in '%s %s %s'" \
@@ -562,6 +538,31 @@ class TestResultDataModel(object):
 
         if raise_now and self.my_execption:
             raise Exception(self.my_execption)
+
+    def _same_json_or_float(self, o, o_other):
+        # If string represents a json-array, then
+        # compare as json data
+        same_json_array = False
+        if o.startswith("[") and o.endswith("]"):
+            try:
+                if json.loads(o) == json.loads(o_other):
+                    same_json_array = True
+            except ValueError:
+                # Actually this string was not json
+                same_json_array = False
+
+        # If literal is a float allow for a small
+        # tolerance to deal with possibly different
+        # roundings
+        close_float = False
+        if o.datatype == XSD.float:
+            if o_other.datatype == XSD.float:
+                # Avoid None
+                if o.value and o_other.value:
+                    close_float = np.isclose(
+                        o.value, o_other.value)
+
+        return (same_json_array, close_float)
 
 
 class ExampleGraph(object):
