@@ -7,7 +7,7 @@ requirements = list(filter(None, reqs))
 
 setup(
     name="nidmresults",
-    version="0.3.2",
+    version="0.3.3",
     author="Camille Maumet",
     author_email="c.m.j.maumet@warwick.ac.uk",
     description=(
@@ -33,7 +33,7 @@ setup(
                    'owl/nidm-results_100.owl',
                    'owl/nidm-results_110.owl',
                    'owl/nidm-results_120.owl',
-                   'owl/nidm-results_130-rc2.owl']},
+                   'owl/nidm-results_130-rc3.owl']},
     include_package_data=True,
     install_requires=requirements,
 )

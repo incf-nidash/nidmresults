@@ -127,6 +127,7 @@ class ContrastMap(NIDMObject):
         self.coord_space = coord_space
         self.type = NIDM_CONTRAST_MAP
         self.prov_type = PROV['Entity']
+        self.label = "Contrast Map: " + self.name
 
     def export(self, nidm_version):
         """
@@ -142,7 +143,7 @@ class ContrastMap(NIDMObject):
             (PROV['type'], NIDM_CONTRAST_MAP),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
             (NIDM_CONTRAST_NAME, self.name),
-            (PROV['label'], "Contrast Map: " + self.name)))
+            (PROV['label'], self.label)))
         return self.p
 
 
@@ -296,11 +297,11 @@ class StatisticMap(NIDMObject):
 
     def __init__(self, location, stat_type, contrast_num, contrast_name, dof,
                  coord_space, export_dir=None, label=None, oid=None,
-                 format="image/nifti", effdof=None, filename=None, sha=None):
+                 format="image/nifti", effdof=None, filename=None, sha=None,
+                 contrast_estimation=None):
         super(StatisticMap, self).__init__(export_dir, oid=oid)
         self.num = contrast_num
         self.contrast_name = contrast_name
-        self.id = NIIRI[str(uuid.uuid4())]
         self.stat_type = stat_type
         if self.stat_type.lower() == "t":
             self.stat = STATO_TSTATISTIC
@@ -310,7 +311,8 @@ class StatisticMap(NIDMObject):
             self.stat = STATO_FSTATISTIC
         # FIXME use new 'preferred mathematical notation from stato'
         if self.num is not None:
-            filename = self.stat_type.upper() + 'Statistic' + self.num + '.nii.gz'
+            filename = self.stat_type.upper() + \
+                'Statistic' + self.num + '.nii.gz'
         self.file = NIDMFile(self.id, location, filename, export_dir, sha=sha)
         self.coord_space = coord_space
         self.dof = dof
@@ -329,6 +331,9 @@ class StatisticMap(NIDMObject):
             effdof = 1.0
 
         self.effdof = effdof
+
+        # Only used when reading (so far)
+        self.contrast_estimation = contrast_estimation
 
     def __str__(self):
         return '%s\t%s' % (self.label, self.file)
@@ -369,13 +374,18 @@ class ContrastEstimation(NIDMObject):
     Object representing a ContrastEstimation entity.
     """
 
-    def __init__(self, contrast_num, contrast_name):
-        super(ContrastEstimation, self).__init__()
+    def __init__(self, contrast_num, contrast_name=None, label=None,
+                 param_estimate=None, oid=None):
+        super(ContrastEstimation, self).__init__(oid=oid)
         self.num = contrast_num
-        self.name = contrast_name
-        self.id = NIIRI[str(uuid.uuid4())]
         self.type = NIDM_CONTRAST_ESTIMATION
         self.prov_type = PROV['Activity']
+        if label is not None:
+            self.label = label
+        else:
+            self.label = "Contrast estimation: " + contrast_name
+        # Only used when reading (so far)
+        self.param_estimate = param_estimate
 
     def export(self, nidm_version):
         """
@@ -383,6 +393,6 @@ class ContrastEstimation(NIDMObject):
         """
         self.add_attributes((
             (PROV['type'], self.type),
-            (PROV['label'], "Contrast estimation: " + self.name)))
+            (PROV['label'], self.label)))
 
         return self.p

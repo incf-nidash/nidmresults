@@ -78,6 +78,7 @@ class Graph():
                 stat_maps.append(StatisticMap(
                     stat_file, stat_type, contrast_num, contrast_name, dof,
                     coord_space, export_dir, label))
+        self.stat_maps = stat_maps
         return stat_maps
 
     def get_peaks(self, contrast_name=None):
@@ -128,18 +129,14 @@ ORDER BY ?peak_label
         if sd:
             for coord_label, coord_vector, z, peak_label, p_unc, peak_id, \
                     exc_set_id in sd:
-                cluster_index = None
-                stat_num = None
-                cluster_id = None
-                local_peak_id = None
-                peak = Peak(cluster_index, local_peak_id, float(z), stat_num,
-                            cluster_id,
-                            coord_vector=coord_vector, p_unc=float(p_unc),
-                            label=peak_label, coord_label=coord_label,
+                peak = Peak(float(z), coord_vector=coord_vector,
+                            p_unc=float(p_unc), label=peak_label,
+                            coord_label=coord_label,
                             oid=peak_id, exc_set_id=exc_set_id)
                 peaks[peak_id] = (peak)
 
         self.objects.update(peaks)
+        self.peaks = peaks
         return peaks
 
     def peak_query(self):
@@ -190,7 +187,7 @@ wasGeneratedBy ?conest .
                 peaks.append(peak)
         return peaks_df
 
-    def get_coordinate_spaces(self, oid=None):
+    def get_coord_spaces(self, oid=None):
         if oid is None:
             oid_var = "?oid"
         else:
@@ -236,6 +233,202 @@ SELECT ?oid ?label ?vox_to_world ?units ?vox_size ?coordinate_system ?numdim
         else:
             return coord_spaces
 
+    def get_groups(self, oid=None):
+        """
+        Read a NIDM-Results document and return a dict of Groups.
+        """
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+prefix obo_studygrouppopulation: <http://purl.obolibrary.org/obo/STATO_0000193>
+prefix nidm_groupName: <http://purl.org/nidash/nidm#NIDM_0000170>
+prefix nidm_numberOfSubjects: <http://purl.org/nidash/nidm#NIDM_0000171>
+
+SELECT DISTINCT * WHERE {
+    """ + oid_var + """ a obo_studygrouppopulation: ;
+        rdfs:label ?label ;
+        nidm_groupName: ?group_name ;
+        nidm_numberOfSubjects: ?num_subjects .
+}
+        """
+        objects = dict()
+
+        arg_list = self.run_query_and_get_args(query, oid)
+        for args in arg_list:
+            group = Group(**args)
+            objects[args['oid']] = group
+
+        self.objects.update(objects)
+        if oid is not None:
+            return objects[oid]
+        else:
+            return objects
+
+    def get_datas(self, oid=None):
+        """
+        Read a NIDM-Results document and return a dict of Data.
+        """
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+prefix nidm_Data: <http://purl.org/nidash/nidm#NIDM_0000169>
+prefix obo_studygrouppopulation: <http://purl.obolibrary.org/obo/STATO_0000193>
+
+SELECT DISTINCT * WHERE {
+    """ + oid_var + """ a nidm_Data: ;
+        rdfs:label ?label ;
+        prov:wasAttributedTo ?group_id .
+    ?group_id a obo_studygrouppopulation: .
+}
+        """
+        objects = dict()
+
+        arg_list = self.run_query_and_get_args(query, oid)
+        for args in arg_list:
+            # FIXME: load from file
+            args["grand_mean_scaling"] = None
+            args["target"] = None
+            args["mri_protocol"] = None
+            args["group_or_sub"] = args["group"]
+            args.pop("group", None)
+            # (self, grand_mean_scaling, target, mri_protocol=None, oid=None)
+            objects[args['oid']] = Data(**args)
+
+        self.objects.update(objects)
+
+        if oid is not None:
+            return objects[oid]
+        else:
+            return objects
+
+    def get_model_param_estimations(self, oid=None):
+        """
+        Read a NIDM-Results document and return a dict of Model Parameter
+        Estimations.
+        """
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_000005\
+6>
+prefix nidm_ParameterEstimateMap: <http://purl.org/nidash/nidm#NIDM_0000061>
+prefix nidm_Data: <http://purl.org/nidash/nidm#NIDM_0000169>
+
+SELECT DISTINCT * WHERE {
+    """ + oid_var + """ a nidm_ModelParameterEstimation: ;
+        rdfs:label ?label ;
+        prov:used ?data_id .
+    ?data_id a nidm_Data: .
+}
+        """
+        objects = dict()
+
+        arg_list = self.run_query_and_get_args(query, oid)
+        for args in arg_list:
+            args['estimation_method'] = None
+            args['software_id'] = None
+            # FIXME: read from file
+            objects[args['oid']] = ModelParametersEstimation(**args)
+            # (self, estimation_method, software_id):
+
+        self.objects.update(objects)
+        if oid is not None:
+            return objects[oid]
+        else:
+            return objects
+
+    def get_param_estimates(self, oid=None):
+        """
+        Read a NIDM-Results document and return a dict of Parameter Estimate
+        Maps.
+        """
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+prefix nidm_ParameterEstimateMap: <http://purl.org/nidash/nidm#NIDM_0000061>
+prefix nidm_inCoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000104>
+prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_000005\
+6>
+
+SELECT DISTINCT * WHERE {
+    """ + oid_var + """ a nidm_ParameterEstimateMap: ;
+        rdfs:label ?label ;
+        nfo:fileName ?filename ;
+        nidm_inCoordinateSpace: ?coord_space_id ;
+        crypto:sha512 ?sha ;
+        dct:format ?format ;
+        prov:wasGeneratedBy ?model_param_estimation_id .
+    ?model_param_estimation_id a nidm_ModelParameterEstimation: .
+}
+        """
+        objects = dict()
+
+        arg_list = self.run_query_and_get_args(query, oid)
+
+        pe_num = 1
+        for args in arg_list:
+            args.pop("format", None)
+            args["pe_num"] = pe_num
+            args["pe_file"] = None
+            pe_num = pe_num + 1
+            objects[args['oid']] = ParameterEstimateMap(**args)
+
+        self.objects.update(objects)
+        if oid is not None:
+            return objects[oid]
+        else:
+            return objects
+
+    def get_contrast_estimations(self, oid=None):
+        """
+        Read a NIDM-Results document and return a dict of Contrast Estimations.
+        """
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+prefix nidm_ContrastEstimation: <http://purl.org/nidash/nidm#NIDM_0000001>
+prefix nidm_ParameterEstimateMap: <http://purl.org/nidash/nidm#NIDM_0000061>
+
+SELECT DISTINCT * WHERE {
+    """ + oid_var + """ a nidm_ContrastEstimation: ;
+        rdfs:label ?label ;
+        prov:used ?param_estimate_id .
+    ?param_estimate_id a nidm_ParameterEstimateMap: .
+}
+        """
+        objects = dict()
+
+        arg_list = self.run_query_and_get_args(query, oid)
+
+        con_num = 1
+        for args in arg_list:
+            # Assign random contrast number
+            args['contrast_num'] = con_num
+            con_num = con_num + 1
+            # FIXME: deal with more than one param_estimate as input
+            objects[args['oid']] = ContrastEstimation(**args)
+
+        self.objects.update(objects)
+        if oid is not None:
+            return objects[oid]
+        else:
+            return objects
+
     def get_stat_maps(self, oid=None):
         """
         Read a NIDM-Results document and return a dict of Statistic Maps.
@@ -253,6 +446,7 @@ prefix nidm_effectDegreesOfFreedom: <http://purl.org/nidash/nidm#NIDM_0000091>
 prefix nidm_inCoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000104>
 prefix nidm_errorDegreesOfFreedom: <http://purl.org/nidash/nidm#NIDM_0000093>
 prefix obo_tstatistic: <http://purl.obolibrary.org/obo/STATO_0000176>
+prefix nidm_ContrastEstimation: <http://purl.org/nidash/nidm#NIDM_0000001>
 
 SELECT DISTINCT * WHERE {
     """ + oid_var + """ a nidm_StatisticMap: ;
@@ -265,30 +459,51 @@ SELECT DISTINCT * WHERE {
         nidm_errorDegreesOfFreedom: ?dof ;
         nidm_effectDegreesOfFreedom: ?effdof ;
         nidm_inCoordinateSpace: ?coord_space_id ;
-        crypto:sha512 ?sha .
+        crypto:sha512 ?sha ;
+        prov:wasGeneratedBy ?contrast_estimation_id .
+    ?contrast_estimation_id a nidm_ContrastEstimation: .
 }
         """
-        sd = self.graph.query(query)
-
         stat_maps = dict()
-        if sd:
-            for row in sd:
-                coord_space = self.get_coordinate_spaces(row.coord_space_id)
-                args = row.asdict()
-                args['coord_space'] = coord_space
-                if oid is not None:
-                    args['oid'] = oid
-                # FIXME: will have to be set by default but that will change
-                # position of arguments (check for compatibility)
-                args['contrast_num'] = None
-                args.pop("coord_space_id", None)
-                stat_maps[args['oid']] = StatisticMap(**args)
+
+        arg_list = self.run_query_and_get_args(query, oid)
+        for args in arg_list:
+            # FIXME: will have to be set by default but that will change
+            # position of arguments (check for compatibility)
+            args['contrast_num'] = None
+            stat_maps[args['oid']] = StatisticMap(**args)
 
         self.objects.update(stat_maps)
         if oid is not None:
             return stat_maps[oid]
         else:
             return stat_maps
+
+    def run_query_and_get_args(self, query, oid):
+        sd = self.graph.query(query)
+        all_args = list()
+        if sd:
+            for row in sd:
+                args = row.asdict()
+
+                for key, value in args.iteritems():
+                    if key.endswith("_id"):
+                        object_name = key.replace("_id", "")
+                        method_name = "get_" + object_name + "s"
+                        method = getattr(self, method_name)
+
+                        loaded_object = method(value)
+                        args[object_name] = loaded_object
+                        args.pop(key, None)
+
+                if oid is not None:
+                    args['oid'] = oid
+
+                all_args.append(args)
+        else:
+            raise Exception('No results for query:\n' + query)
+
+        return all_args
 
     def get_inferences(self, oid=None):
         """
@@ -380,7 +595,7 @@ ORDER BY ?peak_label
             for row in sd:
                 args = row.asdict()
 
-                coord_space = self.get_coordinate_spaces(row.coord_space_id)
+                coord_space = self.get_coord_spaces(row.coord_space_id)
                 args['coord_space'] = coord_space
                 args.pop("coord_space_id", None)
 
@@ -389,17 +604,12 @@ ORDER BY ?peak_label
                 args.pop("inference_id", None)
 
                 exc_sets[args['oid']] = ExcursionSet(**args)
-                #             cluster_id,
-                #             coord_vector=coord_vector, p_unc=float(p_unc),
-                #             label=peak_label, coord_label=coord_label) #,
-                #             # excursion_set_id=exc_set_id)
-                # peaks[peak_id] = (peak)
 
         self.objects.update(exc_sets)
         return exc_sets
 
     def serialize(self, destination, format="mkda", overwrite=False,
-                  con_ids=dict()):
+                  last_used_con_id=0):
         # We need the peaks, excursion set maps and contrast maps
         self.get_peaks()
         self.get_excursion_set_maps()
@@ -427,11 +637,12 @@ ORDER BY ?peak_label
                         ["x", "y", "z", "Study", "Contrast", "N",
                          "FixedRandom", "CoordSys", "Name"])
 
-                self.N = 20  # FIXME
-                self.FixedRandom = "random"  # FIXME
+                # Assumed random effects
+                self.FixedRandom = "random"
 
                 # For anything that has a label
-                con_ids[None] = 0
+                con_ids = dict()
+                con_ids[None] = last_used_con_id
 
                 for oid, peak in self.get_peaks().items():
                     exc_set = self.objects[peak.exc_set_id]
@@ -450,6 +661,10 @@ ORDER BY ?peak_label
                     con_name = stat_map.contrast_name.replace(
                         " ", "_").replace(":", "")
 
+                    # FIXME: need to deal with more than one group
+                    self.N = stat_map.contrast_estimation.param_estimate.\
+                        model_param_estimation.data.group_or_sub.num_subjects
+
                     if con_name in con_ids:
                         con_id = con_ids[con_name]
                     else:
@@ -463,5 +678,7 @@ ORDER BY ?peak_label
                         con_id,
                         self.N, self.FixedRandom,
                         space, con_name])
+
+                return con_ids
 
         return con_ids

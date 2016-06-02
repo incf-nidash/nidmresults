@@ -143,33 +143,54 @@ class OwlReader():
 
     def count_by_namespaces(self):
         owl_types = list([OWL['Class'], OWL['DatatypeProperty'],
-                          OWL['ObjectProperty'], OWL['NamedIndividual'], None])
+                          OWL['ObjectProperty'], OWL['NamedIndividual']])
 
         # Ignore the following namespaces/terms (not part of the model) from
         # the count
         but = ("owl", "rdf", "prv", "protege", "xsd", "obo:IAO_", "iao",
                "obo:iao.owl", "prov")
 
+        counter_dict = dict()
+
         counter = 0
+
+        all_terms = dict()
         for owl_type in owl_types:
             terms = self.get_by_namespaces(self.all_of_rdf_type(owl_type), but)
-            len_dict = {key: len(value) for (key, value) in terms.items() if key is not None}
-            num = sum(len_dict.values())
-            if owl_type is not None:
-                type_id = self.graph.qname(owl_type).split(":")[1]
-                counter = counter + num
-                print counter
-                comp_to = ""
-            else:
-                type_id = 'all'
-                comp_to = " (" + str(counter) + ")"
+            keys = set(all_terms).union(terms)
+            no = []
+            all_terms = dict((k, all_terms.get(k, no) + terms.get(k, no)) for k in keys)
 
-            print str(num) + " " + type_id + comp_to
-            for nsp, length in len_dict.items():
-                print "\t" + nsp + ": " + str(length)
-                if owl_type is None:
-                    print "\t\t" + ", ".join(map(self.get_label, terms[nsp]))
-            print "\n\n-------------"
+            len_dict = {key: (len(value), terms) for (key, value) in \
+                terms.items() if key is not None}
+            num = sum([x[0] for x in len_dict.values()])
+            type_id = self.graph.qname(owl_type).split(":")[1]
+            counter = counter + num
+            # print counter
+            comp_to = ""
+
+            counter_dict[type_id] = (num, len_dict)
+
+        num_attributes = counter_dict[u'DatatypeProperty'][0] + \
+            counter_dict[u'ObjectProperty'][0]
+        num_classes = counter_dict[u'Class'][0] + \
+            counter_dict[u'NamedIndividual'][0]
+        num_terms = num_attributes + num_classes
+
+        all_terms_len = {key: (len(value), value) for (key, value) in
+                         all_terms.items() if key is not None}
+
+        num_defined = all_terms_len[u'nidm'][0] + all_terms_len[u'spm'][0] + \
+            all_terms_len[u'fsl'][0]
+        num_reused = num_terms - num_defined
+
+        # Sanity check
+        num_terms_from_all = sum([x[0] for x in all_terms_len.values()])
+        if not num_terms_from_all == num_terms:
+            raise Exception('Error: number of terms from all is inconsistent.')
+
+        return (num_terms, num_classes, num_attributes, num_reused,
+                all_terms_len)
 
     def get_class_names_by_prov_type(self, classes=None, prefix=None,
                                      but=None):
