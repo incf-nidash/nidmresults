@@ -199,6 +199,11 @@ class TestResultDataModel(object):
             format_found = False
 
             for p, o in graph1.predicate_objects(g1_term):
+                logging.debug("Trying to find a match for " +
+                              str(graph1.qname(g1_term)) + " " +
+                              str(graph1.qname(p)) + " " +
+                              str(o))
+
                 if p == NIDM_IN_COORDINATE_SPACE:
                     coord_space_found = True
                 if p == DCT['format']:
@@ -214,6 +219,8 @@ class TestResultDataModel(object):
                     # We don't want to match agents to activities
                     if g2_term in g2_match:
                         g2_match[g2_term] += 1
+                        logging.debug("Match found with " +
+                                      str(graph1.qname(g2_term)))
 
                 # If o is a string that is likely to be json check if we have
                 # an equivalent json string
@@ -225,6 +232,8 @@ class TestResultDataModel(object):
                             self._same_json_or_float(o, g2_o)
                         if same_json_array or close_float:
                             g2_match[g2_term] += 1
+                            logging.debug("Match found with " +
+                                          str(graph1.qname(g2_term)))
 
             if activity or agent:
                 for s, p in graph1.subject_predicates(g1_term):
