@@ -33,7 +33,7 @@ setup(
                    'owl/nidm-results_100.owl',
                    'owl/nidm-results_110.owl',
                    'owl/nidm-results_120.owl',
-                   'owl/nidm-results_130-rc3.owl']},
+                   'owl/nidm-results_130.owl']},
     include_package_data=True,
     install_requires=requirements,
 )
