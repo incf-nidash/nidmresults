@@ -1722,7 +1722,7 @@ obo:STATO_0000193 rdf:type owl:Class ;
                   
                   rdfs:subClassOf prov:Agent ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/Group.txt" .
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/Group.txt" .
 
 
 
@@ -1738,7 +1738,7 @@ obo:STATO_0000323 rdf:type owl:Class ;
                   
                   rdfs:subClassOf prov:Entity ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ContrastWeights.txt" .
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ContrastWeights.txt" .
 
 
 
@@ -1782,7 +1782,7 @@ fsl:FSL_0000002 rdf:type owl:Class ;
                 
                 rdfs:subClassOf nidm:NIDM_0000087 ;
                 
-                obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/FSL_DriftModel.txt"^^xsd:anyURI ;
+                obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/FSL_DriftModel.txt"^^xsd:anyURI ;
                 
                 obo:IAO_0000115 "A 'Drift Model' in which the drifts are modeled with a Gaussian-weighted running line smoother, fit to and subtracted from the data and each column of the 'Design Matrix'." ;
                 
@@ -1800,7 +1800,7 @@ nidm:NIDM_0000001 rdf:type owl:Class ;
                   
                   rdfs:subClassOf prov:Activity ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ContrastEstimation.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ContrastEstimation.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000115 "The process of performing a [obo:contrast estimation](http://purl.obolibrary.org/obo/STATO_0000383) at each element (e.g., pixel, voxel, vertex, or face) of a map" ;
                   
@@ -1820,7 +1820,7 @@ nidm:NIDM_0000002 rdf:type owl:Class ;
                   
                   obo:IAO_0000115 "A map whose value at each element (e.g., pixel, voxel, vertex, or face) is a [contrast estimate](http://purl.obolibrary.org/obo/STATO_0000384)."^^xsd:string ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ContrastMap.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ContrastMap.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000116 "Discussed in https://github.com/incf-nidash/nidm/issues/255" ;
                   
@@ -1906,9 +1906,9 @@ nidm:NIDM_0000007 rdf:type owl:Class ;
                   
                   rdfs:subClassOf prov:Entity ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ClusterDefinitionCriteria-06.txt"^^xsd:anyURI ,
-                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ClusterDefinitionCriteria-18.txt"^^xsd:anyURI ,
-                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ClusterDefinitionCriteria-26.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ClusterDefinitionCriteria-06.txt"^^xsd:anyURI ,
+                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ClusterDefinitionCriteria-18.txt"^^xsd:anyURI ,
+                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ClusterDefinitionCriteria-26.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000115 "Set of criterion specified a priori to define the clusters reported after 'Inference' (e.g. pixel or voxel 'Connectivity Criterion')." ;
                   
@@ -1924,7 +1924,7 @@ nidm:NIDM_0000008 rdf:type owl:Class ;
                   
                   rdfs:subClassOf nidm:NIDM_0000052 ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ClusterLabelsMap.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ClusterLabelsMap.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000115 "A map whose value at each element (e.g., pixel, voxel, vertex, or face) denotes cluster membership within the excursion set. Each cluster is denoted by a different integer and all members of the same cluster have the same value." ;
                   
@@ -1942,7 +1942,7 @@ nidm:NIDM_0000011 rdf:type owl:Class ;
                   
                   rdfs:subClassOf nidm:NIDM_0000049 ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ConjunctionInference.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ConjunctionInference.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000115 "Statistically testing for the joint significance of multiple effects, with emphasis on rejecting all (instead of one or more) of the respective null hypotheses." ;
                   
@@ -1980,7 +1980,7 @@ nidm:NIDM_0000013 rdf:type owl:Class ;
                   
                   obo:IAO_0000116 "Discussed in https://github.com/incf-nidash/nidm/issues/255."^^xsd:anyURI ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ContrastStandardErrorMap.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ContrastStandardErrorMap.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000115 "A map whose value at each element (e.g., pixel, voxel, vertex, or face) is a [standard error of a contrast estimate](http://purl.obolibrary.org/obo/STATO_0000385)." ;
                   
@@ -1998,7 +1998,7 @@ nidm:NIDM_0000015 rdf:type owl:Class ;
                   
                   owl:sameAs "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C44465"^^xsd:anyURI ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/Coordinate.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/Coordinate.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000116 "Discussed in https://github.com/incf-nidash/nidm/pull/144 and https://github.com/incf-nidash/nidm/pull/172" ;
                   
@@ -2014,7 +2014,7 @@ nidm:NIDM_0000016 rdf:type owl:Class ;
                   
                   rdfs:subClassOf prov:Entity ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/CoordinateSpace.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/CoordinateSpace.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000115 "An entity with spatial attributes (e.g., dimensions, units, and voxel-to-world mapping) that provides context to a 'Map' (e.g., a 'Statistic Map', a 'Contrast Map'...)." ;
                   
@@ -2081,8 +2081,8 @@ nidm:NIDM_0000019 rdf:type owl:Class ;
                                     owl:onDataRange xsd:string
                                   ] ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/DesignMatrix.txt"^^xsd:anyURI ,
-                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/DesignMatrix_1stLevel.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/DesignMatrix.txt"^^xsd:anyURI ,
+                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/DesignMatrix_1stLevel.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000116 "Discussed at https://github.com/incf-nidash/nidm/issues/274" ;
                   
@@ -2102,7 +2102,7 @@ nidm:NIDM_0000020 rdf:type owl:Class ;
                   
                   rdfs:subClassOf nidm:NIDM_0000004 ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/DisplayMaskMap.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/DisplayMaskMap.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000116 "Discussed at: https://github.com/incf-nidash/nidm/pull/258 and https://github.com/incf-nidash/nidm/pull/157" ;
                   
@@ -2136,9 +2136,9 @@ nidm:NIDM_0000023 rdf:type owl:Class ;
                   
                   rdfs:subClassOf prov:Entity ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ErrorModel-OLS.txt"^^xsd:anyURI ,
-                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ErrorModel-WLS.txt"^^xsd:anyURI ,
-                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ErrorModel-SPMnonSphericity.txt" ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ErrorModel-OLS.txt"^^xsd:anyURI ,
+                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ErrorModel-WLS.txt"^^xsd:anyURI ,
+                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ErrorModel-SPMnonSphericity.txt" ;
                   
                   obo:IAO_0000115 "Model used to describe the random variation of the error term as part of parameter estimation, including specification of the error probability distribution, its variance and dependence both spatially and across observations." ;
                   
@@ -2181,7 +2181,7 @@ nidm:NIDM_0000025 rdf:type owl:Class ;
                   
                   obo:IAO_0000116 "Discussed in the Neuroimaging terms spreadsheet and in https://github.com/incf-nidash/nidm/issues/256." ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ExcursionSetMap.txt" ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ExcursionSetMap.txt" ;
                   
                   obo:IAO_0000114 obo:IAO_0000122 .
 
@@ -2195,10 +2195,10 @@ nidm:NIDM_0000026 rdf:type owl:Class ;
                   
                   rdfs:subClassOf nidm:NIDM_0000162 ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ExtentThreshold-FDR.txt"^^xsd:anyURI ,
-                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ExtentThreshold-Unc.txt"^^xsd:anyURI ,
-                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ExtentThresholdStat_clusterSizeResels.txt"^^xsd:anyURI ,
-                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ExtentThreshold_equivThresh-FWER.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ExtentThreshold-FDR.txt"^^xsd:anyURI ,
+                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ExtentThreshold-Unc.txt"^^xsd:anyURI ,
+                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ExtentThresholdStat_clusterSizeResels.txt"^^xsd:anyURI ,
+                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ExtentThreshold_equivThresh-FWER.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000115 "A numerical value that establishes a lower bound on cluster-sizes and can be specified by the user in terms of FWER-corrected p-value, uncorrected p-value or minimum cluster size in voxels" ;
                   
@@ -2216,7 +2216,7 @@ nidm:NIDM_0000027 rdf:type owl:Class ;
                   
                   rdfs:subClassOf nidm:NIDM_0000057 ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/NIDMBundle.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/NIDMBundle.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000116 "Discussed at https://github.com/incf-nidash/nidm/pull/137" ;
                   
@@ -2234,7 +2234,7 @@ nidm:NIDM_0000028 rdf:type owl:Class ;
                   
                   rdfs:subClassOf nidm:NIDM_0000036 ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/DesignMatrix_1stLevel-FIR.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/DesignMatrix_1stLevel-FIR.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000115 "Set of Finite impulse response (FIR) filters, with FIR the convolution kernel is represented as a set of discrete fixed-width \"impulses\" (definition adapted from [FSL wiki](http://fsl.fmrib.ox.ac.uk/fsl/fsl4.0/feat5/detail.html))" ;
                   
@@ -2318,7 +2318,7 @@ nidm:NIDM_0000033 rdf:type owl:Class ;
                   
                   rdfs:subClassOf nidm:NIDM_0000052 ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/GrandMeanMap.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/GrandMeanMap.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000116 "Discussed at https://github.com/incf-nidash/nidm/issues/288" ;
                   
@@ -2336,10 +2336,10 @@ nidm:NIDM_0000034 rdf:type owl:Class ;
                   
                   rdfs:subClassOf nidm:NIDM_0000162 ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/HeightThreshold-FDR.txt"^^xsd:anyURI ,
-                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/HeightThreshold-Stat.txt"^^xsd:anyURI ,
-                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/HeightThreshold-Unc.txt"^^xsd:anyURI ,
-                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/HeightThreshold_equivThresh-FWER.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/HeightThreshold-FDR.txt"^^xsd:anyURI ,
+                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/HeightThreshold-Stat.txt"^^xsd:anyURI ,
+                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/HeightThreshold-Unc.txt"^^xsd:anyURI ,
+                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/HeightThreshold_equivThresh-FWER.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000115 "A numerical value that establishes a lower bound on statistic values and can be specified by the user in terms of FWER-corrected p-value, uncorrected p-value or minimum statistic value." ;
                   
@@ -2389,7 +2389,7 @@ nidm:NIDM_0000037 rdf:type owl:Class ;
                   
                   rdfs:subClassOf nidm:NIDM_0000036 ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/DesignMatrix_1stLevel_HRFBasis2_HRFBasis3-InformedBasisSet.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/DesignMatrix_1stLevel_HRFBasis2_HRFBasis3-InformedBasisSet.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000115 "'Hemodynamic Response Function' basis which is the derivative of an 'Hemodynamic Response Function'." ;
                   
@@ -2423,8 +2423,8 @@ nidm:NIDM_0000049 rdf:type owl:Class ;
                   
                   rdfs:subClassOf prov:Activity ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/Inference-OneTailed.txt"^^xsd:anyURI ,
-                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/Inference-TwoTailed.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/Inference-OneTailed.txt"^^xsd:anyURI ,
+                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/Inference-TwoTailed.txt"^^xsd:anyURI ;
                   
                   owl:sameAs "http://purl.obolibrary.org/obo/STATO_0000299" ;
                   
@@ -2480,8 +2480,8 @@ nidm:NIDM_0000052 rdf:type owl:Class ;
                                     owl:onDataRange xsd:string
                                   ] ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/Map_atLocation-nii.txt"^^xsd:anyURI ,
-                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/Map_atLocation_hasMapHeader-img.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/Map_atLocation-nii.txt"^^xsd:anyURI ,
+                                  "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/Map_atLocation_hasMapHeader-img.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000115 "Ordered set of values corresponding to the discrete sampling of some process (e.g. brain MRI data measured on a regular 3D lattice; or brain cortical surface data measured irregularly over the cortex)." ;
                   
@@ -2519,7 +2519,7 @@ nidm:NIDM_0000053 rdf:type owl:Class ;
                                     owl:onDataRange xsd:string
                                   ] ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/MapHeader.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/MapHeader.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000116 "Discussed at https://github.com/incf-nidash/nidm/issues/289" ;
                   
@@ -2541,7 +2541,7 @@ nidm:NIDM_0000054 rdf:type owl:Class ;
                   
                   obo:IAO_0000116 "Discussed at: https://github.com/incf-nidash/nidm/pull/258 and https://github.com/incf-nidash/nidm/issues/155" ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/MaskMap.txt" ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/MaskMap.txt" ;
                   
                   obo:IAO_0000114 obo:IAO_0000122 .
 
@@ -2555,7 +2555,7 @@ nidm:NIDM_0000056 rdf:type owl:Class ;
                   
                   rdfs:subClassOf prov:Activity ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ModelParametersEstimation.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ModelParametersEstimation.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000115 "the process of performing a [obo:model parameter estimation](http://purl.obolibrary.org/obo/STATO_0000119) at each element (e.g., pixel, voxel, vertex, or face) of a map" ;
                   
@@ -2635,7 +2635,7 @@ nidm:NIDM_0000061 rdf:type owl:Class ;
                   
                   rdfs:subClassOf nidm:NIDM_0000052 ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ParameterEstimateMap.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ParameterEstimateMap.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000116 "Discussed in https://github.com/incf-nidash/nidm/issues/255 and https://github.com/incf-nidash/nidm/issues/141 (see also https://github.com/ISA-tools/stato/issues/18)" ;
                   
@@ -2657,7 +2657,7 @@ nidm:NIDM_0000062 rdf:type owl:Class ;
                   
                   obo:IAO_0000115 "A map element (e.g., pixel, voxel, vertex, or face) which is a local maximum in the supra-threshold cluster and complies with the 'Peak definition criteria'." ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/Peak_ValueP.txt" ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/Peak_ValueP.txt" ;
                   
                   obo:IAO_0000114 obo:IAO_0000122 .
 
@@ -2671,7 +2671,7 @@ nidm:NIDM_0000063 rdf:type owl:Class ;
                   
                   rdfs:subClassOf prov:Entity ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/PeakDefinitionCriteria_MaxPeaks.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/PeakDefinitionCriteria_MaxPeaks.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000117 "Discussed in https://github.com/incf-nidash/nidm/pull/200" ;
                   
@@ -2727,7 +2727,7 @@ nidm:NIDM_0000066 rdf:type owl:Class ;
                   
                   obo:IAO_0000115 "A map whose value at each element (e.g., pixel, voxel, vertex, or face) is a [residual mean square](http://purl.obolibrary.org/obo/STATO_0000375)." ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ResidualMeanSquaresMap.txt" ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ResidualMeanSquaresMap.txt" ;
                   
                   obo:IAO_0000114 obo:IAO_0000122 .
 
@@ -2757,7 +2757,7 @@ nidm:NIDM_0000068 rdf:type owl:Class ;
                   
                   rdfs:subClassOf nidm:NIDM_0000054 ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/SearchSpaceMaskMap.txt" ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/SearchSpaceMaskMap.txt" ;
                   
                   obo:IAO_0000115 "A 'Mask Map' representing the set of elements (e.g., pixels, voxels, vertices, or faces) in which the 'Inference' was performed" ;
                   
@@ -2795,7 +2795,7 @@ nidm:NIDM_0000070 rdf:type owl:Class ;
                   
                   prov:editorialNote "Discussed in https://github.com/incf-nidash/nidm/issues/71."^^xsd:string ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/SupraThresholdCluster.txt" ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/SupraThresholdCluster.txt" ;
                   
                   obo:IAO_0000114 obo:IAO_0000122 .
 
@@ -2891,7 +2891,7 @@ nidm:NIDM_0000076 rdf:type owl:Class ;
                   
                   rdfs:subClassOf nidm:NIDM_0000052 ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/StatisticMap-T.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/StatisticMap-T.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000116 "Discussed at https://github.com/incf-nidash/nidm/issues/255" ;
                   
@@ -3048,7 +3048,7 @@ nidm:NIDM_0000140 rdf:type owl:Class ;
                   
                   obo:IAO_0000115 "A centre of gravity of the cluster, equivalent to the concept of Centre Of Gravity for a object with distributed mass, where intensity substitutes for mass in this case. The 'Coordinate' of the centre of gravity is the weighted average of the cluster element (e.g., pixels, voxels, vertices, or faces) 'Coordinate's, where the weighting factors are the cluster element intensities. (definition adapted from http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Cluster)" ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/FSL_ClusterCenterOfGravity.txt" ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/FSL_ClusterCenterOfGravity.txt" ;
                   
                   obo:IAO_0000114 obo:IAO_0000122 .
 
@@ -3062,7 +3062,7 @@ nidm:NIDM_0000144 rdf:type owl:Class ;
                   
                   rdfs:subClassOf nidm:NIDM_0000052 ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/SPM_ReselsPerVoxelMap.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/SPM_ReselsPerVoxelMap.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000115 "A map whose value at each element (e.g., pixel, voxel, vertex, or face) location is the number of resels per voxel." ;
                   
@@ -3184,7 +3184,7 @@ nidm:NIDM_0000166 rdf:type owl:Class ;
                   
                   rdfs:subClassOf prov:Activity ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/Export.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/Export.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000115 "The process of exporting results created by a neuroimaging software (SPM, FSL, AFNI...) into a NIDM-Results archive." ;
                   
@@ -3200,7 +3200,7 @@ nidm:NIDM_0000167 rdf:type owl:Class ;
                   
                   rdfs:subClassOf nidm:NIDM_0000165 ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ExporterSoftware-FSL.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ExporterSoftware-FSL.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000115 "Python library for the export of feat folders (generated by FSL) to NIDM-Results. Source available at: https://github.com/incf-nidash/nidm-results_fsl/." ;
                   
@@ -3216,7 +3216,7 @@ nidm:NIDM_0000168 rdf:type owl:Class ;
                   
                   rdfs:subClassOf nidm:NIDM_0000165 ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/ExporterSoftware-SPM.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/ExporterSoftware-SPM.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000115 "Matlab m file for the export of SPM results to NIDM-Results. Source available at: http://www.fil.ion.ucl.ac.uk/spm/download/toolbox/NIDM/spm_nidm.zip/." ;
                   
@@ -3232,7 +3232,7 @@ nidm:NIDM_0000169 rdf:type owl:Class ;
                   
                   rdfs:subClassOf prov:Entity ;
                   
-                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/Data_wasAttributedTo.txt"^^xsd:anyURI ;
+                  obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/Data_wasAttributedTo.txt"^^xsd:anyURI ;
                   
                   obo:IAO_0000116 "Discussed at ..." ;
                   
@@ -3250,7 +3250,7 @@ spm:SPM_0000002 rdf:type owl:Class ;
                 
                 rdfs:subClassOf nidm:NIDM_0000087 ;
                 
-                obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/SPM_DriftModel.txt"^^xsd:anyURI ;
+                obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/SPM_DriftModel.txt"^^xsd:anyURI ;
                 
                 obo:IAO_0000116 "Discussed at https://github.com/incf-nidash/nidm/issues/298" ;
                 
@@ -3268,7 +3268,7 @@ spm:SPM_0000005 rdf:type owl:Class ;
                 
                 rdfs:subClassOf nidm:NIDM_0000049 ;
                 
-                obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/SPM_KConjunctionInference.txt"^^xsd:anyURI ;
+                obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/SPM_KConjunctionInference.txt"^^xsd:anyURI ;
                 
                 obo:IAO_0000115 "The process of testing the joint significance of multiple effects to infer that some (not necessarily all) of the respective effects are real (i.e. their null hypotheses are false). If there are K effects considered, the 'partial Conjunction Degree' u is the number non-null effects allowed as part of partial conjunction null hypothesis; if the partial conjunction null is rejected, it may be inferred that u+1 or more effects are real. The case of u=K-1 corresponds to proper \"'Conjunction Inference'\", while the case of u=0 corresponds to \"global null\" conjunction test. See [Friston et al. (2005). Conjunction revisited. NeuroImage, 25(3), 661-7.](http://dx.doi.org/10.1016/j.neuroimage.2005.01.013)." ;
                 
@@ -3284,7 +3284,7 @@ src:SCR_002823 rdf:type owl:Class ;
                
                rdfs:subClassOf nidm:NIDM_0000164 ;
                
-               obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/FSL_Software.txt"^^xsd:anyURI .
+               obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/FSL_Software.txt"^^xsd:anyURI .
 
 
 
@@ -3294,7 +3294,7 @@ src:SCR_007037 rdf:type owl:Class ;
                
                rdfs:subClassOf nidm:NIDM_0000164 ;
                
-               obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0-rc3/nidm/nidm-results/terms/examples/SPM_Software.txt"^^xsd:anyURI .
+               obo:IAO_0000112 "https://raw.githubusercontent.com/incf-nidash/nidm/NIDM-Results_1.3.0/nidm/nidm-results/terms/examples/SPM_Software.txt"^^xsd:anyURI .
 
 
 
