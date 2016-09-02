@@ -313,7 +313,7 @@ ons#")
 
     def use_prefixes(self, ttl):
         prefix_file = os.path.join(os.path.dirname(__file__), 'prefixes.csv')
-        with open(prefix_file, 'rb') as csvfile:
+        with open(prefix_file, "rt", encoding="ascii") as csvfile:
             reader = csv.reader(csvfile)
             for alphanum_id, prefix, uri in reader:
                 if alphanum_id in ttl:
