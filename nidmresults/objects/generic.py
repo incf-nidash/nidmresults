@@ -10,7 +10,7 @@ from prov.model import ProvBundle, Identifier
 import prov
 import numpy as np
 import os
-from constants import *
+from nidmresults.objects.constants import *
 import nibabel as nib
 import shutil
 import hashlib
