@@ -166,7 +166,7 @@ class OwlReader():
             num = sum([x[0] for x in len_dict.values()])
             type_id = self.graph.qname(owl_type).split(":")[1]
             counter = counter + num
-            # print counter
+            # print(counter)
             comp_to = ""
 
             counter_dict[type_id] = (num, len_dict)

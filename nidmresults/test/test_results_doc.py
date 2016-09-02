@@ -5,6 +5,7 @@ The software-specific test classes must inherit from this class.
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>, Satrajit Ghosh
 @copyright: University of Warwick 2014
 '''
+from __future__ import division, print_function, absolute_import
 import os
 import rdflib
 import re
@@ -131,10 +132,10 @@ class TestResultDataModel(object):
         '''Print the results query 'res' to the console'''
         for idx, row in enumerate(res.bindings):
             rowfmt = []
-            print "Item %d" % idx
+            print("Item %d" % idx)
             for key, val in sorted(row.items()):
                 rowfmt.append('%s-->%s' % (key, val.decode()))
-            print '\n'.join(rowfmt)
+            print('\n'.join(rowfmt))
 
     def successful_retreive(self, res, info_str=""):
         '''Check if the results query 'res' contains a value for each field'''

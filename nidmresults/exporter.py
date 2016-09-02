@@ -8,6 +8,7 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 @copyright: University of Warwick 2013-2014
 """
 
+from __future__ import division, print_function, absolute_import
 from prov.model import ProvBundle, ProvDocument
 import rdflib
 import os
@@ -363,6 +364,6 @@ ons#")
         # ttl_fid.write(self.doc.serialize(format='rdf').
             # replace("inf", '"INF"'))
         # ttl_fid.close()
-        # print "provconvert -infile " + provn_file + " -outfile " + ttl_file
+        # print("provconvert -infile " + provn_file + " -outfile " + ttl_file)
         # check_call("provconvert -infile " + provn_file +
         #            " -outfile " + ttl_file, shell=True)
