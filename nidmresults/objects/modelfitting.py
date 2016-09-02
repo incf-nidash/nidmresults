@@ -7,7 +7,7 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>
 @copyright: University of Warwick 2013-2014
 """
-from __future__ import division, print_function, absolute_import
+
 from prov.model import Identifier
 import uuid
 import numpy as np

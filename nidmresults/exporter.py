@@ -8,7 +8,7 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 @copyright: University of Warwick 2013-2014
 """
 
-from __future__ import division, print_function, absolute_import
+
 from prov.model import ProvBundle, ProvDocument
 import rdflib
 import os
@@ -47,7 +47,7 @@ class NIDMExporter():
         # it
         if os.path.exists(out_dir):
             msg = out_dir+" already exists, overwrite?"
-            if not raw_input("%s (y/N) " % msg).lower() == 'y':
+            if not input("%s (y/N) " % msg).lower() == 'y':
                 quit("Bye.")
             if os.path.isdir(out_dir):
                 shutil.rmtree(out_dir)
@@ -149,12 +149,12 @@ ons#")
         self.add_object(self.software)
 
         # Add model fitting steps
-        for model_fitting in self.model_fittings.values():
+        for model_fitting in list(self.model_fittings.values()):
             model_fitting.activity.wasAssociatedWith(self.software)
             self.add_object(model_fitting)
 
         # Add contrast estimation steps
-        for (model_fitting_id, pe_ids), contrasts in self.contrasts.items():
+        for (model_fitting_id, pe_ids), contrasts in list(self.contrasts.items()):
             model_fitting = self._get_model_fitting(model_fitting_id)
             for contrast in contrasts:
                 contrast.estimation.used(model_fitting.rms_map)
@@ -167,7 +167,7 @@ ons#")
                 self.add_object(contrast)
 
         # Add inference steps
-        for contrast_id, inferences in self.inferences.items():
+        for contrast_id, inferences in list(self.inferences.items()):
             contrast = self._get_contrast(contrast_id)
 
             for inference in inferences:
@@ -190,7 +190,7 @@ ons#")
         Retreive model fitting with identifier 'mf_id' from the list of model
         fitting objects stored in self.model_fitting
         """
-        for model_fitting in self.model_fittings.values():
+        for model_fitting in list(self.model_fittings.values()):
             if model_fitting.activity.id == mf_id:
                 return model_fitting
         raise Exception("Model fitting activity with id: " + str(mf_id) +
@@ -201,7 +201,7 @@ ons#")
         Retreive contrast with identifier 'con_id' from the list of contrast
         objects stored in self.contrasts
         """
-        for contrasts in self.contrasts.values():
+        for contrasts in list(self.contrasts.values()):
             for contrast in contrasts:
                 if contrast.estimation.id == con_id:
                     return contrast
