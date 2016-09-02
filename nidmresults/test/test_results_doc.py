@@ -5,7 +5,7 @@ The software-specific test classes must inherit from this class.
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>, Satrajit Ghosh
 @copyright: University of Warwick 2014
 '''
-from __future__ import division, print_function, absolute_import
+
 import os
 import rdflib
 import re
@@ -245,7 +245,7 @@ class TestResultDataModel(object):
 
             match_found = False
             g2_matched = set()
-            for g2_term, match_index in g2_match.items():
+            for g2_term, match_index in list(g2_match.items()):
                 if max(g2_match.values()) >= min_matching:
                     if (match_index == max(g2_match.values())) \
                             and not g2_term in g2_matched:

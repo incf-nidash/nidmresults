@@ -636,7 +636,7 @@ class Coordinate(NIDMObject):
 
         self.add_attributes(
             type_label +
-            list(dict((k, v) for k, v in coordinate.iteritems()
+            list(dict((k, v) for k, v in coordinate.items()
                       if not v is None).items()))
 
         return self.p
