@@ -9,9 +9,9 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 """
 import numpy as np
 import os
-from constants import *
+from nidmresults.objects.constants import *
 import nibabel as nib
-from generic import *
+from nidmresults.objects.generic import *
 import uuid
 
 

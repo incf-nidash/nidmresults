@@ -6,6 +6,7 @@ Create a database suitable for use with MKDA toolbox
 @copyright: University of Warwick 2013-2014
 """
 
+from __future__ import division, print_function, absolute_import
 import os
 import argparse
 from nidmresults.graph import Graph
@@ -38,7 +39,7 @@ if __name__ == "__main__":
     con_ids = dict()
     con_ids[None] = 0
     for nidmpack in nidmpacks:
-        print "Exporting " + nidmpack
+        print("Exporting " + nidmpack)
 
         overwrite = False
         if first:

@@ -9,7 +9,7 @@ from rdflib import RDF, term
 from rdflib.graph import Graph
 from rdflib.term import Literal
 from nidmresults.objects.constants_rdflib import *
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import warnings
 import vcr
 import os
@@ -162,30 +162,30 @@ class OwlReader():
             all_terms = dict((k, all_terms.get(k, no) + terms.get(k, no)) for k in keys)
 
             len_dict = {key: (len(value), terms) for (key, value) in \
-                terms.items() if key is not None}
-            num = sum([x[0] for x in len_dict.values()])
+                list(terms.items()) if key is not None}
+            num = sum([x[0] for x in list(len_dict.values())])
             type_id = self.graph.qname(owl_type).split(":")[1]
             counter = counter + num
-            # print counter
+            # print(counter)
             comp_to = ""
 
             counter_dict[type_id] = (num, len_dict)
 
-        num_attributes = counter_dict[u'DatatypeProperty'][0] + \
-            counter_dict[u'ObjectProperty'][0]
-        num_classes = counter_dict[u'Class'][0] + \
-            counter_dict[u'NamedIndividual'][0]
+        num_attributes = counter_dict['DatatypeProperty'][0] + \
+            counter_dict['ObjectProperty'][0]
+        num_classes = counter_dict['Class'][0] + \
+            counter_dict['NamedIndividual'][0]
         num_terms = num_attributes + num_classes
 
         all_terms_len = {key: (len(value), value) for (key, value) in
-                         all_terms.items() if key is not None}
+                         list(all_terms.items()) if key is not None}
 
-        num_defined = all_terms_len[u'nidm'][0] + all_terms_len[u'spm'][0] + \
-            all_terms_len[u'fsl'][0]
+        num_defined = all_terms_len['nidm'][0] + all_terms_len['spm'][0] + \
+            all_terms_len['fsl'][0]
         num_reused = num_terms - num_defined
 
         # Sanity check
-        num_terms_from_all = sum([x[0] for x in all_terms_len.values()])
+        num_terms_from_all = sum([x[0] for x in list(all_terms_len.values())])
         if not num_terms_from_all == num_terms:
             raise Exception('Error: number of terms from all is inconsistent.')
 
@@ -433,7 +433,7 @@ class OwlReader():
                 warnings.warn('Multiple definitions for '
                               + self.get_label(owl_term) + ': '
                               + ",".join(definition))
-            definition = unicode(definition[0])
+            definition = str(definition[0])
         else:
             definition = ""
 
@@ -506,7 +506,7 @@ class OwlReader():
                         os.path.join(NIDM_PATH, 'vcr_cassettes/synopsis.yaml'),
                         record_mode='new_episodes'):
                     # Read file from url
-                    example = urllib2.urlopen(example).read()
+                    example = urllib.request.urlopen(example).read()
 
             title = ""
             if example.startswith("#"):
@@ -776,11 +776,11 @@ class OwlReader():
 
         if raise_now:
             error_msg = ""
-            for exc in my_exception.keys():
+            for exc in list(my_exception.keys()):
                 error_msg += exc
-            for exc in my_range_exception.keys():
+            for exc in list(my_range_exception.keys()):
                 error_msg += exc
-            for exc in my_restriction_exception.keys():
+            for exc in list(my_restriction_exception.keys()):
                 error_msg += exc
 
             if error_msg:
@@ -846,7 +846,7 @@ class OwlReader():
         return prefix_name
 
     def sorted_by_labels(self, term_list):
-        class_labels = map(self.get_label, term_list)
+        class_labels = list(map(self.get_label, term_list))
         sorted_term_list = [x for (y, x) in
                             sorted(zip(class_labels, term_list))]
 

@@ -486,7 +486,7 @@ SELECT DISTINCT * WHERE {
             for row in sd:
                 args = row.asdict()
 
-                for key, value in args.iteritems():
+                for key, value in args.items():
                     if key.endswith("_id"):
                         object_name = key.replace("_id", "")
                         method_name = "get_" + object_name + "s"
@@ -644,7 +644,7 @@ ORDER BY ?peak_label
                 con_ids = dict()
                 con_ids[None] = last_used_con_id
 
-                for oid, peak in self.get_peaks().items():
+                for oid, peak in list(self.get_peaks().items()):
                     exc_set = self.objects[peak.exc_set_id]
 
                     if exc_set.coord_space.is_mni():

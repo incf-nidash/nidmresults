@@ -7,8 +7,8 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>
 @copyright: University of Warwick 2013-2014
 """
-from constants import *
-from generic import *
+from nidmresults.objects.constants import *
+from nidmresults.objects.generic import *
 import uuid
 from math import erf, sqrt
 
@@ -636,7 +636,7 @@ class Coordinate(NIDMObject):
 
         self.add_attributes(
             type_label +
-            list(dict((k, v) for k, v in coordinate.iteritems()
+            list(dict((k, v) for k, v in coordinate.items()
                       if not v is None).items()))
 
         return self.p

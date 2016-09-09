@@ -10,7 +10,7 @@ from prov.model import ProvBundle, Identifier
 import prov
 import numpy as np
 import os
-from constants import *
+from nidmresults.objects.constants import *
 import nibabel as nib
 import shutil
 import hashlib
@@ -59,7 +59,7 @@ class NIDMObject(object):
 
         # If attributes is a dictionnary, convert to list
         if isinstance(attributes, dict):
-            attributes = [(k, v) for k, v in attributes.iteritems()]
+            attributes = [(k, v) for k, v in attributes.items()]
 
         for p, o in attributes:
             self._rdf_add(self.id, p, o)
@@ -70,7 +70,7 @@ class NIDMObject(object):
         elif isinstance(o, prov.identifier.Identifier):
             o = rdflib.Literal(o, datatype=XSD.anyURI)
         else:
-            if (isinstance(o, str) or isinstance(o, unicode)) and \
+            if (isinstance(o, str) or isinstance(o, str)) and \
                     not str(p) == "prov:label":
                 o = rdflib.Literal(o, datatype=XSD.string)
             elif isinstance(o, float):

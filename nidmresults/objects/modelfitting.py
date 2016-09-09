@@ -7,13 +7,14 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>
 @copyright: University of Warwick 2013-2014
 """
+
 from prov.model import Identifier
 import uuid
 import numpy as np
 import os
-from constants import *
+from nidmresults.objects.constants import *
 import nibabel as nib
-from generic import *
+from nidmresults.objects.generic import *
 import json
 import warnings
 

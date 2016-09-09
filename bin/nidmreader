@@ -7,6 +7,7 @@ specification. The path to feat directory must be passed as first argument.
 @copyright: University of Warwick 2013-2014
 """
 
+from __future__ import division, print_function, absolute_import
 import os
 import argparse
 from nidmresults.graph import *
@@ -31,8 +32,8 @@ if __name__ == "__main__":
 
     nidm_graph.get_peaks()
     for peak in nidm_graph.peaks:
-        print peak
+        print(peak)
 
     nidm_graph.get_statistic_maps()
     for stat_map in nidm_graph.stat_maps:
-        print stat_map
+        print(stat_map)

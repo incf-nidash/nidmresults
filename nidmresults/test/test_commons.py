@@ -9,7 +9,7 @@ import os
 import sys
 import re
 import vcr
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import rdflib
 from rdflib.graph import Graph
 from rdflib.compare import *
@@ -71,7 +71,7 @@ def get_turtle(provn_file):
         url = "https://provenance.ecs.soton.ac.uk/validator/provapi/documents/"
         headers = { 'Content-type' : "text/provenance-notation",
                     'Accept' : "text/turtle" }
-        req = urllib2.Request(url, ex_provn, headers)
+        req = urllib.request.Request(url, ex_provn, headers)
 
         MAX_RETRY = 15
         retry = 0
@@ -83,8 +83,8 @@ def get_turtle(provn_file):
                     record_mode='new_episodes',
                     match_on=['method', 'scheme', 'host', 'port', 'path',
                                   'query', 'body']):
-                    response = urllib2.urlopen(req, timeout=10)
-            except (socket.timeout, urllib2.URLError, ssl.SSLError):
+                    response = urllib.request.urlopen(req, timeout=10)
+            except (socket.timeout, urllib.error.URLError, ssl.SSLError):
                 # On timeout retry
                 retry = retry + 1 
                 logger.info('Retry #'+str(retry))
@@ -101,7 +101,7 @@ def get_turtle(provn_file):
     return ttl_file_url
 
 def merge_exception_dict(excep_dict, other_except_dict):
-    merged_dict = dict(excep_dict.items() + other_except_dict.items())
+    merged_dict = dict(list(excep_dict.items()) + list(other_except_dict.items()))
     # When key is in both dictionaries, we need to merge the set manually
     for key in list(set(excep_dict.keys()) & set(other_except_dict.keys())):
         merged_dict[key] = excep_dict[key].union(other_except_dict[key])
@@ -188,7 +188,7 @@ def _get_ttl_doc_content(doc):
                 with vcr.use_cassette(
                         os.path.join(NIDM_PATH, 'vcr_cassettes/synopsis.yaml'),
                         record_mode='new_episodes'):
-                    ttl_doc_req = urllib2.urlopen(doc, timeout=TIMEOUT)
+                    ttl_doc_req = urllib.request.urlopen(doc, timeout=TIMEOUT)
 
                 # There is no mechanism to handle timeout on read() in urllib2, 
                 # so we need to use a timer
@@ -198,7 +198,7 @@ def _get_ttl_doc_content(doc):
                 doc_content = ttl_doc_req.read()
                 signal.alarm(0)
 
-            except (socket.timeout, TimeoutError, urllib2.URLError):
+            except (socket.timeout, TimeoutError, urllib.error.URLError):
                 # On timeout retry
                 retry = retry + 1 
                 logger.info(' Retry #'+str(retry))
