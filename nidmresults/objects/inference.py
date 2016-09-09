@@ -595,6 +595,7 @@ class Coordinate(NIDMObject):
     def __init__(self, label_id, coord_vector=None, coord_vector_std=None,
                  x=None, y=None, z=None, x_std=None, y_std=None, z_std=None,
                  label=None):
+
         super(Coordinate, self).__init__()
         # FIXME: coordiinate_id should not be determined externally
         self.id = NIIRI[str(uuid.uuid4())]
@@ -623,21 +624,21 @@ class Coordinate(NIDMObject):
         """
         Create prov entities and activities.
         """
-        # We can not have this in the dictionnary because we want to keep the
+        # We can not have this as a dictionnary because we want to keep the
         # duplicate prov:type attribute
-        type_label = [  # (PROV['type'],PROV['Location']),
+        atts = (  # (PROV['type'],PROV['Location']),
             (PROV['type'], NIDM_COORDINATE),
-            (PROV['label'], self.label)]
+            (PROV['label'], self.label),
+            (NIDM_COORDINATE_VECTOR_IN_VOXELS, json.dumps(self.coord_vector))
+            )
 
-        coordinate = {
-            NIDM_COORDINATE_VECTOR_IN_VOXELS: json.dumps(self.coord_vector),
-            NIDM_COORDINATE_VECTOR: json.dumps(self.coord_vector_std),
-        }
+        # FSL unnormalised subject-level analyses do not provide coordinates in
+        # voxels
+        if self.coord_vector_std is not None:
+            atts = atts +\
+                ((NIDM_COORDINATE_VECTOR, json.dumps(self.coord_vector_std)),)
 
-        self.add_attributes(
-            type_label +
-            list(dict((k, v) for k, v in coordinate.items()
-                      if not v is None).items()))
+        self.add_attributes(atts)
 
         return self.p
 
