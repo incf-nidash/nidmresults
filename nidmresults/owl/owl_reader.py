@@ -9,7 +9,11 @@ from rdflib import RDF, term
 from rdflib.graph import Graph
 from rdflib.term import Literal
 from nidmresults.objects.constants_rdflib import *
-import urllib.request, urllib.error, urllib.parse
+
+from future.standard_library import hooks
+with hooks():
+    from urllib.request import urlopen, Request
+
 import warnings
 import vcr
 import os
@@ -506,7 +510,7 @@ class OwlReader():
                         os.path.join(NIDM_PATH, 'vcr_cassettes/synopsis.yaml'),
                         record_mode='new_episodes'):
                     # Read file from url
-                    example = urllib.request.urlopen(example).read()
+                    example = urlopen(example).read()
 
             title = ""
             if example.startswith("#"):

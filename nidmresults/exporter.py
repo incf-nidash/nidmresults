@@ -17,6 +17,7 @@ from nidmresults.objects.constants import *
 from nidmresults.objects.modelfitting import *
 from nidmresults.objects.contrast import *
 from nidmresults.objects.inference import *
+from io import open
 import uuid
 import csv
 import tempfile
@@ -313,7 +314,7 @@ ons#")
 
     def use_prefixes(self, ttl):
         prefix_file = os.path.join(os.path.dirname(__file__), 'prefixes.csv')
-        with open(prefix_file, "rt", encoding="ascii") as csvfile:
+        with open(prefix_file, encoding="ascii") as csvfile:
             reader = csv.reader(csvfile)
             for alphanum_id, prefix, uri in reader:
                 if alphanum_id in ttl:
