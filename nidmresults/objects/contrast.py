@@ -322,8 +322,8 @@ class StatisticMap(NIDMObject):
             self.label = label
         else:
             self.label = "Statistic Map: " + self.contrast_name
-            if self.stat_type == 'Z':
-                self.label = self.stat_type + '-' + self.label
+            # Include statistic type in the label
+            self.label = self.stat_type + '-' + self.label
 
         self.format = format
         if effdof is None:
