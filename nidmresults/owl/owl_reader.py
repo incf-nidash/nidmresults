@@ -211,7 +211,7 @@ class OwlReader():
 
         for class_name in classes:
             if not self.is_class(class_name):
-                raise Exception('Class '+str(class_name)+' does not exist.')
+                warnings.warn('Class '+str(class_name)+' does not exist.')
 
             if not isinstance(class_name, term.BNode):
                 prov_type = self.get_prov_class(class_name)
