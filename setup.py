@@ -33,7 +33,8 @@ setup(
                    'owl/nidm-results_100.owl',
                    'owl/nidm-results_110.owl',
                    'owl/nidm-results_120.owl',
-                   'owl/nidm-results_130.owl']},
+                   'owl/nidm-results_130.owl',
+                   'test/test_data.json']},
     include_package_data=True,
     install_requires=requirements,
 )
