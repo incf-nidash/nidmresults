@@ -57,20 +57,23 @@ class TestReader(unittest.TestCase):
         """
         Test: Check that excursion set can be retreived
         """
+        exc = []
         for nidmpack in self.packs:
             nidm_graph = Graph(nidm_zip=nidmpack)
             nidm_graph.parse()
             exc_sets = nidm_graph.get_excursion_set_maps()
 
             if not exc_sets:
-                raise Exception('No excursion set for ' + nidmpack)
+                exc.append('No excursion set found for ' + nidmpack)
 
             for eid, eobj in exc_sets.items():
                 with zipfile.ZipFile(nidmpack, 'r') as myzip:
-                    if not eobj.file.path.encode('utf-8') in myzip.namelist():
-                        raise Exception(
-                            'Missing excursion set for ' + nidmpack)
+                    if not str(eobj.file.path) in myzip.namelist():
+                        exc.append(
+                            'Missing excursion set file for ' + nidmpack)
 
+        if exc:
+            raise Exception("\n ".join(exc))
 
 if __name__ == '__main__':
     unittest.main()
