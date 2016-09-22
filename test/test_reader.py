@@ -15,9 +15,11 @@ with hooks():
 import zipfile
 import tempfile
 import json
+from ddt import ddt, data, unpack
 import os
 
 
+@ddt
 class TestReader(unittest.TestCase):
 
     def setUp(self):
@@ -58,7 +60,10 @@ class TestReader(unittest.TestCase):
                     local_file.write(f.read())
             self.packs.append(nidmpack)
 
-    def test_exc_set(self):
+    @unpack
+    @data({'name': 'excursion set', 'method_name': 'get_excursion_set_maps'},
+          {'name': 'statistic map', 'method_name': 'get_statistic_maps'})
+    def test_read_object(self, name, method_name):
         """
         Test: Check that excursion set can be retreived
         """
@@ -66,16 +71,19 @@ class TestReader(unittest.TestCase):
         for nidmpack in self.packs:
             nidm_graph = Graph(nidm_zip=nidmpack)
             nidm_graph.parse()
-            exc_sets = nidm_graph.get_excursion_set_maps()
+            # exc_sets = nidm_graph.get_excursion_set_maps()
 
-            if not exc_sets:
-                exc.append('No excursion set found for ' + nidmpack)
+            method = getattr(nidm_graph, method_name)
+            objects = method()
 
-            for eid, eobj in exc_sets.items():
+            if not objects:
+                exc.append('No ' + name + ' found for ' + nidmpack)
+
+            for eid, eobj in objects.items():
                 with zipfile.ZipFile(nidmpack, 'r') as myzip:
                     if not str(eobj.file.path) in myzip.namelist():
                         exc.append(
-                            'Missing excursion set file for ' + nidmpack)
+                            'Missing ' + name + ' file for ' + nidmpack)
 
         if exc:
             raise Exception("\n ".join(exc))
