@@ -45,42 +45,6 @@ class Graph():
                 "RDFLib was unable to parse the RDF file.")
         return g
 
-    def get_statistic_maps(self):
-        """
-        Read a NIDM-Results document and return a list of Statistic Maps.
-        """
-
-        query = """
-        prefix prov: <http://www.w3.org/ns/prov#>
-        prefix nidm_contrastName: <http://purl.org/nidash/nidm#NIDM_0000085>
-        prefix nidm_StatisticMap: <http://purl.org/nidash/nidm#NIDM_0000076>
-        prefix nidm_statisticType: <http://purl.org/nidash/nidm#NIDM_0000123>
-        prefix nidm_errorDegreesOfFreedom: <http://purl.org/nidash/nidm#NIDM_0\
-000093>
-
-        SELECT ?label ?contrastName ?statType ?statFile ?dof WHERE {
-         ?sid a nidm_StatisticMap: ;
-              nidm_contrastName: ?contrastName ;
-              nidm_statisticType: ?statType ;
-              rdfs:label ?label ;
-              nidm_errorDegreesOfFreedom: ?dof ;
-              prov:atLocation ?statFile .
-        }
-        """
-        sd = self.graph.query(query)
-
-        stat_maps = list()
-        if sd:
-            for label, contrast_name, stat_type, stat_file, dof in sd:
-                contrast_num = None
-                coord_space = None
-                export_dir = None
-                stat_maps.append(StatisticMap(
-                    stat_file, stat_type, contrast_num, contrast_name, dof,
-                    coord_space, export_dir, label))
-        self.stat_maps = stat_maps
-        return stat_maps
-
     def get_peaks(self, contrast_name=None):
         """
         Read a NIDM-Results document and return a list of Peaks.
@@ -467,7 +431,7 @@ SELECT DISTINCT * WHERE {
         else:
             return objects
 
-    def get_stat_maps(self, oid=None):
+    def get_statistic_maps(self, oid=None):
         """
         Read a NIDM-Results document and return a dict of Statistic Maps.
         """
@@ -578,7 +542,7 @@ SELECT DISTINCT ?oid ?label ?tail ?stat_map_id WHERE {
         inferences = dict()
         if sd:
             for row in sd:
-                stat_map = self.get_stat_maps(row.stat_map_id)
+                stat_map = self.get_statistic_maps(row.stat_map_id)
                 args = row.asdict()
                 args['stat_map'] = stat_map
                 args['contrast_num'] = None
