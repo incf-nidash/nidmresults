@@ -154,11 +154,13 @@ class Person(NIDMObject):
     Object representing a ImagingInstrument entity.
     """
 
-    def __init__(self):
-        super(Person, self).__init__()
-        self.id = NIIRI[str(uuid.uuid4())]
+    def __init__(self,  label=None, oid=None):
+        super(Person, self).__init__(oid=oid)
         self.prov_type = PROV['Agent']
         self.type = PROV['Person']
+        if not label:
+            label = "Person"
+        self.label = label
 
     def export(self, nidm_version):
         """
@@ -166,7 +168,7 @@ class Person(NIDMObject):
         """
         self.add_attributes((
             (PROV['type'], self.prov_type),
-            (PROV['label'], "Person")))
+            (PROV['label'], self.label)))
 
         return self.p
 

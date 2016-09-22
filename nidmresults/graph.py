@@ -233,6 +233,34 @@ SELECT ?oid ?label ?vox_to_world ?units ?vox_size ?coordinate_system ?numdim
         else:
             return coord_spaces
 
+    def get_subjects(self, oid=None):
+        """
+        Read a NIDM-Results document and return a dict of Subjects.
+        """
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+SELECT DISTINCT * WHERE {
+    """ + oid_var + """ a prov:Person ;
+        rdfs:label ?label .
+}
+        """
+        objects = dict()
+
+        arg_list = self.run_query_and_get_args(query, oid)
+        for args in arg_list:
+            subject = Person(**args)
+            objects[args['oid']] = subject
+
+        self.objects.update(objects)
+        if oid is not None:
+            return objects[oid]
+        else:
+            return objects
+
     def get_groups(self, oid=None):
         """
         Read a NIDM-Results document and return a dict of Groups.
@@ -282,9 +310,13 @@ prefix obo_studygrouppopulation: <http://purl.obolibrary.org/obo/STATO_0000193>
 
 SELECT DISTINCT * WHERE {
     """ + oid_var + """ a nidm_Data: ;
-        rdfs:label ?label ;
-        prov:wasAttributedTo ?group_id .
-    ?group_id a obo_studygrouppopulation: .
+        rdfs:label ?label .
+        {""" + oid_var + """ prov:wasAttributedTo ?group_id .
+        ?group_id a obo_studygrouppopulation: .} UNION
+        {""" + oid_var + """ prov:wasAttributedTo ?subject_id .
+        ?subject_id a prov:Person .
+        } .
+
 }
         """
         objects = dict()
@@ -295,8 +327,14 @@ SELECT DISTINCT * WHERE {
             args["grand_mean_scaling"] = None
             args["target"] = None
             args["mri_protocol"] = None
-            args["group_or_sub"] = args["group"]
-            args.pop("group", None)
+
+            if "group" in args:
+                args["group_or_sub"] = args["group"]
+                args.pop("group", None)
+            else:
+                args["group_or_sub"] = args["subject"]
+                args.pop("subject", None)
+
             # (self, grand_mean_scaling, target, mri_protocol=None, oid=None)
             objects[args['oid']] = Data(**args)
 
@@ -487,6 +525,9 @@ SELECT DISTINCT * WHERE {
                 args = row.asdict()
 
                 for key, value in args.items():
+
+                    # If one the the keys is the id of an object then loads
+                    # the corresponding object
                     if key.endswith("_id"):
                         object_name = key.replace("_id", "")
                         method_name = "get_" + object_name + "s"
@@ -516,13 +557,17 @@ SELECT DISTINCT * WHERE {
 
         query = """
 prefix nidm_Inference: <http://purl.org/nidash/nidm#NIDM_0000049>
+prefix nidm_ConjunctionInference: <http://purl.org/nidash/nidm#NIDM_0000011>
 prefix nidm_hasAltHypothesis: <http://purl.org/nidash/nidm#NIDM_0000097>
 prefix nidm_OneTailedTest: <http://purl.org/nidash/nidm#NIDM_0000060>
 prefix nidm_StatisticMap: <http://purl.org/nidash/nidm#NIDM_0000076>
+prefix spm_PartialConjunctionInferenc: <http://purl.org/nidash/spm#SPM_0000005>
 
 SELECT DISTINCT ?oid ?label ?tail ?stat_map_id WHERE {
-    """ + oid_var + """ a nidm_Inference: ;
-        rdfs:label ?label ;
+    {""" + oid_var + """ a nidm_Inference: .} UNION
+    {""" + oid_var + """ a nidm_ConjunctionInference: .} UNION
+    {""" + oid_var + """ a spm_PartialConjunctionInferenc: .} .
+    """ + oid_var + """ rdfs:label ?label ;
         nidm_hasAltHypothesis: ?tail ;
         prov:used ?stat_map_id .
     ?stat_map_id a nidm_StatisticMap: .
