@@ -8,7 +8,11 @@ Test NIDM FSL export tool installation
 """
 import unittest
 from nidmresults.graph import *
-import urllib.request
+from future.standard_library import hooks
+with hooks():
+    from urllib.request import urlopen, Request
+
+import zipfile
 import tempfile
 import json
 import os
@@ -29,9 +33,9 @@ class TestReader(unittest.TestCase):
 
         data_dir = data_loc['location']
 
-        req = urllib.request.Request(
+        req = Request(
             "http://neurovault.org/api/collections/1692/nidm_results")
-        rep = urllib.request.urlopen(req)
+        rep = urlopen(req)
 
         response = rep.read()
         data = json.loads(response.decode('utf-8'))
@@ -43,7 +47,7 @@ class TestReader(unittest.TestCase):
 
             nidmpack = os.path.join(data_dir, study + ".zip")
             if not os.path.isfile(nidmpack):
-                f = urllib.request.urlopen(url)
+                f = urlopen(url)
                 print("downloading " + url + " at " + nidmpack)
                 with open(nidmpack, "wb") as local_file:
                     local_file.write(f.read())
@@ -57,8 +61,15 @@ class TestReader(unittest.TestCase):
             nidm_graph = Graph(nidm_zip=nidmpack)
             nidm_graph.parse()
             exc_sets = nidm_graph.get_excursion_set_maps()
-            for e in exc_sets:
-                print(e)
+
+            if not exc_sets:
+                raise Exception('No excursion set for ' + nidmpack)
+
+            for eid, eobj in exc_sets.items():
+                with zipfile.ZipFile(nidmpack, 'r') as myzip:
+                    if not eobj.file.path.encode('utf-8') in myzip.namelist():
+                        raise Exception(
+                            'Missing excursion set for ' + nidmpack)
 
 
 if __name__ == '__main__':
