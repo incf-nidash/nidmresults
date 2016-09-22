@@ -21,6 +21,7 @@ import os
 class TestReader(unittest.TestCase):
 
     def setUp(self):
+        # Location of test data can be set in test/test_data.json
         data_cfg = os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
             'test_data.json')
@@ -28,11 +29,13 @@ class TestReader(unittest.TestCase):
             data_loc = json.load(data_file)
 
         if not data_loc['location']:
-            # Store test data in a temporary folder
+            # If no location was provided, store test data in a temporary
+            # folder
             data_loc['location'] = tempfile.mkdtemp()
 
         data_dir = data_loc['location']
 
+        # Collection containing examples of NIDM-Results packs (1.3.0)
         req = Request(
             "http://neurovault.org/api/collections/1692/nidm_results")
         rep = urlopen(req)
@@ -40,6 +43,8 @@ class TestReader(unittest.TestCase):
         response = rep.read()
         data = json.loads(response.decode('utf-8'))
 
+        # Download the NIDM-Results packs from NeuroVault if not available
+        # locally
         self.packs = list()
         for nidm_res in data["results"]:
             url = nidm_res["zip_file"]
