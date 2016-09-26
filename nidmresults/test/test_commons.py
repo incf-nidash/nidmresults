@@ -9,7 +9,12 @@ import os
 import sys
 import re
 import vcr
-import urllib.request, urllib.error, urllib.parse
+
+from future.standard_library import hooks
+with hooks():
+    from urllib.request import urlopen, Request
+    from urllib.error import URLError
+
 import rdflib
 from rdflib.graph import Graph
 from rdflib.compare import *
@@ -71,7 +76,7 @@ def get_turtle(provn_file):
         url = "https://provenance.ecs.soton.ac.uk/validator/provapi/documents/"
         headers = { 'Content-type' : "text/provenance-notation",
                     'Accept' : "text/turtle" }
-        req = urllib.request.Request(url, ex_provn, headers)
+        req = Request(url, ex_provn, headers)
 
         MAX_RETRY = 15
         retry = 0
@@ -83,8 +88,8 @@ def get_turtle(provn_file):
                     record_mode='new_episodes',
                     match_on=['method', 'scheme', 'host', 'port', 'path',
                                   'query', 'body']):
-                    response = urllib.request.urlopen(req, timeout=10)
-            except (socket.timeout, urllib.error.URLError, ssl.SSLError):
+                    response = urlopen(req, timeout=10)
+            except (socket.timeout, URLError, ssl.SSLError):
                 # On timeout retry
                 retry = retry + 1 
                 logger.info('Retry #'+str(retry))
@@ -188,7 +193,7 @@ def _get_ttl_doc_content(doc):
                 with vcr.use_cassette(
                         os.path.join(NIDM_PATH, 'vcr_cassettes/synopsis.yaml'),
                         record_mode='new_episodes'):
-                    ttl_doc_req = urllib.request.urlopen(doc, timeout=TIMEOUT)
+                    ttl_doc_req = urlopen(doc, timeout=TIMEOUT)
 
                 # There is no mechanism to handle timeout on read() in urllib2, 
                 # so we need to use a timer
@@ -198,7 +203,7 @@ def _get_ttl_doc_content(doc):
                 doc_content = ttl_doc_req.read()
                 signal.alarm(0)
 
-            except (socket.timeout, TimeoutError, urllib.error.URLError):
+            except (socket.timeout, TimeoutError, URLError):
                 # On timeout retry
                 retry = retry + 1 
                 logger.info(' Retry #'+str(retry))
