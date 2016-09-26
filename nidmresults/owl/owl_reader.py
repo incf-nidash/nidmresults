@@ -437,7 +437,7 @@ class OwlReader():
                 warnings.warn('Multiple definitions for '
                               + self.get_label(owl_term) + ': '
                               + ",".join(definition))
-            definition = str(definition[0])
+            definition = definition[0].encode('utf-8')
         else:
             definition = ""
 
