@@ -13,29 +13,21 @@ with hooks():
     from urllib.request import urlopen, Request
 
 import zipfile
-import tempfile
 import json
 from ddt import ddt, data, unpack
 import os
+import inspect
 
 
 @ddt
 class TestReader(unittest.TestCase):
 
     def setUp(self):
-        # Location of test data can be set in test/test_data.json
-        data_cfg = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            'test_data.json')
-        with open(data_cfg) as data_file:
-            data_loc = json.load(data_file)
+        pwd = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
 
-        if not data_loc['location']:
-            # If no location was provided, store test data in a temporary
-            # folder
-            data_loc['location'] = tempfile.mkdtemp()
-
-        data_dir = data_loc['location']
+        # Store test data in a 'data' folder until 'test'
+        data_dir = os.path.join(pwd, 'data')
 
         # Collection containing examples of NIDM-Results packs (1.3.0)
         req = Request(
