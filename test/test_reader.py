@@ -29,6 +29,9 @@ class TestReader(unittest.TestCase):
         # Store test data in a 'data' folder until 'test'
         data_dir = os.path.join(pwd, 'data')
 
+        if not os.path.exists(data_dir):
+            os.makedirs(data_dir)
+
         # Collection containing examples of NIDM-Results packs (1.3.0)
         req = Request(
             "http://neurovault.org/api/collections/1692/nidm_results")
