@@ -466,20 +466,18 @@ SELECT DISTINCT * WHERE {
     ?contrast_estimation_id a nidm_ContrastEstimation: .
 }
         """
-        stat_maps = dict()
+        objects = dict()
 
         arg_list = self.run_query_and_get_args(query, oid)
         for args in arg_list:
-            # FIXME: will have to be set by default but that will change
-            # position of arguments (check for compatibility)
-            args['contrast_num'] = None
-            stat_maps[args['oid']] = StatisticMap(**args)
+            stat_map = StatisticMap(**args)
+            objects[args['oid']] = stat_map
 
-        self.objects.update(stat_maps)
+        self.objects.update(objects)
         if oid is not None:
-            return stat_maps[oid]
+            return objects[oid]
         else:
-            return stat_maps
+            return objects
 
     def run_query_and_get_args(self, query, oid):
         sd = self.graph.query(query)

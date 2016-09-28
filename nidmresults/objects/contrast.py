@@ -295,8 +295,8 @@ class StatisticMap(NIDMObject):
     Object representing a StatisticMap entity.
     """
 
-    def __init__(self, location, stat_type, contrast_num, contrast_name, dof,
-                 coord_space, export_dir=None, label=None, oid=None,
+    def __init__(self, location, stat_type, contrast_name, dof, coord_space,
+                 contrast_num=None, export_dir=None, label=None, oid=None,
                  format="image/nifti", effdof=None, filename=None, sha=None,
                  contrast_estimation=None):
         super(StatisticMap, self).__init__(export_dir, oid=oid)
