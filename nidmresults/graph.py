@@ -45,42 +45,6 @@ class Graph():
                 "RDFLib was unable to parse the RDF file.")
         return g
 
-    def get_statistic_maps(self):
-        """
-        Read a NIDM-Results document and return a list of Statistic Maps.
-        """
-
-        query = """
-        prefix prov: <http://www.w3.org/ns/prov#>
-        prefix nidm_contrastName: <http://purl.org/nidash/nidm#NIDM_0000085>
-        prefix nidm_StatisticMap: <http://purl.org/nidash/nidm#NIDM_0000076>
-        prefix nidm_statisticType: <http://purl.org/nidash/nidm#NIDM_0000123>
-        prefix nidm_errorDegreesOfFreedom: <http://purl.org/nidash/nidm#NIDM_0\
-000093>
-
-        SELECT ?label ?contrastName ?statType ?statFile ?dof WHERE {
-         ?sid a nidm_StatisticMap: ;
-              nidm_contrastName: ?contrastName ;
-              nidm_statisticType: ?statType ;
-              rdfs:label ?label ;
-              nidm_errorDegreesOfFreedom: ?dof ;
-              prov:atLocation ?statFile .
-        }
-        """
-        sd = self.graph.query(query)
-
-        stat_maps = list()
-        if sd:
-            for label, contrast_name, stat_type, stat_file, dof in sd:
-                contrast_num = None
-                coord_space = None
-                export_dir = None
-                stat_maps.append(StatisticMap(
-                    stat_file, stat_type, contrast_num, contrast_name, dof,
-                    coord_space, export_dir, label))
-        self.stat_maps = stat_maps
-        return stat_maps
-
     def get_peaks(self, contrast_name=None):
         """
         Read a NIDM-Results document and return a list of Peaks.
@@ -233,6 +197,34 @@ SELECT ?oid ?label ?vox_to_world ?units ?vox_size ?coordinate_system ?numdim
         else:
             return coord_spaces
 
+    def get_subjects(self, oid=None):
+        """
+        Read a NIDM-Results document and return a dict of Subjects.
+        """
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+SELECT DISTINCT * WHERE {
+    """ + oid_var + """ a prov:Person ;
+        rdfs:label ?label .
+}
+        """
+        objects = dict()
+
+        arg_list = self.run_query_and_get_args(query, oid)
+        for args in arg_list:
+            subject = Person(**args)
+            objects[args['oid']] = subject
+
+        self.objects.update(objects)
+        if oid is not None:
+            return objects[oid]
+        else:
+            return objects
+
     def get_groups(self, oid=None):
         """
         Read a NIDM-Results document and return a dict of Groups.
@@ -282,9 +274,13 @@ prefix obo_studygrouppopulation: <http://purl.obolibrary.org/obo/STATO_0000193>
 
 SELECT DISTINCT * WHERE {
     """ + oid_var + """ a nidm_Data: ;
-        rdfs:label ?label ;
-        prov:wasAttributedTo ?group_id .
-    ?group_id a obo_studygrouppopulation: .
+        rdfs:label ?label .
+        {""" + oid_var + """ prov:wasAttributedTo ?group_id .
+        ?group_id a obo_studygrouppopulation: .} UNION
+        {""" + oid_var + """ prov:wasAttributedTo ?subject_id .
+        ?subject_id a prov:Person .
+        } .
+
 }
         """
         objects = dict()
@@ -295,8 +291,14 @@ SELECT DISTINCT * WHERE {
             args["grand_mean_scaling"] = None
             args["target"] = None
             args["mri_protocol"] = None
-            args["group_or_sub"] = args["group"]
-            args.pop("group", None)
+
+            if "group" in args:
+                args["group_or_sub"] = args["group"]
+                args.pop("group", None)
+            else:
+                args["group_or_sub"] = args["subject"]
+                args.pop("subject", None)
+
             # (self, grand_mean_scaling, target, mri_protocol=None, oid=None)
             objects[args['oid']] = Data(**args)
 
@@ -429,7 +431,7 @@ SELECT DISTINCT * WHERE {
         else:
             return objects
 
-    def get_stat_maps(self, oid=None):
+    def get_statistic_maps(self, oid=None):
         """
         Read a NIDM-Results document and return a dict of Statistic Maps.
         """
@@ -464,20 +466,18 @@ SELECT DISTINCT * WHERE {
     ?contrast_estimation_id a nidm_ContrastEstimation: .
 }
         """
-        stat_maps = dict()
+        objects = dict()
 
         arg_list = self.run_query_and_get_args(query, oid)
         for args in arg_list:
-            # FIXME: will have to be set by default but that will change
-            # position of arguments (check for compatibility)
-            args['contrast_num'] = None
-            stat_maps[args['oid']] = StatisticMap(**args)
+            stat_map = StatisticMap(**args)
+            objects[args['oid']] = stat_map
 
-        self.objects.update(stat_maps)
+        self.objects.update(objects)
         if oid is not None:
-            return stat_maps[oid]
+            return objects[oid]
         else:
-            return stat_maps
+            return objects
 
     def run_query_and_get_args(self, query, oid):
         sd = self.graph.query(query)
@@ -487,6 +487,9 @@ SELECT DISTINCT * WHERE {
                 args = row.asdict()
 
                 for key, value in args.items():
+
+                    # If one the the keys is the id of an object then loads
+                    # the corresponding object
                     if key.endswith("_id"):
                         object_name = key.replace("_id", "")
                         method_name = "get_" + object_name + "s"
@@ -516,13 +519,17 @@ SELECT DISTINCT * WHERE {
 
         query = """
 prefix nidm_Inference: <http://purl.org/nidash/nidm#NIDM_0000049>
+prefix nidm_ConjunctionInference: <http://purl.org/nidash/nidm#NIDM_0000011>
 prefix nidm_hasAltHypothesis: <http://purl.org/nidash/nidm#NIDM_0000097>
 prefix nidm_OneTailedTest: <http://purl.org/nidash/nidm#NIDM_0000060>
 prefix nidm_StatisticMap: <http://purl.org/nidash/nidm#NIDM_0000076>
+prefix spm_PartialConjunctionInferenc: <http://purl.org/nidash/spm#SPM_0000005>
 
 SELECT DISTINCT ?oid ?label ?tail ?stat_map_id WHERE {
-    """ + oid_var + """ a nidm_Inference: ;
-        rdfs:label ?label ;
+    {""" + oid_var + """ a nidm_Inference: .} UNION
+    {""" + oid_var + """ a nidm_ConjunctionInference: .} UNION
+    {""" + oid_var + """ a spm_PartialConjunctionInferenc: .} .
+    """ + oid_var + """ rdfs:label ?label ;
         nidm_hasAltHypothesis: ?tail ;
         prov:used ?stat_map_id .
     ?stat_map_id a nidm_StatisticMap: .
@@ -533,7 +540,7 @@ SELECT DISTINCT ?oid ?label ?tail ?stat_map_id WHERE {
         inferences = dict()
         if sd:
             for row in sd:
-                stat_map = self.get_stat_maps(row.stat_map_id)
+                stat_map = self.get_statistic_maps(row.stat_map_id)
                 args = row.asdict()
                 args['stat_map'] = stat_map
                 args['contrast_num'] = None

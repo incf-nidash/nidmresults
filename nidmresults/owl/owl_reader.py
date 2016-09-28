@@ -9,7 +9,11 @@ from rdflib import RDF, term
 from rdflib.graph import Graph
 from rdflib.term import Literal
 from nidmresults.objects.constants_rdflib import *
-import urllib.request, urllib.error, urllib.parse
+
+from future.standard_library import hooks
+with hooks():
+    from urllib.request import urlopen, Request
+
 import warnings
 import vcr
 import os
@@ -207,7 +211,7 @@ class OwlReader():
 
         for class_name in classes:
             if not self.is_class(class_name):
-                raise Exception('Class '+str(class_name)+' does not exist.')
+                warnings.warn('Class '+str(class_name)+' does not exist.')
 
             if not isinstance(class_name, term.BNode):
                 prov_type = self.get_prov_class(class_name)
@@ -433,7 +437,7 @@ class OwlReader():
                 warnings.warn('Multiple definitions for '
                               + self.get_label(owl_term) + ': '
                               + ",".join(definition))
-            definition = str(definition[0])
+            definition = definition[0].encode('utf-8')
         else:
             definition = ""
 
@@ -506,7 +510,7 @@ class OwlReader():
                         os.path.join(NIDM_PATH, 'vcr_cassettes/synopsis.yaml'),
                         record_mode='new_episodes'):
                     # Read file from url
-                    example = urllib.request.urlopen(example).read()
+                    example = urlopen(example).read()
 
             title = ""
             if example.startswith("#"):

@@ -17,6 +17,7 @@ from nidmresults.objects.constants import *
 from nidmresults.objects.modelfitting import *
 from nidmresults.objects.contrast import *
 from nidmresults.objects.inference import *
+from io import open
 import uuid
 import csv
 import tempfile
@@ -47,16 +48,13 @@ class NIDMExporter():
         # it
         if os.path.exists(out_dir):
             msg = out_dir+" already exists, overwrite?"
-            if not input("%s (y/N) " % msg).lower() == 'y':
+            if not raw_input("%s (y/N) " % msg).lower() == 'y':
                 quit("Bye.")
             if os.path.isdir(out_dir):
                 shutil.rmtree(out_dir)
             else:
                 os.remove(out_dir)
         self.out_dir = out_dir
-
-        # A temp directory that will contain the exported data
-        self.export_dir = tempfile.mkdtemp(prefix="nidm-", dir=out_path)
 
         if version == "dev":
             self.version = {'major': 10000, 'minor': 0, 'revision': 0,
@@ -95,37 +93,48 @@ ons#")
             "nfo",
             "http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#")
 
+        # A temp directory that will contain the exported data
+        self.export_dir = tempfile.mkdtemp(prefix="nidm-", dir=out_path)
+
     def parse(self):
         """
         Parse a result directory to extract the pieces information to be
         stored in NIDM-Results.
         """
-        # Methods: find_software, find_model_fitting, find_contrasts and
-        # find_inferences should be defined in the children classes and return
-        # a list of NIDM Objects as specified in the objects module
 
-        # Object of type Software describing the neuroimaging software package
-        # used for the analysis
-        self.software = self._find_software()
+        try:
+            # Methods: find_software, find_model_fitting, find_contrasts and
+            # find_inferences should be defined in the children classes and return
+            # a list of NIDM Objects as specified in the objects module
 
-        # List of objects (or dictionary) of type ModelFitting describing the
-        # model fitting step in NIDM-Results (main activity: Model Parameters
-        # Estimation)
-        self.model_fittings = self._find_model_fitting()
+            # Object of type Software describing the neuroimaging software package
+            # used for the analysis
+            self.software = self._find_software()
 
-        # Dictionary of (key, value) pairs where where key is a tuple
-        # containing the identifier of a ModelParametersEstimation object and a
-        # tuple of identifiers of ParameterEstimateMap objects and value is an
-        # object of type Contrast describing the contrast estimation step in
-        # NIDM-Results (main activity: Contrast Estimation)
-        self.contrasts = self._find_contrasts()
+            # List of objects (or dictionary) of type ModelFitting describing the
+            # model fitting step in NIDM-Results (main activity: Model Parameters
+            # Estimation)
+            self.model_fittings = self._find_model_fitting()
 
-        # Inference activity and entities
-        # Dictionary of (key, value) pairs where key is the identifier of a
-        # ContrastEstimation object and value is an object of type Inference
-        # describing the inference step in NIDM-Results (main activity:
-        # Inference)
-        self.inferences = self._find_inferences()
+            # Dictionary of (key, value) pairs where where key is a tuple
+            # containing the identifier of a ModelParametersEstimation object and a
+            # tuple of identifiers of ParameterEstimateMap objects and value is an
+            # object of type Contrast describing the contrast estimation step in
+            # NIDM-Results (main activity: Contrast Estimation)
+            self.contrasts = self._find_contrasts()
+
+            # Inference activity and entities
+            # Dictionary of (key, value) pairs where key is the identifier of a
+            # ContrastEstimation object and value is an object of type Inference
+            # describing the inference step in NIDM-Results (main activity:
+            # Inference)
+            self.inferences = self._find_inferences()
+        except:
+            self.cleanup()
+            raise
+
+    def cleanup(self,):
+        shutil.rmtree(self.export_dir)
 
     def add_object(self, nidm_object):
         """
@@ -141,49 +150,53 @@ ons#")
         """
         Generate a NIDM-Results export.
         """
-        if not os.path.isdir(self.export_dir):
-            os.mkdir(self.export_dir)
+        try:
+            if not os.path.isdir(self.export_dir):
+                os.mkdir(self.export_dir)
 
-        # Initialise main bundle
-        self._create_bundle(self.version)
-        self.add_object(self.software)
+            # Initialise main bundle
+            self._create_bundle(self.version)
+            self.add_object(self.software)
 
-        # Add model fitting steps
-        for model_fitting in list(self.model_fittings.values()):
-            model_fitting.activity.wasAssociatedWith(self.software)
-            self.add_object(model_fitting)
+            # Add model fitting steps
+            for model_fitting in list(self.model_fittings.values()):
+                model_fitting.activity.wasAssociatedWith(self.software)
+                self.add_object(model_fitting)
 
-        # Add contrast estimation steps
-        for (model_fitting_id, pe_ids), contrasts in list(self.contrasts.items()):
-            model_fitting = self._get_model_fitting(model_fitting_id)
-            for contrast in contrasts:
-                contrast.estimation.used(model_fitting.rms_map)
-                contrast.estimation.used(model_fitting.mask_map)
-                contrast.estimation.wasAssociatedWith(self.software)
+            # Add contrast estimation steps
+            for (model_fitting_id, pe_ids), contrasts in list(self.contrasts.items()):
+                model_fitting = self._get_model_fitting(model_fitting_id)
+                for contrast in contrasts:
+                    contrast.estimation.used(model_fitting.rms_map)
+                    contrast.estimation.used(model_fitting.mask_map)
+                    contrast.estimation.wasAssociatedWith(self.software)
 
-                for pe_id in pe_ids:
-                    contrast.estimation.used(pe_id)
+                    for pe_id in pe_ids:
+                        contrast.estimation.used(pe_id)
 
-                self.add_object(contrast)
+                    self.add_object(contrast)
 
-        # Add inference steps
-        for contrast_id, inferences in list(self.inferences.items()):
-            contrast = self._get_contrast(contrast_id)
+            # Add inference steps
+            for contrast_id, inferences in list(self.inferences.items()):
+                contrast = self._get_contrast(contrast_id)
 
-            for inference in inferences:
-                if contrast.z_stat_map:
-                    used_id = contrast.z_stat_map.id
-                else:
-                    used_id = contrast.stat_map.id
-                inference.inference_act.used(used_id)
-                inference.inference_act.wasAssociatedWith(self.software)
+                for inference in inferences:
+                    if contrast.z_stat_map:
+                        used_id = contrast.z_stat_map.id
+                    else:
+                        used_id = contrast.stat_map.id
+                    inference.inference_act.used(used_id)
+                    inference.inference_act.wasAssociatedWith(self.software)
 
-                self.add_object(inference)
+                    self.add_object(inference)
 
-        # Write-out prov file
-        self.save_prov_to_files()
+            # Write-out prov file
+            self.save_prov_to_files()
 
-        return self.out_dir
+            return self.out_dir
+        except:
+            self.cleanup()
+            raise
 
     def _get_model_fitting(self, mf_id):
         """
@@ -313,7 +326,7 @@ ons#")
 
     def use_prefixes(self, ttl):
         prefix_file = os.path.join(os.path.dirname(__file__), 'prefixes.csv')
-        with open(prefix_file, "rt", encoding="ascii") as csvfile:
+        with open(prefix_file, encoding="ascii") as csvfile:
             reader = csv.reader(csvfile)
             for alphanum_id, prefix, uri in reader:
                 if alphanum_id in ttl:

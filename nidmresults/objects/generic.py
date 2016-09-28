@@ -318,7 +318,8 @@ class NIDMFile(NIDMObject):
                 self.add_attributes([(PROV['atLocation'], loc)])
 
             if nidm_version['num'] in ("1.0.0", "1.1.0"):
-                if org_filename is not self.new_filename:
+                if (org_filename is not self.new_filename) \
+                        and (not self.temporary):
                     self.add_attributes([(NFO['fileName'], org_filename)])
 
             if self.is_nifti():

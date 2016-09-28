@@ -137,7 +137,8 @@ class ExcursionSet(NIDMObject):
 
     def __init__(self, location, coord_space, visualisation=None,
                  export_dir=None, oid=None, format=None, label=None,
-                 sha=None, filename=None, inference=None, suffix=''):
+                 sha=None, filename=None, inference=None, suffix='',
+                 clust_map=None):
         super(ExcursionSet, self).__init__(export_dir, oid)
         # Excursion set is going to be copied over to export_dir folder
         if export_dir is not None:
@@ -155,6 +156,7 @@ class ExcursionSet(NIDMObject):
             label = "Excursion Set Map"
         self.label = label
         self.coord_space = coord_space
+        self.clust_map = clust_map
         # FIXME Not used for export yet (only for reading)
         self.inference = inference
 
@@ -174,6 +176,56 @@ class ExcursionSet(NIDMObject):
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
             (PROV['label'], self.label),
             (DC['description'], self.visu.id)
+        ))
+
+        if self.clust_map is not None:
+            self.add_object(self.clust_map, nidm_version)
+            self.add_attributes((
+                (NIDM_HAS_CLUSTER_LABELS_MAP, self.clust_map.id),
+            ))
+
+        return self.p
+
+
+class ClusterLabelsMap(NIDMObject):
+
+    """
+    Object representing a ClusterLabelsMap entity.
+    """
+
+    def __init__(self, location, coord_space,
+                 export_dir=None, oid=None, format=None, label=None,
+                 sha=None, filename=None, suffix='', temporary=False):
+        super(ClusterLabelsMap, self).__init__(export_dir, oid)
+        # ClusterLabelsMap is going to be copied over to export_dir folder
+        if export_dir is not None:
+            filename = 'ClusterLabels' + suffix + '.nii.gz'
+        else:
+            filename = location
+        self.filename = filename
+        self.file = NIDMFile(self.id, location, filename, export_dir, sha,
+                             temporary=temporary)
+        self.type = NIDM_CLUSTER_LABELS_MAP
+        self.prov_type = PROV['Entity']
+        if label is None:
+            label = "Cluster Labels Map"
+        self.label = label
+        self.coord_space = coord_space
+
+    def export(self, nidm_version):
+        """
+        Create prov entities and activities.
+        """
+        self.add_object(self.coord_space, nidm_version)
+
+        # Copy "Excursion set map" file in export directory
+        self.add_object(self.file, nidm_version)
+
+        # Create "Cluster Labels Map" entity
+        self.add_attributes((
+            (PROV['type'], self.type),
+            (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
+            (PROV['label'], self.label)
         ))
 
         return self.p
@@ -595,6 +647,7 @@ class Coordinate(NIDMObject):
     def __init__(self, label_id, coord_vector=None, coord_vector_std=None,
                  x=None, y=None, z=None, x_std=None, y_std=None, z_std=None,
                  label=None):
+
         super(Coordinate, self).__init__()
         # FIXME: coordiinate_id should not be determined externally
         self.id = NIIRI[str(uuid.uuid4())]
@@ -623,21 +676,21 @@ class Coordinate(NIDMObject):
         """
         Create prov entities and activities.
         """
-        # We can not have this in the dictionnary because we want to keep the
+        # We can not have this as a dictionnary because we want to keep the
         # duplicate prov:type attribute
-        type_label = [  # (PROV['type'],PROV['Location']),
+        atts = (  # (PROV['type'],PROV['Location']),
             (PROV['type'], NIDM_COORDINATE),
-            (PROV['label'], self.label)]
+            (PROV['label'], self.label),
+            (NIDM_COORDINATE_VECTOR_IN_VOXELS, json.dumps(self.coord_vector))
+            )
 
-        coordinate = {
-            NIDM_COORDINATE_VECTOR_IN_VOXELS: json.dumps(self.coord_vector),
-            NIDM_COORDINATE_VECTOR: json.dumps(self.coord_vector_std),
-        }
+        # FSL unnormalised subject-level analyses do not provide coordinates in
+        # voxels
+        if self.coord_vector_std is not None:
+            atts = atts +\
+                ((NIDM_COORDINATE_VECTOR, json.dumps(self.coord_vector_std)),)
 
-        self.add_attributes(
-            type_label +
-            list(dict((k, v) for k, v in coordinate.items()
-                      if not v is None).items()))
+        self.add_attributes(atts)
 
         return self.p
 
