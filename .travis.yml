@@ -9,7 +9,8 @@ install:
 # Avoid "html5lib requires setuptools version 18.5" error
  - pip install --upgrade setuptools
  - pip install -r requirements.txt
- - python setup.py install # install nidmresults from sources
+ - pip install -i https://testpypi.python.org/pypi nidmresults
+ # - python setup.py install # install nidmresults from sources
  - pip install ddt
 script:
  - python test/test_reader.py
