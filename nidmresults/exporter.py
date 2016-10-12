@@ -346,9 +346,9 @@ ons#")
         # provn_fid.close()
 
         ttl_file = os.path.join(self.export_dir, 'nidm.ttl')
-        ttl_txt = self.g.serialize(format='turtle')
+        ttl_txt = self.doc.serialize(format='rdf', rdf_format='turtle')
 
-        ttl_txt = self.use_prefixes(ttl_txt.decode("utf-8"))
+        ttl_txt = self.use_prefixes(ttl_txt)
         with open(ttl_file, 'w') as ttl_fid:
             ttl_fid.write(ttl_txt)
 

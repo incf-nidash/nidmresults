@@ -52,47 +52,47 @@ class NIDMObject(object):
                str(self.id).replace("niiri:", "").replace(NIIRI._uri, "")[0:8]\
                + '>'
 
-    def _rdf_add_attributes(self, attributes):
-        if self.type is not None:
-            self._rdf_add(self.id, RDF.type, self.type)
-        self._rdf_add(self.id, RDF.type, self.prov_type)
+    # def _rdf_add_attributes(self, attributes):
+    #     if self.type is not None:
+    #         self._rdf_add(self.id, RDF.type, self.type)
+    #     self._rdf_add(self.id, RDF.type, self.prov_type)
 
-        # If attributes is a dictionnary, convert to list
-        if isinstance(attributes, dict):
-            attributes = [(k, v) for k, v in attributes.items()]
+    #     # If attributes is a dictionnary, convert to list
+    #     if isinstance(attributes, dict):
+    #         attributes = [(k, v) for k, v in attributes.items()]
 
-        for p, o in attributes:
-            self._rdf_add(self.id, p, o)
+    #     for p, o in attributes:
+    #         self._rdf_add(self.id, p, o)
 
-    def _rdf_add(self, s, p, o):
-        if isinstance(o, prov.identifier.QualifiedName):
-            o = rdflib.URIRef(o.uri)
-        elif isinstance(o, prov.identifier.Identifier):
-            o = rdflib.Literal(o, datatype=XSD.anyURI)
-        else:
-            if (isinstance(o, str) or isinstance(o, str)) and \
-                    not str(p) == "prov:label":
-                o = rdflib.Literal(o, datatype=XSD.string)
-            elif isinstance(o, float):
-                o = rdflib.Literal(o, datatype=XSD.float)
-            elif isinstance(o, bool):
-                o = rdflib.Literal(o, datatype=XSD.boolean)
-            elif isinstance(o, int):
-                o = rdflib.Literal(o, datatype=XSD.int)
-            else:
-                o = rdflib.Literal(str(o))
+    # def _rdf_add(self, s, p, o):
+    #     if isinstance(o, prov.identifier.QualifiedName):
+    #         o = rdflib.URIRef(o.uri)
+    #     elif isinstance(o, prov.identifier.Identifier):
+    #         o = rdflib.Literal(o, datatype=XSD.anyURI)
+    #     else:
+    #         if (isinstance(o, str) or isinstance(o, str)) and \
+    #                 not str(p) == "prov:label":
+    #             o = rdflib.Literal(o, datatype=XSD.string)
+    #         elif isinstance(o, float):
+    #             o = rdflib.Literal(o, datatype=XSD.float)
+    #         elif isinstance(o, bool):
+    #             o = rdflib.Literal(o, datatype=XSD.boolean)
+    #         elif isinstance(o, int):
+    #             o = rdflib.Literal(o, datatype=XSD.int)
+    #         else:
+    #             o = rdflib.Literal(str(o))
 
-        if not isinstance(p, rdflib.URIRef):
-            if str(p) == "prov:type":
-                p = RDF.type
-            elif str(p) == "prov:label":
-                p = RDFS.label
-            elif str(p) == "prov:location":
-                p = rdflib.URIRef(p.uri.replace("location", "atLocation"))
-            else:
-                p = rdflib.URIRef(p.uri)
+    #     if not isinstance(p, rdflib.URIRef):
+    #         if str(p) == "prov:type":
+    #             p = RDF.type
+    #         elif str(p) == "prov:label":
+    #             p = RDFS.label
+    #         elif str(p) == "prov:location":
+    #             p = rdflib.URIRef(p.uri.replace("location", "atLocation"))
+    #         else:
+    #             p = rdflib.URIRef(p.uri)
 
-        self.g.add((rdflib.URIRef(s.uri), p, o))
+    #     self.g.add((rdflib.URIRef(s.uri), p, o))
 
     def add_object(self, nidm_object, nidm_version):
         nidm_object.export(nidm_version)
@@ -136,7 +136,7 @@ class NIDMObject(object):
         else:
             raise Exception('Unrecognised prov relation')
 
-        self._rdf_add(self.id, relation, object_id)
+        # self._rdf_add(self.id, relation, object_id)
 
     def add_attributes(self, attributes):
         if self.prov_type == PROV['Activity']:
@@ -146,7 +146,7 @@ class NIDMObject(object):
         elif self.prov_type == PROV['Agent']:
             self.p.agent(self.id, other_attributes=attributes)
 
-        self._rdf_add_attributes(attributes)
+        # self._rdf_add_attributes(attributes)
 
 
 # class NIDMBundle(NIDMObject):

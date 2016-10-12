@@ -585,6 +585,9 @@ class ExampleGraph(object):
         self.gt_ttl_files = gt_ttl_files
         self.exact_comparison = exact_comparison
         self.graph = Graph()
+
+        print(ttl_file)
+
         self.graph.parse(ttl_file, format='turtle')
 
         # Get NIDM-Results version for each example
