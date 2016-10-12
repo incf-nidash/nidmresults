@@ -338,12 +338,21 @@ class OwlReader():
                                 range_name = sub_range_name
 
                         parent_ranges.setdefault(prp, set()).add(range_name)
+                        # Is XSD:float is requested, also accept XSD:double
+                        # (linked to the fact that python floats are more
+                        # doubles)
+                        if range_name == XSD['float']:
+                            parent_ranges.setdefault(
+                                prp, set()).add(XSD['double'])
 
                         # Add child_class to range (for ObjectProperty)
                         for child in self.graph.transitive_subjects(
                                 RDFS['subClassOf'], range_name):
                             if not self.is_deprecated(child):
                                 ranges.setdefault(prp, set()).add(child)
+                                if child == XSD['float']:
+                                    ranges.setdefault(
+                                        prp, set()).add(XSD['double'])
 
         return list((attributes, ranges, restrictions, parent_ranges))
 
