@@ -349,6 +349,9 @@ ons#")
         ttl_txt = self.doc.serialize(format='rdf', rdf_format='turtle')
 
         ttl_txt = self.use_prefixes(ttl_txt)
+        # Work-around to issue with INF value in rdflib (reported in
+        # https://github.com/RDFLib/rdflib/pull/655)
+        ttl_txt = ttl_txt.replace(' inf ', ' "INF"^^xsd:float ')
         with open(ttl_file, 'w') as ttl_fid:
             ttl_fid.write(ttl_txt)
 
