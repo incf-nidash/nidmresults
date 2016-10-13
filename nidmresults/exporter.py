@@ -251,7 +251,7 @@ class NIDMExporter():
             self.exporter.export(self.version)
             self.doc.update(self.exporter.p)
 
-            self.exporter.wasAssociatedWith(self.export.id)
+            self.doc.wasAssociatedWith(self.export.id, self.exporter.id)
 
     def _get_model_parameters_estimations(self, error_model):
         """
