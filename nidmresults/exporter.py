@@ -348,6 +348,11 @@ ons#")
         ttl_file = os.path.join(self.export_dir, 'nidm.ttl')
         ttl_txt = self.doc.serialize(format='rdf', rdf_format='turtle')
 
+        provn_file = os.path.join(self.export_dir, 'nidm.provn')
+        provn_txt = self.doc.serialize(format='provn')
+        with open(provn_file, 'w') as provn_fid:
+            provn_fid.write(provn_txt)
+
         ttl_txt = self.use_prefixes(ttl_txt)
         # Work-around to issue with INF value in rdflib (reported in
         # https://github.com/RDFLib/rdflib/pull/655)
