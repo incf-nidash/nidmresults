@@ -288,7 +288,9 @@ ons#")
             self.doc.wasGeneratedBy(bundle_id, time=str(ctime))
         else:
             # provn
-            self.bundle.wasGeneratedBy(self.export.id, time=str(ctime))
+            self.doc.wasGeneratedBy(
+                entity=bundle_id, activity=self.export.id, time=str(ctime))
+
             # ttl
             self.g.add((
                 bnode,
