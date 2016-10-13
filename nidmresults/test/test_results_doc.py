@@ -563,7 +563,7 @@ class TestResultDataModel(object):
         # tolerance to deal with possibly different
         # roundings
         close_float = False
-        if o.datatype == XSD.float:
+        if o.datatype in [XSD.float, XSD.double]:
             if o_other.datatype == XSD.float:
                 # Avoid None
                 if o.value and o_other.value:
