@@ -564,7 +564,11 @@ class TestResultDataModel(object):
         # roundings
         close_float = False
         if o.datatype in [XSD.float, XSD.double]:
-            if o_other.datatype == XSD.float:
+            if o_other.datatype in [XSD.float, XSD.double]:
+                # If both are zero but of different type isclose returns false
+                if o.value == 0 and o_other.value == 0:
+                    close_float = True
+
                 # Avoid None
                 if o.value and o_other.value:
                     close_float = np.isclose(
