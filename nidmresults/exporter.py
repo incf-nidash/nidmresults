@@ -22,6 +22,7 @@ import uuid
 import csv
 import tempfile
 import zipfile
+from rdflib.namespace import RDF, RDFS, XSD
 
 
 class NIDMExporter():

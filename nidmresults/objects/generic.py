@@ -16,6 +16,7 @@ import hashlib
 import uuid
 import rdflib
 import json
+from rdflib.namespace import RDF, RDFS, XSD
 
 
 class NIDMObject(object):
