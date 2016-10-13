@@ -294,6 +294,16 @@ class NIDMExporter():
         ttl_file = os.path.join(self.export_dir, 'nidm.ttl')
         ttl_txt = self.doc.serialize(format='rdf', rdf_format='turtle')
 
+        jsonld_file = os.path.join(self.export_dir, 'nidm.jsonld')
+        jsonld_txt = self.doc.serialize(format='rdf', rdf_format='json-ld')
+        with open(jsonld_file, 'w') as jsonld_fid:
+            jsonld_fid.write(jsonld_txt)
+
+        # provjsonld_file = os.path.join(self.export_dir, 'nidm.provjsonld')
+        # provjsonld_txt = self.doc.serialize(format='jsonld')
+        # with open(provjsonld_file, 'w') as provjsonld_fid:
+        #     provjsonld_fid.write(provjsonld_txt)
+
         provn_file = os.path.join(self.export_dir, 'nidm.provn')
         provn_txt = self.doc.serialize(format='provn')
         with open(provn_file, 'w') as provn_fid:
