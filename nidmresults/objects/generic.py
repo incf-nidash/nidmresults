@@ -14,9 +14,7 @@ import nibabel as nib
 import shutil
 import hashlib
 import uuid
-import rdflib
 import json
-from rdflib.namespace import RDF, RDFS, XSD
 
 
 class NIDMObject(object):
@@ -30,7 +28,6 @@ class NIDMObject(object):
         self.export_dir = export_dir
         self.p = ProvBundle()
 
-        self.g = rdflib.Graph()
         if oid is None:
             self.id = NIIRI[str(uuid.uuid4())]
         else:
@@ -56,8 +53,6 @@ class NIDMObject(object):
 
         # Prov graph (=> provn)
         self.p.update(nidm_object.p)
-        # RDF graph (=> turtle)
-        self.g = self.g + nidm_object.g
 
     def used(self, nidm_object):
         self._add_prov_relation(PROV['used'], nidm_object)

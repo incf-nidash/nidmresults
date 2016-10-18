@@ -10,7 +10,6 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 
 
 from prov.model import ProvBundle, ProvDocument
-import rdflib
 import os
 import datetime
 from nidmresults.objects.constants import *
@@ -22,7 +21,6 @@ import uuid
 import csv
 import tempfile
 import zipfile
-from rdflib.namespace import RDF, RDFS, XSD
 
 
 class NIDMExporter():
@@ -225,9 +223,6 @@ class NIDMExporter():
                                           (PROV['type'], NIDM_RESULTS),
                                           (NIDM_VERSION, version['num']))
                         )
-
-        # ttl export
-        bundle_uri = rdflib.URIRef(bundle_id.uri)
 
         # *** NIDM-Results Export Activity
         if version['num'] not in ["1.0.0", "1.1.0"]:

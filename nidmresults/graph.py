@@ -14,6 +14,7 @@ from nidmresults.objects.contrast import *
 from nidmresults.objects.inference import *
 
 from rdflib.plugins.parsers.notation3 import BadSyntax
+import rdflib
 import zipfile
 import csv
 
