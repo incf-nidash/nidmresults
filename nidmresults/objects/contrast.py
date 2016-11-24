@@ -256,8 +256,8 @@ class ContrastStdErrMap(NIDMObject):
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
             (PROV['label'], "Contrast Standard Error Map")))
 
-        if self.is_variance:
-            self.wasDerivedFrom(contrast_var)
+        # if self.is_variance:
+        #     self.wasDerivedFrom(contrast_var)
 
         
 

@@ -217,7 +217,7 @@ class ClusterLabelsMap(NIDMObject):
         """
         Create prov entities and activities.
         """
-        self.add_object(self.coord_space, nidm_version)
+        # self.add_object(self.coord_space, nidm_version)
 
         # Copy "Excursion set map" file in export directory
         # self.add_object(self.file, nidm_version)

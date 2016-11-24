@@ -168,7 +168,7 @@ class NIDMExporter():
                     for sub in model_fitting.subjects:
                         self.add_object(sub)
                         # model_fitting.data.wasAttributedTo(sub)
-                        self.bundle.wasAttributedTo(model_fitting.data.id, model_fitting.sub.id)
+                        self.bundle.wasAttributedTo(model_fitting.data.id, sub.id)
 
                 # Data
                 # model_fitting.activity.used(model_fitting.data)
@@ -183,7 +183,7 @@ class NIDMExporter():
                 # Parameter Estimate Maps
                 for param_estimate in model_fitting.param_estimates:
                     # param_estimate.wasGeneratedBy(model_fitting.activity)
-                    self.bundle.wasGeneratedBy(model_fitting.param_estimate.id, model_fitting.activity.id)
+                    self.bundle.wasGeneratedBy(param_estimate.id, model_fitting.activity.id)
                     self.add_object(param_estimate)
                     self.add_object(param_estimate.coord_space)
                     self.add_object(param_estimate.file)
@@ -209,15 +209,14 @@ class NIDMExporter():
                 self.bundle.wasGeneratedBy(model_fitting.grand_mean_map.id, model_fitting.activity.id)
                 self.add_object(model_fitting.grand_mean_map)
                 # Coordinate space entity
-                self.add_object(odel_fitting.grand_mean_map.coord_space)
+                self.add_object(model_fitting.grand_mean_map.coord_space)
                 # Grand Mean Map entity
-                self.add_object(odel_fitting.grand_mean_map.file)                
+                self.add_object(model_fitting.grand_mean_map.file)
 
                 # Model Parameters Estimation activity
                 self.add_object(model_fitting.activity)
-                self.bundle.wasAssociatedWith(model_fitting.activity.id, model_fitting.software.id)
+                self.bundle.wasAssociatedWith(model_fitting.activity.id, self.software.id)
                 # model_fitting.activity.wasAssociatedWith(self.software)
-                
                 # self.add_object(model_fitting)
 
             # Add contrast estimation steps
@@ -229,7 +228,7 @@ class NIDMExporter():
                     # contrast.estimation.used(model_fitting.mask_map)
                     self.bundle.used(contrast.estimation.id, model_fitting.mask_map.id)
                     # contrast.estimation.wasAssociatedWith(self.software)
-                    self.bundle.wasAssociatedWith(contrast.estimation.id, model_fitting.software.id)
+                    self.bundle.wasAssociatedWith(contrast.estimation.id, self.software.id)
 
                     for pe_id in pe_ids:
                         # contrast.estimation.used(pe_id)
@@ -255,9 +254,10 @@ class NIDMExporter():
                     self.bundle.wasGeneratedBy(contrast.stderr_or_expl_mean_sq_map.id, contrast.estimation.id)
                     self.add_object(contrast.stderr_or_expl_mean_sq_map)
                     self.add_object(contrast.stderr_or_expl_mean_sq_map.coord_space)
-                    if contrast.stderr_or_expl_mean_sq_map.is_variance:
+                    if isinstance(contrast.stderr_or_expl_mean_sq_map, ContrastStdErrMap) and contrast.stderr_or_expl_mean_sq_map.is_variance:
                         self.add_object(contrast.stderr_or_expl_mean_sq_map.contrast_var)
                         self.add_object(contrast.stderr_or_expl_mean_sq_map.var_coord_space)
+                        self.bundle.wasDerivedFrom(contrast.stderr_or_expl_mean_sq_map.id, contrast.stderr_or_expl_mean_sq_map.contrast_var.id)
                     self.add_object(contrast.stderr_or_expl_mean_sq_map.file)
 
                     # Create Statistic Map
@@ -305,6 +305,7 @@ class NIDMExporter():
                     if inference.excursion_set.clust_map is not None:
                         self.add_object(inference.excursion_set.clust_map)
                         self.add_object(inference.excursion_set.clust_map.file)
+                        self.add_object(inference.excursion_set.clust_map.coord_space)
 
                     # Height threshold
                     self.add_object(inference.height_thresh)
@@ -319,9 +320,9 @@ class NIDMExporter():
                             self.bundle.used(inference.inference_act.id, mask.id)
                             self.add_object(mask)
                             # Create coordinate space entity
-                            self.add_object(self.mask.coord_space)
+                            self.add_object(mask.coord_space)
                             # Create "Display Mask Map" entity
-                            self.add_object(self.mask.file)
+                            self.add_object(mask.file)
 
                     # Search Space
                     self.bundle.wasGeneratedBy(inference.search_space.id, inference.inference_act.id)
@@ -353,7 +354,7 @@ class NIDMExporter():
                             for peak in cluster.peaks:
                                 self.bundle.wasDerivedFrom(peak.id, cluster.id)
                                 self.add_object(peak)
-                                self.add_object(self.peak.coordinate)
+                                self.add_object(peak.coordinate)
                             self.bundle.wasDerivedFrom(cluster.cog.id, cluster.id)
                             self.add_object(cluster.cog)
                             self.add_object(cluster.cog.coordinate)
