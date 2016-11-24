@@ -54,20 +54,20 @@ class NIDMObject(object):
         # Prov graph (=> provn)
         self.p.update(nidm_object.p)
 
-    def used(self, nidm_object):
-        self._add_prov_relation(PROV['used'], nidm_object)
+    # def used(self, nidm_object):
+    #     self._add_prov_relation(PROV['used'], nidm_object)
 
-    def wasGeneratedBy(self, nidm_object):
-        self._add_prov_relation(PROV['wasGeneratedBy'], nidm_object)
+    # def wasGeneratedBy(self, nidm_object):
+    #     self._add_prov_relation(PROV['wasGeneratedBy'], nidm_object)
 
-    def wasDerivedFrom(self, nidm_object):
-        self._add_prov_relation(PROV['wasDerivedFrom'], nidm_object)
+    # def wasDerivedFrom(self, nidm_object):
+    #     self._add_prov_relation(PROV['wasDerivedFrom'], nidm_object)
 
-    def wasAttributedTo(self, nidm_object):
-        self._add_prov_relation(PROV['wasAttributedTo'], nidm_object)
+    # def wasAttributedTo(self, nidm_object):
+    #     self._add_prov_relation(PROV['wasAttributedTo'], nidm_object)
 
-    def wasAssociatedWith(self, nidm_object):
-        self._add_prov_relation(PROV['wasAssociatedWith'], nidm_object)
+    # def wasAssociatedWith(self, nidm_object):
+    #     self._add_prov_relation(PROV['wasAssociatedWith'], nidm_object)
 
     def _add_prov_relation(self, relation, nidm_object):
         if isinstance(nidm_object, NIDMObject):
