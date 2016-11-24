@@ -404,6 +404,8 @@ class NIDMResultsExport(NIDMObject):
         """
         Create prov entities and activities.
         """
-        self.add_attributes([(PROV['label'], self.label)])
+        self.add_attributes([
+            (PROV['label'], self.label),
+            (PROV['type'], self.type)])
 
         # 
