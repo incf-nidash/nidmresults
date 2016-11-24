@@ -198,7 +198,7 @@ class CoordinateSpace(NIDMObject):
             NIDM_VOXEL_UNITS: json.dumps(self.units),
             NIDM_VOXEL_SIZE: json.dumps(self.voxel_size.tolist()),
             PROV['label']: self.label})
-        return self.p
+        
 
 
 class NIDMFile(NIDMObject):
@@ -282,7 +282,7 @@ class NIDMFile(NIDMObject):
                     (DCT['format'], self.format)
                 ])
 
-            return self.p
+            # 
 
 
 class Image(NIDMObject):
@@ -310,7 +310,7 @@ class Image(NIDMObject):
                 (DCT['format'], "image/png"),
             ])
 
-        return self.p
+        # 
 
 
 class NeuroimagingSoftware(NIDMObject):
@@ -345,7 +345,7 @@ class NeuroimagingSoftware(NIDMObject):
             (NIDM_SOFTWARE_VERSION, self.version))
         )
 
-        return self.p
+        # 
 
 
 class ExporterSoftware(NIDMObject):
@@ -376,7 +376,7 @@ class ExporterSoftware(NIDMObject):
             (NIDM_SOFTWARE_VERSION, self.version))
         )
 
-        return self.p
+        # 
 
 
 class NIDMResultsExport(NIDMObject):
@@ -396,4 +396,4 @@ class NIDMResultsExport(NIDMObject):
         """
         self.add_attributes([(PROV['label'], self.label)])
 
-        return self.p
+        # 

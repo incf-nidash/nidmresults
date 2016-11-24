@@ -88,7 +88,7 @@ class ModelFitting(object):
     #     # Model Parameters Estimation activity
     #     self.add_object(self.activity, nidm_version)
 
-    #     return self.p
+    #     
 
 
 class ImagingInstrument(NIDMObject):
@@ -118,7 +118,7 @@ class ImagingInstrument(NIDMObject):
             (PROV['type'], self.type),
             (PROV['label'], self.label)))
 
-        return self.p
+        
 
 
 class Group(NIDMObject):
@@ -146,7 +146,7 @@ class Group(NIDMObject):
             (NIDM_NUMBER_OF_SUBJECTS, self.num_subjects),
             (PROV['label'], self.label)))
 
-        return self.p
+        
 
 
 class Person(NIDMObject):
@@ -170,7 +170,7 @@ class Person(NIDMObject):
             (PROV['type'], self.prov_type),
             (PROV['label'], self.label)))
 
-        return self.p
+        
 
 
 class DesignMatrix(NIDMObject):
@@ -236,7 +236,7 @@ class DesignMatrix(NIDMObject):
         # Create "design matrix" entity
         self.add_attributes(attributes)
 
-        return self.p
+        
 
 
 class DriftModel(NIDMObject):
@@ -267,7 +267,7 @@ class DriftModel(NIDMObject):
         # Create "drift model" entity
         self.add_attributes(attributes)
 
-        return self.p
+        
 
 
 class Data(NIDMObject):
@@ -314,7 +314,7 @@ class Data(NIDMObject):
                 self.add_attributes(
                     [(NIDM_HAS_MRI_PROTOCOL, self.mri_protocol)])
 
-        return self.p
+        
 
 
 class ErrorModel(NIDMObject):
@@ -355,7 +355,7 @@ class ErrorModel(NIDMObject):
         # Create "Error Model" entity
         self.add_attributes(atts)
 
-        return self.p
+        
 
 
 class ModelParametersEstimation(NIDMObject):
@@ -387,7 +387,7 @@ class ModelParametersEstimation(NIDMObject):
             (NIDM_WITH_ESTIMATION_METHOD, self.estimation_method),
             (PROV['label'], self.label)))
 
-        return self.p
+        
 
 
 class ParameterEstimateMap(NIDMObject):
@@ -425,7 +425,7 @@ class ParameterEstimateMap(NIDMObject):
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
             (PROV['label'], self.label)))
 
-        return self.p
+        
 
 
 class ResidualMeanSquares(NIDMObject):
@@ -460,7 +460,7 @@ class ResidualMeanSquares(NIDMObject):
             (PROV['label'], "Residual Mean Squares Map"),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id)))
 
-        return self.p
+        
 
 
 class MaskMap(NIDMObject):
@@ -497,7 +497,7 @@ class MaskMap(NIDMObject):
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id))
         )
 
-        return self.p
+        
 
 
 class GrandMeanMap(NIDMObject):
@@ -547,4 +547,4 @@ class GrandMeanMap(NIDMObject):
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id))
         )
 
-        return self.p
+        

@@ -89,7 +89,7 @@ class Inference(object):
     #         # contrast_num])
     #     # self.p.used(self.inference_act.id, NIIRI['mask_id_1'])
 
-    #     return self.p
+    #     
 
 
 class InferenceActivity(NIDMObject):
@@ -127,7 +127,7 @@ class InferenceActivity(NIDMObject):
             (PROV['label'], self.label),
             (NIDM_HAS_ALTERNATIVE_HYPOTHESIS, self.tail)))
 
-        return self.p
+        
 
 
 class ExcursionSet(NIDMObject):
@@ -185,7 +185,7 @@ class ExcursionSet(NIDMObject):
                 (NIDM_HAS_CLUSTER_LABELS_MAP, self.clust_map.id),
             ))
 
-        return self.p
+        
 
 
 class ClusterLabelsMap(NIDMObject):
@@ -229,7 +229,7 @@ class ClusterLabelsMap(NIDMObject):
             (PROV['label'], self.label)
         ))
 
-        return self.p
+        
 
 
 class HeightThreshold(NIDMObject):
@@ -299,7 +299,7 @@ class HeightThreshold(NIDMObject):
                 ]
 
         self.add_attributes([(k, v) for k, v in atts if v is not None])
-        return self.p
+        
 
 
 class ExtentThreshold(NIDMObject):
@@ -381,7 +381,7 @@ class ExtentThreshold(NIDMObject):
                 ]
 
         self.add_attributes([(k, v) for k, v in atts if v is not None])
-        return self.p
+        
 
 
 class Cluster(NIDMObject):
@@ -430,7 +430,7 @@ class Cluster(NIDMObject):
             (NIDM_CLUSTER_SIZE_IN_VOXELS, self.size),
             (NIDM_P_VALUE_FWER, self.pFWER)))
 
-        return self.p
+        
 
 
 class DisplayMaskMap(NIDMObject):
@@ -466,7 +466,7 @@ class DisplayMaskMap(NIDMObject):
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id)
             ))
 
-        return self.p
+        
 
 
 class PeakCriteria(NIDMObject):
@@ -498,7 +498,7 @@ class PeakCriteria(NIDMObject):
             (NIDM_MIN_DISTANCE_BETWEEN_PEAKS, self.peak_dist)
             ) + num_peak)
 
-        return self.p
+        
 
 
 class ClusterCriteria(NIDMObject):
@@ -541,7 +541,7 @@ class ClusterCriteria(NIDMObject):
 
         self.add_attributes(atts)
 
-        return self.p
+        
 
 
 class CenterOfGravity(NIDMObject):
@@ -573,7 +573,7 @@ class CenterOfGravity(NIDMObject):
             (PROV['label'], label),
             (PROV['location'], self.coordinate.id)))
 
-        return self.p
+        
 
 
 class SearchSpace(NIDMObject):
@@ -636,7 +636,7 @@ class SearchSpace(NIDMObject):
         # Create "Search Space Mask map" entity
         self.add_attributes(atts)
 
-        return self.p
+        
 
 
 class Coordinate(NIDMObject):
@@ -693,7 +693,7 @@ class Coordinate(NIDMObject):
 
         self.add_attributes(atts)
 
-        return self.p
+        
 
 
 class Peak(NIDMObject):
@@ -748,4 +748,4 @@ class Peak(NIDMObject):
             (NIDM_P_VALUE_UNCORRECTED, self.p_unc),
             (PROV['location'], self.coordinate.id)])
 
-        return self.p
+        

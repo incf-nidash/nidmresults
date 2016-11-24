@@ -65,7 +65,6 @@ class Contrast(object):
     #         self.z_stat_map.wasGeneratedBy(self.estimation)
     #         self.add_object(self.z_stat_map, nidm_version)
 
-        return self.p
     #     
 
 
@@ -105,7 +104,7 @@ class ContrastWeights(NIDMObject):
             (PROV['label'], label),
             (NIDM_CONTRAST_NAME, self.contrast_name),
             (PROV['value'], self.contrast_weights)))
-        return self.p
+        
 
 
 class ContrastMap(NIDMObject):
@@ -145,7 +144,7 @@ class ContrastMap(NIDMObject):
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
             (NIDM_CONTRAST_NAME, self.name),
             (PROV['label'], self.label)))
-        return self.p
+        
 
 
 class ContrastExplainedMeanSquareMap(NIDMObject):
@@ -195,7 +194,7 @@ class ContrastExplainedMeanSquareMap(NIDMObject):
             (PROV['type'], self.type),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
             (PROV['label'], "Contrast Explained Mean Square Map")))
-        return self.p
+        
 
 
 class ContrastStdErrMap(NIDMObject):
@@ -259,7 +258,7 @@ class ContrastStdErrMap(NIDMObject):
         if self.is_variance:
             self.wasDerivedFrom(contrast_var)
 
-        return self.p
+        
 
 
 class ContrastVariance(NIDMObject):
@@ -287,7 +286,7 @@ class ContrastVariance(NIDMObject):
 
         self.add_attributes([(PROV['type'], NIDM_CONTRAST_VARIANCE_MAP)])
 
-        return self.p
+        
 
 
 class StatisticMap(NIDMObject):
@@ -366,7 +365,7 @@ class StatisticMap(NIDMObject):
         # Create "Statistic Map" entity
         # FIXME: Deal with other than t-contrast maps: dof + statisticType
         self.add_attributes(attributes)
-        return self.p
+        
 
 
 class ContrastEstimation(NIDMObject):
@@ -396,4 +395,4 @@ class ContrastEstimation(NIDMObject):
             (PROV['type'], self.type),
             (PROV['label'], self.label)))
 
-        return self.p
+        
