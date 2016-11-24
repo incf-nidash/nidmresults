@@ -253,10 +253,61 @@ class NIDMExporter():
                         used_id = contrast.z_stat_map.id
                     else:
                         used_id = contrast.stat_map.id
-                    inference.inference_act.used(used_id)
-                    inference.inference_act.wasAssociatedWith(self.software)
+                    # inference.inference_act.used(used_id)
+                    self.bundle.used(inference.inference_act.id, used_id)
+                    # inference.inference_act.wasAssociatedWith(self.software)
+                    self.bundle.wasAssociatedWith(inference.inference_act.id, self.software.id)
 
-                    self.add_object(inference)
+                    # self.add_object(inference)
+                    # Excursion set
+                    # inference.excursion_set.wasGeneratedBy(inference.inference_act)
+                    self.bundle.wasGeneratedBy(inference.excursion_set.id, inference.inference_act.id)
+                    inference.add_object(inference.excursion_set, nidm_version)
+
+                    # Height threshold
+                    inference.add_object(inference.height_thresh, nidm_version)
+
+                    # Extent threshold
+                    inference.add_object(inference.extent_thresh, nidm_version)
+
+                    # Display Mask (potentially more than 1)
+                    if inference.disp_mask:
+                        for mask in inference.disp_mask:
+                            # inference.inference_act.used(mask)
+                            self.bundle.used(inference.inference_act.id, mask.id)
+                            inference.add_object(mask, nidm_version)
+
+                    # Search Space
+                    self.bundle.wasGeneratedBy(inference.search_space.id, inference.inference_act.id)
+                    # inference.search_space.wasGeneratedBy(inference.inference_act)
+                    inference.add_object(inference.search_space, nidm_version)
+
+                    # Peak Definition
+                    if inference.peak_criteria:
+                        # inference.inference_act.used(inference.peak_criteria)
+                        self.bundle.used(inference.inference_act.id, inference.peak_criteria.id)
+                        inference.add_object(inference.peak_criteria, nidm_version)
+
+                    # Cluster Definition
+                    if inference.cluster_criteria:
+                        # inference.inference_act.used(inference.cluster_criteria)
+                        self.bundle.used(inference.inference_act.id, inference.cluster_criteria.id)
+                        inference.add_object(inference.cluster_criteria, nidm_version)
+
+                    if inference.clusters:
+                        # Clusters and peaks
+                        for cluster in inference.clusters:
+                            # cluster.wasDerivedFrom(inference.excursion_set)
+                            self.bundle.wasDerivedFrom(cluster.id, inference.excursion_set.id)
+                            inference.add_object(cluster, nidm_version)
+
+                    # Inference activity
+                    # inference.inference_act.wasAssociatedWith(inference.software_id)
+                    # inference.inference_act.used(inference.height_thresh)
+                    self.bundle.used(inference.inference_act.id, inference.height_thresh.id)
+                    # inference.inference_act.used(inference.extent_thresh)
+                    self.bundle.used(inference.inference_act.id, inference.extent_thresh.id)
+                    inference.add_object(inference.inference_act, nidm_version)
 
             # Write-out prov file
             self.save_prov_to_files()

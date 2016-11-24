@@ -14,7 +14,7 @@ from math import erf, sqrt
 import rdflib
 
 
-class Inference(NIDMObject):
+class Inference(object):
 
     """
     Object representing an Inference step: including an Inference activity, its
@@ -37,59 +37,59 @@ class Inference(NIDMObject):
         self.disp_mask = disp_mask
         self.search_space = search_space
 
-    def export(self, nidm_version):
-        """
-        Create prov entities and activities.
-        """
-        # Excursion set
-        self.excursion_set.wasGeneratedBy(self.inference_act)
-        self.add_object(self.excursion_set, nidm_version)
+    # def export(self, nidm_version):
+    #     """
+    #     Create prov entities and activities.
+    #     """
+    #     # Excursion set
+    #     self.excursion_set.wasGeneratedBy(self.inference_act)
+    #     self.add_object(self.excursion_set, nidm_version)
 
-        # Height threshold
-        self.add_object(self.height_thresh, nidm_version)
+    #     # Height threshold
+    #     self.add_object(self.height_thresh, nidm_version)
 
-        # Extent threshold
-        self.add_object(self.extent_thresh, nidm_version)
+    #     # Extent threshold
+    #     self.add_object(self.extent_thresh, nidm_version)
 
-        # Display Mask (potentially more than 1)
-        if self.disp_mask:
-            for mask in self.disp_mask:
-                self.inference_act.used(mask)
-                self.add_object(mask, nidm_version)
+    #     # Display Mask (potentially more than 1)
+    #     if self.disp_mask:
+    #         for mask in self.disp_mask:
+    #             self.inference_act.used(mask)
+    #             self.add_object(mask, nidm_version)
 
-        # Search Space
-        self.search_space.wasGeneratedBy(self.inference_act)
-        self.add_object(self.search_space, nidm_version)
+    #     # Search Space
+    #     self.search_space.wasGeneratedBy(self.inference_act)
+    #     self.add_object(self.search_space, nidm_version)
 
-        # Peak Definition
-        if self.peak_criteria:
-            self.inference_act.used(self.peak_criteria)
-            self.add_object(self.peak_criteria, nidm_version)
+    #     # Peak Definition
+    #     if self.peak_criteria:
+    #         self.inference_act.used(self.peak_criteria)
+    #         self.add_object(self.peak_criteria, nidm_version)
 
-        # Cluster Definition
-        if self.cluster_criteria:
-            self.inference_act.used(self.cluster_criteria)
-            self.add_object(self.cluster_criteria, nidm_version)
+    #     # Cluster Definition
+    #     if self.cluster_criteria:
+    #         self.inference_act.used(self.cluster_criteria)
+    #         self.add_object(self.cluster_criteria, nidm_version)
 
-        if self.clusters:
-            # Clusters and peaks
-            for cluster in self.clusters:
-                cluster.wasDerivedFrom(self.excursion_set)
-                self.add_object(cluster, nidm_version)
+    #     if self.clusters:
+    #         # Clusters and peaks
+    #         for cluster in self.clusters:
+    #             cluster.wasDerivedFrom(self.excursion_set)
+    #             self.add_object(cluster, nidm_version)
 
-        # Inference activity
-        self.inference_act.wasAssociatedWith(self.software_id)
-        self.inference_act.used(self.height_thresh)
-        self.inference_act.used(self.extent_thresh)
-        self.add_object(self.inference_act, nidm_version)
+    #     # Inference activity
+    #     self.inference_act.wasAssociatedWith(self.software_id)
+    #     self.inference_act.used(self.height_thresh)
+    #     self.inference_act.used(self.extent_thresh)
+    #     self.add_object(self.inference_act, nidm_version)
 
-        # self.p.wasGeneratedBy(NIIRI['search_space_id'],
-            # self.inference_act.id)
-        # self.p.used(self.inference_act.id, NIIRI['z_statistic_map_id_'+
-            # contrast_num])
-        # self.p.used(self.inference_act.id, NIIRI['mask_id_1'])
+    #     # self.p.wasGeneratedBy(NIIRI['search_space_id'],
+    #         # self.inference_act.id)
+    #     # self.p.used(self.inference_act.id, NIIRI['z_statistic_map_id_'+
+    #         # contrast_num])
+    #     # self.p.used(self.inference_act.id, NIIRI['mask_id_1'])
 
-        return self.p
+    #     return self.p
 
 
 class InferenceActivity(NIDMObject):
