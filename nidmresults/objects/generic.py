@@ -48,11 +48,11 @@ class NIDMObject(object):
                str(self.id).replace("niiri:", "").replace(NIIRI._uri, "")[0:8]\
                + '>'
 
-    def add_object(self, nidm_object, nidm_version):
-        nidm_object.export(nidm_version)
+    # def add_object(self, nidm_object, nidm_version):
+    #     nidm_object.export(nidm_version)
 
-        # Prov graph (=> provn)
-        self.p.update(nidm_object.p)
+    #     # Prov graph (=> provn)
+    #     self.p.update(nidm_object.p)
 
     # def used(self, nidm_object):
     #     self._add_prov_relation(PROV['used'], nidm_object)
@@ -303,14 +303,10 @@ class Image(NIDMObject):
         Create prov entity.
         """
         if self.file is not None:
-            self.add_object(self.file, nidm_version)
-
             self.add_attributes([
                 (PROV['type'], self.type),
                 (DCT['format'], "image/png"),
             ])
-
-        # 
 
 
 class NeuroimagingSoftware(NIDMObject):

@@ -147,6 +147,15 @@ class NIDMExporter():
                 # model_fitting.activity.used(model_fitting.design_matrix)
                 self.bundle.used(model_fitting.activity.id, model_fitting.design_matrix.id)
                 self.add_object(model_fitting.design_matrix)
+                # *** Export visualisation of the design matrix
+                self.add_object(model_fitting.design_matrix.image)
+
+                if model_fitting.design_matrix.image.file is not None:
+                    self.add_object(model_fitting.design_matrix.image)
+
+                if model_fitting.design_matrix.hrf_model is not None:
+                    # drift model
+                    self.add_object(model_fitting.design_matrix.drift_model)
 
                 if nidm_version['major'] > 1 or \
                         (nidm_version['major'] == 1 and nidm_version['minor'] >= 3):
@@ -176,21 +185,33 @@ class NIDMExporter():
                     # param_estimate.wasGeneratedBy(model_fitting.activity)
                     self.bundle.wasGeneratedBy(model_fitting.param_estimate.id, model_fitting.activity.id)
                     self.add_object(param_estimate)
+                    self.add_object(param_estimate.coord_space)
+                    self.add_object(param_estimate.file)
 
                 # Residual Mean Squares Map
                 # model_fitting.rms_map.wasGeneratedBy(model_fitting.activity)
                 self.bundle.wasGeneratedBy(model_fitting.rms_map.id, model_fitting.activity.id)
                 self.add_object(model_fitting.rms_map)
+                self.add_object(model_fitting.rms_map.coord_space)
+                self.add_object(model_fitting.rms_map.file)
 
                 # Mask
                 # model_fitting.mask_map.wasGeneratedBy(model_fitting.activity)
                 self.bundle.wasGeneratedBy(model_fitting.mask_map.id, model_fitting.activity.id)
                 self.add_object(model_fitting.mask_map)
+                # Create coordinate space export
+                self.add_object(model_fitting.mask_map.coord_space)
+                # Create "Mask map" entity
+                self.add_object(model_fitting.mask_map.file)
 
                 # Grand Mean map
                 # model_fitting.grand_mean_map.wasGeneratedBy(model_fitting.activity)
                 self.bundle.wasGeneratedBy(model_fitting.grand_mean_map.id, model_fitting.activity.id)
                 self.add_object(model_fitting.grand_mean_map)
+                # Coordinate space entity
+                self.add_object(odel_fitting.grand_mean_map.coord_space)
+                # Grand Mean Map entity
+                self.add_object(odel_fitting.grand_mean_map.file)                
 
                 # Model Parameters Estimation activity
                 self.add_object(model_fitting.activity)
@@ -225,22 +246,36 @@ class NIDMExporter():
                         # contrast.contrast_map.wasGeneratedBy(contrast.estimation)
                         self.bundle.wasGeneratedBy(contrast.contrast_map.id, contrast.estimation.id)
                         self.add_object(contrast.contrast_map)
+                        self.add_object(contrast.contrast_map.coord_space)
+                        # Copy contrast map in export directory
+                        self.add_object(contrast.contrast_map.file)
 
                     # Create Std Err. Map (T-tests) or Explained Mean Sq. Map (F-tests)
                     # contrast.stderr_or_expl_mean_sq_map.wasGeneratedBy(contrast.estimation)
                     self.bundle.wasGeneratedBy(contrast.stderr_or_expl_mean_sq_map.id, contrast.estimation.id)
                     self.add_object(contrast.stderr_or_expl_mean_sq_map)
+                    self.add_object(contrast.stderr_or_expl_mean_sq_map.coord_space)
+                    if contrast.stderr_or_expl_mean_sq_map.is_variance:
+                        self.add_object(contrast.stderr_or_expl_mean_sq_map.contrast_var)
+                        self.add_object(contrast.stderr_or_expl_mean_sq_map.var_coord_space)
+                    self.add_object(contrast.stderr_or_expl_mean_sq_map.file)
 
                     # Create Statistic Map
                     # contrast.stat_map.wasGeneratedBy(contrast.estimation)
                     self.bundle.wasGeneratedBy(contrast.stat_map.id, contrast.estimation.id)
                     self.add_object(contrast.stat_map)
+                    self.add_object(contrast.stat_map.coord_space)
+                    # Copy Statistical map in export directory
+                    self.add_object(contrast.stat_map.file)
 
                     # Create Z Statistic Map
                     if contrast.z_stat_map:
                         # contrast.z_stat_map.wasGeneratedBy(contrast.estimation)
                         self.bundle.wasGeneratedBy(contrast.z_stat_map.id, contrast.estimation.id)
                         self.add_object(contrast.z_stat_map)
+                        self.add_object(contrast.z_stat_map.coord_space)
+                        # Copy Statistical map in export directory
+                        self.add_object(contrast.z_stat_map.file)
 
                     # self.add_object(contrast)
 
@@ -263,6 +298,13 @@ class NIDMExporter():
                     # inference.excursion_set.wasGeneratedBy(inference.inference_act)
                     self.bundle.wasGeneratedBy(inference.excursion_set.id, inference.inference_act.id)
                     self.add_object(inference.excursion_set)
+                    self.add_object(inference.excursion_set.coord_space)
+                    self.add_object(inference.excursion_set.visu)
+                    # Copy "Excursion set map" file in export directory
+                    self.add_object(inference.excursion_set.file)
+                    if inference.excursion_set.clust_map is not None:
+                        self.add_object(inference.excursion_set.clust_map)
+                        self.add_object(inference.excursion_set.clust_map.file)
 
                     # Height threshold
                     self.add_object(inference.height_thresh)
@@ -276,11 +318,19 @@ class NIDMExporter():
                             # inference.inference_act.used(mask)
                             self.bundle.used(inference.inference_act.id, mask.id)
                             self.add_object(mask)
+                            # Create coordinate space entity
+                            self.add_object(self.mask.coord_space)
+                            # Create "Display Mask Map" entity
+                            self.add_object(self.mask.file)
 
                     # Search Space
                     self.bundle.wasGeneratedBy(inference.search_space.id, inference.inference_act.id)
                     # inference.search_space.wasGeneratedBy(inference.inference_act)
                     self.add_object(inference.search_space)
+                    self.add_object(inference.search_space.coord_space)
+                    # Copy "Mask map" in export directory
+                    self.add_object(inference.search_space.file)
+
 
                     # Peak Definition
                     if inference.peak_criteria:
@@ -300,6 +350,13 @@ class NIDMExporter():
                             # cluster.wasDerivedFrom(inference.excursion_set)
                             self.bundle.wasDerivedFrom(cluster.id, inference.excursion_set.id)
                             self.add_object(cluster)
+                            for peak in cluster.peaks:
+                                self.bundle.wasDerivedFrom(peak.id, cluster.id)
+                                self.add_object(peak)
+                                self.add_object(self.peak.coordinate)
+                            self.bundle.wasDerivedFrom(cluster.cog.id, cluster.id)
+                            self.add_object(cluster.cog)
+                            self.add_object(cluster.cog.coordinate)
 
                     # Inference activity
                     # inference.inference_act.wasAssociatedWith(inference.software_id)

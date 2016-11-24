@@ -199,8 +199,7 @@ class DesignMatrix(NIDMObject):
         """
         Create prov entities and activities.
         """
-        # *** Export visualisation of the design matrix
-        self.add_object(self.image, nidm_version)
+        # self.add_object(self.image, nidm_version)
 
         # Create cvs file containing design matrix
         np.savetxt(os.path.join(self.export_dir, self.csv_file),
@@ -230,7 +229,7 @@ class DesignMatrix(NIDMObject):
             # hrf model
             attributes.append((NIDM_HAS_HRF_BASIS, self.hrf_model))
             # drift model
-            self.add_object(self.drift_model, nidm_version)
+            # self.add_object(self.drift_model, nidm_version)
             attributes.append((NIDM_HAS_DRIFT_MODEL, self.drift_model.id))
 
         # Create "design matrix" entity
@@ -416,8 +415,8 @@ class ParameterEstimateMap(NIDMObject):
         """
         Create prov entities and activities.
         """
-        self.add_object(self.coord_space, nidm_version)
-        self.add_object(self.file, nidm_version)
+        # self.add_object(self.coord_space, nidm_version)
+        # self.add_object(self.file, nidm_version)
 
         # Parameter estimate entity
         self.add_attributes((
@@ -450,10 +449,10 @@ class ResidualMeanSquares(NIDMObject):
         Create prov entities and activities.
         """
         # Create coordinate space export
-        self.add_object(self.coord_space, nidm_version)
+        # self.add_object(self.coord_space, nidm_version)
 
         # Create "residuals map" entity
-        self.add_object(self.file, nidm_version)
+        # self.add_object(self.file, nidm_version)
 
         self.add_attributes((
             (PROV['type'], self.type,),
@@ -484,11 +483,11 @@ class MaskMap(NIDMObject):
         """
         Create prov entities and activities.
         """
-        # Create coordinate space export
-        self.add_object(self.coord_space, nidm_version)
+        # # Create coordinate space export
+        # self.add_object(self.coord_space, nidm_version)
 
-        # Create "Mask map" entity
-        self.add_object(self.file, nidm_version)
+        # # Create "Mask map" entity
+        # self.add_object(self.file, nidm_version)
 
         self.add_attributes((
             (PROV['type'], self.type,),
@@ -521,11 +520,11 @@ class GrandMeanMap(NIDMObject):
         """
         Create prov entities and activities.
         """
-        # Coordinate space entity
-        self.add_object(self.coord_space, nidm_version)
+        # # Coordinate space entity
+        # self.add_object(self.coord_space, nidm_version)
 
-        # Grand Mean Map entity
-        self.add_object(self.file, nidm_version)
+        # # Grand Mean Map entity
+        # self.add_object(self.file, nidm_version)
 
         grand_mean_file = self.file.path
         grand_mean_img = nib.load(grand_mean_file)
