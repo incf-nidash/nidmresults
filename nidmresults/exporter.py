@@ -146,54 +146,54 @@ class NIDMExporter():
                 # Design Matrix
                 # model_fitting.activity.used(model_fitting.design_matrix)
                 self.bundle.used(model_fitting.activity.id, model_fitting.design_matrix.id)
-                model_fitting.add_object(model_fitting.design_matrix, nidm_version)
+                self.add_object(model_fitting.design_matrix, nidm_version)
 
                 if nidm_version['major'] > 1 or \
                         (nidm_version['major'] == 1 and nidm_version['minor'] >= 3):
                     # Machine
                     # model_fitting.data.wasAttributedTo(model_fitting.machine)
                     self.bundle.wasAttributedTo(model_fitting.data.id, model_fitting.machine.id)
-                    model_fitting.add_object(model_fitting.machine, nidm_version)
+                    self.add_object(model_fitting.machine, nidm_version)
 
                     # Imaged subject or group(s)
                     for sub in model_fitting.subjects:
-                        model_fitting.add_object(sub, nidm_version)
+                        self.add_object(sub, nidm_version)
                         # model_fitting.data.wasAttributedTo(sub)
                         self.bundle.wasAttributedTo(model_fitting.data.id, model_fitting.sub.id)
 
                 # Data
                 # model_fitting.activity.used(model_fitting.data)
                 self.bundle.used(model_fitting.activity.id, model_fitting.data.id)
-                model_fitting.add_object(model_fitting.data, nidm_version)
+                self.add_object(model_fitting.data, nidm_version)
 
                 # Error Model
                 # model_fitting.activity.used(model_fitting.error_model)
                 self.bundle.used(model_fitting.activity.id, model_fitting.error_model.id)
-                model_fitting.add_object(model_fitting.error_model, nidm_version)
+                self.add_object(model_fitting.error_model, nidm_version)
 
                 # Parameter Estimate Maps
                 for param_estimate in model_fitting.param_estimates:
                     # param_estimate.wasGeneratedBy(model_fitting.activity)
                     self.bundle.wasGeneratedBy(model_fitting.param_estimate.id, model_fitting.activity.id)
-                    model_fitting.add_object(param_estimate, nidm_version)
+                    self.add_object(param_estimate, nidm_version)
 
                 # Residual Mean Squares Map
                 # model_fitting.rms_map.wasGeneratedBy(model_fitting.activity)
                 self.bundle.wasGeneratedBy(model_fitting.rms_map.id, model_fitting.activity.id)
-                model_fitting.add_object(model_fitting.rms_map, nidm_version)
+                self.add_object(model_fitting.rms_map, nidm_version)
 
                 # Mask
                 # model_fitting.mask_map.wasGeneratedBy(model_fitting.activity)
                 self.bundle.wasGeneratedBy(model_fitting.mask_map.id, model_fitting.activity.id)
-                model_fitting.add_object(model_fitting.mask_map, nidm_version)
+                self.add_object(model_fitting.mask_map, nidm_version)
 
                 # Grand Mean map
                 # model_fitting.grand_mean_map.wasGeneratedBy(model_fitting.activity)
                 self.bundle.wasGeneratedBy(model_fitting.grand_mean_map.id, model_fitting.activity.id)
-                model_fitting.add_object(model_fitting.grand_mean_map, nidm_version)
+                self.add_object(model_fitting.grand_mean_map, nidm_version)
 
                 # Model Parameters Estimation activity
-                model_fitting.add_object(model_fitting.activity, nidm_version)
+                self.add_object(model_fitting.activity, nidm_version)
                 self.bundle.wasAssociatedWith(model_fitting.activity.id, model_fitting.software.id)
                 # model_fitting.activity.wasAssociatedWith(self.software)
                 
@@ -215,32 +215,32 @@ class NIDMExporter():
                         self.bundle.used(contrast.estimation.id, pe_id)
 
                     # Create estimation activity
-                    contrast.add_object(contrast.estimation, nidm_version)
+                    self.add_object(contrast.estimation, nidm_version)
 
                     # Create contrast weights
-                    contrast.add_object(contrast.weights, nidm_version)
+                    self.add_object(contrast.weights, nidm_version)
 
                     if contrast.contrast_map is not None:
                         # Create contrast Map
                         # contrast.contrast_map.wasGeneratedBy(contrast.estimation)
                         self.bundle.wasGeneratedBy(contrast.contrast_map.id, contrast.estimation.id)
-                        contrast.add_object(contrast.contrast_map, nidm_version)
+                        self.add_object(contrast.contrast_map, nidm_version)
 
                     # Create Std Err. Map (T-tests) or Explained Mean Sq. Map (F-tests)
                     # contrast.stderr_or_expl_mean_sq_map.wasGeneratedBy(contrast.estimation)
                     self.bundle.wasGeneratedBy(contrast.stderr_or_expl_mean_sq_map.id, contrast.estimation.id)
-                    contrast.add_object(contrast.stderr_or_expl_mean_sq_map, nidm_version)
+                    self.add_object(contrast.stderr_or_expl_mean_sq_map, nidm_version)
 
                     # Create Statistic Map
                     # contrast.stat_map.wasGeneratedBy(contrast.estimation)
                     self.bundle.wasGeneratedBy(contrast.stat_map.id, contrast.estimation.id)
-                    contrast.add_object(contrast.stat_map, nidm_version)
+                    self.add_object(contrast.stat_map, nidm_version)
 
                     # Create Z Statistic Map
                     if contrast.z_stat_map:
                         # contrast.z_stat_map.wasGeneratedBy(contrast.estimation)
                         self.bundle.wasGeneratedBy(contrast.z_stat_map.id, contrast.estimation.id)
-                        contrast.add_object(contrast.z_stat_map, nidm_version)
+                        self.add_object(contrast.z_stat_map, nidm_version)
 
                     # self.add_object(contrast)
 
@@ -262,44 +262,44 @@ class NIDMExporter():
                     # Excursion set
                     # inference.excursion_set.wasGeneratedBy(inference.inference_act)
                     self.bundle.wasGeneratedBy(inference.excursion_set.id, inference.inference_act.id)
-                    inference.add_object(inference.excursion_set, nidm_version)
+                    self.add_object(inference.excursion_set, nidm_version)
 
                     # Height threshold
-                    inference.add_object(inference.height_thresh, nidm_version)
+                    self.add_object(inference.height_thresh, nidm_version)
 
                     # Extent threshold
-                    inference.add_object(inference.extent_thresh, nidm_version)
+                    self.add_object(inference.extent_thresh, nidm_version)
 
                     # Display Mask (potentially more than 1)
                     if inference.disp_mask:
                         for mask in inference.disp_mask:
                             # inference.inference_act.used(mask)
                             self.bundle.used(inference.inference_act.id, mask.id)
-                            inference.add_object(mask, nidm_version)
+                            self.add_object(mask, nidm_version)
 
                     # Search Space
                     self.bundle.wasGeneratedBy(inference.search_space.id, inference.inference_act.id)
                     # inference.search_space.wasGeneratedBy(inference.inference_act)
-                    inference.add_object(inference.search_space, nidm_version)
+                    self.add_object(inference.search_space, nidm_version)
 
                     # Peak Definition
                     if inference.peak_criteria:
                         # inference.inference_act.used(inference.peak_criteria)
                         self.bundle.used(inference.inference_act.id, inference.peak_criteria.id)
-                        inference.add_object(inference.peak_criteria, nidm_version)
+                        self.add_object(inference.peak_criteria, nidm_version)
 
                     # Cluster Definition
                     if inference.cluster_criteria:
                         # inference.inference_act.used(inference.cluster_criteria)
                         self.bundle.used(inference.inference_act.id, inference.cluster_criteria.id)
-                        inference.add_object(inference.cluster_criteria, nidm_version)
+                        self.add_object(inference.cluster_criteria, nidm_version)
 
                     if inference.clusters:
                         # Clusters and peaks
                         for cluster in inference.clusters:
                             # cluster.wasDerivedFrom(inference.excursion_set)
                             self.bundle.wasDerivedFrom(cluster.id, inference.excursion_set.id)
-                            inference.add_object(cluster, nidm_version)
+                            self.add_object(cluster, nidm_version)
 
                     # Inference activity
                     # inference.inference_act.wasAssociatedWith(inference.software_id)
@@ -307,7 +307,7 @@ class NIDMExporter():
                     self.bundle.used(inference.inference_act.id, inference.height_thresh.id)
                     # inference.inference_act.used(inference.extent_thresh)
                     self.bundle.used(inference.inference_act.id, inference.extent_thresh.id)
-                    inference.add_object(inference.inference_act, nidm_version)
+                    self.add_object(inference.inference_act, nidm_version)
 
             # Write-out prov file
             self.save_prov_to_files()
