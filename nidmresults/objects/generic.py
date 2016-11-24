@@ -89,7 +89,21 @@ class NIDMObject(object):
             raise Exception('Unrecognised prov relation')
 
     def add_attributes(self, attributes):
-        self.attributes = attributes
+        if hasattr(self, 'attributes'):
+            if isinstance(attributes, tuple):
+                attributes = list(attributes)
+            if isinstance(self.attributes, tuple):
+                self.attributes = list(self.attributes)
+
+            if isinstance(attributes, dict):
+                attributes = [[k, v] for k, v in attributes.items()]
+            if isinstance(self.attributes, dict):
+                self.attributes = [[k, v] for k, v in self.attributes.items()]
+
+            self.attributes = attributes + self.attributes
+        else:
+            self.attributes = attributes
+
         # if self.prov_type == PROV['Activity']:
             # self.p.activity(self.id, other_attributes=attributes)
         # elif self.prov_type == PROV['Entity']:
