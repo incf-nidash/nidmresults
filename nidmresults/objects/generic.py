@@ -15,6 +15,8 @@ import shutil
 import hashlib
 import uuid
 import json
+from prov.model import Literal
+from prov.constants import XSD_STRING
 
 
 class NIDMObject(object):
@@ -351,7 +353,7 @@ class NeuroimagingSoftware(NIDMObject):
         self.add_attributes((
             (PROV['type'], self.type),
             (PROV['type'], PROV['SoftwareAgent']),
-            (PROV['label'], self.name),
+            (PROV['label'], Literal(self.name, datatype=XSD_STRING)),
             (NIDM_SOFTWARE_VERSION, self.version))
         )
 

@@ -168,6 +168,7 @@ class Person(NIDMObject):
         """
         self.add_attributes((
             (PROV['type'], self.prov_type),
+            (PROV['type'], self.type),
             (PROV['label'], self.label)))
 
         

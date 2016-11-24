@@ -12,6 +12,8 @@ from nidmresults.objects.generic import *
 import uuid
 from math import erf, sqrt
 import rdflib
+from prov.model import Literal
+from prov.constants import XSD_FLOAT
 
 
 class Inference(object):
@@ -428,7 +430,7 @@ class Cluster(NIDMObject):
             (PROV['label'], "%s %04d" % (cluster_naming, self.num)),
             (NIDM_CLUSTER_LABEL_ID, self.num),
             (NIDM_CLUSTER_SIZE_IN_VOXELS, self.size),
-            (NIDM_P_VALUE_FWER, self.pFWER)))
+            (NIDM_P_VALUE_FWER, Literal(self.pFWER, datatype=XSD_FLOAT))))
 
         
 
@@ -681,6 +683,7 @@ class Coordinate(NIDMObject):
         # duplicate prov:type attribute
         atts = (  # (PROV['type'],PROV['Location']),
             (PROV['type'], NIDM_COORDINATE),
+            (PROV['type'], PROV['Location']),            
             (PROV['label'], self.label),
             (NIDM_COORDINATE_VECTOR_IN_VOXELS, json.dumps(self.coord_vector))
             )
@@ -744,8 +747,10 @@ class Peak(NIDMObject):
         self.add_attributes([
             (PROV['type'], self.type),
             (PROV['label'], self.label),
-            (NIDM_EQUIVALENT_ZSTATISTIC, self.equiv_z),
-            (NIDM_P_VALUE_UNCORRECTED, self.p_unc),
+            (NIDM_EQUIVALENT_ZSTATISTIC,
+                Literal(self.equiv_z, datatype=XSD_FLOAT)),
+            (NIDM_P_VALUE_UNCORRECTED,
+                Literal(self.p_unc, datatype=XSD_FLOAT)),
             (PROV['location'], self.coordinate.id)])
 
         

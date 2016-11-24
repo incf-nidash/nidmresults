@@ -151,7 +151,7 @@ class NIDMExporter():
                 self.add_object(model_fitting.design_matrix.image)
 
                 if model_fitting.design_matrix.image.file is not None:
-                    self.add_object(model_fitting.design_matrix.image)
+                    self.add_object(model_fitting.design_matrix.image.file)
 
                 if model_fitting.design_matrix.hrf_model is not None:
                     # drift model
@@ -257,6 +257,7 @@ class NIDMExporter():
                     if isinstance(contrast.stderr_or_expl_mean_sq_map, ContrastStdErrMap) and contrast.stderr_or_expl_mean_sq_map.is_variance:
                         self.add_object(contrast.stderr_or_expl_mean_sq_map.contrast_var)
                         self.add_object(contrast.stderr_or_expl_mean_sq_map.var_coord_space)
+                        self.add_object(contrast.stderr_or_expl_mean_sq_map.contrast_var.file)
                         self.bundle.wasDerivedFrom(contrast.stderr_or_expl_mean_sq_map.id, contrast.stderr_or_expl_mean_sq_map.contrast_var.id)
                     self.add_object(contrast.stderr_or_expl_mean_sq_map.file)
 
@@ -300,6 +301,8 @@ class NIDMExporter():
                     self.add_object(inference.excursion_set)
                     self.add_object(inference.excursion_set.coord_space)
                     self.add_object(inference.excursion_set.visu)
+                    if inference.excursion_set.visu.file is not None:
+                        self.add_object(inference.excursion_set.visu.file)
                     # Copy "Excursion set map" file in export directory
                     self.add_object(inference.excursion_set.file)
                     if inference.excursion_set.clust_map is not None:
@@ -446,7 +449,7 @@ class NIDMExporter():
             self.exporter = self._get_exporter()
             self.exporter.export(self.version)
             # self.doc.update(self.exporter.p)
-            self.doc.entity(self.exporter.id, other_attributes=self.exporter.attributes)
+            self.doc.agent(self.exporter.id, other_attributes=self.exporter.attributes)
 
             self.doc.wasAssociatedWith(self.export.id, self.exporter.id)
 
