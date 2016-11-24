@@ -11,6 +11,7 @@ from nidmresults.objects.constants import *
 from nidmresults.objects.generic import *
 import uuid
 from math import erf, sqrt
+import rdflib
 
 
 class Inference(NIDMObject):
