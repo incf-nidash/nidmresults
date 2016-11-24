@@ -157,8 +157,8 @@ class NIDMExporter():
                     # drift model
                     self.add_object(model_fitting.design_matrix.drift_model)
 
-                if nidm_version['major'] > 1 or \
-                        (nidm_version['major'] == 1 and nidm_version['minor'] >= 3):
+                if self.version['major'] > 1 or \
+                        (self.version['major'] == 1 and self.version['minor'] >= 3):
                     # Machine
                     # model_fitting.data.wasAttributedTo(model_fitting.machine)
                     self.bundle.wasAttributedTo(model_fitting.data.id, model_fitting.machine.id)
