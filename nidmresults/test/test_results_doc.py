@@ -229,9 +229,9 @@ class TestResultDataModel(object):
                 close_float = False
                 if hasattr(o, 'datatype') and o.datatype == XSD['string']:
                     for g2_term, g2_o in graph2.subject_objects(p):
-                        same_json_array, close_float = \
+                        same_json_array, close_float, same_str = \
                             self._same_json_or_float(o, g2_o)
-                        if same_json_array or close_float:
+                        if same_json_array or close_float or same_str:
                             g2_match[g2_term] += 1
                             logging.debug("Match found with " +
                                           str(graph1.qname(g2_term)))
@@ -361,15 +361,17 @@ class TestResultDataModel(object):
                     if isinstance(o, rdflib.term.Literal):
                         same_json_array = False
                         close_float = False
+                        same_str = False
                         for o_gt in gt_m_other.objects(s,  p):
-                            same_json_array, close_float = \
+                            same_json_array, close_float, same_str = \
                                 self._same_json_or_float(o, o_gt)
 
-                            if same_json_array or close_float:
+                            if same_json_array or close_float or same_str:
                                 # We found a match
                                 break
 
-                        if not same_json_array and not close_float:
+                        if not same_json_array and not close_float and \
+                                not same_str:
                             # Alternatives are o such as (s,p,o) in gt and
                             # (s,p,o) *not* in other
                             exc_wrong_literal += \
@@ -473,7 +475,8 @@ class TestResultDataModel(object):
                                 # We found a match
                                 break
 
-                        if not same_json_array and not close_float:
+                        if not same_json_array and not close_float and \
+                                not same_str:
                             exc_wrong_literal += \
                                 "\nWrong o:\t %s should be %s?" \
                                 "\n\t\t ... in '%s %s %s'" \
@@ -574,7 +577,13 @@ class TestResultDataModel(object):
                     close_float = np.isclose(
                         o.value, o_other.value)
 
-        return (same_json_array, close_float)
+        same_str = False
+        if o.datatype in [XSD.string, None]:
+            if o_other.datatype in [XSD.string, None]:
+                if o.value == o_other.value:
+                    same_str = True
+
+        return (same_json_array, close_float, same_str)
 
 
 class ExampleGraph(object):
