@@ -203,14 +203,46 @@ class NIDMExporter():
             for (model_fitting_id, pe_ids), contrasts in list(self.contrasts.items()):
                 model_fitting = self._get_model_fitting(model_fitting_id)
                 for contrast in contrasts:
-                    contrast.estimation.used(model_fitting.rms_map)
-                    contrast.estimation.used(model_fitting.mask_map)
-                    contrast.estimation.wasAssociatedWith(self.software)
+                    # contrast.estimation.used(model_fitting.rms_map)
+                    self.bundle.used(contrast.estimation.id, model_fitting.rms_map.id)
+                    # contrast.estimation.used(model_fitting.mask_map)
+                    self.bundle.used(contrast.estimation.id, model_fitting.mask_map.id)
+                    # contrast.estimation.wasAssociatedWith(self.software)
+                    self.bundle.wasAssociatedWith(contrast.estimation.id, model_fitting.software.id)
 
                     for pe_id in pe_ids:
-                        contrast.estimation.used(pe_id)
+                        # contrast.estimation.used(pe_id)
+                        self.bundle.used(contrast.estimation.id, pe_id)
 
-                    self.add_object(contrast)
+                    # Create estimation activity
+                    contrast.add_object(contrast.estimation, nidm_version)
+
+                    # Create contrast weights
+                    contrast.add_object(contrast.weights, nidm_version)
+
+                    if contrast.contrast_map is not None:
+                        # Create contrast Map
+                        # contrast.contrast_map.wasGeneratedBy(contrast.estimation)
+                        self.bundle.wasGeneratedBy(contrast.contrast_map.id, contrast.estimation.id)
+                        contrast.add_object(contrast.contrast_map, nidm_version)
+
+                    # Create Std Err. Map (T-tests) or Explained Mean Sq. Map (F-tests)
+                    # contrast.stderr_or_expl_mean_sq_map.wasGeneratedBy(contrast.estimation)
+                    self.bundle.wasGeneratedBy(contrast.stderr_or_expl_mean_sq_map.id, contrast.estimation.id)
+                    contrast.add_object(contrast.stderr_or_expl_mean_sq_map, nidm_version)
+
+                    # Create Statistic Map
+                    # contrast.stat_map.wasGeneratedBy(contrast.estimation)
+                    self.bundle.wasGeneratedBy(contrast.stat_map.id, contrast.estimation.id)
+                    contrast.add_object(contrast.stat_map, nidm_version)
+
+                    # Create Z Statistic Map
+                    if contrast.z_stat_map:
+                        # contrast.z_stat_map.wasGeneratedBy(contrast.estimation)
+                        self.bundle.wasGeneratedBy(contrast.z_stat_map.id, contrast.estimation.id)
+                        contrast.add_object(contrast.z_stat_map, nidm_version)
+
+                    # self.add_object(contrast)
 
             # Add inference steps
             for contrast_id, inferences in list(self.inferences.items()):

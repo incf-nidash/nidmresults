@@ -15,7 +15,7 @@ from nidmresults.objects.generic import *
 import uuid
 
 
-class Contrast(NIDMObject):
+class Contrast(object):
 
     """
     Object representing a Contrast Estimation step: including a
