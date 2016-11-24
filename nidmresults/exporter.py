@@ -121,7 +121,13 @@ class NIDMExporter():
         """
         nidm_object.export(self.version)
         # ProvDocument: add object to the bundle
-        self.bundle.update(nidm_object.p)
+        if nidm_object.prov_type == PROV['Activity']:
+            self.bundle.activity(nidm_object.id, other_attributes=nidm_object.attributes)
+        elif nidm_object.prov_type == PROV['Entity']:
+            self.bundle.entity(nidm_object.id, other_attributes=nidm_object.attributes)
+        elif nidm_object.prov_type == PROV['Agent']:
+            self.bundle.agent(nidm_object.id, other_attributes=nidm_object.attributes)
+        # self.bundle.update(nidm_object.p)
 
     def export(self):
         """
@@ -137,8 +143,61 @@ class NIDMExporter():
 
             # Add model fitting steps
             for model_fitting in list(self.model_fittings.values()):
-                model_fitting.activity.wasAssociatedWith(self.software)
-                self.add_object(model_fitting)
+                # Design Matrix
+                # model_fitting.activity.used(model_fitting.design_matrix)
+                self.bundle.used(model_fitting.activity.id, model_fitting.design_matrix.id)
+                model_fitting.add_object(model_fitting.design_matrix, nidm_version)
+
+                if nidm_version['major'] > 1 or \
+                        (nidm_version['major'] == 1 and nidm_version['minor'] >= 3):
+                    # Machine
+                    # model_fitting.data.wasAttributedTo(model_fitting.machine)
+                    self.bundle.wasAttributedTo(model_fitting.data.id, model_fitting.machine.id)
+                    model_fitting.add_object(model_fitting.machine, nidm_version)
+
+                    # Imaged subject or group(s)
+                    for sub in model_fitting.subjects:
+                        model_fitting.add_object(sub, nidm_version)
+                        # model_fitting.data.wasAttributedTo(sub)
+                        self.bundle.wasAttributedTo(model_fitting.data.id, model_fitting.sub.id)
+
+                # Data
+                # model_fitting.activity.used(model_fitting.data)
+                self.bundle.used(model_fitting.activity.id, model_fitting.data.id)
+                model_fitting.add_object(model_fitting.data, nidm_version)
+
+                # Error Model
+                # model_fitting.activity.used(model_fitting.error_model)
+                self.bundle.used(model_fitting.activity.id, model_fitting.error_model.id)
+                model_fitting.add_object(model_fitting.error_model, nidm_version)
+
+                # Parameter Estimate Maps
+                for param_estimate in model_fitting.param_estimates:
+                    # param_estimate.wasGeneratedBy(model_fitting.activity)
+                    self.bundle.wasGeneratedBy(model_fitting.param_estimate.id, model_fitting.activity.id)
+                    model_fitting.add_object(param_estimate, nidm_version)
+
+                # Residual Mean Squares Map
+                # model_fitting.rms_map.wasGeneratedBy(model_fitting.activity)
+                self.bundle.wasGeneratedBy(model_fitting.rms_map.id, model_fitting.activity.id)
+                model_fitting.add_object(model_fitting.rms_map, nidm_version)
+
+                # Mask
+                # model_fitting.mask_map.wasGeneratedBy(model_fitting.activity)
+                self.bundle.wasGeneratedBy(model_fitting.mask_map.id, model_fitting.activity.id)
+                model_fitting.add_object(model_fitting.mask_map, nidm_version)
+
+                # Grand Mean map
+                # model_fitting.grand_mean_map.wasGeneratedBy(model_fitting.activity)
+                self.bundle.wasGeneratedBy(model_fitting.grand_mean_map.id, model_fitting.activity.id)
+                model_fitting.add_object(model_fitting.grand_mean_map, nidm_version)
+
+                # Model Parameters Estimation activity
+                model_fitting.add_object(model_fitting.activity, nidm_version)
+                self.bundle.wasAssociatedWith(model_fitting.activity.id, model_fitting.software.id)
+                # model_fitting.activity.wasAssociatedWith(self.software)
+                
+                # self.add_object(model_fitting)
 
             # Add contrast estimation steps
             for (model_fitting_id, pe_ids), contrasts in list(self.contrasts.items()):

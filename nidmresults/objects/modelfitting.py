@@ -19,7 +19,7 @@ import json
 import warnings
 
 
-class ModelFitting(NIDMObject):
+class ModelFitting(object):
 
     """
     Object representing a Model fitting step: including a
@@ -29,7 +29,7 @@ class ModelFitting(NIDMObject):
     def __init__(self, activity, design_matrix, data, error_model,
                  param_estimates, rms_map, mask_map, grand_mean_map,
                  machine, subjects):
-        super(ModelFitting, self).__init__()
+        # super(ModelFitting, self).__init__()
         self.activity = activity
         self.design_matrix = design_matrix
         self.data = data
@@ -41,54 +41,54 @@ class ModelFitting(NIDMObject):
         self.machine = machine
         self.subjects = subjects
 
-    def export(self, nidm_version):
-        """
-        Create prov entities and activities.
-        """
-        # Design Matrix
-        self.activity.used(self.design_matrix)
-        self.add_object(self.design_matrix, nidm_version)
+    # def export(self, nidm_version):
+    #     """
+    #     Create prov entities and activities.
+    #     """
+    #     # Design Matrix
+    #     self.activity.used(self.design_matrix)
+    #     self.add_object(self.design_matrix, nidm_version)
 
-        if nidm_version['major'] > 1 or \
-                (nidm_version['major'] == 1 and nidm_version['minor'] >= 3):
-            # Machine
-            self.data.wasAttributedTo(self.machine)
-            self.add_object(self.machine, nidm_version)
+    #     if nidm_version['major'] > 1 or \
+    #             (nidm_version['major'] == 1 and nidm_version['minor'] >= 3):
+    #         # Machine
+    #         self.data.wasAttributedTo(self.machine)
+    #         self.add_object(self.machine, nidm_version)
 
-            # Imaged subject or group(s)
-            for sub in self.subjects:
-                self.add_object(sub, nidm_version)
-                self.data.wasAttributedTo(sub)
+    #         # Imaged subject or group(s)
+    #         for sub in self.subjects:
+    #             self.add_object(sub, nidm_version)
+    #             self.data.wasAttributedTo(sub)
 
-        # Data
-        self.activity.used(self.data)
-        self.add_object(self.data, nidm_version)
+    #     # Data
+    #     self.activity.used(self.data)
+    #     self.add_object(self.data, nidm_version)
 
-        # Error Model
-        self.activity.used(self.error_model)
-        self.add_object(self.error_model, nidm_version)
+    #     # Error Model
+    #     self.activity.used(self.error_model)
+    #     self.add_object(self.error_model, nidm_version)
 
-        # Parameter Estimate Maps
-        for param_estimate in self.param_estimates:
-            param_estimate.wasGeneratedBy(self.activity)
-            self.add_object(param_estimate, nidm_version)
+    #     # Parameter Estimate Maps
+    #     for param_estimate in self.param_estimates:
+    #         param_estimate.wasGeneratedBy(self.activity)
+    #         self.add_object(param_estimate, nidm_version)
 
-        # Residual Mean Squares Map
-        self.rms_map.wasGeneratedBy(self.activity)
-        self.add_object(self.rms_map, nidm_version)
+    #     # Residual Mean Squares Map
+    #     self.rms_map.wasGeneratedBy(self.activity)
+    #     self.add_object(self.rms_map, nidm_version)
 
-        # Mask
-        self.mask_map.wasGeneratedBy(self.activity)
-        self.add_object(self.mask_map, nidm_version)
+    #     # Mask
+    #     self.mask_map.wasGeneratedBy(self.activity)
+    #     self.add_object(self.mask_map, nidm_version)
 
-        # Grand Mean map
-        self.grand_mean_map.wasGeneratedBy(self.activity)
-        self.add_object(self.grand_mean_map, nidm_version)
+    #     # Grand Mean map
+    #     self.grand_mean_map.wasGeneratedBy(self.activity)
+    #     self.add_object(self.grand_mean_map, nidm_version)
 
-        # Model Parameters Estimation activity
-        self.add_object(self.activity, nidm_version)
+    #     # Model Parameters Estimation activity
+    #     self.add_object(self.activity, nidm_version)
 
-        return self.p
+    #     return self.p
 
 
 class ImagingInstrument(NIDMObject):

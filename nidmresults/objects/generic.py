@@ -26,7 +26,7 @@ class NIDMObject(object):
 
     def __init__(self, export_dir=None, oid=None):
         self.export_dir = export_dir
-        self.p = ProvBundle()
+        # self.p = ProvBundle()
 
         if oid is None:
             self.id = NIIRI[str(uuid.uuid4())]
@@ -89,12 +89,13 @@ class NIDMObject(object):
             raise Exception('Unrecognised prov relation')
 
     def add_attributes(self, attributes):
-        if self.prov_type == PROV['Activity']:
-            self.p.activity(self.id, other_attributes=attributes)
-        elif self.prov_type == PROV['Entity']:
-            self.p.entity(self.id, other_attributes=attributes)
-        elif self.prov_type == PROV['Agent']:
-            self.p.agent(self.id, other_attributes=attributes)
+        self.attributes = attributes
+        # if self.prov_type == PROV['Activity']:
+            # self.p.activity(self.id, other_attributes=attributes)
+        # elif self.prov_type == PROV['Entity']:
+            # self.p.entity(self.id, other_attributes=attributes)
+        # elif self.prov_type == PROV['Agent']:
+            # self.p.agent(self.id, other_attributes=attributes)
 
 
 # class NIDMBundle(NIDMObject):
