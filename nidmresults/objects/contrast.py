@@ -37,35 +37,36 @@ class Contrast(object):
         self.stat_map = stat_map
         self.z_stat_map = z_stat_map
 
-    def export(self, nidm_version):
-        """
-        Create prov entities and activities.
-        """
-        # Create estimation activity
-        self.add_object(self.estimation, nidm_version)
+    # def export(self, nidm_version):
+    #     """
+    #     Create prov entities and activities.
+    #     """
+    #     # Create estimation activity
+    #     self.add_object(self.estimation, nidm_version)
 
-        # Create contrast weights
-        self.add_object(self.weights, nidm_version)
+    #     # Create contrast weights
+    #     self.add_object(self.weights, nidm_version)
 
-        if self.contrast_map is not None:
-            # Create contrast Map
-            self.contrast_map.wasGeneratedBy(self.estimation)
-            self.add_object(self.contrast_map, nidm_version)
+    #     if self.contrast_map is not None:
+    #         # Create contrast Map
+    #         self.contrast_map.wasGeneratedBy(self.estimation)
+    #         self.add_object(self.contrast_map, nidm_version)
 
-        # Create Std Err. Map (T-tests) or Explained Mean Sq. Map (F-tests)
-        self.stderr_or_expl_mean_sq_map.wasGeneratedBy(self.estimation)
-        self.add_object(self.stderr_or_expl_mean_sq_map, nidm_version)
+    #     # Create Std Err. Map (T-tests) or Explained Mean Sq. Map (F-tests)
+    #     self.stderr_or_expl_mean_sq_map.wasGeneratedBy(self.estimation)
+    #     self.add_object(self.stderr_or_expl_mean_sq_map, nidm_version)
 
-        # Create Statistic Map
-        self.stat_map.wasGeneratedBy(self.estimation)
-        self.add_object(self.stat_map, nidm_version)
+    #     # Create Statistic Map
+    #     self.stat_map.wasGeneratedBy(self.estimation)
+    #     self.add_object(self.stat_map, nidm_version)
 
-        # Create Z Statistic Map
-        if self.z_stat_map:
-            self.z_stat_map.wasGeneratedBy(self.estimation)
-            self.add_object(self.z_stat_map, nidm_version)
+    #     # Create Z Statistic Map
+    #     if self.z_stat_map:
+    #         self.z_stat_map.wasGeneratedBy(self.estimation)
+    #         self.add_object(self.z_stat_map, nidm_version)
 
         return self.p
+    #     
 
 
 class ContrastWeights(NIDMObject):
