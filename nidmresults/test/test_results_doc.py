@@ -468,10 +468,10 @@ class TestResultDataModel(object):
                         close_float = False
 
                         for o_gt in gt_graph.objects(s,  p):
-                            same_json_array, close_float = \
+                            same_json_array, close_float, same_str = \
                                 self._same_json_or_float(o, o_gt)
 
-                            if same_json_array or close_float:
+                            if same_json_array or close_float or same_str:
                                 # We found a match
                                 break
 
