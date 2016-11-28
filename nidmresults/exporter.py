@@ -472,13 +472,20 @@ class NIDMExporter():
 
     def use_prefixes(self, ttl):
         prefix_file = os.path.join(os.path.dirname(__file__), 'prefixes.csv')
+        context = dict()
         with open(prefix_file, encoding="ascii") as csvfile:
             reader = csv.reader(csvfile)
+            next(reader, None)  # skip the headers
             for alphanum_id, prefix, uri in reader:
                 if alphanum_id in ttl:
+                    context[prefix] = uri
                     ttl = "@prefix " + prefix + ": <" + uri + "> .\n" + ttl
                     ttl = ttl.replace(alphanum_id, prefix + ":")
-        return ttl
+                if uri in ttl:
+                    context[prefix] = uri
+                    ttl = "@prefix " + prefix + ": <" + uri + "> .\n" + ttl
+                    ttl = ttl.replace(alphanum_id, prefix + ":")
+        return (ttl, context)
 
     def save_prov_to_files(self, showattributes=False):
         """
@@ -493,9 +500,25 @@ class NIDMExporter():
 
         ttl_file = os.path.join(self.export_dir, 'nidm.ttl')
         ttl_txt = self.doc.serialize(format='rdf', rdf_format='turtle')
+        ttl_txt, json_context = self.use_prefixes(ttl_txt)
 
-        jsonld_file = os.path.join(self.export_dir, 'nidm.jsonld')
-        jsonld_txt = self.doc.serialize(format='rdf', rdf_format='json-ld')
+        # Add namespaces to json-ld context
+        for namespace in self.doc._namespaces.get_registered_namespaces():
+            json_context[namespace._prefix] = namespace._uri
+        for namespace in list(self.doc._namespaces._default_namespaces.values()):
+            json_context[namespace._prefix] = namespace._uri
+        json_context["xsd"] = "http://www.w3.org/2000/01/rdf-schema#"
+
+        # Work-around to issue with INF value in rdflib (reported in
+        # https://github.com/RDFLib/rdflib/pull/655)
+        ttl_txt = ttl_txt.replace(' inf ', ' "INF"^^xsd:float ')
+        with open(ttl_file, 'w') as ttl_fid:
+            ttl_fid.write(ttl_txt)
+
+        # print(json_context)
+        jsonld_file = os.path.join(self.export_dir, 'nidm.json')
+        jsonld_txt = self.doc.serialize(format='rdf', rdf_format='json-ld',
+            context=json_context)
         with open(jsonld_file, 'w') as jsonld_fid:
             jsonld_fid.write(jsonld_txt)
 
@@ -509,12 +532,6 @@ class NIDMExporter():
         with open(provn_file, 'w') as provn_fid:
             provn_fid.write(provn_txt)
 
-        ttl_txt = self.use_prefixes(ttl_txt)
-        # Work-around to issue with INF value in rdflib (reported in
-        # https://github.com/RDFLib/rdflib/pull/655)
-        ttl_txt = ttl_txt.replace(' inf ', ' "INF"^^xsd:float ')
-        with open(ttl_file, 'w') as ttl_fid:
-            ttl_fid.write(ttl_txt)
 
         # Post-processing
         if not self.zipped:
