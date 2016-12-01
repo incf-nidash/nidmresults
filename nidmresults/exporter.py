@@ -21,6 +21,7 @@ import uuid
 import csv
 import tempfile
 import zipfile
+from builtins import input
 
 
 class NIDMExporter():
@@ -47,7 +48,7 @@ class NIDMExporter():
         # it
         if os.path.exists(out_dir):
             msg = out_dir+" already exists, overwrite?"
-            if not raw_input("%s (y/N) " % msg).lower() == 'y':
+            if not input("%s (y/N) " % msg).lower() == 'y':
                 quit("Bye.")
             if os.path.isdir(out_dir):
                 shutil.rmtree(out_dir)
