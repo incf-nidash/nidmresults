@@ -397,12 +397,20 @@ class ParameterEstimateMap(NIDMObject):
     """
 
     def __init__(self, pe_file, pe_num, coord_space, filename=None, sha=None,
-                 label=None, suffix='', model_param_estimation=None, oid=None):
+                 label=None, suffix='', model_param_estimation=None, oid=None,
+                 export_dir=None):
         super(ParameterEstimateMap, self).__init__(oid=oid)
         # Column index in the corresponding design matrix
         self.num = pe_num
         self.coord_space = coord_space
-        self.file = NIDMFile(self.id, pe_file, new_filename=filename, sha=sha)
+        # Parameter Estimate Map is going to be copied over to export_dir
+        if export_dir is not None:
+            filename = 'ParameterEstimate' + suffix + '.nii.gz'
+        else:
+            filename = location
+
+        self.file = NIDMFile(self.id, pe_file, new_filename=filename, sha=sha,
+                             export_dir=export_dir)
         self.type = NIDM_PARAMETER_ESTIMATE_MAP
         self.prov_type = PROV['Entity']
         if label is None:
