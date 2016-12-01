@@ -114,7 +114,8 @@ class NIDMExporter():
             raise
 
     def cleanup(self,):
-        shutil.rmtree(self.export_dir)
+        if os.path.isdir(self.export_dir):
+            shutil.rmtree(self.export_dir)
 
     def add_object(self, nidm_object):
         """
