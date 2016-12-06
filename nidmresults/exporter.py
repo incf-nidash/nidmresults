@@ -483,7 +483,9 @@ class NIDMExporter():
                     context[prefix] = uri
                     ttl = "@prefix " + prefix + ": <" + uri + "> .\n" + ttl
                     ttl = ttl.replace(alphanum_id, prefix + ":")
-                if uri in ttl:
+                    if uri in ttl:
+                        ttl = ttl.replace(alphanum_id, prefix + ":")
+                elif uri in ttl:
                     context[prefix] = uri
                     ttl = "@prefix " + prefix + ": <" + uri + "> .\n" + ttl
                     ttl = ttl.replace(alphanum_id, prefix + ":")
