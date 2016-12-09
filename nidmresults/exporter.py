@@ -411,6 +411,11 @@ class NIDMExporter():
         self.doc.add_namespace(NIIRI)
         self.doc.add_namespace(CRYPTO)
         self.doc.add_namespace(DCT)
+        self.doc.add_namespace(DC)
+        self.doc.add_namespace(NFO)
+        self.doc.add_namespace(OBO)
+        self.doc.add_namespace(SCR)
+        self.doc.add_namespace(NIF)
 
     def _create_bundle(self, version):
         """
