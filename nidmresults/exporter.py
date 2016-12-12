@@ -536,10 +536,10 @@ class NIDMExporter():
         # with open(provjsonld_file, 'w') as provjsonld_fid:
         #     provjsonld_fid.write(provjsonld_txt)
 
-        provn_file = os.path.join(self.export_dir, 'nidm.provn')
-        provn_txt = self.doc.serialize(format='provn')
-        with open(provn_file, 'w') as provn_fid:
-            provn_fid.write(provn_txt)
+        # provn_file = os.path.join(self.export_dir, 'nidm.provn')
+        # provn_txt = self.doc.serialize(format='provn')
+        # with open(provn_file, 'w') as provn_fid:
+        #     provn_fid.write(provn_txt)
 
 
         # Post-processing
