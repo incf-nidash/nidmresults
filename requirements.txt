@@ -1,5 +1,6 @@
 rdflib>=4.2.0
-prov>=1.0.0
+rdflib-jsonld
+prov>=1.5.0
 nibabel
 numpy
 future
