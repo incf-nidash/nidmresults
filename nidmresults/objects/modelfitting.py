@@ -29,7 +29,6 @@ class ModelFitting(object):
     def __init__(self, activity, design_matrix, data, error_model,
                  param_estimates, rms_map, mask_map, grand_mean_map,
                  machine, subjects):
-        # super(ModelFitting, self).__init__()
         self.activity = activity
         self.design_matrix = design_matrix
         self.data = data
@@ -40,55 +39,6 @@ class ModelFitting(object):
         self.grand_mean_map = grand_mean_map
         self.machine = machine
         self.subjects = subjects
-
-    # def export(self, nidm_version):
-    #     """
-    #     Create prov entities and activities.
-    #     """
-    #     # Design Matrix
-    #     self.activity.used(self.design_matrix)
-    #     self.add_object(self.design_matrix, nidm_version)
-
-    #     if nidm_version['major'] > 1 or \
-    #             (nidm_version['major'] == 1 and nidm_version['minor'] >= 3):
-    #         # Machine
-    #         self.data.wasAttributedTo(self.machine)
-    #         self.add_object(self.machine, nidm_version)
-
-    #         # Imaged subject or group(s)
-    #         for sub in self.subjects:
-    #             self.add_object(sub, nidm_version)
-    #             self.data.wasAttributedTo(sub)
-
-    #     # Data
-    #     self.activity.used(self.data)
-    #     self.add_object(self.data, nidm_version)
-
-    #     # Error Model
-    #     self.activity.used(self.error_model)
-    #     self.add_object(self.error_model, nidm_version)
-
-    #     # Parameter Estimate Maps
-    #     for param_estimate in self.param_estimates:
-    #         param_estimate.wasGeneratedBy(self.activity)
-    #         self.add_object(param_estimate, nidm_version)
-
-    #     # Residual Mean Squares Map
-    #     self.rms_map.wasGeneratedBy(self.activity)
-    #     self.add_object(self.rms_map, nidm_version)
-
-    #     # Mask
-    #     self.mask_map.wasGeneratedBy(self.activity)
-    #     self.add_object(self.mask_map, nidm_version)
-
-    #     # Grand Mean map
-    #     self.grand_mean_map.wasGeneratedBy(self.activity)
-    #     self.add_object(self.grand_mean_map, nidm_version)
-
-    #     # Model Parameters Estimation activity
-    #     self.add_object(self.activity, nidm_version)
-
-    #     
 
 
 class ImagingInstrument(NIDMObject):
@@ -145,8 +95,6 @@ class Group(NIDMObject):
             (NIDM_NUMBER_OF_SUBJECTS, self.num_subjects),
             (PROV['label'], self.label)))
 
-        
-
 
 class Person(NIDMObject):
     """
@@ -169,8 +117,6 @@ class Person(NIDMObject):
             (PROV['type'], self.prov_type),
             (PROV['type'], self.type),
             (PROV['label'], self.label)))
-
-        
 
 
 class DesignMatrix(NIDMObject):
@@ -199,8 +145,6 @@ class DesignMatrix(NIDMObject):
         """
         Create prov entities and activities.
         """
-        # self.add_object(self.image, nidm_version)
-
         # Create cvs file containing design matrix
         np.savetxt(os.path.join(self.export_dir, self.csv_file),
                    np.asarray(self.matrix), delimiter=",")
@@ -229,13 +173,10 @@ class DesignMatrix(NIDMObject):
             # hrf model
             attributes.append((NIDM_HAS_HRF_BASIS, self.hrf_model))
             # drift model
-            # self.add_object(self.drift_model, nidm_version)
             attributes.append((NIDM_HAS_DRIFT_MODEL, self.drift_model.id))
 
         # Create "design matrix" entity
         self.add_attributes(attributes)
-
-        
 
 
 class DriftModel(NIDMObject):
@@ -265,8 +206,6 @@ class DriftModel(NIDMObject):
 
         # Create "drift model" entity
         self.add_attributes(attributes)
-
-        
 
 
 class Data(NIDMObject):
@@ -313,8 +252,6 @@ class Data(NIDMObject):
                 self.add_attributes(
                     [(NIDM_HAS_MRI_PROTOCOL, self.mri_protocol)])
 
-        
-
 
 class ErrorModel(NIDMObject):
 
@@ -354,8 +291,6 @@ class ErrorModel(NIDMObject):
         # Create "Error Model" entity
         self.add_attributes(atts)
 
-        
-
 
 class ModelParametersEstimation(NIDMObject):
 
@@ -385,8 +320,6 @@ class ModelParametersEstimation(NIDMObject):
             (PROV['type'], self.type),
             (NIDM_WITH_ESTIMATION_METHOD, self.estimation_method),
             (PROV['label'], self.label)))
-
-        
 
 
 class ParameterEstimateMap(NIDMObject):
@@ -423,16 +356,11 @@ class ParameterEstimateMap(NIDMObject):
         """
         Create prov entities and activities.
         """
-        # self.add_object(self.coord_space, nidm_version)
-        # self.add_object(self.file, nidm_version)
-
         # Parameter estimate entity
         self.add_attributes((
             (PROV['type'], self.type),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
             (PROV['label'], self.label)))
-
-        
 
 
 class ResidualMeanSquares(NIDMObject):
@@ -456,18 +384,10 @@ class ResidualMeanSquares(NIDMObject):
         """
         Create prov entities and activities.
         """
-        # Create coordinate space export
-        # self.add_object(self.coord_space, nidm_version)
-
-        # Create "residuals map" entity
-        # self.add_object(self.file, nidm_version)
-
         self.add_attributes((
             (PROV['type'], self.type,),
             (PROV['label'], "Residual Mean Squares Map"),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id)))
-
-        
 
 
 class MaskMap(NIDMObject):
@@ -491,20 +411,12 @@ class MaskMap(NIDMObject):
         """
         Create prov entities and activities.
         """
-        # # Create coordinate space export
-        # self.add_object(self.coord_space, nidm_version)
-
-        # # Create "Mask map" entity
-        # self.add_object(self.file, nidm_version)
-
         self.add_attributes((
             (PROV['type'], self.type,),
             (PROV['label'], "Mask"),
             (NIDM_IS_USER_DEFINED, self.user_defined),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id))
         )
-
-        
 
 
 class GrandMeanMap(NIDMObject):
@@ -528,12 +440,6 @@ class GrandMeanMap(NIDMObject):
         """
         Create prov entities and activities.
         """
-        # # Coordinate space entity
-        # self.add_object(self.coord_space, nidm_version)
-
-        # # Grand Mean Map entity
-        # self.add_object(self.file, nidm_version)
-
         grand_mean_file = self.file.path
         grand_mean_img = nib.load(grand_mean_file)
         grand_mean_data = grand_mean_img.get_data()
@@ -553,5 +459,3 @@ class GrandMeanMap(NIDMObject):
             (NIDM_MASKED_MEDIAN, masked_median),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id))
         )
-
-        
