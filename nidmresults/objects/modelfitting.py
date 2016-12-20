@@ -339,7 +339,7 @@ class ParameterEstimateMap(NIDMObject):
         if export_dir is not None:
             filename = 'ParameterEstimate' + suffix + '.nii.gz'
         else:
-            filename = location
+            filename = filename
 
         self.file = NIDMFile(self.id, pe_file, new_filename=filename, sha=sha,
                              export_dir=export_dir)
