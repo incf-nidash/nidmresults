@@ -216,12 +216,15 @@ class TestResultDataModel(object):
                 # could cause issues later on? and condition removed altogether
                 # if activity or \
                 #        (isinstance(o, rdflib.term.Literal) or p == RDF.type):
-                for g2_term in graph2.subjects(p, o):
-                    # We don't want to match agents to activities
-                    if g2_term in g2_match:
-                        g2_match[g2_term] += 1
-                        logging.debug("Match found with " +
-                                      str(graph1.qname(g2_term)))
+                # if graph2.subjects(p, o):
+                for g2_term in \
+                        (x for x in graph2.subjects(p, o) if x in g2_match):
+                    g2_match[g2_term] += 1
+                    logging.debug(
+                        "Match found with " + str(graph1.qname(g2_term)))
+                # else:
+                # print(sum(g2_match.values()))
+                    # logging.debug("NO --- Match found")
 
                 # If o is a string that is likely to be json check if we have
                 # an equivalent json string
@@ -346,8 +349,8 @@ class TestResultDataModel(object):
                             exc_added += "\nAdded s:\t'%s' should be removed" \
                                 % (self.get_readable_name(owl, other_graph, s))
                             exlude.append(s)
-                # If predicate p is *not* found in gt_graph
-                elif (None,  p, None) not in gt_graph:
+                # If subject, predicate s, p is *not* found in gt_graph
+                elif (s,  p, None) not in gt_graph:
                     if not p in exlude:
                         exc_added += "\nAdded p:\t'%s' should be removed" \
                             % (self.get_readable_name(owl, other_graph, p))
@@ -357,7 +360,7 @@ class TestResultDataModel(object):
                 # is correct and the other wrong)
                 # Alternatives are o_gt such as (s,p,o_gt) in gt and
                 # (s,p,o_gt) *not* in other
-                elif ((s,  p, None) in gt_m_other):
+                elif ((s,  p, None) in gt_graph):
                     if isinstance(o, rdflib.term.Literal):
                         same_json_array = False
                         close_float = False
@@ -462,7 +465,7 @@ class TestResultDataModel(object):
 
             # If subject and predicate are found in gt_graph
             elif (s,  p, o) in gt_graph and (not p == NIDM_SOFTWARE_VERSION):
-                if include and (s,  p, None) in other_graph:
+                if (s,  p, None) in other_graph:
                     if isinstance(o, rdflib.term.Literal):
                         same_json_array = False
                         close_float = False
@@ -500,16 +503,33 @@ class TestResultDataModel(object):
                             # p=p),
                         #     self.get_readable_name(owl, gt_graph, o))
                     elif not isinstance(o, rdflib.term.BNode):
-                        exc_wrong += "\nWrong o:\ts('%s') p('%s') o('%s') not\
-                        in gold std, o should be o(%s)?)" % (
-                            self.get_readable_name(owl, other_graph, p),
-                            self.get_readable_name(owl, other_graph, s),
-                            self.get_alternatives(owl, other_graph, s=s, p=p),
-                            self.get_readable_name(owl, gt_graph, o))
+                        # Look for possible mimatched value (decide between
+                        # wrong or missing)
+                        wrong_o = list()
+                        for o_alt in other_graph.objects(s,  p):
+                            if (s, p, o_alt) not in gt_graph:
+                                wrong_o.append(o_alt)
+
+                        if wrong_o:
+                            exc_wrong += "\nWrong o:\ts('%s') p('%s') o('%s') \
+                            missing, o should be o(%s)?)" % (
+                                self.get_readable_name(owl, other_graph, s),
+                                self.get_readable_name(owl, other_graph, p),
+                                self.get_alternatives(owl, other_graph, s=s, p=p),
+                                self.get_readable_name(owl, gt_graph, o))
+                        else:
+                            exc_missing += "\nMissg o:\t %s is missing in %s?" \
+                                "\n\t\t ... in %s %s %s'" \
+                                % (
+                                    self.get_readable_name(owl, gt_graph, o),
+                                    self.get_readable_name(owl, gt_graph, s),
+                                    self.get_readable_name(owl, gt_graph, s),
+                                    self.get_readable_name(owl, gt_graph, p),
+                                    self.get_readable_name(owl, gt_graph, o),
+                                )
                         # If object o is *not* found in gt_graph (and o is a
                         # URI, i.e. not the value of an attribute)
-
-                if not (s,  p, None) in other_graph:
+                else:
                     #     if isinstance(o, rdflib.term.Literal):
                     #         if (not exc_wrong_literal):
                     #             exc_wrong_literal += "\nWrong literal o:\t
@@ -543,6 +563,8 @@ class TestResultDataModel(object):
                                 exc_missing += "\nMissg s:\t%s is missing " % (
                                     self.get_readable_name(owl, gt_graph, s))
                                 missing_s.append(s)
+            elif not p == NIDM_SOFTWARE_VERSION:
+                exc_missing += "\nUNTRACKED ERROR"
 
         self.my_execption += exc_missing + \
             exc_added + exc_wrong + exc_wrong_literal
