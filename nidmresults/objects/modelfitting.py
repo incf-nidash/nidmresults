@@ -116,9 +116,8 @@ class ImagingInstrument(NIDMObject):
         """
         self.add_attributes((
             (PROV['type'], self.type),
+            (PROV['type'], NLX_IMAGING_INSTRUMENT),
             (PROV['label'], self.label)))
-
-        
 
 
 class Group(NIDMObject):

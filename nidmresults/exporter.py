@@ -222,6 +222,7 @@ class NIDMExporter():
                 # self.add_object(model_fitting)
 
             # Add contrast estimation steps
+            analysis_masks = dict()
             for (model_fitting_id, pe_ids), contrasts in list(self.contrasts.items()):
                 model_fitting = self._get_model_fitting(model_fitting_id)
                 for contrast in contrasts:
@@ -229,6 +230,9 @@ class NIDMExporter():
                     self.bundle.used(contrast.estimation.id, model_fitting.rms_map.id)
                     # contrast.estimation.used(model_fitting.mask_map)
                     self.bundle.used(contrast.estimation.id, model_fitting.mask_map.id)
+                    analysis_masks[contrast.estimation.id] = model_fitting.mask_map.id
+                    self.bundle.used(contrast.estimation.id, contrast.weights.id) 
+                    self.bundle.used(contrast.estimation.id, model_fitting.design_matrix.id)
                     # contrast.estimation.wasAssociatedWith(self.software)
                     self.bundle.wasAssociatedWith(contrast.estimation.id, self.software.id)
 
@@ -370,6 +374,7 @@ class NIDMExporter():
                     self.bundle.used(inference.inference_act.id, inference.height_thresh.id)
                     # inference.inference_act.used(inference.extent_thresh)
                     self.bundle.used(inference.inference_act.id, inference.extent_thresh.id)
+                    self.bundle.used(inference.inference_act.id, analysis_masks[contrast.estimation.id])
                     self.add_object(inference.inference_act)
 
             # Write-out prov file
