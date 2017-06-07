@@ -576,34 +576,38 @@ class TestResultDataModel(object):
         # If string represents a json-array, then
         # compare as json data
         same_json_array = False
-        if o.startswith("[") and o.endswith("]"):
-            try:
-                if json.loads(o) == json.loads(o_other):
-                    same_json_array = True
-            except ValueError:
-                # Actually this string was not json
-                same_json_array = False
 
         # If literal is a float allow for a small
         # tolerance to deal with possibly different
         # roundings
         close_float = False
-        if o.datatype in [XSD.float, XSD.double]:
-            if o_other.datatype in [XSD.float, XSD.double]:
-                # If both are zero but of different type isclose returns false
-                if o.value == 0 and o_other.value == 0:
-                    close_float = True
-
-                # Avoid None
-                if o.value and o_other.value:
-                    close_float = np.isclose(
-                        o.value, o_other.value)
 
         same_str = False
-        if o.datatype in [XSD.string, None]:
-            if o_other.datatype in [XSD.string, None]:
-                if o.value == o_other.value:
-                    same_str = True
+
+        if isinstance(o, rdflib.term.Literal) and isinstance(o_other, rdflib.term.Literal):
+            if o.startswith("[") and o.endswith("]"):
+                try:
+                    if json.loads(o) == json.loads(o_other):
+                        same_json_array = True
+                except ValueError:
+                    # Actually this string was not json
+                    same_json_array = False
+
+            if o.datatype in [XSD.float, XSD.double]:
+                if o_other.datatype in [XSD.float, XSD.double]:
+                    # If both are zero but of different type isclose returns false
+                    if o.value == 0 and o_other.value == 0:
+                        close_float = True
+
+                    # Avoid None
+                    if o.value and o_other.value:
+                        close_float = np.isclose(
+                            o.value, o_other.value)
+
+            if o.datatype in [XSD.string, None]:
+                if o_other.datatype in [XSD.string, None]:
+                    if o.value == o_other.value:
+                        same_str = True
 
         return (same_json_array, close_float, same_str)
 
