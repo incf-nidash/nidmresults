@@ -37,6 +37,7 @@ class NIDMResults():
         # self.get_peaks()
         # self.get_excursion_set_maps()
         # self.get_inferences()
+        self.load_modelfitting()
         self.load_contrasts()
 
     @classmethod
@@ -752,7 +753,53 @@ ORDER BY ?peak_label
         }
         """
 
+    def load_modelfitting(self):
+        query = """
+        prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
+        prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
 
+        SELECT DISTINCT * WHERE {
+
+            ?design_id a nidm_DesignMatrix: .
+            OPTIONAL { ?design_id dc:description ?designdesc_id . } .
+
+            ?mpe_id a nidm_ModelParameterEstimation: ;
+                prov:used ?design_id .
+        }
+        """
+        sd = self.graph.query(query)
+
+        model_fittings = dict()
+        if sd:
+            for row in sd:
+                row_num = 0
+                print("------------")
+                print(row_num)
+                args = row.asdict()
+
+                # TODO: should software_id really be an input?
+                activity = self.get_object(ModelParametersEstimation, args['mpe_id'], software_id=None)
+
+                # TODO fill in image_file
+                design_matrix = self.get_object(DesignMatrix, args['design_id'], matrix=None, image_file=None, export_dir=None)
+                
+                print("mfitting ok")
+
+                con_num = row_num + 1        
+
+        # ModelFitting(activity, design_matrix, data, error_model,
+        #          param_estimates, rms_map, mask_map, grand_mean_map,
+        #          machine, subjects):
+        # self.activity = activity
+        # self.design_matrix = design_matrix
+        # self.data = data
+        # self.error_model = error_model
+        # self.param_estimates = param_estimates
+        # self.rms_map = rms_map
+        # self.mask_map = mask_map
+        # self.grand_mean_map = grand_mean_map
+        # self.machine = machine
+        # self.subjects = subjects
 
     def load_contrasts(self):
         query = """
@@ -828,7 +875,6 @@ ORDER BY ?peak_label
 
                 stat_map_coordspace = self.get_object(CoordinateSpace, args['statm_coordspace_id'])
                 stat_map = self.get_object(StatisticMap, args['statm_id'], coord_space=stat_map_coordspace)
-                print('----')
 
                 if args['otherstatm_id'] is not None:
                     zstat_exist = True

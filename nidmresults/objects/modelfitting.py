@@ -17,6 +17,7 @@ import nibabel as nib
 from nidmresults.objects.generic import *
 import json
 import warnings
+from numpy import genfromtxt
 
 
 class ModelFitting(object):
@@ -127,11 +128,10 @@ class DesignMatrix(NIDMObject):
 
     def __init__(self, matrix, image_file, export_dir, regressors=None,
                  design_type=None, hrf_model=None, drift_model=None,
-                 suffix=''):
+                 suffix='', csv_file=None, filename=None, label=None):
         super(DesignMatrix, self).__init__(export_dir=export_dir)
         self.type = NIDM_DESIGN_MATRIX
         self.prov_type = PROV['Entity']
-        self.matrix = matrix
         self.id = NIIRI[str(uuid.uuid4())]
         img_filename = 'DesignMatrix' + suffix + '.png'
         self.image = Image(export_dir, image_file, img_filename)
@@ -139,7 +139,47 @@ class DesignMatrix(NIDMObject):
         self.design_type = design_type
         self.hrf_model = hrf_model
         self.drift_model = drift_model
-        self.csv_file = 'DesignMatrix' + suffix + '.csv'
+        if csv_file is None:
+            self.csv_file = 'DesignMatrix' + suffix + '.csv'
+            self.matrix = matrix
+        else:
+            self.csv_file = csv_file
+            # TODO: this fails as csv_file is only a relative path and we don't have the root to append...
+            # self.matrix = genfromtxt(self.csv_file, delimiter=',')
+            self.matrix = []
+        if filename is None:
+            self.filename = 'DesignMatrix' + suffix + '.csv'
+        else:
+            self.filename = filename
+        if label is not None:
+            self.label = label
+        else:
+            self.label="Design Matrix"
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        # TODO: handle multiple basis
+        query = """
+        prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
+        prefix nidm_withEstimationMethod: <http://purl.org/nidash/nidm#NIDM_0000134>
+
+        SELECT DISTINCT * WHERE {
+            """ + oid_var + """ a nidm_DesignMatrix: ;
+                rdfs:label ?label ;
+                prov:atLocation ?csv_file ;
+                nfo:fileName ?filename .
+
+            OPTIONAL { """  + oid_var + """ nidm_regressorNames: ?regressors . } .
+            OPTIONAL { """  + oid_var + """ nidm_hasHRFBasis: ?hrf_model . } .
+            OPTIONAL { """  + oid_var + """ nidm_hasDriftModel: ?drift_model . } .
+        }
+        """
+        return query
 
     def export(self, nidm_version):
         """
@@ -155,10 +195,10 @@ class DesignMatrix(NIDMObject):
             csv_location = Identifier(self.csv_file)
 
         attributes = [(PROV['type'], self.type),
-                      (PROV['label'], "Design Matrix"),
+                      (PROV['label'], self.label),
                       (NIDM_REGRESSOR_NAMES, json.dumps(self.regressors)),
                       (DCT['format'], "text/csv"),
-                      (NFO['fileName'], self.csv_file),
+                      (NFO['fileName'], self.filename),
                       (DC['description'], self.image.id),
                       (PROV['location'], csv_location)]
 
@@ -310,6 +350,25 @@ class ModelParametersEstimation(NIDMObject):
         if label is None:
             label = "Model Parameters Estimation"
         self.label = label
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
+        prefix nidm_withEstimationMethod: <http://purl.org/nidash/nidm#NIDM_0000134>
+
+        SELECT DISTINCT * WHERE {
+            """ + oid_var + """ a nidm_ModelParameterEstimation: ;
+                rdfs:label ?label ;
+                nidm_withEstimationMethod: ?estimation_method .
+        }
+        """
+        return query
 
     def export(self, nidm_version):
         """
