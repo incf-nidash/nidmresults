@@ -131,6 +131,40 @@ class CoordinateSpace(NIDMObject):
         else:
             return False
 
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix nidm_CoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000016>
+        prefix nidm_voxelToWorldMapping: <http://purl.org/nidash/nidm#NIDM_0000132>
+        prefix nidm_voxelUnits: <http://purl.org/nidash/nidm#NIDM_0000133>
+        prefix nidm_voxelSize: <http://purl.org/nidash/nidm#NIDM_0000131>
+        prefix nidm_inWorldCoordinateSystem: <http://purl.org/nidash/nidm#NIDM_0000105>
+        prefix nidm_MNICoordinateSystem: <http://purl.org/nidash/nidm#NIDM_0000051>
+        prefix nidm_numberOfDimensions: <http://purl.org/nidash/nidm#NIDM_0000112>
+        prefix nidm_dimensionsInVoxels: <http://purl.org/nidash/nidm#NIDM_0000090>
+
+
+        SELECT ?oid ?label ?vox_to_world ?units ?vox_size ?coordinate_system ?numdim
+        ?dimensions
+                WHERE
+                {
+            """ + oid_var + """ a nidm_CoordinateSpace: ;
+            rdfs:label ?label ;
+            nidm_voxelToWorldMapping: ?vox_to_world ;
+            nidm_voxelUnits: ?units ;
+            nidm_voxelSize: ?vox_size ;
+            nidm_inWorldCoordinateSystem: ?coordinate_system ;
+            nidm_numberOfDimensions: ?numdim ;
+            nidm_dimensionsInVoxels: ?dimensions .
+            }
+        """
+        return query
+
     def export(self, nidm_version):
         """
         Create prov entities and activities.

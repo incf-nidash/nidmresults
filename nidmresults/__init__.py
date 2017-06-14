@@ -1,6 +1,8 @@
 import os
 from pkg_resources import get_distribution
 
+from .load import load
+
 latest_owlfile = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), 'nidmresults', 'owl',
     "nidm-results_130.owl")

@@ -19,23 +19,33 @@ import zipfile
 import csv
 
 
-class Graph():
+class NIDMResults():
     """
-    Generic class to read a NIDM-result archive and create a python object.
+    NIDM-result object containing all metadata and link to image files.
     """
 
     def __init__(self, nidm_zip=None, rdf_file=None, format="turtle"):
         with zipfile.ZipFile(nidm_zip) as z:
             rdf_data = z.read('nidm.ttl')
-
-        self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")
-
         self.rdf_data = rdf_data
-
+        self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")      
         self.format = format
         self.graph = self.parse()
-
         self.objects = dict()
+
+        # We need the peaks, excursion set maps and contrast maps
+        # self.get_peaks()
+        # self.get_excursion_set_maps()
+        # self.get_inferences()
+        self.load_contrasts()
+
+    @classmethod
+    def load_from_pack(klass, nidm_zip):
+        nidmr = NIDMResults(nidm_zip=nidm_zip)
+        return nidmr
+
+    def get_metadata(self):
+        return self.objects
 
     def parse(self):
         g = rdflib.Graph()
@@ -46,11 +56,55 @@ class Graph():
                 "RDFLib was unable to parse the RDF file.")
         return g
 
+    def _find_model_fitting(self):
+        """
+        Parse FSL result directory to retreive model fitting information.
+        Return a list of objects of type ModelFitting.
+        """
+        self.model_fittings = dict()
+
+        for analysis_dir in self.analysis_dirs:
+
+            design_matrix = self._get_design_matrix(analysis_dir)
+            data = self._get_data()
+            error_model = self._get_error_model()
+
+            rms_map = self._get_residual_mean_squares_map(analysis_dir)
+            param_estimates = self._get_param_estimate_maps(analysis_dir)
+            mask_map = self._get_mask_map(analysis_dir)
+            grand_mean_map = self._get_grand_mean(
+                mask_map.file.path, analysis_dir)
+
+            activity = self._get_model_parameters_estimations(error_model)
+
+            # Assuming MRI data
+            machine = ImagingInstrument("mri")
+
+            # Group or Person
+            if self.version['num'] not in ["1.0.0", "1.1.0", "1.2.0"]:
+                if self.first_level:
+                    subjects = [Person()]
+                else:
+                    subjects = list()
+                    for group_name, numsub in self.groups:
+                        subjects.append(Group(
+                            num_subjects=int(numsub), group_name=group_name))
+            else:
+                subjects = None
+
+            model_fitting = ModelFitting(
+                activity, design_matrix, data,
+                error_model, param_estimates, rms_map, mask_map,
+                grand_mean_map, machine, subjects)
+
+            self.model_fittings[analysis_dir] = model_fitting
+
+        return self.model_fittings
+
     def get_peaks(self, contrast_name=None):
         """
         Read a NIDM-Results document and return a list of Peaks.
         """
-
         if contrast_name is not None:
             query_extension = """
 ?cluster a significant_cluster: .
@@ -99,6 +153,8 @@ ORDER BY ?peak_label
                             coord_label=coord_label,
                             oid=peak_id, exc_set_id=exc_set_id)
                 peaks[peak_id] = (peak)
+        else:
+            print('No peaks found')
 
         self.objects.update(peaks)
         self.peaks = peaks
@@ -222,6 +278,9 @@ SELECT DISTINCT * WHERE {
 
         self.objects.update(objects)
         if oid is not None:
+            if oid not in objects:
+                raise Exception('No results for query:\n' + query)
+
             return objects[oid]
         else:
             return objects
@@ -285,6 +344,7 @@ SELECT DISTINCT * WHERE {
 }
         """
         objects = dict()
+        meta = dict()
 
         arg_list = self.run_query_and_get_args(query, oid)
         for args in arg_list:
@@ -596,12 +656,29 @@ SELECT DISTINCT ?oid ?label ?location ?format ?filname ?cluster_label_map_id
 }
 ORDER BY ?peak_label
         """
+#         query = """
+# prefix prov: <http://www.w3.org/ns/prov#>
+# prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+# prefix nidm_ExcursionSetMap: <http://purl.org/nidash/nidm#NIDM_0000025>
+
+# SELECT DISTINCT ?oid ?att_name ?att_value WHERE {
+# ?oid a nidm_ExcursionSetMap: ;
+#     ?att_name ?att_value .
+# }
+#         """
         sd = self.graph.query(query)
 
         exc_sets = dict()
+        exc_sets_meta = dict()
         if sd:
             for row in sd:
                 args = row.asdict()
+                # print(args)
+                if not args['oid'] in exc_sets_meta:
+                    exc_sets_meta[args['oid']] = dict()
+                
+                # exc_sets_meta[args['oid']]['nidm_ExcursionSetMap/' + self.graph.qname(args['att_name'])] = args['att_value']
 
                 coord_space = self.get_coord_spaces(row.coord_space_id)
                 args['coord_space'] = coord_space
@@ -613,8 +690,164 @@ ORDER BY ?peak_label
 
                 exc_sets[args['oid']] = ExcursionSet(**args)
 
+                # exc_sets_meta['nidm_ExcursionSetMap/prov:atLocation'] = args['location']
+                # exc_sets_meta['nidm_ExcursionSetMap/nfo:fileName'] = args['filname']
+            # print(exc_sets_meta)
+
         self.objects.update(exc_sets)
         return exc_sets
+
+    def get_object(self, klass, oid=None, **kwargs):
+        query = klass.get_query(oid)
+
+        sd = self.graph.query(query)
+
+        objects = dict()
+        if sd:
+            for row in sd:
+                argums = row.asdict()
+                objects[oid] = klass(**argums, **kwargs)
+
+        self.objects.update(objects)
+        if oid is not None:
+            if oid not in objects:
+                return None
+            else:
+                return objects[oid]
+        else:
+            return objects
+
+    def get_contrast_weights(self):
+        query = """
+        prefix nidm_statisticType: <http://purl.org/nidash/nidm#NIDM_0000123>
+        prefix nidm_contrastName: <http://purl.org/nidash/nidm#NIDM_0000085>
+        prefix obo_contrastweightmatrix: <http://purl.obolibrary.org/obo/STATO_0000323>
+        prefix obo_tstatistic: <http://purl.obolibrary.org/obo/STATO_0000176>
+
+        prefix nidm_ContrastEstimation: <http://purl.org/nidash/nidm#NIDM_0000001>
+
+        prefix nidm_ContrastMap: <http://purl.org/nidash/nidm#NIDM_0000002>
+        prefix nidm_inCoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000104>
+
+        SELECT * WHERE {
+
+        ?conw_id a obo_contrastweightmatrix: ;
+            rdfs:label ?conw_label ;
+            prov:value ?contrast_weights ;
+            nidm_statisticType: ?stat_type ; 
+            nidm_contrastName: ?contrast_name .
+
+        ?conest_id a nidm_ContrastEstimation: ;
+            prov:used ?conw_id .    
+
+        ?conm_id a nidm_ContrastMap: ;
+            rdfs:label ?conm_label ;
+            prov:atLocation ?conm_location ;
+            dct:format ?conm_format ;
+            nfo:fileName ?conm_filename ;
+            nidm_contrastName: ?contrast_name ;
+            nidm_inCoordinateSpace: ?conm_coordspace_id ;
+            crypto:sha512 ?conm_sha ;
+            prov:wasGeneratedBy ?conest_id .
+        }
+        """
+
+
+
+    def load_contrasts(self):
+        query = """
+        prefix nidm_contrastName: <http://purl.org/nidash/nidm#NIDM_0000085>
+        prefix obo_contrastweightmatrix: <http://purl.obolibrary.org/obo/STATO_0000323>
+        prefix nidm_ContrastEstimation: <http://purl.org/nidash/nidm#NIDM_0000001>
+        prefix nidm_ContrastMap: <http://purl.org/nidash/nidm#NIDM_0000002>
+        prefix nidm_ContrastStandardErrorMap: <http://purl.org/nidash/nidm#NIDM_0000013>
+        prefix nidm_ContrastExplainedMeanSquareMap: <http://purl.org/nidash/nidm#NIDM_0000163>
+        prefix nidm_StatisticMap: <http://purl.org/nidash/nidm#NIDM_0000076>
+        prefix nidm_Inference: <http://purl.org/nidash/nidm#NIDM_0000049>
+        prefix nidm_contrastName: <http://purl.org/nidash/nidm#NIDM_0000085>
+
+        SELECT DISTINCT * WHERE {
+
+            ?conw_id a obo_contrastweightmatrix: .
+
+            ?conest_id a nidm_ContrastEstimation: ;
+                prov:used ?conw_id .    
+
+            ?conm_id a nidm_ContrastMap: ;
+                nidm_inCoordinateSpace: ?conm_coordspace_id ;
+                nidm_contrastName: ?contrast_name ;
+                prov:wasGeneratedBy ?conest_id .
+
+            {?constdm_id a nidm_ContrastStandardErrorMap: .} UNION
+            {?constdm_id a nidm_ContrastExplainedMeanSquareMap: .} .
+
+            ?constdm_id nidm_inCoordinateSpace: ?constdm_coordspace_id ;
+                prov:wasGeneratedBy ?conest_id .
+
+            ?statm_id a nidm_StatisticMap: ;
+                prov:wasGeneratedBy ?conest_id ;
+                nidm_inCoordinateSpace: ?statm_coordspace_id .
+
+            ?inf_id a nidm_Inference: ;
+                prov:used ?statm_id .
+
+            ?otherstatm_id a nidm_StatisticMap: ;
+                prov:wasGeneratedBy ?conest_id ;
+                nidm_inCoordinateSpace: ?otherstatm_coordspace_id .
+
+
+        }
+    """
+        sd = self.graph.query(query)
+
+        contrasts = dict()
+        if sd:
+            for row in sd:
+                con_num = 0
+                print("------------")
+                print(con_num)
+                args = row.asdict()
+
+                contrast_num = str(con_num)
+                contrast_name = args['contrast_name']
+
+                weights = self.get_object(ContrastWeights, args['conw_id'], contrast_num=contrast_num)
+                estimation = self.get_object(ContrastEstimation, args['conest_id'], contrast_num=contrast_num)
+                contrast_map_coordspace = self.get_object(CoordinateSpace, args['conm_coordspace_id'])
+                contrast_map = self.get_object(ContrastMap, args['conm_id'], 
+                    coord_space=contrast_map_coordspace, contrast_num=contrast_num, export_dir=None)
+
+                contraststd_map_coordspace = self.get_object(CoordinateSpace, args['constdm_coordspace_id'])
+
+                stderr_or_expl_mean_sq_map = self.get_object(ContrastExplainedMeanSquareMap, args['constdm_coordspace_id'],
+                    coord_space=contraststd_map_coordspace, contrast_num=contrast_num, export_dir=None)
+                if stderr_or_expl_mean_sq_map is None:
+                    # Try loading as a contrast standard map
+                    stderr_or_expl_mean_sq_map = self.get_object(ContrastStdErrMap, args['constdm_id'], 
+                        coord_space=contraststd_map_coordspace, contrast_num=contrast_num, export_dir=None, is_variance=False, var_coord_space=None)
+
+                stat_map_coordspace = self.get_object(CoordinateSpace, args['statm_coordspace_id'])
+                stat_map = self.get_object(StatisticMap, args['statm_id'], coord_space=stat_map_coordspace)
+                print('----')
+
+                if args['otherstatm_id'] is not None:
+                    zstat_exist = True
+
+                    otherstat_map_coordspace = self.get_object(CoordinateSpace, args['otherstatm_coordspace_id'])
+                    otherstat_map = self.get_object(StatisticMap, args['otherstatm_id'], coord_space=stat_map_coordspace)
+                    
+                if zstat_exist:
+                    con = Contrast(contrast_num, args['contrast_name'], weights, estimation,
+                          contrast_map, stderr_or_expl_mean_sq_map, stat_map=otherstat_map,
+                          z_stat_map=stat_map)
+                else:
+                    con = Contrast(contrast_num, args['contrast_name'], weights, estimation,
+                          contrast_map, stderr_or_expl_mean_sq_map, stat_map=stat_map)
+
+
+                print("est ok")
+
+                con_num = con_num + 1
 
     def serialize(self, destination, format="mkda", overwrite=False,
                   last_used_con_id=0):

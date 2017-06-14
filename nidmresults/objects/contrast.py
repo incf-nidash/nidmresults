@@ -45,8 +45,8 @@ class ContrastWeights(NIDMObject):
     """
 
     def __init__(self, contrast_num, contrast_name, contrast_weights,
-                 stat_type):
-        super(ContrastWeights, self).__init__()
+                 stat_type, label=None, oid=None):
+        super(ContrastWeights, self).__init__(oid=oid)
         self.contrast_name = contrast_name
         self.contrast_weights = contrast_weights
         self.contrast_num = contrast_num
@@ -54,12 +54,37 @@ class ContrastWeights(NIDMObject):
         self.id = NIIRI[str(uuid.uuid4())]
         self.type = STATO_CONTRAST_WEIGHT_MATRIX
         self.prov_type = PROV['Entity']
+        if label is None:
+            self.label = "Contrast Weights: " + self.contrast_name,
+        else:
+            self.label = label
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix obo_contrastweightmatrix: <http://purl.obolibrary.org/obo/STATO_0000323>
+        prefix nidm_statisticType: <http://purl.org/nidash/nidm#NIDM_0000123>
+        prefix nidm_contrastName: <http://purl.org/nidash/nidm#NIDM_0000085>
+
+        SELECT DISTINCT * WHERE {
+            """ + oid_var + """ a obo_contrastweightmatrix: ;
+            rdfs:label ?label ;
+            prov:value ?contrast_weights ;
+            nidm_statisticType: ?stat_type ; 
+            nidm_contrastName: ?contrast_name .
+        }
+        """
+        return query
 
     def export(self, nidm_version):
         """
         Create prov graph.
         """
-        label = "Contrast Weights: " + self.contrast_name
 
         if self.stat_type.lower() == "t":
             stat = STATO_TSTATISTIC
@@ -83,7 +108,7 @@ class ContrastMap(NIDMObject):
     """
 
     def __init__(self, contrast_file, contrast_num, contrast_name,
-                 coord_space, export_dir, ident=None):
+                 coord_space, export_dir, ident=None, sha=None, format=None, label=None, filename=None):
         super(ContrastMap, self).__init__(export_dir)
         self.num = contrast_num
         self.name = contrast_name
@@ -91,12 +116,38 @@ class ContrastMap(NIDMObject):
             self.id = NIIRI[str(uuid.uuid4())]
         else:
             self.id = ident
-        filename = 'Contrast' + self.num + '.nii.gz'
-        self.file = NIDMFile(self.id, contrast_file, filename, export_dir)
+        if filename is None:
+            filename = 'Contrast' + self.num + '.nii.gz'
+        self.file = NIDMFile(self.id, contrast_file, filename, export_dir, sha=sha, format=format)
         self.coord_space = coord_space
         self.type = NIDM_CONTRAST_MAP
         self.prov_type = PROV['Entity']
-        self.label = "Contrast Map: " + self.name
+        if label is None:
+            self.label = "Contrast Map: " + self.name
+        else:
+            self.label = label
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix nidm_ContrastMap: <http://purl.org/nidash/nidm#NIDM_0000002>
+
+        SELECT DISTINCT * WHERE {
+            """ + oid_var + """ a nidm_ContrastMap: ;
+            rdfs:label ?label ;
+            prov:atLocation ?contrast_file ;
+            dct:format ?format ;
+            nfo:fileName ?filename ;
+            nidm_contrastName: ?contrast_name ;
+            crypto:sha512 ?sha ;
+        }
+        """
+        return query
 
     def export(self, nidm_version):
         """
@@ -115,7 +166,7 @@ class ContrastExplainedMeanSquareMap(NIDMObject):
     Object representing a ContrastExplainedMeanSquareMap entity.
     """
     def __init__(self, stat_file, sigma_sq_file, contrast_num,
-                 coord_space, export_dir):
+                 coord_space, export_dir, expl_mean_sq_file=None, sha=None, format=None, filename=None):
         super(ContrastExplainedMeanSquareMap, self).__init__(export_dir)
         self.stat_file = stat_file
         self.sigma_sq_file = sigma_sq_file
@@ -124,29 +175,58 @@ class ContrastExplainedMeanSquareMap(NIDMObject):
         self.coord_space = coord_space
         self.type = NIDM_CONTRAST_EXPLAINED_MEAN_SQUARE_MAP
         self.prov_type = PROV['Entity']
+        self.expl_mean_sq_file = expl_mean_sq_file
+        self.sha = sha
+        self.filename = filename
+        self.format = format
+
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix nidm_ContrastExplainedMeanSquareMap: <http://purl.org/nidash/nidm#NIDM_0000163>
+
+        SELECT DISTINCT * WHERE {
+            """ + oid_var + """ a nidm_ContrastExplainedMeanSquareMap: ;
+            rdfs:label ?label ;
+            prov:atLocation ?contrast_file ;
+            dct:format ?format ;
+            nfo:fileName ?filename ;
+            nidm_contrastName: ?contrast_name ;
+            crypto:sha512 ?sha ;
+        }
+        """
+        return query
 
     def export(self, nidm_version):
         """
         Create prov graph.
         """
-        # Create Contrast Explained Mean Square Map as fstat<num>.nii.gz
-        # multiplied by sigmasquareds.nii.gz and save it in export_dir
-        fstat_img = nib.load(self.stat_file)
-        fstat = fstat_img.get_data()
+        if self.expl_mean_sq_file is None:
+            # Create Contrast Explained Mean Square Map as fstat<num>.nii.gz
+            # multiplied by sigmasquareds.nii.gz and save it in export_dir
+            fstat_img = nib.load(self.stat_file)
+            fstat = fstat_img.get_data()
 
-        sigma_sq_img = nib.load(self.sigma_sq_file)
-        sigma_sq = sigma_sq_img.get_data()
+            sigma_sq_img = nib.load(self.sigma_sq_file)
+            sigma_sq = sigma_sq_img.get_data()
 
-        expl_mean_sq = nib.Nifti1Image(fstat*sigma_sq, fstat_img.get_qform())
+            expl_mean_sq = nib.Nifti1Image(fstat*sigma_sq, fstat_img.get_qform())
 
-        expl_mean_sq_filename = \
-            "ContrastExplainedMeanSquareMap" + self.num + ".nii.gz"
-        expl_mean_sq_file = os.path.join(
-            self.export_dir, expl_mean_sq_filename)
-        nib.save(expl_mean_sq, expl_mean_sq_file)
+            expl_mean_sq_filename = \
+                "ContrastExplainedMeanSquareMap" + self.num + ".nii.gz"
+            self.expl_mean_sq_file = os.path.join(
+                self.export_dir, expl_mean_sq_filename)
+            nib.save(expl_mean_sq, expl_mean_sq_file)
 
         self.file = NIDMFile(self.id, expl_mean_sq_file,
-                             expl_mean_sq_filename, self.export_dir)
+                             expl_mean_sq_filename, self.export_dir,
+                             sha=self.sha, filename=self.filename, format=self.format)
 
         # Contrast Explained Mean Square Map entity
         path, filename = os.path.split(expl_mean_sq_file)
@@ -163,7 +243,7 @@ class ContrastStdErrMap(NIDMObject):
     """
 
     def __init__(self, contrast_num, filepath, is_variance, coord_space,
-                 var_coord_space, export_dir):
+                 var_coord_space, export_dir, label=None, format=None, sha=None, filename=None):
         super(ContrastStdErrMap, self).__init__(export_dir)
         self.file = filepath
         self.id = NIIRI[str(uuid.uuid4())]
@@ -174,6 +254,34 @@ class ContrastStdErrMap(NIDMObject):
             self.var_coord_space = var_coord_space
         self.type = NIDM_CONTRAST_STANDARD_ERROR_MAP
         self.prov_type = PROV['Entity']
+        self.format = format
+        self.sha = sha
+        self.filename = filename
+        if label is None:
+            self.label = "Contrast Map: " + self.name
+        else:
+            self.label = label
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix nidm_ContrastStandardErrorMap: <http://purl.org/nidash/nidm#NIDM_0000013>
+
+        SELECT DISTINCT * WHERE {
+            """ + oid_var + """ a nidm_ContrastStandardErrorMap: ;
+            rdfs:label ?label ;
+            prov:atLocation ?filepath ;
+            nfo:fileName ?filename ;
+            dct:format ?format ;
+            crypto:sha512 ?sha ;
+        }
+        """
+        return query        
 
     def export(self, nidm_version):
         """
@@ -184,7 +292,7 @@ class ContrastStdErrMap(NIDMObject):
             # Copy contrast variance map in export directory
             path, var_cope_filename = os.path.split(self.file)
             contrast_var = ContrastVariance(
-                self.var_coord_space, self.file, var_cope_filename)
+                self.var_coord_space, self.file, var_cope_filename, format=self.format, sha=self.sha, filename=self.filename)
             self.contrast_var = contrast_var
 
             # Create standard error map from contrast variance map
@@ -200,7 +308,7 @@ class ContrastStdErrMap(NIDMObject):
                 self.id, stderr_file, filename, self.export_dir)
 
         else:
-            self.file = NIDMFile(self.id, self.file, None, self.export_dir)
+            self.file = NIDMFile(self.id, self.file, None, self.export_dir, format=self.format, sha=self.sha, filename=self.filename)
 
         self.add_attributes((
             (PROV['type'], self.type),
@@ -210,12 +318,12 @@ class ContrastStdErrMap(NIDMObject):
 
 
 class ContrastVariance(NIDMObject):
-    def __init__(self, coord_space, var_file, filename):
+    def __init__(self, coord_space, var_file, filename, format=None):
         super(ContrastVariance, self).__init__()
         self.id = NIIRI[str(uuid.uuid4())]
         self.coord_space = coord_space
         self.type = NIDM_CONTRAST_VARIANCE_MAP
-        self.file = NIDMFile(self.id, var_file)
+        self.file = NIDMFile(self.id, var_file, format=format)
         self.filename = filename
         self.prov_type = PROV['Entity']
 
@@ -249,6 +357,7 @@ class StatisticMap(NIDMObject):
                 'Statistic' + self.num + '.nii.gz'
         self.file = NIDMFile(self.id, location, filename, export_dir, sha=sha)
         self.coord_space = coord_space
+
         self.dof = dof
         self.type = NIDM_STATISTIC_MAP
         self.prov_type = PROV['Entity']
@@ -271,6 +380,36 @@ class StatisticMap(NIDMObject):
 
     def __str__(self):
         return '%s\t%s' % (self.label, self.file)
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix nidm_StatisticMap: <http://purl.org/nidash/nidm#NIDM_0000076>
+
+        prefix nidm_statisticType: <http://purl.org/nidash/nidm#NIDM_0000123>
+        prefix nidm_contrastName: <http://purl.org/nidash/nidm#NIDM_0000085>
+        prefix nidm_effectDegreesOfFreedom: <http://purl.org/nidash/nidm#NIDM_0000091>
+        prefix nidm_errorDegreesOfFreedom: <http://purl.org/nidash/nidm#NIDM_0000093>
+
+        SELECT DISTINCT * WHERE {
+            """ + oid_var + """ a nidm_StatisticMap: ;
+            rdfs:label ?label ;
+            prov:atLocation ?location ;
+            dct:format ?format ;
+            nfo:fileName ?filename ;
+            nidm_contrastName: ?contrast_name ;
+            crypto:sha512 ?sha ;
+            nidm_statisticType: ?stat_type ;
+            nidm_effectDegreesOfFreedom: ?effdof ;
+            nidm_errorDegreesOfFreedom: ?dof .
+        }
+        """
+        return query
 
     def export(self, nidm_version):
         """
@@ -303,7 +442,7 @@ class ContrastEstimation(NIDMObject):
     """
 
     def __init__(self, contrast_num, contrast_name=None, label=None,
-                 param_estimate=None, oid=None):
+                 param_estimate_id=None, oid=None):
         super(ContrastEstimation, self).__init__(oid=oid)
         self.num = contrast_num
         self.type = NIDM_CONTRAST_ESTIMATION
@@ -313,7 +452,27 @@ class ContrastEstimation(NIDMObject):
         else:
             self.label = "Contrast estimation: " + contrast_name
         # Only used when reading (so far)
-        self.param_estimate = param_estimate
+        self.param_estimate_id = param_estimate_id
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix nidm_ContrastEstimation: <http://purl.org/nidash/nidm#NIDM_0000001>
+        prefix nidm_ParameterEstimateMap: <http://purl.org/nidash/nidm#NIDM_0000061>
+
+        SELECT DISTINCT * WHERE {
+            """ + oid_var + """ a nidm_ContrastEstimation: ;
+                rdfs:label ?label ;
+                prov:used ?param_estimate_id .
+            ?param_estimate_id a nidm_ParameterEstimateMap: .
+        }
+        """
+        return query
 
     def export(self, nidm_version):
         """
