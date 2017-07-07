@@ -859,34 +859,29 @@ class OwlReader():
 
             prefix, words = label.split(':')
             label_words = re.findall(r"[\w']+", words)
-            print(label_words)
 
-            # Camel case
-            if len(label_words) > 1:
-                words = ''
-                for word in label_words:
-                    print(word)
-                    if len(word) > 1:
-                        words += word[0].upper() + word[1:]
-                    else:
-                        words += word[0].upper()
-                print(words)
-            print(self.is_class(uri))
+            # Camel case terms that come from external ontologies
+            if self.is_external_namespace(uri):               
+                if len(label_words) > 1:
+                    words = ''
+                    for word in label_words:
+                        if len(word) > 1:
+                            words += word[0].upper() + word[1:]
+                        else:
+                            words += word[0].upper()
 
-            if not self.is_class(uri) and not self.is_named_individual(uri):
-                # avoid lowercaseing acronyms
-                if not words[1].istitle() and words not in ('nidm', 'spm'):
-                    words = words[0].lower() + words[1:]
+                if not self.is_class(uri) and not self.is_named_individual(uri):
+                    # avoid lowercaseing acronyms
+                    if not words[1].istitle() and words not in ('nidm', 'spm'):
+                        words = words[0].lower() + words[1:]
+                else:
+                    # avoid lowercaseing software names
+                    if not words in ('nidmfsl', 'spm_results_nidm', 'Legendre'):
+                        words = words[0].upper() + words[1:]
+
+                prefix_name = prefix + '_' + words
             else:
-                # avoid lowercaseing software names
-                if not words in ('nidmfsl', 'spm_results_nidm'):
-                    words = words[0].upper() + words[1:]
-            print(words)
-
-            label = prefix + ':' + words
-            print(label)
-
-            prefix_name = label.replace(":", "_")
+                prefix_name = prefix + '_' + "".join(label_words)
 
         return prefix_name
 
