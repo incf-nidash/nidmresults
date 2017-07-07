@@ -95,6 +95,9 @@ class OwlReader():
     def is_class(self, uri):
         return (uri, RDF['type'], OWL['Class']) in self.graph
 
+    def is_named_individual(self, uri):
+        return (uri, RDF['type'], OWL['NamedIndividual']) in self.graph
+
     def all_of_rdf_type(self, rdf_type, prefix=None, but=set(),
                         but_type=OWL['AnnotationProperty']):
         classes = self.graph.subjects(RDF['type'], rdf_type)
@@ -852,26 +855,34 @@ class OwlReader():
             # keep the id directly)
             prefix_name = None
         else:
-            label = self.get_label(uri)
+            label = self.get_label(uri).replace("'", "")
 
             prefix, words = label.split(':')
-            label_words = words.split()
-            if len(label_words) > 1:
-                # Check if the second word is camel cased
-                if(label_words[1][0] == label_words[1][0].lower()):
+            label_words = re.findall(r"[\w']+", words)
+
+            # Camel case terms that come from external ontologies
+            if self.is_external_namespace(uri):               
+                if len(label_words) > 1:
                     words = ''
                     for word in label_words:
-                        words += word[0].upper() + word[1:]
+                        if len(word) > 1:
+                            words += word[0].upper() + word[1:]
+                        else:
+                            words += word[0].upper()
 
-            if not self.is_class(uri):
-                words = words[0].lower() + words[1:]
+                if not self.is_class(uri) and not self.is_named_individual(uri):
+                    # avoid lowercaseing acronyms
+                    if not words[1].istitle() and words not in ('nidm', 'spm'):
+                        words = words[0].lower() + words[1:]
+                else:
+                    # avoid lowercaseing software names
+                    if not words in ('nidmfsl', 'spm_results_nidm', 'Legendre'):
+                        words = words[0].upper() + words[1:]
 
-            label = prefix + ':' + words
+                prefix_name = prefix + '_' + words
+            else:
+                prefix_name = prefix + '_' + "".join(label_words)
 
-            prefix_name = label.replace(" ", "")\
-                               .replace(":", "_")\
-                               .replace("'", "")\
-                               .replace("-", "")
         return prefix_name
 
     def sorted_by_labels(self, term_list):
