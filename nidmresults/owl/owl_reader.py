@@ -9,6 +9,7 @@ from rdflib import RDF, term
 from rdflib.graph import Graph
 from rdflib.term import Literal
 from nidmresults.objects.constants_rdflib import *
+from nidmresults.objects.constants_rdflib import namespaces as namespace_names
 
 from future.standard_library import hooks
 with hooks():
@@ -389,6 +390,10 @@ class OwlReader():
                 # import_graph.parse(data=import_txt, format='turtle')
 
                 owl_graph = owl_graph + import_graph
+
+        # Overwrite namespaces
+        for name, namespace in namespace_names.items():
+            owl_graph.bind(name, namespace)
 
         return owl_graph
 
@@ -809,6 +814,7 @@ class OwlReader():
         if not isinstance(uri, term.BNode):
             try:
                 name = self.graph.qname(uri)
+
             except:
                 # For ontology names, qname fails not sure if this is a bug
                 name = uri
