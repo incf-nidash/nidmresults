@@ -852,10 +852,26 @@ class OwlReader():
             # keep the id directly)
             prefix_name = None
         else:
-            prefix_name = self.get_label(uri).replace(" ", "")\
-                                             .replace(":", "_")\
-                                             .replace("'", "")\
-                                             .replace("-", "")
+            label = self.get_label(uri)
+
+            prefix, words = label.split(':')
+            label_words = words.split()
+            if len(label_words) > 1:
+                # Check if the second word is camel cased
+                if(label_words[1][0] == label_words[1][0].lower()):
+                    words = ''
+                    for word in label_words:
+                        words += word[0].upper() + word[1:]
+
+            if not self.is_class(uri):
+                words = words[0].lower() + words[1:]
+
+            label = prefix + ':' + words
+
+            prefix_name = label.replace(" ", "")\
+                               .replace(":", "_")\
+                               .replace("'", "")\
+                               .replace("-", "")
         return prefix_name
 
     def sorted_by_labels(self, term_list):
