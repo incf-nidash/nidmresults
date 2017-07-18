@@ -269,12 +269,33 @@ class Image(NIDMObject):
     Object representing an Image entity.
     """
 
-    def __init__(self, export_dir, image_file, filename):
+    def __init__(self, export_dir, image_file, filename, format='png'):
         super(Image, self).__init__(export_dir)
         self.type = DCTYPE['Image']
         self.prov_type = PROV['Entity']
         self.id = NIIRI[str(uuid.uuid4())]
         self.file = NIDMFile(self.id, image_file, filename, export_dir)
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix dctype: <http://purl.org/dc/dcmitype/>
+
+
+        SELECT * WHERE
+                {
+            """ + oid_var + """ a dctype:Image ;
+            prov:atLocation ?image_file ;
+            nfo:fileName ?filename ;
+            dct:format ?format .
+            }
+        """
+        return query    
 
     def export(self, nidm_version):
         """

@@ -18,6 +18,7 @@ from nidmresults.objects.generic import *
 import json
 import warnings
 from numpy import genfromtxt
+from prov.identifier import QualifiedName
 
 
 class ModelFitting(object):
@@ -47,7 +48,7 @@ class ImagingInstrument(NIDMObject):
     Object representing a ImagingInstrument entity.
     """
 
-    def __init__(self, machine_type):
+    def __init__(self, machine_type, label=None):
         super(ImagingInstrument, self).__init__()
         machine_type = machine_type.lower()
         self.id = NIIRI[str(uuid.uuid4())]
@@ -57,9 +58,36 @@ class ImagingInstrument(NIDMObject):
         machine_label = dict(
             mri='MRI Scanner', eeg='EEG Machine', meg='MEG Machine',
             pet='PET Scanner', spect='SPECT Machine')
-        self.type = machine_term[machine_type]
+
+        if not machine_type.startswith('http:'):
+            self.type = machine_term[machine_type]
+        else:    
+            self.type = machine_type
         self.prov_type = PROV['Agent']
-        self.label = machine_label[machine_type]
+
+        if label is None:
+            self.label = machine_label[machine_type]
+        else:
+            self.label = label        
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        # TODO: handle multiple basis
+        query = """
+        prefix nlx_Imaginginstrument: <http://uri.neuinfo.org/nif/nifstd/birnlex_2094>
+
+        SELECT DISTINCT * WHERE {
+            """ + oid_var + """ a nlx_Imaginginstrument: ;
+                rdfs:label ?label ;
+                rdf:type ?machine_type .
+        }
+        """
+        return query
 
     def export(self, nidm_version):
         """
@@ -86,6 +114,27 @@ class Group(NIDMObject):
             label = "Study group population: " + group_name
         self.label = label
 
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix obo_studygrouppopulation: <http://purl.obolibrary.org/obo/STATO_0000193>
+        prefix nidm_groupName: <http://purl.org/nidash/nidm#NIDM_0000170>
+        prefix nidm_numberOfSubjects: <http://purl.org/nidash/nidm#NIDM_0000171>
+
+        SELECT DISTINCT * WHERE {
+            """ + oid_var + """ a obo_studygrouppopulation: ;
+                rdfs:label ?label ;
+                nidm_groupName: ?group_name ;
+                nidm_numberOfSubjects: ?num_subjects .
+        }
+        """
+        return query
+
     def export(self, nidm_version):
         """
         Create prov entities and activities.
@@ -109,6 +158,21 @@ class Person(NIDMObject):
         if not label:
             label = "Person"
         self.label = label
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+            SELECT DISTINCT * WHERE {
+            """ + oid_var + """ a prov:Person ;
+                rdfs:label ?label .
+        }
+        """
+        return query
 
     def export(self, nidm_version):
         """
@@ -167,6 +231,8 @@ class DesignMatrix(NIDMObject):
         query = """
         prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
         prefix nidm_withEstimationMethod: <http://purl.org/nidash/nidm#NIDM_0000134>
+        prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
+        prefix nidm_hasDriftModel: <http://purl.org/nidash/nidm#NIDM_0000088>
 
         SELECT DISTINCT * WHERE {
             """ + oid_var + """ a nidm_DesignMatrix: ;
@@ -254,7 +320,7 @@ class Data(NIDMObject):
     Object representing a Data entity.
     """
 
-    def __init__(self, grand_mean_scaling, target, mri_protocol=None,
+    def __init__(self, grand_mean_scaling, target=None, mri_protocol=None,
                  label=None, group_or_sub=None, oid=None):
         super(Data, self).__init__(oid=oid)
         self.grand_mean_sc = grand_mean_scaling
@@ -268,6 +334,31 @@ class Data(NIDMObject):
             label = "Data"
         self.label = label
         self.group_or_sub = group_or_sub
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """  
+        prefix nidm_Data: <http://purl.org/nidash/nidm#NIDM_0000169>
+        prefix nidm_grandMeanScaling: <http://purl.org/nidash/nidm#NIDM_0000096>
+        prefix nidm_targetIntensity: <http://purl.org/nidash/nidm#NIDM_0000124>
+        prefix nidm_hasMRIProtocol: <http://purl.org/nidash/nidm#NIDM_0000172>
+        prefix nlx_FunctionalMRIprotocol: <http://uri.neuinfo.org/nif/nifstd/birnlex_2250>
+
+
+        SELECT DISTINCT * WHERE {
+            """ + oid_var + """ a nidm_Data: ;
+                rdfs:label ?label ;
+                nidm_grandMeanScaling: $grand_mean_scaling .
+            OPTIONAL {""" + oid_var + """ nidm_targetIntensity: ?target . } .
+            OPTIONAL {""" + oid_var + """ nidm_hasMRIProtocol: ?mri_protocol . } .
+        }
+        """
+        return query
 
     def export(self, nidm_version):
         """
@@ -300,7 +391,7 @@ class ErrorModel(NIDMObject):
     """
 
     def __init__(self, error_distribution, variance_homo, variance_spatial,
-                 dependance, dependance_spatial):
+                 dependance, dependance_spatial=None):
         super(ErrorModel, self).__init__()
         self.error_distribution = error_distribution
         self.variance_homo = variance_homo
@@ -310,6 +401,34 @@ class ErrorModel(NIDMObject):
         self.id = NIIRI[str(uuid.uuid4())]
         self.type = NIDM_ERROR_MODEL
         self.prov_type = PROV['Entity']
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """  
+        prefix nidm_ErrorModel: <http://purl.org/nidash/nidm#NIDM_0000023>
+        prefix nidm_hasErrorDistribution: <http://purl.org/nidash/nidm#NIDM_0000101>
+        prefix nidm_errorVarianceHomogeneous: <http://purl.org/nidash/nidm#NIDM_0000094>
+        prefix nidm_varianceMapWiseDependence: <http://purl.org/nidash/nidm#NIDM_0000126>
+        prefix nidm_hasErrorDependence: <http://purl.org/nidash/nidm#NIDM_0000100>
+        prefix nidm_dependenceMapWiseDependence: <http://purl.org/nidash/nidm#NIDM_0000089>
+
+        SELECT DISTINCT * WHERE {
+            """ + oid_var + """ a nidm_ErrorModel: ;
+                rdfs:label ?label ;
+                nidm_hasErrorDistribution: $error_distribution ;
+                nidm_errorVarianceHomogeneous: $variance_homo ;
+                nidm_varianceMapWiseDependence: $variance_spatial ;
+                nidm_hasErrorDependence: $dependance .
+
+            OPTIONAL {""" + oid_var + """ nidm_dependenceMapWiseDependence: ?dependance_spatial . } .
+        }
+        """
+        return query
 
     def export(self, nidm_version):
         """
@@ -389,7 +508,7 @@ class ParameterEstimateMap(NIDMObject):
 
     def __init__(self, pe_file, pe_num, coord_space, filename=None, sha=None,
                  label=None, suffix='', model_param_estimation=None, oid=None,
-                 export_dir=None):
+                 export_dir=None, format=None):
         super(ParameterEstimateMap, self).__init__(oid=oid)
         # Column index in the corresponding design matrix
         self.num = pe_num
@@ -401,7 +520,8 @@ class ParameterEstimateMap(NIDMObject):
             filename = filename
 
         self.file = NIDMFile(self.id, pe_file, new_filename=filename, sha=sha,
-                             export_dir=export_dir)
+                             export_dir=export_dir, format=format)
+
         self.type = NIDM_PARAMETER_ESTIMATE_MAP
         self.prov_type = PROV['Entity']
         if label is None:
@@ -409,6 +529,27 @@ class ParameterEstimateMap(NIDMObject):
         self.label = label
         # Only used for reading (so far)
         self.model_param_estimation = model_param_estimation
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix nidm_ParameterEstimateMap: <http://purl.org/nidash/nidm#NIDM_0000061>
+
+        SELECT DISTINCT * WHERE {
+            """ + oid_var + """ a nidm_ParameterEstimateMap: ;
+                rdfs:label ?label ;
+                nfo:fileName ?filename ;
+                crypto:sha512 ?sha ;
+                prov:atLocation ?csv_file ;
+                dct:format ?format .
+        }
+        """
+        return query
 
     # Generate prov for contrast map
     def export(self, nidm_version):
@@ -429,15 +570,41 @@ class ResidualMeanSquares(NIDMObject):
     """
 
     def __init__(self, export_dir, residual_file, coord_space,
-                 temporary=False, suffix=''):
+                 temporary=False, suffix='', format=None, filename=None,
+                 sha=None, label=None):
         super(ResidualMeanSquares, self).__init__(export_dir)
         self.coord_space = coord_space
         self.id = NIIRI[str(uuid.uuid4())]
-        filename = 'ResidualMeanSquares' + suffix + '.nii.gz'
+        if filename is None:
+            filename = 'ResidualMeanSquares' + suffix + '.nii.gz'
         self.file = NIDMFile(self.id, residual_file, filename, export_dir,
-                             temporary=temporary)
+                             temporary=temporary, format=format, sha=sha)
+        if label is None:
+            label = "Residual Mean Squares Map"
+        self.label = label
         self.type = NIDM_RESIDUAL_MEAN_SQUARES_MAP
         self.prov_type = PROV['Entity']
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix nidm_ResidualMeanSquaresMap: <http://purl.org/nidash/nidm#NIDM_0000066>
+
+        SELECT DISTINCT * WHERE {
+            """ + oid_var + """ a nidm_ResidualMeanSquaresMap: ;
+                rdfs:label ?label ;
+                nfo:fileName ?filename ;
+                crypto:sha512 ?sha ;
+                prov:atLocation ?residual_file ;
+                dct:format ?format .
+        }
+        """
+        return query
 
     def export(self, nidm_version):
         """
@@ -445,7 +612,7 @@ class ResidualMeanSquares(NIDMObject):
         """
         self.add_attributes((
             (PROV['type'], self.type,),
-            (PROV['label'], "Residual Mean Squares Map"),
+            (PROV['label'], self.label),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id)))
 
 
@@ -456,15 +623,43 @@ class MaskMap(NIDMObject):
     """
 
     def __init__(self, export_dir, mask_file, coord_space, user_defined,
-                 suffix=''):
+                 suffix='', filename=None, format=None, label=None, sha=None):
         super(MaskMap, self).__init__(export_dir)
         self.coord_space = coord_space
         self.id = NIIRI[str(uuid.uuid4())]
-        filename = 'Mask' + suffix + '.nii.gz'
-        self.file = NIDMFile(self.id, mask_file, filename, export_dir)
+        if filename is None:
+            filename = 'Mask' + suffix + '.nii.gz'
+        self.file = NIDMFile(self.id, mask_file, filename, export_dir, 
+            sha=sha, format=format)
         self.user_defined = user_defined
         self.type = NIDM_MASK_MAP
         self.prov_type = PROV['Entity']
+        if label is None:
+            label = "Mask"
+        self.label = label
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix nidm_MaskMap: <http://purl.org/nidash/nidm#NIDM_0000054>
+        prefix nidm_isUserDefined: <http://purl.org/nidash/nidm#NIDM_0000106>
+
+        SELECT DISTINCT * WHERE {
+            """ + oid_var + """ a nidm_MaskMap: ;
+                rdfs:label ?label ;
+                nidm_isUserDefined: ?user_defined ;
+                nfo:fileName ?filename ;
+                crypto:sha512 ?sha ;
+                prov:atLocation ?mask_file ;
+                dct:format ?format .
+        }
+        """
+        return query
 
     def export(self, nidm_version):
         """
@@ -472,7 +667,7 @@ class MaskMap(NIDMObject):
         """
         self.add_attributes((
             (PROV['type'], self.type,),
-            (PROV['label'], "Mask"),
+            (PROV['label'], self.label),
             (NIDM_IS_USER_DEFINED, self.user_defined),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id))
         )
@@ -484,37 +679,70 @@ class GrandMeanMap(NIDMObject):
     Object representing an GrandMeanMap entity.
     """
 
+    # TODO: we should remove mask_file here and ask for masked data instead?
     def __init__(self, org_file, mask_file, coord_space, export_dir,
-                 suffix=''):
+                 suffix='', label=None, filename=None, sha=None,
+                 format=format, masked_median=None):
         super(GrandMeanMap, self).__init__(export_dir)
         self.id = NIIRI[str(uuid.uuid4())]
-        filename = 'GrandMean' + suffix + '.nii.gz'
-        self.file = NIDMFile(self.id, org_file, filename, export_dir)
+        if filename is None:
+            filename = 'GrandMean' + suffix + '.nii.gz'
+        self.file = NIDMFile(self.id, org_file, filename, export_dir, 
+            sha=sha, format=format)
         self.mask_file = mask_file  # needed to compute masked median
         self.coord_space = coord_space
         self.type = NIDM_GRAND_MEAN_MAP
         self.prov_type = PROV['Entity']
+        if label is None:
+            label = "Grand Mean Map"
+        self.label = label
+        self.masked_median = masked_median
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix nidm_GrandMeanMap: <http://purl.org/nidash/nidm#NIDM_0000033>
+        prefix nidm_maskedMedian: <http://purl.org/nidash/nidm#NIDM_0000107>
+
+        SELECT DISTINCT * WHERE {
+            """ + oid_var + """ a nidm_GrandMeanMap: ;
+                rdfs:label ?label ;
+                nidm_maskedMedian: ?masked_median;
+                prov:atLocation ?org_file ;
+                nfo:fileName ?filename ;
+                crypto:sha512 ?sha ;
+                dct:format ?format .
+        }
+        """
+        return query
 
     def export(self, nidm_version):
         """
         Create prov entities and activities.
         """
-        grand_mean_file = self.file.path
-        grand_mean_img = nib.load(grand_mean_file)
-        grand_mean_data = grand_mean_img.get_data()
-        grand_mean_data = np.ndarray.flatten(grand_mean_data)
 
-        mask_img = nib.load(self.mask_file)
-        mask_data = mask_img.get_data()
-        mask_data = np.ndarray.flatten(mask_data)
+        if self.masked_median is None:
+            grand_mean_file = self.file.path
+            grand_mean_img = nib.load(grand_mean_file)
+            grand_mean_data = grand_mean_img.get_data()
+            grand_mean_data = np.ndarray.flatten(grand_mean_data)
 
-        grand_mean_data_in_mask = grand_mean_data[mask_data > 0]
-        masked_median = np.median(
-            np.array(grand_mean_data_in_mask, dtype=float))
+            mask_img = nib.load(self.mask_file)
+            mask_data = mask_img.get_data()
+            mask_data = np.ndarray.flatten(mask_data)
+
+            grand_mean_data_in_mask = grand_mean_data[mask_data > 0]
+            masked_median = np.median(
+                np.array(grand_mean_data_in_mask, dtype=float))
 
         self.add_attributes((
             (PROV['type'], self.type),
-            (PROV['label'], "Grand Mean Map"),
+            (PROV['label'], self.label),
             (NIDM_MASKED_MEDIAN, masked_median),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id))
         )

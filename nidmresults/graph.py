@@ -33,12 +33,9 @@ class NIDMResults():
         self.graph = self.parse()
         self.objects = dict()
 
-        # We need the peaks, excursion set maps and contrast maps
-        # self.get_peaks()
-        # self.get_excursion_set_maps()
-        # self.get_inferences()
         self.load_modelfitting()
         self.load_contrasts()
+        self.load_inferences()
 
     @classmethod
     def load_from_pack(klass, nidm_zip):
@@ -618,86 +615,6 @@ SELECT DISTINCT ?oid ?label ?tail ?stat_map_id WHERE {
         else:
             return inferences
 
-    def get_excursion_set_maps(self):
-        """
-        Read a NIDM-Results document and return a dict of ExcursionSet.
-        """
-
-        # We need to add optional
-    #         nidm_hasClusterLabelsMap: ?cluster_label_map_id ;
-    # nidm_hasMaximumIntensityProjection: ?mip_id ;
-        # nidm_numberOfSignificantClusters: ?num_signif_vox ;
-        # nidm_pValue: ?p_value ;
-        # visu
-        query = """
-prefix prov: <http://www.w3.org/ns/prov#>
-prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
-prefix nidm_ExcursionSetMap: <http://purl.org/nidash/nidm#NIDM_0000025>
-prefix nidm_hasClusterLabelsMap: <http://purl.org/nidash/nidm#NIDM_0000098>
-prefix nidm_hasMaximumIntensityProjection: <http://purl.org/nidash/nidm#NIDM_0\
-000138>
-prefix nidm_inCoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000104>
-prefix nidm_numberOfSignificantClusters: <http://purl.org/nidash/nidm#NIDM_000\
-0111>
-prefix nidm_pValue: <http://purl.org/nidash/nidm#NIDM_0000114>
-
-SELECT DISTINCT ?oid ?label ?location ?format ?filname ?cluster_label_map_id
-?mip_id ?coord_space_id ?sha ?num_signif_vox ?p_value ?inference_id WHERE {
-
-?oid a nidm_ExcursionSetMap: ;
-    prov:atLocation ?location ;
-    rdfs:label ?label ;
-    dct:format ?format ;
-    nfo:fileName ?filename ;
-    nidm_inCoordinateSpace: ?coord_space_id ;
-    crypto:sha512 ?sha ;
-    prov:wasGeneratedBy ?inference_id .
-    OPTIONAL {?oid dc:description ?visualisation } .
-}
-ORDER BY ?peak_label
-        """
-#         query = """
-# prefix prov: <http://www.w3.org/ns/prov#>
-# prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
-# prefix nidm_ExcursionSetMap: <http://purl.org/nidash/nidm#NIDM_0000025>
-
-# SELECT DISTINCT ?oid ?att_name ?att_value WHERE {
-# ?oid a nidm_ExcursionSetMap: ;
-#     ?att_name ?att_value .
-# }
-#         """
-        sd = self.graph.query(query)
-
-        exc_sets = dict()
-        exc_sets_meta = dict()
-        if sd:
-            for row in sd:
-                args = row.asdict()
-                # print(args)
-                if not args['oid'] in exc_sets_meta:
-                    exc_sets_meta[args['oid']] = dict()
-                
-                # exc_sets_meta[args['oid']]['nidm_ExcursionSetMap/' + self.graph.qname(args['att_name'])] = args['att_value']
-
-                coord_space = self.get_coord_spaces(row.coord_space_id)
-                args['coord_space'] = coord_space
-                args.pop("coord_space_id", None)
-
-                inference = self.get_inferences(row.inference_id)
-                args['inference'] = inference
-                args.pop("inference_id", None)
-
-                exc_sets[args['oid']] = ExcursionSet(**args)
-
-                # exc_sets_meta['nidm_ExcursionSetMap/prov:atLocation'] = args['location']
-                # exc_sets_meta['nidm_ExcursionSetMap/nfo:fileName'] = args['filname']
-            # print(exc_sets_meta)
-
-        self.objects.update(exc_sets)
-        return exc_sets
-
     def get_object(self, klass, oid=None, **kwargs):
         query = klass.get_query(oid)
 
@@ -755,54 +672,122 @@ ORDER BY ?peak_label
 
     def load_modelfitting(self):
         query = """
-        prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
         prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+        prefix nidm_Data: <http://purl.org/nidash/nidm#NIDM_0000169>
+        prefix obo_studygrouppopulation: <http://purl.obolibrary.org/obo/STATO_0000193>
+        prefix nidm_ErrorModel: <http://purl.org/nidash/nidm#NIDM_0000023>
+        prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
+        prefix nidm_ResidualMeanSquaresMap: <http://purl.org/nidash/nidm#NIDM_0000066>
+        prefix nidm_MaskMap: <http://purl.org/nidash/nidm#NIDM_0000054>
+        prefix nidm_GrandMeanMap: <http://purl.org/nidash/nidm#NIDM_0000033>
+        prefix nlx_Imaginginstrument: <http://uri.neuinfo.org/nif/nifstd/birnlex_2094>
 
         SELECT DISTINCT * WHERE {
 
             ?design_id a nidm_DesignMatrix: .
-            OPTIONAL { ?design_id dc:description ?designdesc_id . } .
+            OPTIONAL { ?png_id dc:description ?designdesc_id . } .
+
+            ?data_id a nidm_Data: ;
+                prov:wasAttributedTo ?machine_id ;
+                prov:wasAttributedTo ?person_or_group_id .
+            
+            {?person_or_group_id a prov:Person .} UNION
+            {?person_or_group_id a obo_studygrouppopulation: .} .
+
+            ?machine_id a nlx_Imaginginstrument: .
+
+            ?error_id a nidm_ErrorModel: .
 
             ?mpe_id a nidm_ModelParameterEstimation: ;
-                prov:used ?design_id .
+                prov:used ?design_id ;
+                prov:used ?data_id ;
+                prov:used ?error_id .
+
+            ?rms_id a nidm_ResidualMeanSquaresMap: ;
+                nidm_inCoordinateSpace: ?rms_coordspace_id ;
+                prov:wasGeneratedBy ?mpe_id .
+
+            ?mask_id a nidm_MaskMap: ;
+                nidm_inCoordinateSpace: ?mask_coordspace_id ;
+                prov:wasGeneratedBy ?mpe_id .
+
+            ?gm_id a nidm_GrandMeanMap: ;
+                nidm_inCoordinateSpace: ?gm_coordspace_id ;
+                prov:wasGeneratedBy ?mpe_id .
         }
         """
         sd = self.graph.query(query)
 
-        model_fittings = dict()
+        model_fittings = list()
         if sd:
             for row in sd:
                 row_num = 0
-                print("------------")
-                print(row_num)
                 args = row.asdict()
 
                 # TODO: should software_id really be an input?
                 activity = self.get_object(ModelParametersEstimation, args['mpe_id'], software_id=None)
 
                 # TODO fill in image_file
-                design_matrix = self.get_object(DesignMatrix, args['design_id'], matrix=None, image_file=None, export_dir=None)
+                design_matrix_png = None
+                if args['png_id'] is not None:
+                    design_matrix_png = self.get_object(CoordinateSpace, args['png_id'], export_dir=None)
+
+                design_matrix = self.get_object(DesignMatrix, args['design_id'], matrix=None, image_file=design_matrix_png, export_dir=None)
+                data = self.get_object(Data, args['data_id'])
+                error_model = self.get_object(ErrorModel, args['error_id'])
+
+
+                # Find list of model parameter estimate maps
+                query_pe_maps = """
+                prefix nidm_ParameterEstimateMap: <http://purl.org/nidash/nidm#NIDM_0000061>
+                prefix nidm_inCoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000104>
                 
-                print("mfitting ok")
+                SELECT DISTINCT * WHERE {
+                    ?pe_id a nidm_ParameterEstimateMap: ;
+                    nidm_inCoordinateSpace: ?pe_coordspace_id ;
+                    prov:wasGeneratedBy <""" + str(args['mpe_id']) + """> .
+                }
+                """
+                param_estimates = list()
+                sd_pe_maps = self.graph.query(query_pe_maps)
+                if sd_pe_maps:
+                    for row_pe in sd_pe_maps:
+                        args_pe = row_pe.asdict()
+                        pe_map_coordspace = self.get_object(CoordinateSpace, args_pe['pe_coordspace_id'])
+
+                        param_estimates.append(self.get_object(ParameterEstimateMap, args_pe['pe_id'], 
+                            coord_space=pe_map_coordspace))
+
+                rms_coord_space = self.get_object(CoordinateSpace, args['rms_coordspace_id'])
+                rms_map = self.get_object(ResidualMeanSquares, args['rms_id'], coord_space=rms_coord_space, 
+                    export_dir=None)
+
+                mask_coord_space = self.get_object(CoordinateSpace, args['mask_coordspace_id'])
+                mask_map = self.get_object(MaskMap, args['mask_id'], coord_space=mask_coord_space, 
+                    export_dir=None)
+
+                gm_coord_space = self.get_object(CoordinateSpace, args['gm_coordspace_id'])
+                grand_mean_map = self.get_object(GrandMeanMap, args['gm_id'], coord_space=mask_coord_space, 
+                    export_dir=None, mask_file=None)
+
+                machine = self.get_object(ImagingInstrument, args['machine_id'])
+
+                subjects = self.get_object(Group, args['person_or_group_id'])
+
+                if subjects is None:
+                    # Try loading as a single subject
+                    subjects = self.get_object(Person, args['person_or_group_id'])
+                
+                model_fittings.append(ModelFitting(activity, design_matrix, data, error_model,
+                 param_estimates, rms_map, mask_map, grand_mean_map,
+                 machine, subjects))
 
                 con_num = row_num + 1        
 
-        # ModelFitting(activity, design_matrix, data, error_model,
-        #          param_estimates, rms_map, mask_map, grand_mean_map,
-        #          machine, subjects):
-        # self.activity = activity
-        # self.design_matrix = design_matrix
-        # self.data = data
-        # self.error_model = error_model
-        # self.param_estimates = param_estimates
-        # self.rms_map = rms_map
-        # self.mask_map = mask_map
-        # self.grand_mean_map = grand_mean_map
-        # self.machine = machine
-        # self.subjects = subjects
-
     def load_contrasts(self):
         query = """
+        prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+        prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
         prefix nidm_contrastName: <http://purl.org/nidash/nidm#NIDM_0000085>
         prefix obo_contrastweightmatrix: <http://purl.obolibrary.org/obo/STATO_0000323>
         prefix nidm_ContrastEstimation: <http://purl.org/nidash/nidm#NIDM_0000001>
@@ -815,10 +800,16 @@ ORDER BY ?peak_label
 
         SELECT DISTINCT * WHERE {
 
+            ?design_id a nidm_DesignMatrix: .
+
             ?conw_id a obo_contrastweightmatrix: .
 
             ?conest_id a nidm_ContrastEstimation: ;
-                prov:used ?conw_id .    
+                prov:used ?conw_id ;
+                prov:used ?design_id .
+
+            ?mpe_id a nidm_ModelParameterEstimation: ;
+                prov:used ?design_id .
 
             ?conm_id a nidm_ContrastMap: ;
                 nidm_inCoordinateSpace: ?conm_coordspace_id ;
@@ -851,8 +842,6 @@ ORDER BY ?peak_label
         if sd:
             for row in sd:
                 con_num = 0
-                print("------------")
-                print(con_num)
                 args = row.asdict()
 
                 contrast_num = str(con_num)
@@ -890,10 +879,148 @@ ORDER BY ?peak_label
                     con = Contrast(contrast_num, args['contrast_name'], weights, estimation,
                           contrast_map, stderr_or_expl_mean_sq_map, stat_map=stat_map)
 
+                # Find list of model parameter estimate maps
+                query_pe_maps = """
+                prefix nidm_ParameterEstimateMap: <http://purl.org/nidash/nidm#NIDM_0000061>
+                
+                SELECT DISTINCT * WHERE {
+                    <""" + str(args['conest_id']) + """> prov:used  ?pe_id .
+                    ?pe_id a nidm_ParameterEstimateMap: .
+                    
+                }
+                """
+                pe_ids = ()
+                sd_pe_maps = self.graph.query(query_pe_maps)
+                if sd_pe_maps:
+                    for row_pe in sd_pe_maps:
+                        args_pe = row_pe.asdict()
+                        pe_ids = pe_ids + (args_pe['pe_id'],)
 
-                print("est ok")
+                contrasts[(args['mpe_id'], pe_ids)] = con
 
                 con_num = con_num + 1
+
+    def load_inferences(self):
+        query = """
+        prefix nidm_ContrastEstimation: <http://purl.org/nidash/nidm#NIDM_0000001>
+
+        prefix nidm_Inference: <http://purl.org/nidash/nidm#NIDM_0000049>
+        prefix nidm_HeightThreshold: <http://purl.org/nidash/nidm#NIDM_0000034>
+        prefix nidm_ExtentThreshold: <http://purl.org/nidash/nidm#NIDM_0000026>
+        prefix nidm_PeakDefinitionCriteria: <http://purl.org/nidash/nidm#NIDM_0000063>
+        prefix nidm_ClusterDefinitionCriteria: <http://purl.org/nidash/nidm#NIDM_0000007>
+        prefix nidm_DisplayMaskMap: <http://purl.org/nidash/nidm#NIDM_0000020>
+        prefix nidm_ExcursionSetMap: <http://purl.org/nidash/nidm#NIDM_0000025>
+        prefix nidm_inCoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000104>
+        prefix nidm_SearchSpaceMaskMap: <http://purl.org/nidash/nidm#NIDM_0000068>
+
+        SELECT DISTINCT * WHERE {
+            ?con_est_id a nidm_ContrastEstimation: .
+
+            ?inference_id a nidm_Inference: ;
+                prov:used/prov:wasGeneratedBy ?con_est_id ;
+                prov:used ?height_thresh_id ;
+                prov:used ?extent_thresh_id ;
+                prov:used ?peak_criteria_id ;
+                prov:used ?cluster_criteria_id .
+
+            ?height_thresh_id a nidm_HeightThreshold: .
+
+            ?extent_thresh_id a nidm_ExtentThreshold: .
+
+            ?peak_criteria_id a nidm_PeakDefinitionCriteria: .
+
+            ?cluster_criteria_id a nidm_ClusterDefinitionCriteria: .
+
+            OPTIONAL {
+            ?inference_id prov:used ?display_mask_id .
+            ?display_mask_id a nidm_DisplayMaskMap: ;
+                nidm_inCoordinateSpace: ?disp_coord_space_id . 
+            } .
+
+            ?exc_set_id a nidm_ExcursionSetMap: ;
+                nidm_inCoordinateSpace: ?excset_coord_space_id ;
+                prov:wasGeneratedBy ?inference_id .
+
+            ?search_space_id a nidm_SearchSpaceMaskMap: ;
+                nidm_inCoordinateSpace: ?search_space_coord_space_id ;
+                prov:wasGeneratedBy ?inference_id .
+        }
+    """
+        sd = self.graph.query(query)
+
+        inferences = dict()
+        if sd:
+            for row in sd:
+                args = row.asdict()
+                inference = self.get_object(InferenceActivity, args['inference_id'])
+
+                height_thresh = self.get_object(HeightThreshold, args['height_thresh_id'])
+                extent_thresh = self.get_object(ExtentThreshold, args['extent_thresh_id'])
+                peak_criteria = self.get_object(PeakCriteria, args['peak_criteria_id'], contrast_num=None)
+                cluster_criteria = self.get_object(ClusterCriteria, args['cluster_criteria_id'], contrast_num=None)
+
+                if 'display_mask_id' in args:
+                    disp_coordspace = self.get_object(CoordinateSpace, args['disp_coord_space_id'])
+                    disp_mask = self.get_object(DisplayMaskMap, args['display_mask_id'], 
+                        contrast_num=None, coord_space=disp_coordspace, mask_num=None, export_dir=None)
+                else:
+                    disp_mask = None
+
+                excset_coordspace = self.get_object(CoordinateSpace, args['excset_coord_space_id'])
+                excursion_set = self.get_object(ExcursionSet, args['exc_set_id'], 
+                    coord_space=excset_coordspace)
+
+                searchspace_coordspace = self.get_object(CoordinateSpace, args['search_space_coord_space_id'])
+                search_space = self.get_object(SearchSpace, args['search_space_id'], 
+                    coord_space=searchspace_coordspace, dlh=None, export_dir=None)
+
+                # TODO
+                software_id = None
+
+                # Find list of clusters
+                query_clusters = """
+                prefix nidm_SupraThresholdCluster: <http://purl.org/nidash/nidm#NIDM_0000070>
+                
+                SELECT DISTINCT * WHERE {
+                    ?cluster_id a nidm_SupraThresholdCluster: ;
+                    prov:wasDerivedFrom <""" + str(args['exc_set_id']) + """> .
+                }
+                """
+                clusters = list()
+                sd_clusters = self.graph.query(query_clusters)
+                if sd_clusters:
+                    for row_cluster in sd_clusters:
+                        args_cl = row_cluster.asdict()
+
+                        # Find list of peaks
+                        query_peaks = """
+                        prefix nidm_Peak: <http://purl.org/nidash/nidm#NIDM_0000062>
+                        
+                        SELECT DISTINCT * WHERE {
+                            ?peak_id a nidm_Peak: ;
+                            prov:wasDerivedFrom <""" + str(args_cl['cluster_id']) + """> .
+                        }
+                        """
+                        peaks = list()
+                        sd_peaks = self.graph.query(query_peaks)
+                        if sd_peaks:
+                            for row_peak in sd_peaks:
+                                args_peak = row_peak.asdict()
+
+                                peaks.append(self.get_object(Peak, args_peak['peak_id']))
+
+                        clusters.append(self.get_object(Cluster, args_cl['cluster_id'], peaks=peaks))
+
+                # Dictionary of (key, value) pairs where key is the identifier of a
+                # ContrastEstimation object and value is an object of type Inference
+                # describing the inference step in NIDM-Results (main activity:
+                # Inference)
+                inferences[args['con_est_id']] = Inference(inference, height_thresh, extent_thresh,
+                    peak_criteria, cluster_criteria, disp_mask, excursion_set,
+                    clusters, search_space, software_id)
+
+
 
     def serialize(self, destination, format="mkda", overwrite=False,
                   last_used_con_id=0):
