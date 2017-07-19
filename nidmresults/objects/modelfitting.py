@@ -232,7 +232,6 @@ class DesignMatrix(NIDMObject):
         prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
         prefix nidm_withEstimationMethod: <http://purl.org/nidash/nidm#NIDM_0000134>
         prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
-        prefix nidm_hasDriftModel: <http://purl.org/nidash/nidm#NIDM_0000088>
 
         SELECT DISTINCT * WHERE {
             """ + oid_var + """ a nidm_DesignMatrix: ;
@@ -242,7 +241,6 @@ class DesignMatrix(NIDMObject):
 
             OPTIONAL { """  + oid_var + """ nidm_regressorNames: ?regressors . } .
             OPTIONAL { """  + oid_var + """ nidm_hasHRFBasis: ?hrf_model . } .
-            OPTIONAL { """  + oid_var + """ nidm_hasDriftModel: ?drift_model . } .
         }
         """
         return query
@@ -291,13 +289,43 @@ class DriftModel(NIDMObject):
     Object representing a DriftModel entity.
     """
 
-    def __init__(self, drift_type, parameter, oid=None):
+    def __init__(self, drift_type, parameter, label=None, oid=None):
         super(DriftModel, self).__init__(oid=oid)
         self.drift_type = drift_type
         self.id = NIIRI[str(uuid.uuid4())]
         self.parameter = parameter
         self.type = drift_type
         self.prov_type = PROV['Entity']
+        if not label:
+            if self.drift_type == FSL_GAUSSIAN_RUNNING_LINE_DRIFT_MODEL:
+                self.label = "FSL's Gaussian Running Line Drift Model"
+        else:
+            self.label = label
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+        prefix spm_SPMsDriftCutoffPeriod: <http://purl.org/nidash/spm#SPM_0000001>
+        prefix fsl_driftCutoffPeriod: <http://purl.org/nidash/fsl#FSL_0000004>
+
+        SELECT DISTINCT * WHERE {
+            [] a nidm_DesignMatrix: ;
+                nidm_hasDriftModel: """ + oid_var + """ .
+
+            """ + oid_var + """ a ?drift_type ;
+                rdfs:label ?label .
+
+            {""" + oid_var + """ spm_SPMsDriftCutoffPeriod: ?parameter .} UNION
+            {""" + oid_var + """ fsl_driftCutoffPeriod: ?parameter .} .
+        }
+        """
+        return query
 
     def export(self, nidm_version, export_dir):
         """
@@ -307,7 +335,7 @@ class DriftModel(NIDMObject):
 
         if self.drift_type == FSL_GAUSSIAN_RUNNING_LINE_DRIFT_MODEL:
             attributes.append(
-                (PROV['label'], "FSL's Gaussian Running Line Drift Model"))
+                (PROV['label'], self.label))
             attributes.append((FSL_DRIFT_CUTOFF_PERIOD, self.parameter))
 
         # Create "drift model" entity

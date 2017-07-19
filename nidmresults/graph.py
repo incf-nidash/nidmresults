@@ -111,6 +111,7 @@ class NIDMResults():
     def load_modelfitting(self):
         query = """
         prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+        prefix nidm_hasDriftModel: <http://purl.org/nidash/nidm#NIDM_0000088>
         prefix nidm_Data: <http://purl.org/nidash/nidm#NIDM_0000169>
         prefix obo_studygrouppopulation: <http://purl.obolibrary.org/obo/STATO_0000193>
         prefix nidm_ErrorModel: <http://purl.org/nidash/nidm#NIDM_0000023>
@@ -123,7 +124,8 @@ class NIDMResults():
         SELECT DISTINCT * WHERE {
 
             ?design_id a nidm_DesignMatrix: .
-            OPTIONAL { ?png_id dc:description ?designdesc_id . } .
+            OPTIONAL { ?design_id dc:description ?png_id . } .
+            OPTIONAL { ?design_id nidm_hasDriftModel: ?drift_model_id . } .
 
             ?data_id a nidm_Data: ;
                 prov:wasAttributedTo ?machine_id ;
@@ -165,12 +167,18 @@ class NIDMResults():
                 # TODO: should software_id really be an input?
                 activity = self.get_object(ModelParametersEstimation, args['mpe_id'], software_id=self.software.id)
 
-                # TODO fill in image_file
-                design_matrix_png = None
-                if args['png_id'] is not None:
+                if 'png_id' in args:
                     design_matrix_png = self.get_object(CoordinateSpace, args['png_id'])
+                else:
+                    design_matrix_png = None
 
-                design_matrix = self.get_object(DesignMatrix, args['design_id'], matrix=None, image_file=design_matrix_png)
+                if 'drift_model_id' in args:
+                    drift_model = self.get_object(DriftModel, args['drift_model_id'])
+                else:
+                    drift_model = None
+
+                design_matrix = self.get_object(DesignMatrix, args['design_id'], matrix=None, 
+                    image_file=design_matrix_png, drift_model=drift_model)
                 data = self.get_object(Data, args['data_id'])
                 error_model = self.get_object(ErrorModel, args['error_id'])
 
