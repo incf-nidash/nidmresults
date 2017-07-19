@@ -29,9 +29,10 @@ class NIDMResults():
     def __init__(self, nidm_zip=None, rdf_file=None):
 
         self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")      
+        self.prepend_path = zipfile.ZipFile(nidm_zip)
 
         # Load the turtle file
-        with zipfile.ZipFile(nidm_zip) as z:
+        with self.prepend_path as z:
             rdf_data = z.read('nidm.ttl')
         self.graph = rdflib.Graph()
         try:
@@ -486,6 +487,7 @@ class NIDMResults():
             exporter.inferences = self.inferences
             exporter.exporter = ExporterSoftware('nidmresults', nidmresults.__version__)
             exporter.software = self.software
+            exporter.prepend_path = self.prepend_path
             exporter.export()
 
         elif format == "mkda":

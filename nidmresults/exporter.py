@@ -76,6 +76,8 @@ class NIDMExporter():
         # A temp directory that will contain the exported data
         self.export_dir = tempfile.mkdtemp(prefix="nidm-", dir=out_path)
 
+        self.prepend_path = None
+
     def parse(self):
         """
         Parse a result directory to extract the pieces information to be
@@ -121,7 +123,10 @@ class NIDMExporter():
         """
         Add a NIDMObject to a NIDM-Results export.
         """
-        nidm_object.export(self.version, self.export_dir)
+        if not isinstance(nidm_object, NIDMFile):
+            nidm_object.export(self.version, self.export_dir)
+        else:
+            nidm_object.export(self.version, self.export_dir, self.prepend_path)
         # ProvDocument: add object to the bundle
         if nidm_object.prov_type == PROV['Activity']:
             self.bundle.activity(nidm_object.id, other_attributes=nidm_object.attributes)

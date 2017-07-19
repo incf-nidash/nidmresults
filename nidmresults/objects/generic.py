@@ -18,6 +18,7 @@ import json
 from prov.model import Literal
 from prov.constants import XSD_STRING
 import warnings
+import zipfile
 
 
 class NIDMObject(object):
@@ -219,17 +220,25 @@ class NIDMFile(NIDMObject):
 
         return hashlib.sha512(data).hexdigest()
 
-    def export(self, nidm_version, export_dir):
+    def export(self, nidm_version, export_dir, prepend_path):
         """
         Copy file over of export_dir and create corresponding triples
         """
         if self.path is not None:
-            path, org_filename = os.path.split(self.path)
             if export_dir is not None:
                 # Copy file only if export_dir is not None
                 new_file = os.path.join(export_dir, self.new_filename)
                 if not self.path == new_file:
-                    shutil.copy(self.path, new_file)
+                    if isinstance(prepend_path, zipfile.ZipFile):
+                        with prepend_path as z:
+                            z.extract(str(self.path), new_file)
+                    else:
+                        if prepend_path:
+                            file_copied = os.path.join(prepend_path, self.path)
+                        else:
+                            file_copied = self.path
+                        shutil.copy(file_copied, new_file)
+
                     if self.temporary:
                         os.remove(self.path)
             else:
@@ -246,6 +255,7 @@ class NIDMFile(NIDMObject):
                 self.add_attributes([(PROV['atLocation'], loc)])
 
             if nidm_version['num'] in ("1.0.0", "1.1.0"):
+                path, org_filename = os.path.split(self.path)
                 if (org_filename is not self.new_filename) \
                         and (not self.temporary):
                     self.add_attributes([(NFO['fileName'], org_filename)])
