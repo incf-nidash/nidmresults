@@ -198,7 +198,10 @@ class DesignMatrix(NIDMObject):
         self.prov_type = PROV['Entity']
         self.id = NIIRI[str(uuid.uuid4())]
         img_filename = 'DesignMatrix' + suffix + '.png'
-        self.image = Image(image_file, img_filename)
+        if isinstance(image_file, Image):
+            self.image = image_file
+        else:
+            self.image = Image(image_file, img_filename)
         self.regressors = regressors
         self.design_type = design_type
         self.hrf_model = hrf_model

@@ -168,7 +168,7 @@ class NIDMResults():
                 activity = self.get_object(ModelParametersEstimation, args['mpe_id'], software_id=self.software.id)
 
                 if 'png_id' in args:
-                    design_matrix_png = self.get_object(CoordinateSpace, args['png_id'])
+                    design_matrix_png = self.get_object(Image, args['png_id'])
                 else:
                     design_matrix_png = None
 
