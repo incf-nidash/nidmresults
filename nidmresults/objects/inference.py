@@ -80,7 +80,7 @@ class InferenceActivity(NIDMObject):
         """
         return query
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -101,22 +101,21 @@ class ExcursionSet(NIDMObject):
     """
 
     def __init__(self, location, coord_space, visualisation=None,
-                 export_dir=None, oid=None, format=None, label=None,
+                 oid=None, format=None, label=None,
                  sha=None, filename=None, inference=None, suffix='',
                  clust_map=None):
-        super(ExcursionSet, self).__init__(export_dir, oid)
-        # Excursion set is going to be copied over to export_dir folder
-        if export_dir is not None:
+        super(ExcursionSet, self).__init__(oid)
+        if not filename:
             filename = 'ExcursionSet' + suffix + '.nii.gz'
         else:
             filename = location
         self.filename = filename
-        self.file = NIDMFile(self.id, location, filename, export_dir, sha)
+        self.file = NIDMFile(self.id, location, filename, sha)
         self.type = NIDM_EXCURSION_SET_MAP
         self.prov_type = PROV['Entity']
         if visualisation is not None:
             visu_filename = 'ExcursionSet' + suffix + '.png'
-            self.visu = Image(export_dir, visualisation, visu_filename)
+            self.visu = Image(visualisation, visu_filename)
         if label is None:
             label = "Excursion Set Map"
         self.label = label
@@ -156,7 +155,7 @@ class ExcursionSet(NIDMObject):
         return query
 
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -181,16 +180,13 @@ class ClusterLabelsMap(NIDMObject):
     """
 
     def __init__(self, location, coord_space,
-                 export_dir=None, oid=None, format=None, label=None,
+                 oid=None, format=None, label=None,
                  sha=None, filename=None, suffix='', temporary=False):
-        super(ClusterLabelsMap, self).__init__(export_dir, oid)
-        # ClusterLabelsMap is going to be copied over to export_dir folder
-        if export_dir is not None:
+        super(ClusterLabelsMap, self).__init__(oid)
+        if not filename:
             filename = 'ClusterLabels' + suffix + '.nii.gz'
-        else:
-            filename = location
         self.filename = filename
-        self.file = NIDMFile(self.id, location, filename, export_dir, sha,
+        self.file = NIDMFile(self.id, location, filename, sha,
                              temporary=temporary)
         self.type = NIDM_CLUSTER_LABELS_MAP
         self.prov_type = PROV['Entity']
@@ -199,7 +195,7 @@ class ClusterLabelsMap(NIDMObject):
         self.label = label
         self.coord_space = coord_space
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -288,7 +284,7 @@ class HeightThreshold(NIDMObject):
         return query
 
 
-    def export(self, version):
+    def export(self, version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -395,7 +391,7 @@ class ExtentThreshold(NIDMObject):
         """
         return query
 
-    def export(self, version):
+    def export(self, version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -496,7 +492,7 @@ class Cluster(NIDMObject):
         return query
 
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -520,12 +516,12 @@ class DisplayMaskMap(NIDMObject):
     Object representing a DisplayMaskMap entity.
     """
     def __init__(self, contrast_num, mask_file, mask_num, coord_space,
-                 export_dir, sha=None, filename=None, format=None, label=None, oid=None):
-        super(DisplayMaskMap, self).__init__(export_dir, oid=oid)
+                 sha=None, filename=None, format=None, label=None, oid=None):
+        super(DisplayMaskMap, self).__init__(oid=oid)
         self.id = NIIRI[str(uuid.uuid4())]
         if not filename:
             filename = 'DisplayMask' + str(self.mask_num) + '.nii.gz'
-        self.file = NIDMFile(self.id, mask_file, filename, export_dir, 
+        self.file = NIDMFile(self.id, mask_file, filename,  
             sha=sha, format=format)
         self.coord_space = coord_space
         self.type = NIDM_DISPLAY_MASK_MAP
@@ -556,7 +552,7 @@ class DisplayMaskMap(NIDMObject):
         """
         return query
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -606,7 +602,7 @@ class PeakCriteria(NIDMObject):
         """
         return query
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -658,7 +654,7 @@ class ClusterCriteria(NIDMObject):
         """
         return query
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -701,7 +697,7 @@ class CenterOfGravity(NIDMObject):
         self.type = NIDM_CLUSTER_CENTER_OF_GRAVITY
         self.prov_type = PROV['Entity']
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -722,17 +718,17 @@ class SearchSpace(NIDMObject):
     def __init__(self, search_space_file, vol_in_voxels, vol_in_units,
                  vol_in_resels, resel_size_in_voxels, dlh,
                  random_field_stationarity, noise_fwhm_in_voxels,
-                 noise_fwhm_in_units, coord_space, export_dir,
+                 noise_fwhm_in_units, coord_space, 
                  expected_num_voxels=None, expected_num_clusters=None,
                  height_critical_fwe05=None, height_critical_fdr05=None,
                  extent_critical_fwe05=None, extent_critical_fdr05=None,
                  search_vol_geom=None, filename=None, sha=None, format=None,
                  label=None, oid=None):
-        super(SearchSpace, self).__init__(export_dir, oid=oid)
+        super(SearchSpace, self).__init__(oid=oid)
         self.id = NIIRI[str(uuid.uuid4())]
         if not filename:
             filename = 'SearchSpaceMask.nii.gz'
-        self.file = NIDMFile(self.id, search_space_file, filename, export_dir,
+        self.file = NIDMFile(self.id, search_space_file, filename,
             sha=sha, format=format)
         self.coord_space = coord_space
         self.resel_size_in_voxels = resel_size_in_voxels
@@ -803,7 +799,7 @@ class SearchSpace(NIDMObject):
         return query
 
     # Generate prov for search space entity generated by the inference activity
-    def export(self, version):
+    def export(self, version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -865,7 +861,7 @@ class Coordinate(NIDMObject):
     def __str__(self):
         return '%s\t%s' % (self.label, self.coord_vector)
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -949,7 +945,7 @@ class Peak(NIDMObject):
         return '%s \tz=%.2f \tp=%.2e (unc.) \t%s' % (
             self.label, self.equiv_z, self.p_unc, str(self.coordinate))
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """

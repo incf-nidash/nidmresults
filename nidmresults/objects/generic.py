@@ -27,9 +27,7 @@ class NIDMObject(object):
     or agent
     """
 
-    def __init__(self, export_dir=None, oid=None):
-        self.export_dir = export_dir
-
+    def __init__(self, oid=None):
         if oid is None:
             self.id = NIIRI[str(uuid.uuid4())]
         else:
@@ -166,7 +164,7 @@ class CoordinateSpace(NIDMObject):
         """
         return query
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -186,9 +184,9 @@ class NIDMFile(NIDMObject):
     """
     Object representing a File (to be used as attribute of another class)
     """
-    def __init__(self, rdf_id, location, new_filename=None, export_dir=None,
+    def __init__(self, rdf_id, location, new_filename=None,
                  sha=None, format=None, temporary=False):
-        super(NIDMFile, self).__init__(export_dir)
+        super(NIDMFile, self).__init__()
         self.prov_type = PROV['Entity']
         self.path = location
         if new_filename is None:
@@ -221,15 +219,15 @@ class NIDMFile(NIDMObject):
 
         return hashlib.sha512(data).hexdigest()
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Copy file over of export_dir and create corresponding triples
         """
         if self.path is not None:
             path, org_filename = os.path.split(self.path)
-            if self.export_dir is not None:
+            if export_dir is not None:
                 # Copy file only if export_dir is not None
-                new_file = os.path.join(self.export_dir, self.new_filename)
+                new_file = os.path.join(export_dir, self.new_filename)
                 if not self.path == new_file:
                     shutil.copy(self.path, new_file)
                     if self.temporary:
@@ -244,7 +242,7 @@ class NIDMFile(NIDMObject):
 
             self.add_attributes([(NFO['fileName'], self.new_filename)])
 
-            if self.export_dir:
+            if export_dir:
                 self.add_attributes([(PROV['atLocation'], loc)])
 
             if nidm_version['num'] in ("1.0.0", "1.1.0"):
@@ -270,12 +268,12 @@ class Image(NIDMObject):
     Object representing an Image entity.
     """
 
-    def __init__(self, export_dir, image_file, filename, format='png', oid=None):
-        super(Image, self).__init__(export_dir, oid=oid)
+    def __init__(self, image_file, filename, format='png', oid=None):
+        super(Image, self).__init__(oid=oid)
         self.type = DCTYPE['Image']
         self.prov_type = PROV['Entity']
         self.id = NIIRI[str(uuid.uuid4())]
-        self.file = NIDMFile(self.id, image_file, filename, export_dir)
+        self.file = NIDMFile(self.id, image_file, filename)
 
     @classmethod
     def get_query(klass, oid=None):
@@ -298,7 +296,7 @@ class Image(NIDMObject):
         """
         return query    
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entity.
         """
@@ -356,7 +354,7 @@ class NeuroimagingSoftware(NIDMObject):
         """
         return query    
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -392,7 +390,7 @@ class ExporterSoftware(NIDMObject):
             self.type = None
 
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -415,7 +413,7 @@ class NIDMResultsExport(NIDMObject):
         self.prov_type = PROV['Activity']
         self.label = "NIDM-Results export"
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """

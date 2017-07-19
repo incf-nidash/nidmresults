@@ -81,7 +81,7 @@ class ContrastWeights(NIDMObject):
         """
         return query
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov graph.
         """
@@ -108,9 +108,9 @@ class ContrastMap(NIDMObject):
     """
 
     def __init__(self, contrast_file, contrast_num, contrast_name,
-                 coord_space, export_dir, ident=None, sha=None, format=None, 
+                 coord_space, ident=None, sha=None, format=None, 
                  label=None, filename=None, oid=None):
-        super(ContrastMap, self).__init__(export_dir, oid=oid)
+        super(ContrastMap, self).__init__(oid=oid)
         self.num = contrast_num
         self.name = contrast_name
         if ident is None:
@@ -119,7 +119,7 @@ class ContrastMap(NIDMObject):
             self.id = ident
         if filename is None:
             filename = 'Contrast' + self.num + '.nii.gz'
-        self.file = NIDMFile(self.id, contrast_file, filename, export_dir, sha=sha, format=format)
+        self.file = NIDMFile(self.id, contrast_file, filename, sha=sha, format=format)
         self.coord_space = coord_space
         self.type = NIDM_CONTRAST_MAP
         self.prov_type = PROV['Entity']
@@ -150,7 +150,7 @@ class ContrastMap(NIDMObject):
         """
         return query
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov graph.
         """
@@ -167,9 +167,9 @@ class ContrastExplainedMeanSquareMap(NIDMObject):
     Object representing a ContrastExplainedMeanSquareMap entity.
     """
     def __init__(self, stat_file, sigma_sq_file, contrast_num,
-                 coord_space, export_dir, expl_mean_sq_file=None, 
+                 coord_space, expl_mean_sq_file=None, 
                  sha=None, format=None, filename=None, oid=None):
-        super(ContrastExplainedMeanSquareMap, self).__init__(export_dir, oid=oid)
+        super(ContrastExplainedMeanSquareMap, self).__init__(oid=oid)
         self.stat_file = stat_file
         self.sigma_sq_file = sigma_sq_file
         self.num = contrast_num
@@ -205,7 +205,7 @@ class ContrastExplainedMeanSquareMap(NIDMObject):
         """
         return query
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov graph.
         """
@@ -222,12 +222,11 @@ class ContrastExplainedMeanSquareMap(NIDMObject):
 
             expl_mean_sq_filename = \
                 "ContrastExplainedMeanSquareMap" + self.num + ".nii.gz"
-            self.expl_mean_sq_file = os.path.join(
-                self.export_dir, expl_mean_sq_filename)
+            self.expl_mean_sq_file = os.path.join(export_dir, expl_mean_sq_filename)
             nib.save(expl_mean_sq, expl_mean_sq_file)
 
         self.file = NIDMFile(self.id, expl_mean_sq_file,
-                             expl_mean_sq_filename, self.export_dir,
+                             expl_mean_sq_filename,
                              sha=self.sha, filename=self.filename, format=self.format)
 
         # Contrast Explained Mean Square Map entity
@@ -245,9 +244,9 @@ class ContrastStdErrMap(NIDMObject):
     """
 
     def __init__(self, contrast_num, filepath, is_variance, coord_space,
-                 var_coord_space, export_dir, label=None, format=None, 
+                 var_coord_space, label=None, format=None, 
                  sha=None, filename=None, oid=None):
-        super(ContrastStdErrMap, self).__init__(export_dir, oid=oid)
+        super(ContrastStdErrMap, self).__init__(oid=oid)
         self.file = filepath
         self.id = NIIRI[str(uuid.uuid4())]
         self.is_variance = is_variance
@@ -286,7 +285,7 @@ class ContrastStdErrMap(NIDMObject):
         """
         return query        
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov graph.
         """
@@ -305,13 +304,13 @@ class ContrastStdErrMap(NIDMObject):
             standard_error_img = nib.Nifti1Image(np.sqrt(contrast_variance),
                                                  var_cope_img.get_qform())
 
-            stderr_file = os.path.join(self.export_dir, filename)
+            stderr_file = os.path.join(export_dir, filename)
             nib.save(standard_error_img, stderr_file)
             self.file = NIDMFile(
-                self.id, stderr_file, filename, self.export_dir)
+                self.id, stderr_file, filename)
 
         else:
-            self.file = NIDMFile(self.id, self.file, None, self.export_dir, format=self.format, sha=self.sha, filename=self.filename)
+            self.file = NIDMFile(self.id, self.file, None, format=self.format, sha=self.sha, filename=self.filename)
 
         self.add_attributes((
             (PROV['type'], self.type),
@@ -331,7 +330,7 @@ class ContrastVariance(NIDMObject):
         self.filename = filename
         self.prov_type = PROV['Entity']
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         self.add_attributes([(PROV['type'], NIDM_CONTRAST_VARIANCE_MAP)])
 
 
@@ -342,10 +341,10 @@ class StatisticMap(NIDMObject):
     """
 
     def __init__(self, location, stat_type, contrast_name, dof, coord_space,
-                 contrast_num=None, export_dir=None, label=None, oid=None,
+                 contrast_num=None, label=None, oid=None,
                  format="image/nifti", effdof=None, filename=None, sha=None,
                  contrast_estimation=None):
-        super(StatisticMap, self).__init__(export_dir, oid=oid)
+        super(StatisticMap, self).__init__(oid=oid)
         self.num = contrast_num
         self.contrast_name = contrast_name
         self.stat_type = stat_type
@@ -359,7 +358,7 @@ class StatisticMap(NIDMObject):
         if self.num is not None:
             filename = self.stat_type.upper() + \
                 'Statistic' + self.num + '.nii.gz'
-        self.file = NIDMFile(self.id, location, filename, export_dir, sha=sha)
+        self.file = NIDMFile(self.id, location, filename, sha=sha)
         self.coord_space = coord_space
 
         self.dof = dof
@@ -415,7 +414,7 @@ class StatisticMap(NIDMObject):
         """
         return query
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov graph.
         """
@@ -478,7 +477,7 @@ class ContrastEstimation(NIDMObject):
         """
         return query
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov graph.
         """

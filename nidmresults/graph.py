@@ -168,9 +168,9 @@ class NIDMResults():
                 # TODO fill in image_file
                 design_matrix_png = None
                 if args['png_id'] is not None:
-                    design_matrix_png = self.get_object(CoordinateSpace, args['png_id'], export_dir=None)
+                    design_matrix_png = self.get_object(CoordinateSpace, args['png_id'])
 
-                design_matrix = self.get_object(DesignMatrix, args['design_id'], matrix=None, image_file=design_matrix_png, export_dir=None)
+                design_matrix = self.get_object(DesignMatrix, args['design_id'], matrix=None, image_file=design_matrix_png)
                 data = self.get_object(Data, args['data_id'])
                 error_model = self.get_object(ErrorModel, args['error_id'])
 
@@ -197,16 +197,14 @@ class NIDMResults():
                             coord_space=pe_map_coordspace, pe_num=None))
 
                 rms_coord_space = self.get_object(CoordinateSpace, args['rms_coordspace_id'])
-                rms_map = self.get_object(ResidualMeanSquares, args['rms_id'], coord_space=rms_coord_space, 
-                    export_dir=None)
+                rms_map = self.get_object(ResidualMeanSquares, args['rms_id'], coord_space=rms_coord_space)
 
                 mask_coord_space = self.get_object(CoordinateSpace, args['mask_coordspace_id'])
-                mask_map = self.get_object(MaskMap, args['mask_id'], coord_space=mask_coord_space, 
-                    export_dir=None)
+                mask_map = self.get_object(MaskMap, args['mask_id'], coord_space=mask_coord_space)
 
                 gm_coord_space = self.get_object(CoordinateSpace, args['gm_coordspace_id'])
                 grand_mean_map = self.get_object(GrandMeanMap, args['gm_id'], coord_space=mask_coord_space, 
-                    export_dir=None, mask_file=None)
+                    mask_file=None)
 
                 machine = self.get_object(ImagingInstrument, args['machine_id'])
 
@@ -292,16 +290,16 @@ class NIDMResults():
 
                 contrast_map_coordspace = self.get_object(CoordinateSpace, args['conm_coordspace_id'])
                 contrast_map = self.get_object(ContrastMap, args['conm_id'], 
-                    coord_space=contrast_map_coordspace, contrast_num=contrast_num, export_dir=None)
+                    coord_space=contrast_map_coordspace, contrast_num=contrast_num)
 
                 contraststd_map_coordspace = self.get_object(CoordinateSpace, args['constdm_coordspace_id'])
 
                 stderr_or_expl_mean_sq_map = self.get_object(ContrastExplainedMeanSquareMap, args['constdm_coordspace_id'],
-                    coord_space=contraststd_map_coordspace, contrast_num=contrast_num, export_dir=None)
+                    coord_space=contraststd_map_coordspace, contrast_num=contrast_num)
                 if stderr_or_expl_mean_sq_map is None:
                     # Try loading as a contrast standard map
                     stderr_or_expl_mean_sq_map = self.get_object(ContrastStdErrMap, args['constdm_id'], 
-                        coord_space=contraststd_map_coordspace, contrast_num=contrast_num, export_dir=None, is_variance=False, var_coord_space=None)
+                        coord_space=contraststd_map_coordspace, contrast_num=contrast_num, is_variance=False, var_coord_space=None)
 
                 stat_map_coordspace = self.get_object(CoordinateSpace, args['statm_coordspace_id'])
                 stat_map = self.get_object(StatisticMap, args['statm_id'], coord_space=stat_map_coordspace)
@@ -409,7 +407,7 @@ class NIDMResults():
                 if 'display_mask_id' in args:
                     disp_coordspace = self.get_object(CoordinateSpace, args['disp_coord_space_id'])
                     disp_mask = self.get_object(DisplayMaskMap, args['display_mask_id'], 
-                        contrast_num=None, coord_space=disp_coordspace, mask_num=None, export_dir=None)
+                        contrast_num=None, coord_space=disp_coordspace, mask_num=None)
                 else:
                     disp_mask = None
 
@@ -419,7 +417,7 @@ class NIDMResults():
 
                 searchspace_coordspace = self.get_object(CoordinateSpace, args['search_space_coord_space_id'])
                 search_space = self.get_object(SearchSpace, args['search_space_id'], 
-                    coord_space=searchspace_coordspace, dlh=None, export_dir=None)
+                    coord_space=searchspace_coordspace, dlh=None)
 
                 # TODO
                 software_id = self.software.id

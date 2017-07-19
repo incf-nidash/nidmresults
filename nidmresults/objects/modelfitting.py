@@ -89,7 +89,7 @@ class ImagingInstrument(NIDMObject):
         """
         return query
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -135,7 +135,7 @@ class Group(NIDMObject):
         """
         return query
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -174,7 +174,7 @@ class Person(NIDMObject):
         """
         return query
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -190,15 +190,15 @@ class DesignMatrix(NIDMObject):
     Object representing a DesignMatrix entity.
     """
 
-    def __init__(self, matrix, image_file, export_dir, regressors=None,
+    def __init__(self, matrix, image_file, regressors=None,
                  design_type=None, hrf_model=None, drift_model=None,
                  suffix='', csv_file=None, filename=None, label=None, oid=None):
-        super(DesignMatrix, self).__init__(export_dir=export_dir, oid=oid)
+        super(DesignMatrix, self).__init__(oid=oid)
         self.type = NIDM_DESIGN_MATRIX
         self.prov_type = PROV['Entity']
         self.id = NIIRI[str(uuid.uuid4())]
         img_filename = 'DesignMatrix' + suffix + '.png'
-        self.image = Image(export_dir, image_file, img_filename)
+        self.image = Image(image_file, img_filename)
         self.regressors = regressors
         self.design_type = design_type
         self.hrf_model = hrf_model
@@ -252,8 +252,6 @@ class DesignMatrix(NIDMObject):
         Create prov entities and activities.
         """
         # Create cvs file containing design matrix
-        print(os.path.join(export_dir, self.csv_file))
-        print('oooo')
         np.savetxt(os.path.join(export_dir, self.csv_file),
                    np.asarray(self.matrix), delimiter=",")
 
@@ -301,7 +299,7 @@ class DriftModel(NIDMObject):
         self.type = drift_type
         self.prov_type = PROV['Entity']
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -362,7 +360,7 @@ class Data(NIDMObject):
         """
         return query
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -432,7 +430,7 @@ class ErrorModel(NIDMObject):
         """
         return query
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -491,7 +489,7 @@ class ModelParametersEstimation(NIDMObject):
         """
         return query
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -510,19 +508,17 @@ class ParameterEstimateMap(NIDMObject):
 
     def __init__(self, pe_file, pe_num, coord_space, filename=None, sha=None,
                  label=None, suffix='', model_param_estimation=None, oid=None,
-                 export_dir=None, format=None):
+                 format=None):
         super(ParameterEstimateMap, self).__init__(oid=oid)
         # Column index in the corresponding design matrix
         self.num = pe_num
         self.coord_space = coord_space
         # Parameter Estimate Map is going to be copied over to export_dir
-        if export_dir is not None:
+        if not filename:
             filename = 'ParameterEstimate' + suffix + '.nii.gz'
-        else:
-            filename = filename
 
         self.file = NIDMFile(self.id, pe_file, new_filename=filename, sha=sha,
-                             export_dir=export_dir, format=format)
+                             format=format)
 
         self.type = NIDM_PARAMETER_ESTIMATE_MAP
         self.prov_type = PROV['Entity']
@@ -554,7 +550,7 @@ class ParameterEstimateMap(NIDMObject):
         return query
 
     # Generate prov for contrast map
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -571,15 +567,15 @@ class ResidualMeanSquares(NIDMObject):
     Object representing an ResidualMeanSquares entity.
     """
 
-    def __init__(self, export_dir, residual_file, coord_space,
+    def __init__(self, residual_file, coord_space,
                  temporary=False, suffix='', format=None, filename=None,
                  sha=None, label=None, oid=None):
-        super(ResidualMeanSquares, self).__init__(export_dir, oid=oid)
+        super(ResidualMeanSquares, self).__init__(oid=oid)
         self.coord_space = coord_space
         self.id = NIIRI[str(uuid.uuid4())]
         if filename is None:
             filename = 'ResidualMeanSquares' + suffix + '.nii.gz'
-        self.file = NIDMFile(self.id, residual_file, filename, export_dir,
+        self.file = NIDMFile(self.id, residual_file, filename,
                              temporary=temporary, format=format, sha=sha)
         if label is None:
             label = "Residual Mean Squares Map"
@@ -608,7 +604,7 @@ class ResidualMeanSquares(NIDMObject):
         """
         return query
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -624,14 +620,14 @@ class MaskMap(NIDMObject):
     Object representing an MaskMap entity.
     """
 
-    def __init__(self, export_dir, mask_file, coord_space, user_defined,
+    def __init__(self, mask_file, coord_space, user_defined,
                  suffix='', filename=None, format=None, label=None, sha=None, oid=None):
-        super(MaskMap, self).__init__(export_dir, oid=oid)
+        super(MaskMap, self).__init__(oid=oid)
         self.coord_space = coord_space
         self.id = NIIRI[str(uuid.uuid4())]
         if filename is None:
             filename = 'Mask' + suffix + '.nii.gz'
-        self.file = NIDMFile(self.id, mask_file, filename, export_dir, 
+        self.file = NIDMFile(self.id, mask_file, filename, 
             sha=sha, format=format)
         self.user_defined = user_defined
         self.type = NIDM_MASK_MAP
@@ -663,7 +659,7 @@ class MaskMap(NIDMObject):
         """
         return query
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
@@ -682,14 +678,14 @@ class GrandMeanMap(NIDMObject):
     """
 
     # TODO: we should remove mask_file here and ask for masked data instead?
-    def __init__(self, org_file, mask_file, coord_space, export_dir,
+    def __init__(self, org_file, mask_file, coord_space,
                  suffix='', label=None, filename=None, sha=None,
                  format=format, masked_median=None, oid=None):
-        super(GrandMeanMap, self).__init__(export_dir, oid=oid)
+        super(GrandMeanMap, self).__init__(oid=oid)
         self.id = NIIRI[str(uuid.uuid4())]
         if filename is None:
             filename = 'GrandMean' + suffix + '.nii.gz'
-        self.file = NIDMFile(self.id, org_file, filename, export_dir, 
+        self.file = NIDMFile(self.id, org_file, filename, 
             sha=sha, format=format)
         self.mask_file = mask_file  # needed to compute masked median
         self.coord_space = coord_space
@@ -723,7 +719,7 @@ class GrandMeanMap(NIDMObject):
         """
         return query
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
