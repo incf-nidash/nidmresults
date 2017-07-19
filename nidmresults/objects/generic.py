@@ -17,6 +17,7 @@ import uuid
 import json
 from prov.model import Literal
 from prov.constants import XSD_STRING
+import warnings
 
 
 class NIDMObject(object):
@@ -269,8 +270,8 @@ class Image(NIDMObject):
     Object representing an Image entity.
     """
 
-    def __init__(self, export_dir, image_file, filename, format='png'):
-        super(Image, self).__init__(export_dir)
+    def __init__(self, export_dir, image_file, filename, format='png', oid=None):
+        super(Image, self).__init__(export_dir, oid=oid)
         self.type = DCTYPE['Image']
         self.prov_type = PROV['Entity']
         self.id = NIIRI[str(uuid.uuid4())]
@@ -313,17 +314,47 @@ class NeuroimagingSoftware(NIDMObject):
     Class representing a NeuroimagingSoftware Agent.
     """
 
-    def __init__(self, software_type, version):
-        super(NeuroimagingSoftware, self).__init__()
+    def __init__(self, software_type, version, label=None, feat_version=None, oid=None):
+        super(NeuroimagingSoftware, self).__init__(oid=oid)
         self.id = NIIRI[str(uuid.uuid4())]
         self.version = version
         # FIXME: get label from owl!
         if software_type.lower() == "fsl":
             self.name = "FSL"
+            self.type = SCR_FSL  # NLX_FSL
         else:
-            raise Exception('Unrecognised software: ' + str(software_type))
-        self.type = SCR_FSL  # NLX_FSL
+            warnings.warn('Unrecognised software: ' + str(software_type))
+            self.name = str(software_type)
+            self.type = None
+        if not label:
+            self.label = self.name
+        else:
+            self.label = label
         self.prov_type = PROV['Agent']
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
+        prefix fsl_featVersion: <http://purl.org/nidash/fsl#FSL_0000005>
+
+        SELECT DISTINCT * WHERE
+                {
+            """ + oid_var + """ a prov:SoftwareAgent ;
+                nidm_softwareVersion: ?version .
+
+            OPTIONAL {""" + oid_var + """ a ?software_type .} .
+            OPTIONAL {""" + oid_var + """ fsl_featVersion: ?feat_version .} .
+
+            FILTER ( ?software_type NOT IN (prov:SoftwareAgent, prov:Agent) )
+            }
+        """
+        return query    
 
     def export(self, nidm_version):
         """
@@ -336,7 +367,7 @@ class NeuroimagingSoftware(NIDMObject):
         self.add_attributes((
             (PROV['type'], self.type),
             (PROV['type'], PROV['SoftwareAgent']),
-            (PROV['label'], Literal(self.name, datatype=XSD_STRING)),
+            (PROV['label'], Literal(self.label, datatype=XSD_STRING)),
             (NIDM_SOFTWARE_VERSION, self.version))
         )
 
@@ -346,8 +377,8 @@ class ExporterSoftware(NIDMObject):
     Class representing a Software Agent.
     """
 
-    def __init__(self, software_type, version):
-        super(ExporterSoftware, self).__init__()
+    def __init__(self, software_type, version, oid=None):
+        super(ExporterSoftware, self).__init__(oid=oid)
         self.id = NIIRI[str(uuid.uuid4())]
         self.type = software_type
         self.prov_type = PROV['Agent']
@@ -356,7 +387,10 @@ class ExporterSoftware(NIDMObject):
         if software_type == NIDM_FSL:
             self.name = "nidmfsl"
         else:
-            raise Exception('Unrecognised software: ' + str(software_type))
+            warnings.warn('Unrecognised software: ' + str(software_type))
+            self.name = str(software_type)
+            self.type = None
+
 
     def export(self, nidm_version):
         """
@@ -374,8 +408,8 @@ class NIDMResultsExport(NIDMObject):
     """
     Class representing a NIDM-Results Export activity.
     """
-    def __init__(self):
-        super(NIDMResultsExport, self).__init__()
+    def __init__(self, oid=None):
+        super(NIDMResultsExport, self).__init__(oid=oid)
         self.id = NIIRI[str(uuid.uuid4())]
         self.type = NIDM_NIDM_RESULTS_EXPORT
         self.prov_type = PROV['Activity']

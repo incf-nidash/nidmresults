@@ -48,8 +48,8 @@ class ImagingInstrument(NIDMObject):
     Object representing a ImagingInstrument entity.
     """
 
-    def __init__(self, machine_type, label=None):
-        super(ImagingInstrument, self).__init__()
+    def __init__(self, machine_type, label=None, oid=None):
+        super(ImagingInstrument, self).__init__(oid=oid)
         machine_type = machine_type.lower()
         self.id = NIIRI[str(uuid.uuid4())]
         machine_term = dict(
@@ -192,8 +192,8 @@ class DesignMatrix(NIDMObject):
 
     def __init__(self, matrix, image_file, export_dir, regressors=None,
                  design_type=None, hrf_model=None, drift_model=None,
-                 suffix='', csv_file=None, filename=None, label=None):
-        super(DesignMatrix, self).__init__(export_dir=export_dir)
+                 suffix='', csv_file=None, filename=None, label=None, oid=None):
+        super(DesignMatrix, self).__init__(export_dir=export_dir, oid=oid)
         self.type = NIDM_DESIGN_MATRIX
         self.prov_type = PROV['Entity']
         self.id = NIIRI[str(uuid.uuid4())]
@@ -247,12 +247,14 @@ class DesignMatrix(NIDMObject):
         """
         return query
 
-    def export(self, nidm_version):
+    def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
         # Create cvs file containing design matrix
-        np.savetxt(os.path.join(self.export_dir, self.csv_file),
+        print(os.path.join(export_dir, self.csv_file))
+        print('oooo')
+        np.savetxt(os.path.join(export_dir, self.csv_file),
                    np.asarray(self.matrix), delimiter=",")
 
         if nidm_version['num'] in ["1.0.0", "1.1.0"]:
@@ -291,8 +293,8 @@ class DriftModel(NIDMObject):
     Object representing a DriftModel entity.
     """
 
-    def __init__(self, drift_type, parameter):
-        super(DriftModel, self).__init__()
+    def __init__(self, drift_type, parameter, oid=None):
+        super(DriftModel, self).__init__(oid=oid)
         self.drift_type = drift_type
         self.id = NIIRI[str(uuid.uuid4())]
         self.parameter = parameter
@@ -391,8 +393,8 @@ class ErrorModel(NIDMObject):
     """
 
     def __init__(self, error_distribution, variance_homo, variance_spatial,
-                 dependance, dependance_spatial=None):
-        super(ErrorModel, self).__init__()
+                 dependance, dependance_spatial=None, oid=None):
+        super(ErrorModel, self).__init__(oid=oid)
         self.error_distribution = error_distribution
         self.variance_homo = variance_homo
         self.variance_spatial = variance_spatial
@@ -545,7 +547,7 @@ class ParameterEstimateMap(NIDMObject):
                 rdfs:label ?label ;
                 nfo:fileName ?filename ;
                 crypto:sha512 ?sha ;
-                prov:atLocation ?csv_file ;
+                prov:atLocation ?pe_file ;
                 dct:format ?format .
         }
         """
@@ -571,8 +573,8 @@ class ResidualMeanSquares(NIDMObject):
 
     def __init__(self, export_dir, residual_file, coord_space,
                  temporary=False, suffix='', format=None, filename=None,
-                 sha=None, label=None):
-        super(ResidualMeanSquares, self).__init__(export_dir)
+                 sha=None, label=None, oid=None):
+        super(ResidualMeanSquares, self).__init__(export_dir, oid=oid)
         self.coord_space = coord_space
         self.id = NIIRI[str(uuid.uuid4())]
         if filename is None:
@@ -623,8 +625,8 @@ class MaskMap(NIDMObject):
     """
 
     def __init__(self, export_dir, mask_file, coord_space, user_defined,
-                 suffix='', filename=None, format=None, label=None, sha=None):
-        super(MaskMap, self).__init__(export_dir)
+                 suffix='', filename=None, format=None, label=None, sha=None, oid=None):
+        super(MaskMap, self).__init__(export_dir, oid=oid)
         self.coord_space = coord_space
         self.id = NIIRI[str(uuid.uuid4())]
         if filename is None:
@@ -682,8 +684,8 @@ class GrandMeanMap(NIDMObject):
     # TODO: we should remove mask_file here and ask for masked data instead?
     def __init__(self, org_file, mask_file, coord_space, export_dir,
                  suffix='', label=None, filename=None, sha=None,
-                 format=format, masked_median=None):
-        super(GrandMeanMap, self).__init__(export_dir)
+                 format=format, masked_median=None, oid=None):
+        super(GrandMeanMap, self).__init__(export_dir, oid=oid)
         self.id = NIIRI[str(uuid.uuid4())]
         if filename is None:
             filename = 'GrandMean' + suffix + '.nii.gz'

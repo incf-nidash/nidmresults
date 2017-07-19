@@ -7,13 +7,13 @@ Return version of nidmresults module
 """
 
 import argparse
-from nidmresults import __version__
+import nidmresults
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='NIDM-Results module.')
     parser.add_argument(
         '-v', '--version', action='version',
-        version='{version}'.format(version=__version__))
+        version='{version}'.format(version=nidmresults.__version__))
 
     args = parser.parse_args()

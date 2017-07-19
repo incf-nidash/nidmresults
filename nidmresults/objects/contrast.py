@@ -108,8 +108,9 @@ class ContrastMap(NIDMObject):
     """
 
     def __init__(self, contrast_file, contrast_num, contrast_name,
-                 coord_space, export_dir, ident=None, sha=None, format=None, label=None, filename=None):
-        super(ContrastMap, self).__init__(export_dir)
+                 coord_space, export_dir, ident=None, sha=None, format=None, 
+                 label=None, filename=None, oid=None):
+        super(ContrastMap, self).__init__(export_dir, oid=oid)
         self.num = contrast_num
         self.name = contrast_name
         if ident is None:
@@ -166,8 +167,9 @@ class ContrastExplainedMeanSquareMap(NIDMObject):
     Object representing a ContrastExplainedMeanSquareMap entity.
     """
     def __init__(self, stat_file, sigma_sq_file, contrast_num,
-                 coord_space, export_dir, expl_mean_sq_file=None, sha=None, format=None, filename=None):
-        super(ContrastExplainedMeanSquareMap, self).__init__(export_dir)
+                 coord_space, export_dir, expl_mean_sq_file=None, 
+                 sha=None, format=None, filename=None, oid=None):
+        super(ContrastExplainedMeanSquareMap, self).__init__(export_dir, oid=oid)
         self.stat_file = stat_file
         self.sigma_sq_file = sigma_sq_file
         self.num = contrast_num
@@ -243,8 +245,9 @@ class ContrastStdErrMap(NIDMObject):
     """
 
     def __init__(self, contrast_num, filepath, is_variance, coord_space,
-                 var_coord_space, export_dir, label=None, format=None, sha=None, filename=None):
-        super(ContrastStdErrMap, self).__init__(export_dir)
+                 var_coord_space, export_dir, label=None, format=None, 
+                 sha=None, filename=None, oid=None):
+        super(ContrastStdErrMap, self).__init__(export_dir, oid=oid)
         self.file = filepath
         self.id = NIIRI[str(uuid.uuid4())]
         self.is_variance = is_variance
@@ -318,8 +321,9 @@ class ContrastStdErrMap(NIDMObject):
 
 
 class ContrastVariance(NIDMObject):
-    def __init__(self, coord_space, var_file, filename, format=None):
-        super(ContrastVariance, self).__init__()
+    def __init__(self, coord_space, var_file, filename, format=None, 
+                oid=None):
+        super(ContrastVariance, self).__init__(oid=oid)
         self.id = NIIRI[str(uuid.uuid4())]
         self.coord_space = coord_space
         self.type = NIDM_CONTRAST_VARIANCE_MAP

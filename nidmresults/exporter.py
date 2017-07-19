@@ -121,7 +121,7 @@ class NIDMExporter():
         """
         Add a NIDMObject to a NIDM-Results export.
         """
-        nidm_object.export(self.version)
+        nidm_object.export(self.version, self.export_dir)
         # ProvDocument: add object to the bundle
         if nidm_object.prov_type == PROV['Activity']:
             self.bundle.activity(nidm_object.id, other_attributes=nidm_object.attributes)
@@ -141,10 +141,14 @@ class NIDMExporter():
 
             # Initialise main bundle
             self._create_bundle(self.version)
+
             self.add_object(self.software)
 
             # Add model fitting steps
-            for model_fitting in list(self.model_fittings.values()):
+            if not isinstance(self.model_fittings, list):
+                self.model_fittings = list(self.model_fittings.values())
+
+            for model_fitting in self.model_fittings:
                 # Design Matrix
                 # model_fitting.activity.used(model_fitting.design_matrix)
                 self.bundle.used(model_fitting.activity.id, model_fitting.design_matrix.id)
@@ -442,7 +446,7 @@ class NIDMExporter():
         # *** NIDM-Results Export Activity
         if version['num'] not in ["1.0.0", "1.1.0"]:
             self.export = NIDMResultsExport()
-            self.export.export(self.version)
+            self.export.export(self.version, self.export_dir)
             # self.doc.update(self.export.p)
             self.doc.activity(self.export.id, other_attributes=self.export.attributes)
 
@@ -458,8 +462,9 @@ class NIDMExporter():
 
         # *** NIDM-Results Exporter (Software Agent)
         if version['num'] not in ["1.0.0", "1.1.0"]:
-            self.exporter = self._get_exporter()
-            self.exporter.export(self.version)
+            if not self.exporter:
+                self.exporter = self._get_exporter()
+            self.exporter.export(self.version, self.export_dir)
             # self.doc.update(self.exporter.p)
             self.doc.agent(self.exporter.id, other_attributes=self.exporter.attributes)
 

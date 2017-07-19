@@ -8,10 +8,12 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 @copyright: University of Warwick 2013-2014
 """
 
+import nidmresults
 from nidmresults.objects.constants import *
 from nidmresults.objects.modelfitting import *
 from nidmresults.objects.contrast import *
 from nidmresults.objects.inference import *
+from nidmresults.exporter import NIDMExporter
 
 from rdflib.plugins.parsers.notation3 import BadSyntax
 import rdflib
@@ -24,18 +26,27 @@ class NIDMResults():
     NIDM-result object containing all metadata and link to image files.
     """
 
-    def __init__(self, nidm_zip=None, rdf_file=None, format="turtle"):
+    def __init__(self, nidm_zip=None, rdf_file=None):
+
+        self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")      
+
+        # Load the turtle file
         with zipfile.ZipFile(nidm_zip) as z:
             rdf_data = z.read('nidm.ttl')
-        self.rdf_data = rdf_data
-        self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")      
-        self.format = format
-        self.graph = self.parse()
+        self.graph = rdflib.Graph()
+        try:
+            self.graph.parse(data=rdf_data, format="turtle")
+        except BadSyntax:
+            raise self.ParseException(
+                "RDFLib was unable to parse the RDF file.")
+
         self.objects = dict()
 
-        self.load_modelfitting()
-        self.load_contrasts()
-        self.load_inferences()
+        # Query the RDF document 
+        self.software = self.load_software()
+        self.model_fittings = self.load_modelfitting()
+        self.contrasts = self.load_contrasts()
+        self.inferences = self.load_inferences()
 
     @classmethod
     def load_from_pack(klass, nidm_zip):
@@ -63,7 +74,7 @@ class NIDMResults():
         if sd:
             for row in sd:
                 argums = row.asdict()
-                objects[oid] = klass(**argums, **kwargs)
+                objects[oid] = klass(oid=oid, **argums, **kwargs)
 
         self.objects.update(objects)
         if oid is not None:
@@ -74,6 +85,28 @@ class NIDMResults():
         else:
             return objects
 
+    def load_software(self):
+        query = """
+        prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
+
+        SELECT DISTINCT * WHERE {
+
+            ?ni_software_id a prov:SoftwareAgent .
+
+            ?mpe_id a nidm_ModelParameterEstimation: ;
+                prov:wasAssociatedWith ?ni_software_id .
+        }
+        """
+        sd = self.graph.query(query)
+
+        model_fittings = list()
+        if sd:
+            for row in sd:
+                args = row.asdict()
+                software = self.get_object(NeuroimagingSoftware, args['ni_software_id'])
+        
+        return software
+        
 
     def load_modelfitting(self):
         query = """
@@ -130,7 +163,7 @@ class NIDMResults():
                 args = row.asdict()
 
                 # TODO: should software_id really be an input?
-                activity = self.get_object(ModelParametersEstimation, args['mpe_id'], software_id=None)
+                activity = self.get_object(ModelParametersEstimation, args['mpe_id'], software_id=self.software.id)
 
                 # TODO fill in image_file
                 design_matrix_png = None
@@ -161,7 +194,7 @@ class NIDMResults():
                         pe_map_coordspace = self.get_object(CoordinateSpace, args_pe['pe_coordspace_id'])
 
                         param_estimates.append(self.get_object(ParameterEstimateMap, args_pe['pe_id'], 
-                            coord_space=pe_map_coordspace))
+                            coord_space=pe_map_coordspace, pe_num=None))
 
                 rms_coord_space = self.get_object(CoordinateSpace, args['rms_coordspace_id'])
                 rms_map = self.get_object(ResidualMeanSquares, args['rms_id'], coord_space=rms_coord_space, 
@@ -188,6 +221,8 @@ class NIDMResults():
                  machine, subjects))
 
                 con_num = row_num + 1        
+
+        return model_fittings
 
     def load_contrasts(self):
         query = """
@@ -254,6 +289,7 @@ class NIDMResults():
 
                 weights = self.get_object(ContrastWeights, args['conw_id'], contrast_num=contrast_num)
                 estimation = self.get_object(ContrastEstimation, args['conest_id'], contrast_num=contrast_num)
+
                 contrast_map_coordspace = self.get_object(CoordinateSpace, args['conm_coordspace_id'])
                 contrast_map = self.get_object(ContrastMap, args['conm_id'], 
                     coord_space=contrast_map_coordspace, contrast_num=contrast_num, export_dir=None)
@@ -304,6 +340,11 @@ class NIDMResults():
                 contrasts[(args['mpe_id'], pe_ids)] = con
 
                 con_num = con_num + 1
+
+        if not contrasts:
+            raise Exception('No contrast found')
+
+        return contrasts
 
     def load_inferences(self):
         query = """
@@ -381,7 +422,7 @@ class NIDMResults():
                     coord_space=searchspace_coordspace, dlh=None, export_dir=None)
 
                 # TODO
-                software_id = None
+                software_id = self.software.id
 
                 # Find list of clusters
                 query_clusters = """
@@ -425,12 +466,23 @@ class NIDMResults():
                     peak_criteria, cluster_criteria, disp_mask, excursion_set,
                     clusters, search_space, software_id)
 
+        return inferences
 
 
-    def serialize(self, destination, format="mkda", overwrite=False,
+
+    def serialize(self, destination, format="nidm", overwrite=False,
                   last_used_con_id=0):
 
-        if format == "mkda":
+        if format == "nidm":
+            exporter = NIDMExporter(version="1.3.0", out_dir=destination)
+            exporter.model_fittings = self.model_fittings
+            exporter.contrasts = self.contrasts
+            exporter.inferences = self.inferences
+            exporter.exporter = ExporterSoftware('nidmresults', nidmresults.__version__)
+            exporter.software = self.software
+            exporter.export()
+
+        elif format == "mkda":
             if not destination.endswith(".csv"):
                 destination = destination + ".csv"
             csvfile = destination
@@ -494,5 +546,3 @@ class NIDMResults():
                         space, con_name])
 
                 return con_ids
-
-        return con_ids

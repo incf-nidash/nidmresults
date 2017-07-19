@@ -219,8 +219,8 @@ class HeightThreshold(NIDMObject):
 
     def __init__(self, stat_threshold=None, p_corr_threshold=None,
                  p_uncorr_threshold=None, threshold_type=None, value=None, label=None,
-                 version={'num': '1.3.0'}):
-        super(HeightThreshold, self).__init__()
+                 version={'num': '1.3.0'}, oid=None):
+        super(HeightThreshold, self).__init__(oid=oid)
         if not stat_threshold and not p_corr_threshold and \
            not p_uncorr_threshold and not value:
             raise Exception('No threshold defined')
@@ -322,8 +322,8 @@ class ExtentThreshold(NIDMObject):
     """
 
     def __init__(self, extent=None, p_corr=None, p_uncorr=None, extent_rsl=None, 
-            label=None, version={'num': '1.3.0'}, value=None):
-        super(ExtentThreshold, self).__init__()
+            label=None, version={'num': '1.3.0'}, value=None, oid=None):
+        super(ExtentThreshold, self).__init__(oid=oid)
         self.id = NIIRI[str(uuid.uuid4())]
         self.type = NIDM_EXTENT_THRESHOLD
         self.prov_type = PROV['Entity']
@@ -443,8 +443,9 @@ class Cluster(NIDMObject):
 
     def __init__(self, cluster_num, size, pFWER, peaks,
                  x=None, y=None, z=None, x_std=None, y_std=None, z_std=None,
-                 suffix='', clust_size_resels=None, pFDR=None, punc=None, label=None):
-        super(Cluster, self).__init__()
+                 suffix='', clust_size_resels=None, pFDR=None, punc=None, 
+                 label=None, oid=None):
+        super(Cluster, self).__init__(oid=oid)
         self.num = cluster_num
         self.id = NIIRI[str(uuid.uuid4())]
         if x and y and z:
@@ -519,8 +520,8 @@ class DisplayMaskMap(NIDMObject):
     Object representing a DisplayMaskMap entity.
     """
     def __init__(self, contrast_num, mask_file, mask_num, coord_space,
-                 export_dir, sha=None, filename=None, format=None, label=None):
-        super(DisplayMaskMap, self).__init__(export_dir)
+                 export_dir, sha=None, filename=None, format=None, label=None, oid=None):
+        super(DisplayMaskMap, self).__init__(export_dir, oid=oid)
         self.id = NIIRI[str(uuid.uuid4())]
         if not filename:
             filename = 'DisplayMask' + str(self.mask_num) + '.nii.gz'
@@ -572,8 +573,8 @@ class PeakCriteria(NIDMObject):
     Object representing a PeakCriteria entity.
     """
 
-    def __init__(self, contrast_num, num_peak, peak_dist, label=None):
-        super(PeakCriteria, self).__init__()
+    def __init__(self, contrast_num, num_peak, peak_dist, label=None, oid=None):
+        super(PeakCriteria, self).__init__(oid=oid)
         self.id = NIIRI[str(uuid.uuid4())]
         self.num_peak = num_peak
         self.peak_dist = peak_dist
@@ -627,8 +628,8 @@ class ClusterCriteria(NIDMObject):
     Object representing a ClusterCriteria entity.
     """
 
-    def __init__(self, contrast_num, connectivity, label=None):
-        super(ClusterCriteria, self).__init__()
+    def __init__(self, contrast_num, connectivity, label=None, oid=None):
+        super(ClusterCriteria, self).__init__(oid=oid)
         self.id = NIIRI[str(uuid.uuid4())]
         self.connectivity = connectivity
         self.type = NIDM_CLUSTER_DEFINITION_CRITERIA
@@ -691,8 +692,8 @@ class CenterOfGravity(NIDMObject):
     """
 
     def __init__(self, cluster_num, x=None, y=None, z=None, x_std=None,
-                 y_std=None, z_std=None):
-        super(CenterOfGravity, self).__init__()
+                 y_std=None, z_std=None, oid=None):
+        super(CenterOfGravity, self).__init__(oid=oid)
         self.cluster_num = cluster_num
         self.id = NIIRI[str(uuid.uuid4())]
         self.coordinate = Coordinate("%04d" % cluster_num, x=x, y=y, z=z,
@@ -726,8 +727,8 @@ class SearchSpace(NIDMObject):
                  height_critical_fwe05=None, height_critical_fdr05=None,
                  extent_critical_fwe05=None, extent_critical_fdr05=None,
                  search_vol_geom=None, filename=None, sha=None, format=None,
-                 label=None):
-        super(SearchSpace, self).__init__(export_dir)
+                 label=None, oid=None):
+        super(SearchSpace, self).__init__(export_dir, oid=oid)
         self.id = NIIRI[str(uuid.uuid4())]
         if not filename:
             filename = 'SearchSpaceMask.nii.gz'
@@ -838,9 +839,9 @@ class Coordinate(NIDMObject):
 
     def __init__(self, label_id, coord_vector=None, coord_vector_std=None,
                  x=None, y=None, z=None, x_std=None, y_std=None, z_std=None,
-                 label=None):
+                 label=None, oid=None):
 
-        super(Coordinate, self).__init__()
+        super(Coordinate, self).__init__(oid=oid)
         # FIXME: coordiinate_id should not be determined externally
         self.id = NIIRI[str(uuid.uuid4())]
         self.label_id = label_id

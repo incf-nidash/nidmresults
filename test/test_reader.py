@@ -34,7 +34,7 @@ class TestReader(unittest.TestCase):
 
         # Collection containing examples of NIDM-Results packs (1.3.0)
         req = Request(
-            "http://neurovault.org/api/collections/1692/nidm_results")
+            "http://neurovault.org/api/collections/2210/nidm_results")
         rep = urlopen(req)
 
         response = rep.read()
@@ -64,7 +64,11 @@ class TestReader(unittest.TestCase):
         """
         exc = []
         for nidmpack in self.packs:
-            nidm_graph = NIDMResults(nidm_zip=nidmpack)
+            print(nidmpack)
+            print("----")
+            nidmres = NIDMResults(nidm_zip=nidmpack)
+            nidmres.serialize(nidmpack.replace(".nidm.zip", "_2.nidm.zip"))
+            print('Seralised to ' + nidmpack.replace(".nidm.zip", "_2.nidm.zip"))
             # nidm_graph.parse()
             # # exc_sets = nidm_graph.get_excursion_set_maps()
 
