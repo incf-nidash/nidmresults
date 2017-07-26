@@ -229,8 +229,8 @@ class NIDMFile(NIDMObject):
                 # Copy file only if export_dir is not None
                 new_file = os.path.join(export_dir, self.new_filename)
                 if not self.path == new_file:
-                    if isinstance(prepend_path, zipfile.ZipFile):
-                        with prepend_path as z:
+                    if prepend_path.endswith('.zip'):
+                        with zipfile.ZipFile(prepend_path) as z:
                             z.extract(str(self.path), new_file)
                     else:
                         if prepend_path:
@@ -284,6 +284,7 @@ class Image(NIDMObject):
         self.prov_type = PROV['Entity']
         self.id = NIIRI[str(uuid.uuid4())]
         self.file = NIDMFile(self.id, image_file, filename)
+        self.label = "" # Enable printing
 
     @classmethod
     def get_query(klass, oid=None):

@@ -29,10 +29,10 @@ class NIDMResults():
     def __init__(self, nidm_zip=None, rdf_file=None):
 
         self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")      
-        self.prepend_path = zipfile.ZipFile(nidm_zip)
+        self.zip_path = nidm_zip
 
         # Load the turtle file
-        with self.prepend_path as z:
+        with zipfile.ZipFile(self.zip_path) as z:
             rdf_data = z.read('nidm.ttl')
         self.graph = rdflib.Graph()
         try:
@@ -43,7 +43,7 @@ class NIDMResults():
 
         self.objects = dict()
 
-        # Query the RDF document 
+        # Query the RDF document and create the objects
         self.software = self.load_software()
         self.model_fittings = self.load_modelfitting()
         self.contrasts = self.load_contrasts()
@@ -66,7 +66,7 @@ class NIDMResults():
                 "RDFLib was unable to parse the RDF file.")
         return g
 
-    def get_object(self, klass, oid=None, **kwargs):
+    def get_object(self, klass, oid=None, err_if_none=True, **kwargs):
         query = klass.get_query(oid)
 
         sd = self.graph.query(query)
@@ -80,11 +80,16 @@ class NIDMResults():
         self.objects.update(objects)
         if oid is not None:
             if oid not in objects:
-                return None
+                to_return = None
             else:
-                return objects[oid]
+                to_return = objects[oid]
         else:
-            return objects
+            to_return = objects
+
+        if err_if_none and (to_return is None):
+            raise Exception('No results found for query:' + query)
+
+        return(to_return)
 
     def load_software(self):
         query = """
@@ -100,11 +105,14 @@ class NIDMResults():
         """
         sd = self.graph.query(query)
 
-        model_fittings = list()
+        software = None
         if sd:
             for row in sd:
                 args = row.asdict()
                 software = self.get_object(NeuroimagingSoftware, args['ni_software_id'])
+
+        if software is None:
+            raise Exception('No results found for query:' + query)
         
         return software
         
@@ -167,6 +175,7 @@ class NIDMResults():
 
                 # TODO: should software_id really be an input?
                 activity = self.get_object(ModelParametersEstimation, args['mpe_id'], software_id=self.software.id)
+                print(activity.id)
 
                 if 'png_id' in args:
                     design_matrix_png = self.get_object(Image, args['png_id'])
@@ -182,6 +191,8 @@ class NIDMResults():
                     image_file=design_matrix_png, drift_model=drift_model)
                 data = self.get_object(Data, args['data_id'])
                 error_model = self.get_object(ErrorModel, args['error_id'])
+
+                print(error_model.id)
 
 
                 # Find list of model parameter estimate maps
@@ -217,12 +228,13 @@ class NIDMResults():
 
                 machine = self.get_object(ImagingInstrument, args['machine_id'])
 
-                subjects = self.get_object(Group, args['person_or_group_id'])
+                # TODO could be more than 1 group
+                subjects = self.get_object(Group, args['person_or_group_id'], err_if_none=False)
 
                 if subjects is None:
                     # Try loading as a single subject
-                    subjects = self.get_object(Person, args['person_or_group_id'])
-                
+                    subjects = [self.get_object(Person, args['person_or_group_id'])]
+
                 model_fittings.append(ModelFitting(activity, design_matrix, data, error_model,
                  param_estimates, rms_map, mask_map, grand_mean_map,
                  machine, subjects))
@@ -304,7 +316,7 @@ class NIDMResults():
                 contraststd_map_coordspace = self.get_object(CoordinateSpace, args['constdm_coordspace_id'])
 
                 stderr_or_expl_mean_sq_map = self.get_object(ContrastExplainedMeanSquareMap, args['constdm_coordspace_id'],
-                    coord_space=contraststd_map_coordspace, contrast_num=contrast_num)
+                    coord_space=contraststd_map_coordspace, contrast_num=contrast_num, err_if_none=False)
                 if stderr_or_expl_mean_sq_map is None:
                     # Try loading as a contrast standard map
                     stderr_or_expl_mean_sq_map = self.get_object(ContrastStdErrMap, args['constdm_id'], 
@@ -487,7 +499,7 @@ class NIDMResults():
             exporter.inferences = self.inferences
             exporter.exporter = ExporterSoftware('nidmresults', nidmresults.__version__)
             exporter.software = self.software
-            exporter.prepend_path = self.prepend_path
+            exporter.prepend_path = self.zip_path
             exporter.export()
 
         elif format == "mkda":
