@@ -450,12 +450,12 @@ class ErrorModel(NIDMObject):
 
         SELECT DISTINCT * WHERE {
             """ + oid_var + """ a nidm_ErrorModel: ;
-                rdfs:label ?label ;
                 nidm_hasErrorDistribution: $error_distribution ;
                 nidm_errorVarianceHomogeneous: $variance_homo ;
                 nidm_varianceMapWiseDependence: $variance_spatial ;
                 nidm_hasErrorDependence: $dependance .
 
+            OPTIONAL {""" + oid_var + """ rdfs:label ?label . } .
             OPTIONAL {""" + oid_var + """ nidm_dependenceMapWiseDependence: ?dependance_spatial . } .
         }
         """
@@ -548,7 +548,7 @@ class ParameterEstimateMap(NIDMObject):
         if not filename:
             filename = 'ParameterEstimate' + suffix + '.nii.gz'
 
-        self.file = NIDMFile(self.id, pe_file, new_filename=filename, sha=sha,
+        self.file = NIDMFile(self.id, pe_file, filename=filename, sha=sha,
                              format=format)
 
         self.type = NIDM_PARAMETER_ESTIMATE_MAP
@@ -766,12 +766,12 @@ class GrandMeanMap(NIDMObject):
             mask_data = np.ndarray.flatten(mask_data)
 
             grand_mean_data_in_mask = grand_mean_data[mask_data > 0]
-            masked_median = np.median(
+            self.masked_median = np.median(
                 np.array(grand_mean_data_in_mask, dtype=float))
 
         self.add_attributes((
             (PROV['type'], self.type),
             (PROV['label'], self.label),
-            (NIDM_MASKED_MEDIAN, masked_median),
+            (NIDM_MASKED_MEDIAN, self.masked_median),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id))
         )

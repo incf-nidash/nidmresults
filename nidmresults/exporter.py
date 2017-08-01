@@ -232,68 +232,68 @@ class NIDMExporter():
 
             # Add contrast estimation steps
             analysis_masks = dict()
-            for (model_fitting_id, pe_ids), contrasts in list(self.contrasts.items()):
+            for (model_fitting_id, pe_ids), contrast in list(self.contrasts.items()):
                 model_fitting = self._get_model_fitting(model_fitting_id)
-                for contrast in contrasts:
-                    # contrast.estimation.used(model_fitting.rms_map)
-                    self.bundle.used(contrast.estimation.id, model_fitting.rms_map.id)
-                    # contrast.estimation.used(model_fitting.mask_map)
-                    self.bundle.used(contrast.estimation.id, model_fitting.mask_map.id)
-                    analysis_masks[contrast.estimation.id] = model_fitting.mask_map.id
-                    self.bundle.used(contrast.estimation.id, contrast.weights.id) 
-                    self.bundle.used(contrast.estimation.id, model_fitting.design_matrix.id)
-                    # contrast.estimation.wasAssociatedWith(self.software)
-                    self.bundle.wasAssociatedWith(contrast.estimation.id, self.software.id)
+                # for contrast in contrasts:
+                # contrast.estimation.used(model_fitting.rms_map)
+                self.bundle.used(contrast.estimation.id, model_fitting.rms_map.id)
+                # contrast.estimation.used(model_fitting.mask_map)
+                self.bundle.used(contrast.estimation.id, model_fitting.mask_map.id)
+                analysis_masks[contrast.estimation.id] = model_fitting.mask_map.id
+                self.bundle.used(contrast.estimation.id, contrast.weights.id) 
+                self.bundle.used(contrast.estimation.id, model_fitting.design_matrix.id)
+                # contrast.estimation.wasAssociatedWith(self.software)
+                self.bundle.wasAssociatedWith(contrast.estimation.id, self.software.id)
 
-                    for pe_id in pe_ids:
-                        # contrast.estimation.used(pe_id)
-                        self.bundle.used(contrast.estimation.id, pe_id)
+                for pe_id in pe_ids:
+                    # contrast.estimation.used(pe_id)
+                    self.bundle.used(contrast.estimation.id, pe_id)
 
-                    # Create estimation activity
-                    self.add_object(contrast.estimation)
+                # Create estimation activity
+                self.add_object(contrast.estimation)
 
-                    # Create contrast weights
-                    self.add_object(contrast.weights)
+                # Create contrast weights
+                self.add_object(contrast.weights)
 
-                    if contrast.contrast_map is not None:
-                        # Create contrast Map
-                        # contrast.contrast_map.wasGeneratedBy(contrast.estimation)
-                        self.bundle.wasGeneratedBy(contrast.contrast_map.id, contrast.estimation.id)
-                        self.add_object(contrast.contrast_map)
-                        self.add_object(contrast.contrast_map.coord_space)
-                        # Copy contrast map in export directory
-                        self.add_object(contrast.contrast_map.file)
+                if contrast.contrast_map is not None:
+                    # Create contrast Map
+                    # contrast.contrast_map.wasGeneratedBy(contrast.estimation)
+                    self.bundle.wasGeneratedBy(contrast.contrast_map.id, contrast.estimation.id)
+                    self.add_object(contrast.contrast_map)
+                    self.add_object(contrast.contrast_map.coord_space)
+                    # Copy contrast map in export directory
+                    self.add_object(contrast.contrast_map.file)
 
-                    # Create Std Err. Map (T-tests) or Explained Mean Sq. Map (F-tests)
-                    # contrast.stderr_or_expl_mean_sq_map.wasGeneratedBy(contrast.estimation)
-                    self.bundle.wasGeneratedBy(contrast.stderr_or_expl_mean_sq_map.id, contrast.estimation.id)
-                    self.add_object(contrast.stderr_or_expl_mean_sq_map)
-                    self.add_object(contrast.stderr_or_expl_mean_sq_map.coord_space)
-                    if isinstance(contrast.stderr_or_expl_mean_sq_map, ContrastStdErrMap) and contrast.stderr_or_expl_mean_sq_map.is_variance:
-                        self.add_object(contrast.stderr_or_expl_mean_sq_map.contrast_var)
-                        self.add_object(contrast.stderr_or_expl_mean_sq_map.var_coord_space)
-                        self.add_object(contrast.stderr_or_expl_mean_sq_map.contrast_var.file)
-                        self.bundle.wasDerivedFrom(contrast.stderr_or_expl_mean_sq_map.id, contrast.stderr_or_expl_mean_sq_map.contrast_var.id)
-                    self.add_object(contrast.stderr_or_expl_mean_sq_map.file)
+                # Create Std Err. Map (T-tests) or Explained Mean Sq. Map (F-tests)
+                # contrast.stderr_or_expl_mean_sq_map.wasGeneratedBy(contrast.estimation)
+                self.bundle.wasGeneratedBy(contrast.stderr_or_expl_mean_sq_map.id, contrast.estimation.id)
+                self.add_object(contrast.stderr_or_expl_mean_sq_map)
+                self.add_object(contrast.stderr_or_expl_mean_sq_map.coord_space)
+                if isinstance(contrast.stderr_or_expl_mean_sq_map, ContrastStdErrMap) and contrast.stderr_or_expl_mean_sq_map.is_variance:
+                    self.add_object(contrast.stderr_or_expl_mean_sq_map.contrast_var)
+                    self.add_object(contrast.stderr_or_expl_mean_sq_map.var_coord_space)
+                    self.add_object(contrast.stderr_or_expl_mean_sq_map.contrast_var.file)
+                    self.bundle.wasDerivedFrom(contrast.stderr_or_expl_mean_sq_map.id, contrast.stderr_or_expl_mean_sq_map.contrast_var.id)
+                self.add_object(contrast.stderr_or_expl_mean_sq_map.file)
 
-                    # Create Statistic Map
-                    # contrast.stat_map.wasGeneratedBy(contrast.estimation)
-                    self.bundle.wasGeneratedBy(contrast.stat_map.id, contrast.estimation.id)
-                    self.add_object(contrast.stat_map)
-                    self.add_object(contrast.stat_map.coord_space)
+                # Create Statistic Map
+                # contrast.stat_map.wasGeneratedBy(contrast.estimation)
+                self.bundle.wasGeneratedBy(contrast.stat_map.id, contrast.estimation.id)
+                self.add_object(contrast.stat_map)
+                self.add_object(contrast.stat_map.coord_space)
+                # Copy Statistical map in export directory
+                self.add_object(contrast.stat_map.file)
+
+                # Create Z Statistic Map
+                if contrast.z_stat_map:
+                    # contrast.z_stat_map.wasGeneratedBy(contrast.estimation)
+                    self.bundle.wasGeneratedBy(contrast.z_stat_map.id, contrast.estimation.id)
+                    self.add_object(contrast.z_stat_map)
+                    self.add_object(contrast.z_stat_map.coord_space)
                     # Copy Statistical map in export directory
-                    self.add_object(contrast.stat_map.file)
+                    self.add_object(contrast.z_stat_map.file)
 
-                    # Create Z Statistic Map
-                    if contrast.z_stat_map:
-                        # contrast.z_stat_map.wasGeneratedBy(contrast.estimation)
-                        self.bundle.wasGeneratedBy(contrast.z_stat_map.id, contrast.estimation.id)
-                        self.add_object(contrast.z_stat_map)
-                        self.add_object(contrast.z_stat_map.coord_space)
-                        # Copy Statistical map in export directory
-                        self.add_object(contrast.z_stat_map.file)
-
-                    # self.add_object(contrast)
+                # self.add_object(contrast)
 
             # Add inference steps
             for contrast_id, inferences in list(self.inferences.items()):
@@ -399,7 +399,7 @@ class NIDMExporter():
         Retreive model fitting with identifier 'mf_id' from the list of model
         fitting objects stored in self.model_fitting
         """
-        for model_fitting in list(self.model_fittings.values()):
+        for model_fitting in self.model_fittings:
             if model_fitting.activity.id == mf_id:
                 return model_fitting
         raise Exception("Model fitting activity with id: " + str(mf_id) +
@@ -410,10 +410,10 @@ class NIDMExporter():
         Retreive contrast with identifier 'con_id' from the list of contrast
         objects stored in self.contrasts
         """
-        for contrasts in list(self.contrasts.values()):
-            for contrast in contrasts:
-                if contrast.estimation.id == con_id:
-                    return contrast
+        for contrast in list(self.contrasts.values()):
+            # for contrast in contrasts:
+            if contrast.estimation.id == con_id:
+                return contrast
         raise Exception("Contrast activity with id: " + str(con_id) +
                         " not found.")
 

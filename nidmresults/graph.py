@@ -14,6 +14,7 @@ from nidmresults.objects.modelfitting import *
 from nidmresults.objects.contrast import *
 from nidmresults.objects.inference import *
 from nidmresults.exporter import NIDMExporter
+# from rdflib.term import Literal
 
 from rdflib.plugins.parsers.notation3 import BadSyntax
 import rdflib
@@ -75,6 +76,9 @@ class NIDMResults():
         if sd:
             for row in sd:
                 argums = row.asdict()
+
+                # Convert from rdflib Literal to appropriate Python datatype 
+                argums = {k: v.toPython() for k, v in argums.items()}
                 objects[oid] = klass(oid=oid, **argums, **kwargs)
 
         self.objects.update(objects)
@@ -175,7 +179,6 @@ class NIDMResults():
 
                 # TODO: should software_id really be an input?
                 activity = self.get_object(ModelParametersEstimation, args['mpe_id'], software_id=self.software.id)
-                print(activity.id)
 
                 if 'png_id' in args:
                     design_matrix_png = self.get_object(Image, args['png_id'])
@@ -191,9 +194,6 @@ class NIDMResults():
                     image_file=design_matrix_png, drift_model=drift_model)
                 data = self.get_object(Data, args['data_id'])
                 error_model = self.get_object(ErrorModel, args['error_id'])
-
-                print(error_model.id)
-
 
                 # Find list of model parameter estimate maps
                 query_pe_maps = """
@@ -481,9 +481,10 @@ class NIDMResults():
                 # ContrastEstimation object and value is an object of type Inference
                 # describing the inference step in NIDM-Results (main activity:
                 # Inference)
-                inferences[args['con_est_id']] = Inference(inference, height_thresh, extent_thresh,
+                # TODO: if key exist we need to append!
+                inferences[args['con_est_id']] = [Inference(inference, height_thresh, extent_thresh,
                     peak_criteria, cluster_criteria, disp_mask, excursion_set,
-                    clusters, search_space, software_id)
+                    clusters, search_space, software_id)]
 
         return inferences
 

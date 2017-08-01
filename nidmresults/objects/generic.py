@@ -98,6 +98,13 @@ class CoordinateSpace(NIDMObject):
             units = ["mm", "mm", "mm"]
 
         self.number_of_dimensions = numdim
+        if isinstance(vox_to_world, str):
+            # This is useful if info was read from a NIDM pack
+            vox_to_world = np.array(json.loads(vox_to_world))
+            dimensions = np.array(json.loads(dimensions))
+            units = json.loads(units)
+            vox_size = np.array(json.loads(vox_size))
+
         self.voxel_to_world = vox_to_world
         self.voxel_size = vox_size
         self.dimensions = dimensions
@@ -171,7 +178,7 @@ class CoordinateSpace(NIDMObject):
         """
         self.add_attributes({
             PROV['type']: self.type,
-            NIDM_DIMENSIONS_IN_VOXELS: json.dumps(self.dimensions),
+            NIDM_DIMENSIONS_IN_VOXELS: json.dumps(self.dimensions.tolist()),
             NIDM_NUMBER_OF_DIMENSIONS: self.number_of_dimensions,
             NIDM_VOXEL_TO_WORLD_MAPPING:
             json.dumps(self.voxel_to_world.tolist()),
@@ -185,16 +192,16 @@ class NIDMFile(NIDMObject):
     """
     Object representing a File (to be used as attribute of another class)
     """
-    def __init__(self, rdf_id, location, new_filename=None,
+    def __init__(self, rdf_id, location, filename=None,
                  sha=None, format=None, temporary=False):
         super(NIDMFile, self).__init__()
         self.prov_type = PROV['Entity']
         self.path = location
-        if new_filename is None:
+        if filename is None:
             # Keep same file name
-            path, self.new_filename = os.path.split(self.path)
+            path, self.filename = os.path.split(self.path)
         else:
-            self.new_filename = new_filename
+            self.filename = filename
 
         # NIDMFile is not a NIDM class defined in the owl file
         self.type = None
@@ -227,7 +234,7 @@ class NIDMFile(NIDMObject):
         if self.path is not None:
             if export_dir is not None:
                 # Copy file only if export_dir is not None
-                new_file = os.path.join(export_dir, self.new_filename)
+                new_file = os.path.join(export_dir, self.filename)
                 if not self.path == new_file:
                     if prepend_path.endswith('.zip'):
                         with zipfile.ZipFile(prepend_path) as z:
@@ -245,18 +252,18 @@ class NIDMFile(NIDMObject):
                 new_file = self.path
 
             if nidm_version['num'] in ["1.0.0", "1.1.0"]:
-                loc = Identifier("file://./" + self.new_filename)
+                loc = Identifier("file://./" + self.filename)
             else:
-                loc = Identifier(self.new_filename)
+                loc = Identifier(self.filename)
 
-            self.add_attributes([(NFO['fileName'], self.new_filename)])
+            self.add_attributes([(NFO['fileName'], self.filename)])
 
             if export_dir:
                 self.add_attributes([(PROV['atLocation'], loc)])
 
             if nidm_version['num'] in ("1.0.0", "1.1.0"):
                 path, org_filename = os.path.split(self.path)
-                if (org_filename is not self.new_filename) \
+                if (org_filename is not self.filename) \
                         and (not self.temporary):
                     self.add_attributes([(NFO['fileName'], org_filename)])
 
@@ -327,14 +334,25 @@ class NeuroimagingSoftware(NIDMObject):
         super(NeuroimagingSoftware, self).__init__(oid=oid)
         self.id = NIIRI[str(uuid.uuid4())]
         self.version = version
-        # FIXME: get label from owl!
-        if software_type.lower() == "fsl":
+
+        if software_type.startswith('http'):         
+            self.type = Identifier(software_type)
+        elif software_type.lower() == "fsl":
             self.name = "FSL"
-            self.type = SCR_FSL  # NLX_FSL
         else:
             warnings.warn('Unrecognised software: ' + str(software_type))
             self.name = str(software_type)
             self.type = None
+
+        # FIXME: get label from owl!
+        if self.type == SCR_FSL:
+            self.name = "FSL"
+        elif self.type == SCR_SPM:
+            self.name = "SPM"
+        else:
+            warnings.warn('Unrecognised software: ' + str(software_type))
+            self.name = str(software_type)
+
         if not label:
             self.label = self.name
         else:

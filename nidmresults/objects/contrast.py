@@ -13,6 +13,7 @@ from nidmresults.objects.constants import *
 import nibabel as nib
 from nidmresults.objects.generic import *
 import uuid
+from prov.model import Identifier
 
 
 class Contrast(object):
@@ -85,18 +86,19 @@ class ContrastWeights(NIDMObject):
         """
         Create prov graph.
         """
-
         if self.stat_type.lower() == "t":
             stat = STATO_TSTATISTIC
         elif self.stat_type.lower() == "z":
             stat = STATO_ZSTATISTIC
         elif self.stat_type.lower() == "f":
             stat = STATO_FSTATISTIC
+        elif self.stat_type.startswith('http'):
+            stat = Identifier(self.stat_type)
 
         self.add_attributes((
             (PROV['type'], STATO_CONTRAST_WEIGHT_MATRIX),
             (NIDM_STATISTIC_TYPE, stat),
-            (PROV['label'], label),
+            (PROV['label'], self.label),
             (NIDM_CONTRAST_NAME, self.contrast_name),
             (PROV['value'], self.contrast_weights)))
 
@@ -289,7 +291,7 @@ class ContrastStdErrMap(NIDMObject):
         """
         Create prov graph.
         """
-        filename = "ContrastStandardError" + self.num + ".nii.gz"
+        std_filename = "ContrastStandardError" + self.num + ".nii.gz"
         if self.is_variance:
             # Copy contrast variance map in export directory
             path, var_cope_filename = os.path.split(self.file)
@@ -304,13 +306,13 @@ class ContrastStdErrMap(NIDMObject):
             standard_error_img = nib.Nifti1Image(np.sqrt(contrast_variance),
                                                  var_cope_img.get_qform())
 
-            stderr_file = os.path.join(export_dir, filename)
+            stderr_file = os.path.join(export_dir, std_filename)
             nib.save(standard_error_img, stderr_file)
             self.file = NIDMFile(
-                self.id, stderr_file, filename)
+                self.id, stderr_file, std_filename)
 
         else:
-            self.file = NIDMFile(self.id, self.file, None, format=self.format, sha=self.sha, filename=self.filename)
+            self.file = NIDMFile(self.id, self.file, self.filename, format=self.format, sha=self.sha)
 
         self.add_attributes((
             (PROV['type'], self.type),
@@ -354,6 +356,11 @@ class StatisticMap(NIDMObject):
             self.stat = STATO_ZSTATISTIC
         elif self.stat_type.lower() == "f":
             self.stat = STATO_FSTATISTIC
+        elif self.stat_type.startswith('http'):
+            self.stat = Identifier(self.stat_type)
+        else:
+            raise Exception('Unrecognised statistic: ' + str(self.stat_type))
+
         # FIXME use new 'preferred mathematical notation from stato'
         if self.num is not None:
             filename = self.stat_type.upper() + \

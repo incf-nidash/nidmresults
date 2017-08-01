@@ -569,7 +569,7 @@ class PeakCriteria(NIDMObject):
     Object representing a PeakCriteria entity.
     """
 
-    def __init__(self, contrast_num, num_peak, peak_dist, label=None, oid=None):
+    def __init__(self, contrast_num, peak_dist, num_peak=None, label=None, oid=None):
         super(PeakCriteria, self).__init__(oid=oid)
         self.id = NIIRI[str(uuid.uuid4())]
         self.num_peak = num_peak
@@ -596,8 +596,9 @@ class PeakCriteria(NIDMObject):
             SELECT DISTINCT * WHERE {
             """ + oid_var + """ a nidm_PeakDefinitionCriteria: ;
                 rdfs:label ?label ;
-                nidm_minDistanceBetweenPeaks: ?peak_dist ;
-                nidm_maxNumberOfPeaksPerCluster: ?num_peak .
+                nidm_minDistanceBetweenPeaks: ?peak_dist .
+
+            OPTIONAL { """ + oid_var + """ nidm_maxNumberOfPeaksPerCluster: ?num_peak .} .
         }
         """
         return query
