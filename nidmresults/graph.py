@@ -407,6 +407,8 @@ class NIDMResults():
                 nidm_inCoordinateSpace: ?excset_coord_space_id ;
                 prov:wasGeneratedBy ?inference_id .
 
+            OPTIONAL {?exc_set_id dc:description ?excset_visu_id}
+
             ?search_space_id a nidm_SearchSpaceMaskMap: ;
                 nidm_inCoordinateSpace: ?search_space_coord_space_id ;
                 prov:wasGeneratedBy ?inference_id .
@@ -432,9 +434,12 @@ class NIDMResults():
                 else:
                     disp_mask = None
 
+                if 'excset_visu_id' in args:
+                    excset_visu = self.get_object(Image, args['excset_visu_id'])
+
                 excset_coordspace = self.get_object(CoordinateSpace, args['excset_coord_space_id'])
                 excursion_set = self.get_object(ExcursionSet, args['exc_set_id'], 
-                    coord_space=excset_coordspace)
+                    coord_space=excset_coordspace, visu=excset_visu)
 
                 searchspace_coordspace = self.get_object(CoordinateSpace, args['search_space_coord_space_id'])
                 search_space = self.get_object(SearchSpace, args['search_space_id'], 

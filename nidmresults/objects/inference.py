@@ -100,7 +100,7 @@ class ExcursionSet(NIDMObject):
     Object representing a ExcursionSet entity.
     """
 
-    def __init__(self, location, coord_space, visualisation=None,
+    def __init__(self, location, coord_space, visu=None,
                  oid=None, format=None, label=None,
                  sha=None, filename=None, inference=None, suffix='',
                  clust_map=None):
@@ -113,9 +113,10 @@ class ExcursionSet(NIDMObject):
         self.file = NIDMFile(self.id, location, filename, sha)
         self.type = NIDM_EXCURSION_SET_MAP
         self.prov_type = PROV['Entity']
-        if visualisation is not None:
-            visu_filename = 'ExcursionSet' + suffix + '.png'
-            self.visu = Image(visualisation, visu_filename)
+        # if visu is not None:
+        self.visu = visu
+            # visu_filename = 'ExcursionSet' + suffix + '.png'
+            # self.visu = Image(visualisation, visu_filename)
         if label is None:
             label = "Excursion Set Map"
         self.label = label
@@ -146,8 +147,7 @@ class ExcursionSet(NIDMObject):
             rdfs:label ?label ;
             dct:format ?format ;
             nfo:fileName ?filename ;
-            crypto:sha512 ?sha ;
-            OPTIONAL {""" + oid_var + """ dc:description ?visualisation } .
+            crypto:sha512 ?sha .
         }
         ORDER BY ?peak_label
 
@@ -164,8 +164,12 @@ class ExcursionSet(NIDMObject):
             (PROV['type'], self.type),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
             (PROV['label'], self.label),
-            (DC['description'], self.visu.id)
         ))
+
+        if self.visu is not None:
+            self.add_attributes((
+                (DC['description'], self.visu.id),
+            ))
 
         if self.clust_map is not None:
             self.add_attributes((
