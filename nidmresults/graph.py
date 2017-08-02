@@ -126,7 +126,6 @@ class NIDMResults():
         prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
         prefix nidm_hasDriftModel: <http://purl.org/nidash/nidm#NIDM_0000088>
         prefix nidm_Data: <http://purl.org/nidash/nidm#NIDM_0000169>
-        prefix obo_studygrouppopulation: <http://purl.obolibrary.org/obo/STATO_0000193>
         prefix nidm_ErrorModel: <http://purl.org/nidash/nidm#NIDM_0000023>
         prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
         prefix nidm_ResidualMeanSquaresMap: <http://purl.org/nidash/nidm#NIDM_0000066>
@@ -141,12 +140,8 @@ class NIDMResults():
             OPTIONAL { ?design_id nidm_hasDriftModel: ?drift_model_id . } .
 
             ?data_id a nidm_Data: ;
-                prov:wasAttributedTo ?machine_id ;
-                prov:wasAttributedTo ?person_or_group_id .
+                prov:wasAttributedTo ?machine_id .
             
-            {?person_or_group_id a prov:Person .} UNION
-            {?person_or_group_id a obo_studygrouppopulation: .} .
-
             ?machine_id a nlx_Imaginginstrument: .
 
             ?error_id a nidm_ErrorModel: .
@@ -228,12 +223,36 @@ class NIDMResults():
 
                 machine = self.get_object(ImagingInstrument, args['machine_id'])
 
-                # TODO could be more than 1 group
-                subjects = self.get_object(Group, args['person_or_group_id'], err_if_none=False)
+                # Find subject or group(s)
+                query_subjects = """
+                prefix nidm_Data: <http://purl.org/nidash/nidm#NIDM_0000169>
+                prefix obo_studygrouppopulation: <http://purl.obolibrary.org/obo/STATO_0000193>
 
-                if subjects is None:
-                    # Try loading as a single subject
-                    subjects = [self.get_object(Person, args['person_or_group_id'])]
+                SELECT DISTINCT * WHERE {
+                    <""" + str(args['data_id']) + """> a nidm_Data: ;
+                        prov:wasAttributedTo ?person_or_group_id .
+            
+                    {?person_or_group_id a prov:Person .} UNION
+                    {?person_or_group_id a obo_studygrouppopulation: .} .
+                
+                }
+                """
+                
+                sd_subjects = self.graph.query(query_subjects)
+                subjects = None
+
+                if sd_subjects:
+                    subjects = list()
+                    for row_sub in sd_subjects:
+                        args_sub = row_sub.asdict()
+                        group = self.get_object(Group, args_sub['person_or_group_id'], err_if_none=False)
+
+                        if group is None:
+                            # Try loading as a single subject
+                            subject = self.get_object(Person, args_sub['person_or_group_id'])
+                            subjects.append(subject)
+                        else:
+                            subjects.append(group)
 
                 model_fittings.append(ModelFitting(activity, design_matrix, data, error_model,
                  param_estimates, rms_map, mask_map, grand_mean_map,
@@ -442,8 +461,9 @@ class NIDMResults():
 
                 if 'display_mask_id' in args:
                     disp_coordspace = self.get_object(CoordinateSpace, args['disp_coord_space_id'])
-                    disp_mask = self.get_object(DisplayMaskMap, args['display_mask_id'], 
-                        contrast_num=None, coord_space=disp_coordspace, mask_num=None)
+                    # TODO we need to deal with more than 1 DisplayMaskMap
+                    disp_mask = [self.get_object(DisplayMaskMap, args['display_mask_id'], 
+                        contrast_num=None, coord_space=disp_coordspace, mask_num=None)]
                 else:
                     disp_mask = None
 
