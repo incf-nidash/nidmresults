@@ -238,7 +238,8 @@ class NIDMFile(NIDMObject):
                 if not self.path == new_file:
                     if prepend_path.endswith('.zip'):
                         with zipfile.ZipFile(prepend_path) as z:
-                            z.extract(str(self.path), new_file)
+                            extracted = z.extract(str(self.path), export_dir)
+                            shutil.move(extracted, new_file)
                     else:
                         if prepend_path:
                             file_copied = os.path.join(prepend_path, self.path)
