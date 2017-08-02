@@ -625,7 +625,7 @@ class PeakCriteria(NIDMObject):
         """
         num_peak = ()
         if self.num_peak:
-            num_peak = (NIDM_MAXNUMBEROFPEAKSPERCLUSTER, self.num_peak)
+            num_peak = ((NIDM_MAX_NUMBER_OF_PEAKS_PER_CLUSTER, self.num_peak),)
 
         # Create "Peak definition criteria" entity
         self.add_attributes((
