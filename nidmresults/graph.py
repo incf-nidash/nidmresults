@@ -329,7 +329,7 @@ class NIDMResults():
                 else:
                     # F-contrast
                     stderr_or_expl_mean_sq_map = self.get_object(ContrastExplainedMeanSquareMap, args['constdm_coordspace_id'],
-                        coord_space=contraststd_map_coordspace, contrast_num=contrast_num, err_if_none=False)
+                        coord_space=contraststd_map_coordspace, contrast_num=contrast_num)
 
                 stat_map_coordspace = self.get_object(CoordinateSpace, args['statm_coordspace_id'])
                 stat_map = self.get_object(StatisticMap, args['statm_id'], coord_space=stat_map_coordspace)
