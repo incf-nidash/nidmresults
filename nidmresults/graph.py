@@ -327,6 +327,7 @@ class NIDMResults():
                         coord_space=contraststd_map_coordspace, contrast_num=contrast_num, is_variance=False, var_coord_space=None)
                 else:
                     # F-contrast
+                    contrast_map = None
                     stderr_or_expl_mean_sq_map = self.get_object(ContrastExplainedMeanSquareMap, args['constdm_id'],
                         coord_space=contraststd_map_coordspace, contrast_num=contrast_num, stat_file=None, sigma_sq_file=None)
 
@@ -463,10 +464,18 @@ class NIDMResults():
                 # Find list of clusters
                 query_clusters = """
                 prefix nidm_SupraThresholdCluster: <http://purl.org/nidash/nidm#NIDM_0000070>
+                prefix nidm_ClusterCenterOfGravity: <http://purl.org/nidash/nidm#NIDM_0000140>
+                prefix nidm_clusterLabelId: <http://purl.org/nidash/nidm#NIDM_0000082>
                 
                 SELECT DISTINCT * WHERE {
                     ?cluster_id a nidm_SupraThresholdCluster: ;
-                    prov:wasDerivedFrom <""" + str(args['exc_set_id']) + """> .
+                        nidm_clusterLabelId: ?cluster_num ;
+                        prov:wasDerivedFrom <""" + str(args['exc_set_id']) + """> .
+
+                    OPTIONAL {
+                    ?cog_id a nidm_ClusterCenterOfGravity: ;
+                        prov:wasDerivedFrom ?cluster_id .
+                    }
                 }
                 """
                 clusters = list()
@@ -474,6 +483,11 @@ class NIDMResults():
                 if sd_clusters:
                     for row_cluster in sd_clusters:
                         args_cl = row_cluster.asdict()
+
+                        if 'cog_id' in args_cl:
+                            cog = self.get_object(CenterOfGravity, args_cl['cog_id'], cluster_num=args_cl['cluster_num'].toPython())
+                        else:
+                            cog=None
 
                         # Find list of peaks
                         query_peaks = """
@@ -492,7 +506,7 @@ class NIDMResults():
 
                                 peaks.append(self.get_object(Peak, args_peak['peak_id']))
 
-                        clusters.append(self.get_object(Cluster, args_cl['cluster_id'], peaks=peaks))
+                        clusters.append(self.get_object(Cluster, args_cl['cluster_id'], peaks=peaks, cog=cog))
 
                 # Dictionary of (key, value) pairs where key is the identifier of a
                 # ContrastEstimation object and value is an object of type Inference

@@ -446,15 +446,18 @@ class Cluster(NIDMObject):
     def __init__(self, cluster_num, size, pFWER, peaks,
                  x=None, y=None, z=None, x_std=None, y_std=None, z_std=None,
                  suffix='', clust_size_resels=None, pFDR=None, punc=None, 
-                 label=None, oid=None):
+                 label=None, oid=None, cog=None):
         super(Cluster, self).__init__(oid=oid)
         self.num = cluster_num
         self.id = NIIRI[str(uuid.uuid4())]
-        if x and y and z:
-            self.cog = CenterOfGravity(
-                cluster_num, x=x, y=y, z=z, x_std=x_std, y_std=y_std, z_std=z_std)
+        if cog is not None:
+            self.cog = cog 
         else:
-            self.cog = None
+            if x and y and z:
+                self.cog = CenterOfGravity(
+                    cluster_num, x=x, y=y, z=z, x_std=x_std, y_std=y_std, z_std=z_std)
+            else:
+                self.cog = None
         self.peaks = peaks
         self.size = size
         self.pFWER = pFWER
@@ -695,24 +698,57 @@ class CenterOfGravity(NIDMObject):
     """
 
     def __init__(self, cluster_num, x=None, y=None, z=None, x_std=None,
-                 y_std=None, z_std=None, oid=None):
+                 y_std=None, z_std=None, oid=None, coord_vector=None, 
+                 coord_vector_std=None, label=None, coord_id=None):
+        # Note: coord_id argument is only here for compatibility 
+        # with the query outputs
+
         super(CenterOfGravity, self).__init__(oid=oid)
         self.cluster_num = cluster_num
         self.id = NIIRI[str(uuid.uuid4())]
         self.coordinate = Coordinate("%04d" % cluster_num, x=x, y=y, z=z,
-                                     x_std=x_std, y_std=y_std, z_std=z_std)
+                                     x_std=x_std, y_std=y_std, z_std=z_std,
+                                     coord_vector_std=coord_vector_std,
+                                     coord_vector=coord_vector)
         self.type = NIDM_CLUSTER_CENTER_OF_GRAVITY
         self.prov_type = PROV['Entity']
+        if label is None:
+            label = "Center of gravity " + str(self.cluster_num)
+        self.label = label
+
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix nidm_ClusterCenterOfGravity: <http://purl.org/nidash/nidm#NIDM_0000140>
+        prefix nidm_coordinateVector: <http://purl.org/nidash/nidm#NIDM_0000086>
+        prefix nidm_coordinateVectorInVoxels: <http://purl.org/nidash/nidm#NIDM_0000139>
+
+            SELECT DISTINCT * WHERE {
+            """ + oid_var + """ a nidm_ClusterCenterOfGravity: ;
+                rdfs:label ?label ;
+                prov:atLocation ?coord_id .
+
+            ?coord_id a nidm_Coordinate: ;
+                nidm_coordinateVector: ?coord_vector_std .
+
+            OPTIONAL { ?coord_id nidm_coordinateVectorInVoxels: ?coord_vector .} .
+        }
+        """
+        return query
 
     def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
-        label = "Center of gravity " + str(self.cluster_num)
-
         self.add_attributes((
             (PROV['type'], self.type),
-            (PROV['label'], label),
+            (PROV['label'], self.label),
             (PROV['location'], self.coordinate.id)))
 
 
