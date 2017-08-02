@@ -481,6 +481,8 @@ class NIDMResults():
 
                 if 'excset_visu_id' in args:
                     excset_visu = self.get_object(Image, args['excset_visu_id'])
+                else:
+                    excset_visu = None
 
                 excset_coordspace = self.get_object(CoordinateSpace, args['excset_coord_space_id'])
                 excursion_set = self.get_object(ExcursionSet, args['exc_set_id'], 

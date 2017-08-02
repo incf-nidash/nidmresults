@@ -316,9 +316,10 @@ class NIDMExporter():
                     self.bundle.wasGeneratedBy(inference.excursion_set.id, inference.inference_act.id)
                     self.add_object(inference.excursion_set)
                     self.add_object(inference.excursion_set.coord_space)
-                    self.add_object(inference.excursion_set.visu)
-                    if inference.excursion_set.visu.file is not None:
-                        self.add_object(inference.excursion_set.visu.file)
+                    if inference.excursion_set.visu is not None:
+                        self.add_object(inference.excursion_set.visu)
+                        if inference.excursion_set.visu.file is not None:
+                            self.add_object(inference.excursion_set.visu.file)
                     # Copy "Excursion set map" file in export directory
                     self.add_object(inference.excursion_set.file)
                     if inference.excursion_set.clust_map is not None:
