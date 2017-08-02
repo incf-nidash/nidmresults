@@ -561,7 +561,7 @@ class NIDMResults():
                   last_used_con_id=0):
 
         if format == "nidm":
-            exporter = NIDMExporter(version="1.3.0", out_dir=destination)
+            exporter = NIDMExporter(version="1.3.0", out_dir=destination.replace('.nidm.zip', ''))
             exporter.model_fittings = self.model_fittings
             exporter.contrasts = self.contrasts
             exporter.inferences = self.inferences
