@@ -170,7 +170,8 @@ class ContrastExplainedMeanSquareMap(NIDMObject):
     """
     def __init__(self, stat_file, sigma_sq_file, contrast_num,
                  coord_space, expl_mean_sq_file=None, 
-                 sha=None, format=None, filename=None, oid=None):
+                 sha=None, format=None, filename=None, oid=None,
+                 label="Contrast Explained Mean Square Map"):
         super(ContrastExplainedMeanSquareMap, self).__init__(oid=oid)
         self.stat_file = stat_file
         self.sigma_sq_file = sigma_sq_file
@@ -183,6 +184,7 @@ class ContrastExplainedMeanSquareMap(NIDMObject):
         self.sha = sha
         self.filename = filename
         self.format = format
+        self.label = label
 
 
     @classmethod
@@ -198,7 +200,7 @@ class ContrastExplainedMeanSquareMap(NIDMObject):
         SELECT DISTINCT * WHERE {
             """ + oid_var + """ a nidm_ContrastExplainedMeanSquareMap: ;
             rdfs:label ?label ;
-            prov:atLocation ?contrast_file ;
+            prov:atLocation ?expl_mean_sq_file ;
             dct:format ?format ;
             nfo:fileName ?filename ;
             crypto:sha512 ?sha .
@@ -235,7 +237,7 @@ class ContrastExplainedMeanSquareMap(NIDMObject):
         self.add_attributes((
             (PROV['type'], self.type),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
-            (PROV['label'], "Contrast Explained Mean Square Map")))
+            (PROV['label'], self.label)))
 
 
 class ContrastStdErrMap(NIDMObject):

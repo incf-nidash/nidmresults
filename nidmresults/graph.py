@@ -309,7 +309,6 @@ class NIDMResults():
             con_num = 0
             for row in sd:
                 args = row.asdict()
-
                 contrast_num = str(con_num)
                 contrast_name = args['contrast_name']
 
@@ -329,7 +328,7 @@ class NIDMResults():
                 else:
                     # F-contrast
                     stderr_or_expl_mean_sq_map = self.get_object(ContrastExplainedMeanSquareMap, args['constdm_id'],
-                        coord_space=contraststd_map_coordspace, contrast_num=contrast_num)
+                        coord_space=contraststd_map_coordspace, contrast_num=contrast_num, stat_file=None, sigma_sq_file=None)
 
                 stat_map_coordspace = self.get_object(CoordinateSpace, args['statm_coordspace_id'])
                 stat_map = self.get_object(StatisticMap, args['statm_id'], coord_space=stat_map_coordspace)
