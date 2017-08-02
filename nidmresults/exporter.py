@@ -375,9 +375,11 @@ class NIDMExporter():
                                 self.bundle.wasDerivedFrom(peak.id, cluster.id)
                                 self.add_object(peak)
                                 self.add_object(peak.coordinate)
-                            self.bundle.wasDerivedFrom(cluster.cog.id, cluster.id)
-                            self.add_object(cluster.cog)
-                            self.add_object(cluster.cog.coordinate)
+
+                            if cluster.cog is not None:
+                                self.bundle.wasDerivedFrom(cluster.cog.id, cluster.id)
+                                self.add_object(cluster.cog)
+                                self.add_object(cluster.cog.coordinate)
 
                     # Inference activity
                     # inference.inference_act.wasAssociatedWith(inference.software_id)
