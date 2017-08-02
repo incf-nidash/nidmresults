@@ -270,31 +270,38 @@ class NIDMResults():
             ?mpe_id a nidm_ModelParameterEstimation: ;
                 prov:used ?design_id .
 
+            {
             ?conm_id a nidm_ContrastMap: ;
                 nidm_inCoordinateSpace: ?conm_coordspace_id ;
-                nidm_contrastName: ?contrast_name ;
                 prov:wasGeneratedBy ?conest_id .
 
-            {?constdm_id a nidm_ContrastStandardErrorMap: .} UNION
-            {?constdm_id a nidm_ContrastExplainedMeanSquareMap: .} .
+            ?constdm_id a nidm_ContrastStandardErrorMap: .
+            } UNION
+            {
+            ?constdm_id a nidm_ContrastExplainedMeanSquareMap: .
+            } .
 
             ?constdm_id nidm_inCoordinateSpace: ?constdm_coordspace_id ;
                 prov:wasGeneratedBy ?conest_id .
 
             ?statm_id a nidm_StatisticMap: ;
                 prov:wasGeneratedBy ?conest_id ;
+                nidm_contrastName: ?contrast_name ;
                 nidm_inCoordinateSpace: ?statm_coordspace_id .
 
             ?inf_id a nidm_Inference: ;
                 prov:used ?statm_id .
 
-            ?otherstatm_id a nidm_StatisticMap: ;
+            OPTIONAL {
+                ?otherstatm_id a nidm_StatisticMap: ;
                 prov:wasGeneratedBy ?conest_id ;
-                nidm_inCoordinateSpace: ?otherstatm_coordspace_id .
-
+                nidm_inCoordinateSpace: ?otherstatm_coordspace_id . 
+                FILTER (?otherstatm_id != ?statm_id)
+            } .
 
         }
-    """
+        """
+
         sd = self.graph.query(query)
 
         contrasts = dict()
@@ -309,23 +316,25 @@ class NIDMResults():
                 weights = self.get_object(ContrastWeights, args['conw_id'], contrast_num=contrast_num)
                 estimation = self.get_object(ContrastEstimation, args['conest_id'], contrast_num=contrast_num)
 
-                contrast_map_coordspace = self.get_object(CoordinateSpace, args['conm_coordspace_id'])
-                contrast_map = self.get_object(ContrastMap, args['conm_id'], 
-                    coord_space=contrast_map_coordspace, contrast_num=contrast_num)
-
                 contraststd_map_coordspace = self.get_object(CoordinateSpace, args['constdm_coordspace_id'])
 
-                stderr_or_expl_mean_sq_map = self.get_object(ContrastExplainedMeanSquareMap, args['constdm_coordspace_id'],
-                    coord_space=contraststd_map_coordspace, contrast_num=contrast_num, err_if_none=False)
-                if stderr_or_expl_mean_sq_map is None:
-                    # Try loading as a contrast standard map
+                if 'conm_id' in args:
+                    # T-contrast
+                    contrast_map_coordspace = self.get_object(CoordinateSpace, args['conm_coordspace_id'])
+                    contrast_map = self.get_object(ContrastMap, args['conm_id'], 
+                        coord_space=contrast_map_coordspace, contrast_num=contrast_num)
+
                     stderr_or_expl_mean_sq_map = self.get_object(ContrastStdErrMap, args['constdm_id'], 
                         coord_space=contraststd_map_coordspace, contrast_num=contrast_num, is_variance=False, var_coord_space=None)
+                else:
+                    # F-contrast
+                    stderr_or_expl_mean_sq_map = self.get_object(ContrastExplainedMeanSquareMap, args['constdm_coordspace_id'],
+                        coord_space=contraststd_map_coordspace, contrast_num=contrast_num, err_if_none=False)
 
                 stat_map_coordspace = self.get_object(CoordinateSpace, args['statm_coordspace_id'])
                 stat_map = self.get_object(StatisticMap, args['statm_id'], coord_space=stat_map_coordspace)
 
-                if args['otherstatm_id'] is not None:
+                if 'otherstatm_id' in args:
                     zstat_exist = True
 
                     otherstat_map_coordspace = self.get_object(CoordinateSpace, args['otherstatm_coordspace_id'])
