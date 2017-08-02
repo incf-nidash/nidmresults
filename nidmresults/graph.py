@@ -274,6 +274,7 @@ class NIDMResults():
         prefix nidm_ContrastExplainedMeanSquareMap: <http://purl.org/nidash/nidm#NIDM_0000163>
         prefix nidm_StatisticMap: <http://purl.org/nidash/nidm#NIDM_0000076>
         prefix nidm_Inference: <http://purl.org/nidash/nidm#NIDM_0000049>
+        prefix nidm_ConjunctionInference: <http://purl.org/nidash/nidm#NIDM_0000011>
         prefix nidm_contrastName: <http://purl.org/nidash/nidm#NIDM_0000085>
 
         SELECT DISTINCT * WHERE {
@@ -308,8 +309,13 @@ class NIDMResults():
                 nidm_contrastName: ?contrast_name ;
                 nidm_inCoordinateSpace: ?statm_coordspace_id .
 
-            ?inf_id a nidm_Inference: ;
-                prov:used ?statm_id .
+            { 
+            ?inf_id a nidm_Inference: .
+            } UNION {
+            ?inf_id a nidm_ConjunctionInference: .
+            } .
+
+            ?inf_id prov:used ?statm_id .
 
             OPTIONAL {
                 ?otherstatm_id a nidm_StatisticMap: ;
@@ -353,6 +359,7 @@ class NIDMResults():
                 stat_map_coordspace = self.get_object(CoordinateSpace, args['statm_coordspace_id'])
                 stat_map = self.get_object(StatisticMap, args['statm_id'], coord_space=stat_map_coordspace)
 
+                zstat_exist = False
                 if 'otherstatm_id' in args:
                     zstat_exist = True
 
@@ -410,12 +417,15 @@ class NIDMResults():
         prefix nidm_ExcursionSetMap: <http://purl.org/nidash/nidm#NIDM_0000025>
         prefix nidm_inCoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000104>
         prefix nidm_SearchSpaceMaskMap: <http://purl.org/nidash/nidm#NIDM_0000068>
+        prefix nidm_ConjunctionInference: <http://purl.org/nidash/nidm#NIDM_0000011>
 
         SELECT DISTINCT * WHERE {
             ?con_est_id a nidm_ContrastEstimation: .
 
-            ?inference_id a nidm_Inference: ;
-                prov:used/prov:wasGeneratedBy ?con_est_id ;
+            { ?inference_id a nidm_Inference: . } 
+            UNION {  ?inference_id a nidm_ConjunctionInference: . }
+
+            ?inference_id prov:used/prov:wasGeneratedBy ?con_est_id ;
                 prov:used ?height_thresh_id ;
                 prov:used ?extent_thresh_id ;
                 prov:used ?peak_criteria_id ;
@@ -452,7 +462,9 @@ class NIDMResults():
         if sd:
             for row in sd:
                 args = row.asdict()
-                inference = self.get_object(InferenceActivity, args['inference_id'])
+                inference = self.get_object(InferenceActivity, args['inference_id'], err_if_none=False)
+                if inference is None:
+                    inference = self.get_object(ConjunctionInferenceActivity, args['inference_id'], err_if_none=False)
 
                 height_thresh = self.get_object(HeightThreshold, args['height_thresh_id'])
                 extent_thresh = self.get_object(ExtentThreshold, args['extent_thresh_id'])

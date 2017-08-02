@@ -70,11 +70,18 @@ class InferenceActivity(NIDMObject):
 
         query = """
         prefix nidm_Inference: <http://purl.org/nidash/nidm#NIDM_0000049>
+        prefix nidm_ConjunctionInference: <http://purl.org/nidash/nidm#NIDM_0000011>
         prefix nidm_hasAlternativeHypothesis: <http://purl.org/nidash/nidm#NIDM_0000097>
 
             SELECT DISTINCT * WHERE {
-            """ + oid_var + """ a nidm_Inference: ;
-                rdfs:label ?label ;
+            {
+            """ + oid_var + """ a nidm_Inference: .
+            } UNION {
+            """ + oid_var + """ a nidm_ConjunctionInference: .
+            }
+
+
+            """ + oid_var + """ rdfs:label ?label ;
                 nidm_hasAlternativeHypothesis: ?tail .
         }
         """
