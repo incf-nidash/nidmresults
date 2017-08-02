@@ -308,8 +308,8 @@ class HeightThreshold(NIDMObject):
                 ]
         else:
             atts += [
-                (PROV['type'], threshold_type),
-                (PROV['value'], value)
+                (PROV['type'], self.threshold_type),
+                (PROV['value'], self.value)
                 ]
 
         self.add_attributes([(k, v) for k, v in atts if v is not None])
@@ -363,6 +363,8 @@ class ExtentThreshold(NIDMObject):
             self.user_threshold_type = user_threshold_type
             self.p_uncorr = p_uncorr
             self.p_corr = p_corr
+        else:
+            self.threshold_type = threshold_type
 
         self.extent = extent
         self.extent_rsl = extent_rsl
@@ -425,11 +427,11 @@ class ExtentThreshold(NIDMObject):
             ]
         else:
             atts += [
-                (PROV['type'], threshold_type)
+                (PROV['type'], self.threshold_type)
             ]
             if self.extent is None:
                 atts += [
-                    (PROV['value'], value)
+                    (PROV['value'], self.value)
                 ]
 
         self.add_attributes([(k, v) for k, v in atts if v is not None])
@@ -664,20 +666,20 @@ class ClusterCriteria(NIDMObject):
         Create prov entities and activities.
         """
         # Create "Cluster definition criteria" entity
-        if isinstance(voxel_conn, int):
+        if isinstance(self.connectivity, int):
             if self.connectivity == 6:
-                voxel_conn = NIDM_VOXEL6CONNECTED
+                self.connectivity = NIDM_VOXEL6CONNECTED
             elif self.connectivity == 18:
-                voxel_conn = NIDM_VOXEL18CONNECTED
+                self.connectivity = NIDM_VOXEL18CONNECTED
             elif self.connectivity == 26:
-                voxel_conn = NIDM_VOXEL26CONNECTED
+                self.connectivity = NIDM_VOXEL26CONNECTED
 
         # FIXME if connectivity is missing
         if self.connectivity is not None:
             atts = (
                 (PROV['type'], self.type),
                 (PROV['label'], self.label),
-                (NIDM_HAS_CONNECTIVITY_CRITERION, voxel_conn))
+                (NIDM_HAS_CONNECTIVITY_CRITERION, self.connectivity))
         else:
             atts = (
                 (PROV['type'], NIDM_CLUSTER_DEFINITION_CRITERIA),
