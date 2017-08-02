@@ -275,6 +275,7 @@ class NIDMResults():
         prefix nidm_StatisticMap: <http://purl.org/nidash/nidm#NIDM_0000076>
         prefix nidm_Inference: <http://purl.org/nidash/nidm#NIDM_0000049>
         prefix nidm_ConjunctionInference: <http://purl.org/nidash/nidm#NIDM_0000011>
+        prefix spm_PartialConjunctionInference: <http://purl.org/nidash/spm#SPM_0000005>
         prefix nidm_contrastName: <http://purl.org/nidash/nidm#NIDM_0000085>
 
         SELECT DISTINCT * WHERE {
@@ -313,6 +314,8 @@ class NIDMResults():
             ?inf_id a nidm_Inference: .
             } UNION {
             ?inf_id a nidm_ConjunctionInference: .
+            } UNION {
+            ?inf_id a spm_PartialConjunctionInference: .
             } .
 
             ?inf_id prov:used ?statm_id .
@@ -418,12 +421,14 @@ class NIDMResults():
         prefix nidm_inCoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000104>
         prefix nidm_SearchSpaceMaskMap: <http://purl.org/nidash/nidm#NIDM_0000068>
         prefix nidm_ConjunctionInference: <http://purl.org/nidash/nidm#NIDM_0000011>
+        prefix spm_PartialConjunctionInference: <http://purl.org/nidash/spm#SPM_0000005>
 
         SELECT DISTINCT * WHERE {
             ?con_est_id a nidm_ContrastEstimation: .
 
             { ?inference_id a nidm_Inference: . } 
-            UNION {  ?inference_id a nidm_ConjunctionInference: . }
+            UNION { ?inference_id a nidm_ConjunctionInference: . }
+            UNION { ?inference_id a spm_PartialConjunctionInference: . } .
 
             ?inference_id prov:used/prov:wasGeneratedBy ?con_est_id ;
                 prov:used ?height_thresh_id ;
@@ -463,9 +468,6 @@ class NIDMResults():
             for row in sd:
                 args = row.asdict()
                 inference = self.get_object(InferenceActivity, args['inference_id'], err_if_none=False)
-                if inference is None:
-                    inference = self.get_object(ConjunctionInferenceActivity, args['inference_id'], err_if_none=False)
-
                 height_thresh = self.get_object(HeightThreshold, args['height_thresh_id'])
                 extent_thresh = self.get_object(ExtentThreshold, args['extent_thresh_id'])
                 peak_criteria = self.get_object(PeakCriteria, args['peak_criteria_id'], contrast_num=None)
