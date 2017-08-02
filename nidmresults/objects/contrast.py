@@ -201,8 +201,7 @@ class ContrastExplainedMeanSquareMap(NIDMObject):
             prov:atLocation ?contrast_file ;
             dct:format ?format ;
             nfo:fileName ?filename ;
-            nidm_contrastName: ?contrast_name ;
-            crypto:sha512 ?sha ;
+            crypto:sha512 ?sha .
         }
         """
         return query
