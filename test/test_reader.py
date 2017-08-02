@@ -67,8 +67,9 @@ class TestReader(unittest.TestCase):
             print(nidmpack)
             print("----")
             nidmres = NIDMResults(nidm_zip=nidmpack)
-            nidmres.serialize(nidmpack.replace(".nidm.zip", "_2.nidm.zip"))
-            print('Seralised to ' + nidmpack.replace(".nidm.zip", "_2.nidm.zip"))
+            new_name = nidmpack.replace(".nidm.zip", "_2.nidm.zip")
+            nidmres.serialize(new_name)
+            print('Seralised to ' + new_name)
             # nidm_graph.parse()
             # # exc_sets = nidm_graph.get_excursion_set_maps()
 
