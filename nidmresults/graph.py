@@ -299,8 +299,8 @@ class NIDMResults():
 
         contrasts = dict()
         if sd:
+            con_num = 0
             for row in sd:
-                con_num = 0
                 args = row.asdict()
 
                 contrast_num = str(con_num)
@@ -356,7 +356,11 @@ class NIDMResults():
                         args_pe = row_pe.asdict()
                         pe_ids = pe_ids + (args_pe['pe_id'],)
 
-                contrasts[(args['mpe_id'], pe_ids)] = con
+
+                if not (args['mpe_id'], pe_ids) in contrasts:
+                    contrasts[(args['mpe_id'], pe_ids)] = [con]
+                else:
+                    contrasts[(args['mpe_id'], pe_ids)].append(con)
 
                 con_num = con_num + 1
 
