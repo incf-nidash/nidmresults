@@ -472,6 +472,8 @@ class Cluster(NIDMObject):
         self.pFWER = pFWER
         self.type = NIDM_SIGNIFICANT_CLUSTER
         self.prov_type = PROV['Entity']
+        self.punc = punc
+        self.pFDR = pFDR
         if not label:
             cluster_naming = "Supra-Threshold Cluster"
             self.label = "%s %04d" % (cluster_naming, self.num)
@@ -965,6 +967,8 @@ class Peak(NIDMObject):
         self.prov_type = PROV['Entity']
         # self.cluster = cluster_id
         self.exc_set_id = exc_set_id
+        self.value = value
+        self.p_fdr = p_fdr
 
     @classmethod
     def get_query(klass, oid=None):

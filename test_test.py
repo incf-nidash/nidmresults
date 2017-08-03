@@ -1,10 +1,16 @@
 import nidmresults as nres
+import json
 
 # Reading an existing NIDM-Results
 nidm = nres.load('/Users/cmaumet/Projects/Data_sharing/dev/nidmresults_dev/test/data/ex_spm_thr_clustfwep05.nidm.zip')
 
-nidm_meta = nidm.get_metadata()
-print(nidm_meta)
+# nidm_meta = nidm.get_metadata()
+# print(nidm_meta)
+
+nidm_info = nidm.get_info()
+# print(nidm_info)
+print('----')
+print(json.dumps(nidm_info, indent=4))
 # print(nidm_meta['nidm_Data/nidm_hasMRIProtocol'])
 
 # print(dir(nidm.peaks.itervalues().next()))

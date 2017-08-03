@@ -93,7 +93,7 @@ class NIDMExporter():
             # used for the analysis
             self.software = self._find_software()
 
-            # List of objects (or dictionary) of type ModelFitting describing the
+            # List of objects of type ModelFitting describing the
             # model fitting step in NIDM-Results (main activity: Model Parameters
             # Estimation)
             self.model_fittings = self._find_model_fitting()

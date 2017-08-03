@@ -14,6 +14,7 @@ from nidmresults.objects.modelfitting import *
 from nidmresults.objects.contrast import *
 from nidmresults.objects.inference import *
 from nidmresults.exporter import NIDMExporter
+import collections
 # from rdflib.term import Literal
 
 from rdflib.plugins.parsers.notation3 import BadSyntax
@@ -28,7 +29,6 @@ class NIDMResults():
     """
 
     def __init__(self, nidm_zip=None, rdf_file=None):
-
         self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")      
         self.zip_path = nidm_zip
 
@@ -43,6 +43,7 @@ class NIDMResults():
                 "RDFLib was unable to parse the RDF file.")
 
         self.objects = dict()
+        self.info = None
 
         # Query the RDF document and create the objects
         self.software = self.load_software()
@@ -55,8 +56,162 @@ class NIDMResults():
         nidmr = NIDMResults(nidm_zip=nidm_zip)
         return nidmr
 
+    def get_info(self):
+        
+        if self.info is None:
+            self.info = collections.OrderedDict()
+
+            # TODO: here we assume that there is a single mpe activity per nidm-results pack, this should 
+            # be stated explicitely in the spec?
+            if len(self.model_fittings) > 1:
+                raise Exception("Can't handle NIDM-Results packs with multiple model parameter estimation activities")
+
+            self.info['NeuroimagingAnalysisSoftware_type'] = self.software.name
+            self.info['NeuroimagingAnalysisSoftware_softwareVersion'] = self.software.version
+            self.info['Data_grandMeanScaling'] = self.model_fittings[0].data.grand_mean_sc
+            self.info['Data_targetIntensity'] = self.model_fittings[0].data.target_intensity
+            self.info['DesignMatrix_atLocation'] = self.model_fittings[0].design_matrix.csv_file
+            self.info['DesignMatrix_regressorNames'] = self.model_fittings[0].design_matrix.regressors
+            self.info['ErrorModel_hasErrorDistribution'] = self.model_fittings[0].error_model.error_distribution
+            self.info['ErrorModel_errorVarianceHomogeneous'] = self.model_fittings[0].error_model.variance_homo
+            # TODO: replace IRIs by preferred prefixes for readability
+            self.info['ErrorModel_varianceMapWiseDependence'] = self.model_fittings[0].error_model.variance_spatial
+            self.info['ErrorModel_hasErrorDependence'] = self.model_fittings[0].error_model.dependance
+            self.info['ErrorModel_dependenceMapWiseDependence'] = self.model_fittings[0].error_model.dependance_spatial
+            self.info['ModelParameterEstimation_withEstimationMethod'] = self.model_fittings[0].activity.estimation_method
+            self.info['ResidualMeanSquaresMap_atLocation'] = self.model_fittings[0].rms_map.file.filename
+            self.info['ResidualMeanSquaresMap_inWorldCoordinateSystem'] = self.model_fittings[0].rms_map.coord_space.coordinate_system
+            self.info['GrandMeanMap_atLocation'] = self.model_fittings[0].grand_mean_map.file.filename
+            self.info['GrandMeanMap_inWorldCoordinateSystem'] = self.model_fittings[0].grand_mean_map.coord_space.coordinate_system
+            self.info['MaskMap_atLocation'] = self.model_fittings[0].mask_map.file.filename
+            self.info['MaskMap_inWorldCoordinateSystem'] = self.model_fittings[0].mask_map.coord_space.coordinate_system
+
+            self.info['ParameterEstimateMaps'] = list()
+            # TODO the order of the pe maps matters!!
+            for pe in self.model_fittings[0].param_estimates:
+                self.info['ParameterEstimateMaps'].append(pe.file.filename)
+
+            self.info['Contrasts'] = list()
+            for contrasts in self.contrasts.values():
+                for contrast in contrasts:
+                    self.info['Contrasts'].append(collections.OrderedDict())
+                    self.info['Contrasts'][-1]['StatisticMap_contrastName'] = contrast.stat_map.contrast_name
+                    self.info['Contrasts'][-1]['ContrastWeightMatrix_value'] = contrast.weights.contrast_weights
+                    self.info['Contrasts'][-1]['StatisticMap_statisticType'] = str(contrast.stat_map.stat_type)
+                    self.info['Contrasts'][-1]['StatisticMap_errorDegreesOfFreedom'] = contrast.stat_map.dof
+                    if contrast.stat_map.effdof:
+                        self.info['Contrasts'][-1]['StatisticMap_effectDegreesOfFreedom'] = contrast.stat_map.effdof
+                    self.info['Contrasts'][-1]['StatisticMap_atLocation'] = contrast.stat_map.file.filename
+                    self.info['Contrasts'][-1]['StatisticMap_inWorldCoordinateSystem'] = contrast.stat_map.coord_space.coordinate_system
+                    if contrast.contrast_map:
+                        self.info['Contrasts'][-1]['ContrastMap_atLocation'] = contrast.contrast_map.file.filename
+                        self.info['Contrasts'][-1]['ContrastMap_inWorldCoordinateSystem'] = contrast.contrast_map.coord_space.coordinate_system
+                        # TODO: deal when this is not created yet...
+                        # self.info['Contrasts'][-1]['ContrastStandardErrorMap_atLocation'] = contrast.stderr_or_expl_mean_sq_map.file.filename
+                        # self.info['Contrasts'][-1]['ContrastStandardErrorMap_inWorldCoordinateSystem'] = contrast.stderr_or_expl_mean_sq_map.coord_space.coordinate_system
+
+            self.info['Inferences'] = list()
+            for con_est_id, inferences in self.inferences.items():
+                for inference in inferences:
+                    if 'ClusterDefinitionCriteria_hasConnectivityCriterion' not in self.info:
+                        # Assume that all inference have the same cluster def and peak def > should be stated explicitely in JSON spec and tested
+                        self.info['ClusterDefinitionCriteria_hasConnectivityCriterion'] = inference.cluster_criteria.connectivity
+                        self.info['PeakDefinitionCriteria_minDistanceBetweenPeaks'] = inference.peak_criteria.peak_dist
+                        self.info['PeakDefinitionCriteria_maxNumberOfPeaksPerCluster'] = inference.peak_criteria.num_peak
+                    else:
+                        if not inference.cluster_criteria.connectivity == self.info['ClusterDefinitionCriteria_hasConnectivityCriterion']:
+                            raise Exception('Inferences using multiple connectivity criteria ' +
+                              str(inference.cluster_criteria.connectivity) + str(self.info['ClusterDefinitionCriteria_hasConnectivityCriterion']) 
+                              + ' not handled yet.')
+                        if not inference.peak_criteria.peak_dist == self.info['PeakDefinitionCriteria_minDistanceBetweenPeaks']:
+                            raise Exception('Inferences using multiple distance between peaks criteria ' +
+                              str(inference.peak_criteria.peak_dist) + str(self.info['PeakDefinitionCriteria_minDistanceBetweenPeaks']) 
+                              + ' not handled yet.')
+                        if not inference.peak_criteria.num_peak == self.info['PeakDefinitionCriteria_maxNumberOfPeaksPerCluster']:
+                            raise Exception('Inferences using multiple number of peak per cluster criteria ' +
+                              str(inference.peak_criteria.num_peak) + str(self.info['PeakDefinitionCriteria_maxNumberOfPeaksPerCluster']) 
+                              + ' not handled yet.')
+
+
+                    contrast = self._get_contrast(con_est_id)
+                    # (model_fitting, pe_map_ids) = self._get_model_fitting(con_est_id)               
+                    self.info['Inferences'].append(collections.OrderedDict())
+                    self.info['Inferences'][-1]['StatisticMap_contrastName'] = contrast.stat_map.contrast_name
+                    self.info['Inferences'][-1]['HeightThreshold_type'] = str(inference.height_thresh.threshold_type)
+                    self.info['Inferences'][-1]['HeightThreshold_value'] = inference.height_thresh.value
+                    self.info['Inferences'][-1]['ExtentThreshold_type'] = str(inference.extent_thresh.threshold_type)
+                    self.info['Inferences'][-1]['ExtentThreshold_clusterSizeInVoxels'] = inference.extent_thresh.extent
+                    self.info['Inferences'][-1]['Inference_hasAlternativeHypothesis'] = inference.inference_act.tail
+                    self.info['Inferences'][-1]['SearchSpaceMaskMap_atLocation'] = inference.search_space.file.filename
+                    self.info['Inferences'][-1]['SearchSpaceMaskMap_inWorldCoordinateSystem'] = inference.search_space.coord_space.coordinate_system
+                    self.info['Inferences'][-1]['SearchSpaceMaskMap_searchVolumeInVoxels'] = inference.search_space.search_volume_in_voxels
+                    self.info['Inferences'][-1]['SearchSpaceMaskMap_searchVolumeInUnits'] = inference.search_space.search_volume_in_units
+                    self.info['Inferences'][-1]['ExcursionSetMap_atLocation'] = inference.excursion_set.file.filename
+                    self.info['Inferences'][-1]['ExcursionSetMap_inWorldCoordinateSystem'] = inference.excursion_set.coord_space.coordinate_system
+                    self.info['Inferences'][-1]['Clusters'] = list()
+                    for cluster in inference.clusters:
+                        self.info['Inferences'][-1]['Clusters'].append(collections.OrderedDict())
+                        self.info['Inferences'][-1]['Clusters'][-1]['SupraThresholdCluster_clusterSizeInVoxels'] = cluster.size
+                        if cluster.punc is not None:
+                            self.info['Inferences'][-1]['Clusters'][-1]['SupraThresholdCluster_pValueUncorrected'] = cluster.punc
+                        if cluster.pFWER is not None:
+                            self.info['Inferences'][-1]['Clusters'][-1]['SupraThresholdCluster_pValueFWER'] = cluster.pFWER
+                        if cluster.pFDR is not None:
+                            self.info['Inferences'][-1]['Clusters'][-1]['SupraThresholdCluster_qValueFDR'] = cluster.pFDR
+                        self.info['Inferences'][-1]['Clusters'][-1]['Peaks'] = list()
+                        for peak in cluster.peaks:
+                            self.info['Inferences'][-1]['Clusters'][-1]['Peaks'].append(collections.OrderedDict())
+                            if peak.value is not None:
+                                self.info['Inferences'][-1]['Clusters'][-1]['Peaks'][-1]['Peak_value'] = peak.value
+                            self.info['Inferences'][-1]['Clusters'][-1]['Peaks'][-1]['Coordinate_coordinateVector'] = peak.coordinate.coord_vector_std
+                            if peak.p_unc is not None:
+                                self.info['Inferences'][-1]['Clusters'][-1]['Peaks'][-1]['Peak_pValueUncorrected'] = peak.p_unc
+                            if peak.p_fwer is not None:
+                                self.info['Inferences'][-1]['Clusters'][-1]['Peaks'][-1]['Peak_pValueFWER'] = peak.p_fwer
+                            if peak.p_fdr is not None:
+                                self.info['Inferences'][-1]['Clusters'][-1]['Peaks'][-1]['Peak_qValueFDR'] = peak.p_fdr
+                            if peak.equiv_z is not None:
+                                self.info['Inferences'][-1]['Clusters'][-1]['Peaks'][-1]['Peak_equivalentZStatistic'] = peak.equiv_z
+
+        # TODO: if all world coord system are identical then use
+        # self.info['CoordinateSpace_inWorldCoordinateSystem'] = ''
+        # self.info['CoordinateSpace_voxelUnits'] = ''
+
+        return self.info
+
     def get_metadata(self):
         return self.objects
+
+    def _get_model_fitting(self, con_est_id):
+        """
+        Retreive model fitting that corresponds to contrast with identifier 'con_id' 
+        from the list of model fitting objects stored in self.model_fittings
+        """
+        for (mpe_id, pe_ids), contrasts in self.contrasts.items():
+            for contrast in contrasts:
+                if contrast.estimation.id == con_est_id:
+                    model_fitting_id = mpe_id
+                    pe_map_ids = pe_ids
+                    break
+
+        for model_fitting in self.model_fittings:
+            if model_fitting.activity.id == model_fitting_id:
+                return (model_fitting, pe_map_ids)
+
+        raise Exception("Model fitting of contrast : " + str(con_est_id) +
+                        " not found.")
+
+    def _get_contrast(self, con_id):
+        """
+        Retreive contrast with identifier 'con_id' from the list of contrast
+        objects stored in self.contrasts
+        """
+        for contrasts in list(self.contrasts.values()):
+            for contrast in contrasts:
+                if contrast.estimation.id == con_id:
+                    return contrast
+        raise Exception("Contrast activity with id: " + str(con_id) +
+                        " not found.")
 
     def parse(self):
         g = rdflib.Graph()
