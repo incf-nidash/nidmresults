@@ -905,6 +905,7 @@ class Coordinate(NIDMObject):
             self.coord_vector_std = [x_std, y_std, z_std]
         else:
             self.coord_vector_std = coord_vector_std
+
         self.type = NIDM_COORDINATE
         self.prov_type = PROV['Entity']
         if label is not None:
@@ -945,7 +946,8 @@ class Peak(NIDMObject):
 
     def __init__(self, equiv_z, p_unc=None, p_fwer=None, label=None,
                  coord_label=None, exc_set_id=None, oid=None, suffix='',
-                 p_fdr=None, value=None, *args, **kwargs):
+                 p_fdr=None, value=None, coord_id=None, *args, **kwargs):
+        # TODO: coord_id argument is only here for compatibility with query 
         super(Peak, self).__init__(oid)
         # FIXME: Currently assumes less than 10 clusters per contrast
         # cluster_num = cluster_index
@@ -986,7 +988,11 @@ class Peak(NIDMObject):
 
         SELECT DISTINCT * WHERE {
             """ + oid_var + """ a nidm_Peak: ;
-                rdfs:label ?label .
+                rdfs:label ?label ;
+                prov:atLocation ?coord_id .
+
+            ?coord_id a nidm_Coordinate: ;
+                nidm_coordinateVector: ?coord_vector_std .
 
             OPTIONAL {""" + oid_var + """ prov:value ?value .} .
             OPTIONAL {""" + oid_var + """ nidm_pValueUncorrected: ?p_unc .} .
