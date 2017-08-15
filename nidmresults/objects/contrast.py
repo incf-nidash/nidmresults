@@ -49,6 +49,8 @@ class ContrastWeights(NIDMObject):
                  stat_type, label=None, oid=None):
         super(ContrastWeights, self).__init__(oid=oid)
         self.contrast_name = contrast_name
+        if isinstance(contrast_weights, str):
+            contrast_weights = json.loads(contrast_weights)
         self.contrast_weights = contrast_weights
         self.contrast_num = contrast_num
         self.stat_type = stat_type
@@ -100,7 +102,7 @@ class ContrastWeights(NIDMObject):
             (NIDM_STATISTIC_TYPE, stat),
             (PROV['label'], self.label),
             (NIDM_CONTRAST_NAME, self.contrast_name),
-            (PROV['value'], self.contrast_weights)))
+            (PROV['value'], json.dumps(self.contrast_weights))))
 
 
 class ContrastMap(NIDMObject):
@@ -266,6 +268,29 @@ class ContrastStdErrMap(NIDMObject):
         else:
             self.label = label
 
+        std_filename = "ContrastStandardError" + self.num + ".nii.gz"
+        if self.is_variance:
+            # Copy contrast variance map in export directory
+            path, var_cope_filename = os.path.split(self.file)
+            contrast_var = ContrastVariance(
+                self.var_coord_space, self.file, var_cope_filename, format=self.format, sha=self.sha, filename=self.filename)
+            self.contrast_var = contrast_var
+
+            # Create standard error map from contrast variance map
+            var_cope_img = nib.load(self.file)
+            contrast_variance = var_cope_img.get_data()
+
+            standard_error_img = nib.Nifti1Image(np.sqrt(contrast_variance),
+                                                 var_cope_img.get_qform())
+
+            stderr_file = os.path.join(export_dir, std_filename)
+            nib.save(standard_error_img, stderr_file)
+            self.file = NIDMFile(
+                self.id, stderr_file, std_filename)
+
+        else:
+            self.file = NIDMFile(self.id, self.file, self.filename, format=self.format, sha=self.sha)
+
     @classmethod
     def get_query(klass, oid=None):
         if oid is None:
@@ -291,28 +316,6 @@ class ContrastStdErrMap(NIDMObject):
         """
         Create prov graph.
         """
-        std_filename = "ContrastStandardError" + self.num + ".nii.gz"
-        if self.is_variance:
-            # Copy contrast variance map in export directory
-            path, var_cope_filename = os.path.split(self.file)
-            contrast_var = ContrastVariance(
-                self.var_coord_space, self.file, var_cope_filename, format=self.format, sha=self.sha, filename=self.filename)
-            self.contrast_var = contrast_var
-
-            # Create standard error map from contrast variance map
-            var_cope_img = nib.load(self.file)
-            contrast_variance = var_cope_img.get_data()
-
-            standard_error_img = nib.Nifti1Image(np.sqrt(contrast_variance),
-                                                 var_cope_img.get_qform())
-
-            stderr_file = os.path.join(export_dir, std_filename)
-            nib.save(standard_error_img, stderr_file)
-            self.file = NIDMFile(
-                self.id, stderr_file, std_filename)
-
-        else:
-            self.file = NIDMFile(self.id, self.file, self.filename, format=self.format, sha=self.sha)
 
         self.add_attributes((
             (PROV['type'], self.type),

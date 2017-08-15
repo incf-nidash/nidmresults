@@ -103,12 +103,17 @@ class NIDMResults():
                         self.info['Contrasts'][-1]['StatisticMap_effectDegreesOfFreedom'] = contrast.stat_map.effdof
                     self.info['Contrasts'][-1]['StatisticMap_atLocation'] = contrast.stat_map.file.filename
                     self.info['Contrasts'][-1]['StatisticMap_inWorldCoordinateSystem'] = contrast.stat_map.coord_space.coordinate_system
+
+                    if contrast.z_stat_map is not None:
+                        self.info['Contrasts'][-1]['ZStatisticMap_atLocation'] = contrast.z_stat_map.file.filename
+                        self.info['Contrasts'][-1]['ZStatisticMap_inWorldCoordinateSystem'] = contrast.z_stat_map.coord_space.coordinate_system
+
                     if contrast.contrast_map:
                         self.info['Contrasts'][-1]['ContrastMap_atLocation'] = contrast.contrast_map.file.filename
                         self.info['Contrasts'][-1]['ContrastMap_inWorldCoordinateSystem'] = contrast.contrast_map.coord_space.coordinate_system
                         # TODO: deal when this is not created yet...
-                        # self.info['Contrasts'][-1]['ContrastStandardErrorMap_atLocation'] = contrast.stderr_or_expl_mean_sq_map.file.filename
-                        # self.info['Contrasts'][-1]['ContrastStandardErrorMap_inWorldCoordinateSystem'] = contrast.stderr_or_expl_mean_sq_map.coord_space.coordinate_system
+                        self.info['Contrasts'][-1]['ContrastStandardErrorMap_atLocation'] = contrast.stderr_or_expl_mean_sq_map.file.filename
+                        self.info['Contrasts'][-1]['ContrastStandardErrorMap_inWorldCoordinateSystem'] = contrast.stderr_or_expl_mean_sq_map.coord_space.coordinate_system
 
             self.info['Inferences'] = list()
             for con_est_id, inferences in self.inferences.items():
