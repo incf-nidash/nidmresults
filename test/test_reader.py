@@ -17,6 +17,7 @@ import json
 from ddt import ddt, data, unpack
 import os
 import inspect
+import glob
 
 
 @ddt
@@ -32,28 +33,30 @@ class TestReader(unittest.TestCase):
         if not os.path.exists(data_dir):
             os.makedirs(data_dir)
 
-        # Collection containing examples of NIDM-Results packs (1.3.0)
-        req = Request(
-            "http://neurovault.org/api/collections/2210/nidm_results")
-        rep = urlopen(req)
+        # # Collection containing examples of NIDM-Results packs (1.3.0)
+        # req = Request(
+        #     "http://neurovault.org/api/collections/2210/nidm_results")
+        # rep = urlopen(req)
 
-        response = rep.read()
-        data = json.loads(response.decode('utf-8'))
+        # response = rep.read()
+        # data = json.loads(response.decode('utf-8'))
 
-        # Download the NIDM-Results packs from NeuroVault if not available
-        # locally
-        self.packs = list()
-        for nidm_res in data["results"]:
-            url = nidm_res["zip_file"]
-            study = nidm_res["name"]
+        # # Download the NIDM-Results packs from NeuroVault if not available
+        # # locally
+        # self.packs = list()
+        # for nidm_res in data["results"]:
+        #     url = nidm_res["zip_file"]
+        #     study = nidm_res["name"]
 
-            nidmpack = os.path.join(data_dir, study + ".zip")
-            if not os.path.isfile(nidmpack):
-                f = urlopen(url)
-                print("downloading " + url + " at " + nidmpack)
-                with open(nidmpack, "wb") as local_file:
-                    local_file.write(f.read())
-            self.packs.append(nidmpack)
+        #     nidmpack = os.path.join(data_dir, study + ".zip")
+        #     if not os.path.isfile(nidmpack):
+        #         f = urlopen(url)
+        #         print("downloading " + url + " at " + nidmpack)
+        #         with open(nidmpack, "wb") as local_file:
+        #             local_file.write(f.read())
+        #     self.packs.append(nidmpack)
+
+        self.packs = glob.glob(os.path.join(data_dir, '*.nidm.zip'))
 
     # @unpack
     # @data({'name': 'excursion set', 'method_name': 'get_excursion_set_maps'},
