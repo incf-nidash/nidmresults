@@ -512,7 +512,6 @@ class NIDMResults():
         """
 
 
-
         sd = self.graph.query(query)
 
         contrasts = dict()
