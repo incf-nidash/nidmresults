@@ -21,6 +21,7 @@ from rdflib.plugins.parsers.notation3 import BadSyntax
 import rdflib
 import zipfile
 import csv
+import warnings
 
 
 class NIDMResults():
@@ -28,7 +29,7 @@ class NIDMResults():
     NIDM-result object containing all metadata and link to image files.
     """
 
-    def __init__(self, nidm_zip=None, rdf_file=None):
+    def __init__(self, nidm_zip=None, rdf_file=None, workaround=False):
         self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")      
         self.zip_path = nidm_zip
 
@@ -48,12 +49,12 @@ class NIDMResults():
         # Query the RDF document and create the objects
         self.software = self.load_software()
         self.model_fittings = self.load_modelfitting()
-        self.contrasts = self.load_contrasts()
+        self.contrasts = self.load_contrasts(workaround=workaround)
         self.inferences = self.load_inferences()
 
     @classmethod
-    def load_from_pack(klass, nidm_zip):
-        nidmr = NIDMResults(nidm_zip=nidm_zip)
+    def load_from_pack(klass, nidm_zip, workaround):
+        nidmr = NIDMResults(nidm_zip=nidm_zip, workaround=workaround)
         return nidmr
 
     def get_info(self):
@@ -292,6 +293,11 @@ class NIDMResults():
         prefix nidm_MaskMap: <http://purl.org/nidash/nidm#NIDM_0000054>
         prefix nidm_GrandMeanMap: <http://purl.org/nidash/nidm#NIDM_0000033>
         prefix nlx_Imaginginstrument: <http://uri.neuinfo.org/nif/nifstd/birnlex_2094>
+        prefix nlx_MagneticResonanceImagingScanner: <http://uri.neuinfo.org/nif/nifstd/birnlex_2100>
+        prefix nlx_PositronEmissionTomographyScanner: <http://uri.neuinfo.org/nif/nifstd/ixl_0050000>
+        prefix nlx_SinglePhotonEmissionComputedTomographyScanner: <http://uri.neuinfo.org/nif/nifstd/ixl_0050001>
+        prefix nlx_MagnetoencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/ixl_0050002>
+        prefix nlx_ElectroencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/ixl_0050003>
 
         SELECT DISTINCT * WHERE {
 
@@ -302,7 +308,12 @@ class NIDMResults():
             ?data_id a nidm_Data: ;
                 prov:wasAttributedTo ?machine_id .
             
-            ?machine_id a nlx_Imaginginstrument: .
+            {?machine_id a nlx_Imaginginstrument: .} UNION
+            {?machine_id a nlx_MagneticResonanceImagingScanner: .} UNION
+            {?machine_id a nlx_PositronEmissionTomographyScanner: .} UNION
+            {?machine_id a nlx_SinglePhotonEmissionComputedTomographyScanner: .} UNION
+            {?machine_id a nlx_MagnetoencephalographyMachine: .} UNION
+            {?machine_id a nlx_ElectroencephalographyMachine: .}
 
             ?error_id a nidm_ErrorModel: .
 
@@ -418,11 +429,23 @@ class NIDMResults():
                  param_estimates, rms_map, mask_map, grand_mean_map,
                  machine, subjects))
 
-                con_num = row_num + 1        
+                con_num = row_num + 1   
+
+        if not model_fittings:
+            raise Exception('No model fitting found')     
 
         return model_fittings
 
-    def load_contrasts(self):
+    def load_contrasts(self, workaround=False):
+        if workaround:
+            warnings.warn('Using workaround: links between contrast weights and contrast estimations are not assessed')
+            con_est_att = "."
+        else:
+            con_est_att = """;
+                prov:used ?conw_id ;
+                prov:used ?design_id ."""
+
+
         query = """
         prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
         prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
@@ -444,9 +467,7 @@ class NIDMResults():
 
             ?conw_id a obo_contrastweightmatrix: .
 
-            ?conest_id a nidm_ContrastEstimation: ;
-                prov:used ?conw_id ;
-                prov:used ?design_id .
+            ?conest_id a nidm_ContrastEstimation: """ + con_est_att + """
 
             ?mpe_id a nidm_ModelParameterEstimation: ;
                 prov:used ?design_id .
@@ -489,6 +510,8 @@ class NIDMResults():
 
         }
         """
+
+
 
         sd = self.graph.query(query)
 

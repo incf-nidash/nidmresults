@@ -80,10 +80,21 @@ class ImagingInstrument(NIDMObject):
         # TODO: handle multiple basis
         query = """
         prefix nlx_Imaginginstrument: <http://uri.neuinfo.org/nif/nifstd/birnlex_2094>
+        prefix nlx_MagneticResonanceImagingScanner: <http://uri.neuinfo.org/nif/nifstd/birnlex_2100>
+        prefix nlx_PositronEmissionTomographyScanner: <http://uri.neuinfo.org/nif/nifstd/ixl_0050000>
+        prefix nlx_SinglePhotonEmissionComputedTomographyScanner: <http://uri.neuinfo.org/nif/nifstd/ixl_0050001>
+        prefix nlx_MagnetoencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/ixl_0050002>
+        prefix nlx_ElectroencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/ixl_0050003>
 
         SELECT DISTINCT * WHERE {
-            """ + oid_var + """ a nlx_Imaginginstrument: ;
-                rdfs:label ?label ;
+            {""" + oid_var + """ a nlx_Imaginginstrument: .} UNION
+            {""" + oid_var + """ a nlx_MagneticResonanceImagingScanner: .} UNION
+            {""" + oid_var + """ a nlx_PositronEmissionTomographyScanner: .} UNION
+            {""" + oid_var + """ a nlx_SinglePhotonEmissionComputedTomographyScanner: .} UNION
+            {""" + oid_var + """ a nlx_MagnetoencephalographyMachine: .} UNION
+            {""" + oid_var + """ a nlx_ElectroencephalographyMachine: .}
+
+            """ + oid_var + """ rdfs:label ?label ;
                 rdf:type ?machine_type .
         }
         """
@@ -537,7 +548,7 @@ class ParameterEstimateMap(NIDMObject):
     Object representing an ParameterEstimateMap entity.
     """
 
-    def __init__(self, pe_file, pe_num, coord_space, filename=None, sha=None,
+    def __init__(self, coord_space, pe_file=None, pe_num=None, filename=None, sha=None,
                  label=None, suffix='', model_param_estimation=None, oid=None,
                  format=None):
         super(ParameterEstimateMap, self).__init__(oid=oid)
@@ -574,8 +585,9 @@ class ParameterEstimateMap(NIDMObject):
                 rdfs:label ?label ;
                 nfo:fileName ?filename ;
                 crypto:sha512 ?sha ;
-                prov:atLocation ?pe_file ;
                 dct:format ?format .
+
+            OPTIONAL {""" + oid_var + """ prov:atLocation ?pe_file .} .
         }
         """
         return query
