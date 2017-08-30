@@ -239,7 +239,10 @@ class NIDMResults():
                 argums = row.asdict()
 
                 # Convert from rdflib Literal to appropriate Python datatype 
+                print(argums)
                 argums = {k: v.toPython() for k, v in argums.items()}
+                print(argums)
+                print('---')
 
                 # Combine with passed arguments
                 argums.update(kwargs)
