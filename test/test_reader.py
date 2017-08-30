@@ -74,7 +74,6 @@ class TestReader(unittest.TestCase):
         exc = []
         for nidmpack in self.packs:
             print(nidmpack)
-            print(os.path.dirname(nidmpack))
             print("----")
             nidmres = NIDMResults(nidm_zip=nidmpack)
             new_name = os.path.join(self.out_dir, os.path.basename(nidmpack))
