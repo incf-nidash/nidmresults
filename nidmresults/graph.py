@@ -240,7 +240,11 @@ class NIDMResults():
 
                 # Convert from rdflib Literal to appropriate Python datatype 
                 argums = {k: v.toPython() for k, v in argums.items()}
-                objects[oid] = klass(oid=oid, **argums, **kwargs)
+
+                # Combine with passed arguments
+                argums.update(kwargs)
+
+                objects[oid] = klass(oid=oid, **argums)
 
         self.objects.update(objects)
         if oid is not None:
