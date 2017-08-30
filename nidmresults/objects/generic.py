@@ -176,6 +176,10 @@ class CoordinateSpace(NIDMObject):
         """
         Create prov entities and activities.
         """
+        print(self.dimensions)
+        print(type(self.dimensions))
+        print(self.dimensions.tolist())
+        print(type(self.dimensions.tolist()))
         self.add_attributes({
             PROV['type']: self.type,
             NIDM_DIMENSIONS_IN_VOXELS: json.dumps(self.dimensions.tolist()),
