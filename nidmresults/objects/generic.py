@@ -98,7 +98,7 @@ class CoordinateSpace(NIDMObject):
             units = ["mm", "mm", "mm"]
 
         self.number_of_dimensions = numdim
-        if isinstance(vox_to_world, str):
+        if not type(vox_to_world) is np.ndarray:
             # This is useful if info was read from a NIDM pack
             vox_to_world = np.array(json.loads(vox_to_world))
             dimensions = np.array(json.loads(dimensions))
@@ -176,10 +176,6 @@ class CoordinateSpace(NIDMObject):
         """
         Create prov entities and activities.
         """
-        print(self.dimensions)
-        print(type(self.dimensions))
-        print(self.dimensions.tolist())
-        print(type(self.dimensions.tolist()))
         self.add_attributes({
             PROV['type']: self.type,
             NIDM_DIMENSIONS_IN_VOXELS: json.dumps(self.dimensions.tolist()),
