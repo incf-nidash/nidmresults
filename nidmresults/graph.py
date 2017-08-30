@@ -240,7 +240,7 @@ class NIDMResults():
 
                 # Convert from rdflib Literal to appropriate Python datatype 
                 argums = {k: v.toPython() for k, v in argums.items()}
-                objects[oid] = klass(oid=oid, *argums, **kwargs)
+                objects[oid] = klass(oid=oid, **argums, **kwargs)
 
         self.objects.update(objects)
         if oid is not None:
@@ -344,7 +344,7 @@ class NIDMResults():
                 args = row.asdict()
 
                 # TODO: should software_id really be an input?
-                activity = self.get_object(ModelParametersEstimation, args['mpe_id'], software_id=self.software.id)
+                activity = self.get_object(ModelParametersEstimation, args['mpe_id'])
 
                 if 'png_id' in args:
                     design_matrix_png = self.get_object(Image, args['png_id'])

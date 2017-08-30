@@ -526,7 +526,8 @@ class ModelParametersEstimation(NIDMObject):
         SELECT DISTINCT * WHERE {
             """ + oid_var + """ a nidm_ModelParameterEstimation: ;
                 rdfs:label ?label ;
-                nidm_withEstimationMethod: ?estimation_method .
+                nidm_withEstimationMethod: ?estimation_method ;
+                prov:wasAssociatedWith ?software_id .
         }
         """
         return query
