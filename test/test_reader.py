@@ -18,7 +18,7 @@ from ddt import ddt, data, unpack
 import os
 import inspect
 import glob
-
+import shutil
 
 @ddt
 class TestReader(unittest.TestCase):
@@ -57,6 +57,12 @@ class TestReader(unittest.TestCase):
         #     self.packs.append(nidmpack)
 
         self.packs = glob.glob(os.path.join(data_dir, '*.nidm.zip'))
+        self.out_dir = os.path.join(data_dir, 'recomputed')
+
+        if os.path.isdir(self.out_dir):
+            shutil.rmtree(self.out_dir)
+
+        os.mkdir(self.out_dir)
 
     # @unpack
     # @data({'name': 'excursion set', 'method_name': 'get_excursion_set_maps'},
@@ -68,9 +74,10 @@ class TestReader(unittest.TestCase):
         exc = []
         for nidmpack in self.packs:
             print(nidmpack)
+            print(os.path.dirname(nidmpack))
             print("----")
             nidmres = NIDMResults(nidm_zip=nidmpack)
-            new_name = nidmpack.replace(".nidm.zip", "_2.nidm.zip")
+            new_name = os.path.join(self.out_dir, os.path.basename(nidmpack))
             nidmres.serialize(new_name)
             print('Seralised to ' + new_name)
             # nidm_graph.parse()
