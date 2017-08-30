@@ -14,13 +14,13 @@ with hooks():
 
 import zipfile
 import json
-from ddt import ddt, data, unpack
+# from ddt import ddt, data, unpack
 import os
 import inspect
 import glob
 import shutil
 
-@ddt
+# @ddt
 class TestReader(unittest.TestCase):
 
     def setUp(self):
