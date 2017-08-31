@@ -229,8 +229,12 @@ class NIDMResults():
         return g
 
     def get_object(self, klass, oid=None, err_if_none=True, **kwargs):
-        query = klass.get_query(oid)
 
+        if oid is not None:
+            if oid in self.objects:
+                return(self.objects[oid])
+
+        query = klass.get_query(oid)
         sd = self.graph.query(query)
 
         objects = dict()
