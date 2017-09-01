@@ -582,13 +582,13 @@ class NIDMResults():
                 if sd_pe_maps:
                     for row_pe in sd_pe_maps:
                         args_pe = row_pe.asdict()
-                        pe_ids = pe_ids + (args_pe['pe_id'],)
+                        pe_ids = pe_ids + (NIIRI.qname(str(args_pe['pe_id'])),)
 
-
-                if not (args['mpe_id'], pe_ids) in contrasts:
-                    contrasts[(args['mpe_id'], pe_ids)] = [con]
+                mpe_id = NIIRI.qname(str(args['mpe_id']))
+                if not (mpe_id, pe_ids) in contrasts:
+                    contrasts[(mpe_id, pe_ids)] = [con]
                 else:
-                    contrasts[(args['mpe_id'], pe_ids)].append(con)
+                    contrasts[(mpe_id, pe_ids)].append(con)
 
                 con_num = con_num + 1
 
@@ -739,7 +739,7 @@ class NIDMResults():
                 # describing the inference step in NIDM-Results (main activity:
                 # Inference)
                 # TODO: if key exist we need to append!
-                inferences[args['con_est_id']] = [Inference(inference, height_thresh, extent_thresh,
+                inferences[NIIRI.qname(args['con_est_id'])] = [Inference(inference, height_thresh, extent_thresh,
                     peak_criteria, cluster_criteria, disp_mask, excursion_set,
                     clusters, search_space, software_id)]
 

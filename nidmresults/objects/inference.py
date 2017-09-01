@@ -48,7 +48,6 @@ class InferenceActivity(NIDMObject):
 
     def __init__(self, oid=None, tail=None, label=None, contrast_name=None):
         super(InferenceActivity, self).__init__(oid=oid)
-        self.id = NIIRI[str(uuid.uuid4())]
         self.type = NIDM_INFERENCE
         self.prov_type = PROV['Activity']
         if tail is None:
@@ -272,7 +271,6 @@ class HeightThreshold(NIDMObject):
         else:
             self.label = label
 
-        self.id = NIIRI[str(uuid.uuid4())]
         self.type = NIDM_HEIGHT_THRESHOLD
         self.prov_type = PROV['Entity']
         
@@ -333,7 +331,6 @@ class ExtentThreshold(NIDMObject):
     def __init__(self, extent=None, p_corr=None, p_uncorr=None, extent_rsl=None, 
             label=None, version={'num': '1.3.0'}, value=None, oid=None):
         super(ExtentThreshold, self).__init__(oid=oid)
-        self.id = NIIRI[str(uuid.uuid4())]
         self.type = NIDM_EXTENT_THRESHOLD
         self.prov_type = PROV['Entity']
 
@@ -458,7 +455,6 @@ class Cluster(NIDMObject):
                  label=None, oid=None, cog=None):
         super(Cluster, self).__init__(oid=oid)
         self.num = cluster_num
-        self.id = NIIRI[str(uuid.uuid4())]
         if cog is not None:
             self.cog = cog 
         else:
@@ -538,7 +534,6 @@ class DisplayMaskMap(NIDMObject):
     def __init__(self, contrast_num, mask_file, mask_num, coord_space,
                  sha=None, filename=None, format=None, label=None, oid=None):
         super(DisplayMaskMap, self).__init__(oid=oid)
-        self.id = NIIRI[str(uuid.uuid4())]
         if not filename:
             filename = 'DisplayMask' + str(self.mask_num) + '.nii.gz'
         self.file = NIDMFile(self.id, mask_file, filename,  
@@ -591,7 +586,6 @@ class PeakCriteria(NIDMObject):
 
     def __init__(self, contrast_num, peak_dist, num_peak=None, label=None, oid=None):
         super(PeakCriteria, self).__init__(oid=oid)
-        self.id = NIIRI[str(uuid.uuid4())]
         self.num_peak = num_peak
         self.peak_dist = peak_dist
         self.type = NIDM_PEAK_DEFINITION_CRITERIA
@@ -647,7 +641,6 @@ class ClusterCriteria(NIDMObject):
 
     def __init__(self, contrast_num, connectivity, label=None, oid=None):
         super(ClusterCriteria, self).__init__(oid=oid)
-        self.id = NIIRI[str(uuid.uuid4())]
         self.connectivity = connectivity
         self.type = NIDM_CLUSTER_DEFINITION_CRITERIA
         self.prov_type = PROV['Entity']
@@ -716,7 +709,6 @@ class CenterOfGravity(NIDMObject):
 
         super(CenterOfGravity, self).__init__(oid=oid)
         self.cluster_num = cluster_num
-        self.id = NIIRI[str(uuid.uuid4())]
         self.coordinate = Coordinate("%04d" % cluster_num, x=x, y=y, z=z,
                                      x_std=x_std, y_std=y_std, z_std=z_std,
                                      coord_vector_std=coord_vector_std,
@@ -779,7 +771,6 @@ class SearchSpace(NIDMObject):
                  search_vol_geom=None, filename=None, sha=None, format=None,
                  label=None, oid=None):
         super(SearchSpace, self).__init__(oid=oid)
-        self.id = NIIRI[str(uuid.uuid4())]
         if not filename:
             filename = 'SearchSpaceMask.nii.gz'
         self.file = NIDMFile(self.id, search_space_file, filename,
@@ -892,18 +883,18 @@ class Coordinate(NIDMObject):
                  label=None, oid=None):
 
         super(Coordinate, self).__init__(oid=oid)
-        # FIXME: coordiinate_id should not be determined externally
-        self.id = NIIRI[str(uuid.uuid4())]
         self.label_id = label_id
         if x is not None and y is not None and z is not None:
             self.coord_vector = [x, y, z]
         else:
-            if isinstance(coord_vector, rdflib.term.Literal):
+            if coord_vector and not type(coord_vector) is list:
                 coord_vector = json.loads(coord_vector)
             self.coord_vector = coord_vector
         if x_std is not None and y_std is not None and z_std is not None:
             self.coord_vector_std = [x_std, y_std, z_std]
         else:
+            if coord_vector_std and not type(coord_vector_std) is list:
+                coord_vector_std = json.loads(coord_vector_std)
             self.coord_vector_std = coord_vector_std
 
         self.type = NIDM_COORDINATE
@@ -925,9 +916,12 @@ class Coordinate(NIDMObject):
         atts = (  # (PROV['type'],PROV['Location']),
             (PROV['type'], NIDM_COORDINATE),
             (PROV['type'], PROV['Location']),
-            (PROV['label'], self.label),
-            (NIDM_COORDINATE_VECTOR_IN_VOXELS, json.dumps(self.coord_vector))
+            (PROV['label'], self.label)
             )
+
+        if self.coord_vector is not None:
+            atts = atts +\
+                ((NIDM_COORDINATE_VECTOR_IN_VOXELS, json.dumps(self.coord_vector)),)
 
         # FSL unnormalised subject-level analyses do not provide coordinates in
         # voxels
@@ -947,7 +941,6 @@ class Peak(NIDMObject):
     def __init__(self, equiv_z, p_unc=None, p_fwer=None, label=None,
                  coord_label=None, exc_set_id=None, oid=None, suffix='',
                  p_fdr=None, value=None, coord_id=None, *args, **kwargs):
-        # TODO: coord_id argument is only here for compatibility with query 
         super(Peak, self).__init__(oid)
         # FIXME: Currently assumes less than 10 clusters per contrast
         # cluster_num = cluster_index
@@ -964,7 +957,7 @@ class Peak(NIDMObject):
         self.p_unc = p_unc
         self.p_fwer = p_fwer
         self.coordinate = Coordinate(
-            str(peak_unique_id), label=coord_label, **kwargs)
+            str(peak_unique_id), label=coord_label, oid=coord_id, **kwargs)
         self.type = NIDM_PEAK
         self.prov_type = PROV['Entity']
         # self.cluster = cluster_id

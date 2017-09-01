@@ -406,6 +406,7 @@ class NIDMExporter():
         for model_fitting in self.model_fittings:
             if model_fitting.activity.id == mf_id:
                 return model_fitting
+
         raise Exception("Model fitting activity with id: " + str(mf_id) +
                         " not found.")
 

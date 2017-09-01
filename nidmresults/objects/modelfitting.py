@@ -51,7 +51,6 @@ class ImagingInstrument(NIDMObject):
     def __init__(self, machine_type, label=None, oid=None):
         super(ImagingInstrument, self).__init__(oid=oid)
         machine_type = machine_type.lower()
-        self.id = NIIRI[str(uuid.uuid4())]
         machine_term = dict(
             mri=NIF_MRI, eeg=NIF_EEG, meg=NIF_MEG, pet=NIF_PET,
             spect=NIF_SPECT)
@@ -207,7 +206,6 @@ class DesignMatrix(NIDMObject):
         super(DesignMatrix, self).__init__(oid=oid)
         self.type = NIDM_DESIGN_MATRIX
         self.prov_type = PROV['Entity']
-        self.id = NIIRI[str(uuid.uuid4())]
         img_filename = 'DesignMatrix' + suffix + '.png'
         if isinstance(image_file, Image):
             self.image = image_file
@@ -216,6 +214,9 @@ class DesignMatrix(NIDMObject):
         self.regressors = regressors
         self.design_type = design_type
         self.hrf_model = hrf_model
+        if type(self.hrf_model) is not Identifier:
+            self.hrf_model = Identifier(self.hrf_model)
+
         self.drift_model = drift_model
         if csv_file is None:
             self.csv_file = 'DesignMatrix' + suffix + '.csv'
@@ -306,7 +307,8 @@ class DriftModel(NIDMObject):
     def __init__(self, drift_type, parameter, label=None, oid=None):
         super(DriftModel, self).__init__(oid=oid)
         self.drift_type = drift_type
-        self.id = NIIRI[str(uuid.uuid4())]
+        if not type(self.drift_type) is Identifier:
+            self.drift_type = Identifier(self.drift_type)
         self.parameter = parameter
         self.type = drift_type
         self.prov_type = PROV['Entity']
@@ -337,6 +339,8 @@ class DriftModel(NIDMObject):
 
             {""" + oid_var + """ spm_SPMsDriftCutoffPeriod: ?parameter .} UNION
             {""" + oid_var + """ fsl_driftCutoffPeriod: ?parameter .} .
+
+            FILTER ( ?drift_type NOT IN (prov:Entity) )
         }
         """
         return query
@@ -345,12 +349,14 @@ class DriftModel(NIDMObject):
         """
         Create prov entities and activities.
         """
-        attributes = [(PROV['type'], self.drift_type)]
+        attributes = [(PROV['type'], self.drift_type),
+                      (PROV['label'], self.label)]
 
         if self.drift_type == FSL_GAUSSIAN_RUNNING_LINE_DRIFT_MODEL:
-            attributes.append(
-                (PROV['label'], self.label))
             attributes.append((FSL_DRIFT_CUTOFF_PERIOD, self.parameter))
+
+        if self.drift_type == SPM_DCT_DRIFT_MODEL:
+            attributes.append((SPM_SPMS_DRIFT_CUT_OFF_PERIOD, self.parameter))
 
         # Create "drift model" entity
         self.add_attributes(attributes)
@@ -440,7 +446,6 @@ class ErrorModel(NIDMObject):
         self.variance_spatial = variance_spatial
         self.dependance = dependance
         self.dependance_spatial = dependance_spatial
-        self.id = NIIRI[str(uuid.uuid4())]
         self.type = NIDM_ERROR_MODEL
         self.prov_type = PROV['Entity']
 
@@ -616,7 +621,6 @@ class ResidualMeanSquares(NIDMObject):
                  sha=None, label=None, oid=None):
         super(ResidualMeanSquares, self).__init__(oid=oid)
         self.coord_space = coord_space
-        self.id = NIIRI[str(uuid.uuid4())]
         if filename is None:
             filename = 'ResidualMeanSquares' + suffix + '.nii.gz'
         self.file = NIDMFile(self.id, residual_file, filename,
@@ -668,7 +672,6 @@ class MaskMap(NIDMObject):
                  suffix='', filename=None, format=None, label=None, sha=None, oid=None):
         super(MaskMap, self).__init__(oid=oid)
         self.coord_space = coord_space
-        self.id = NIIRI[str(uuid.uuid4())]
         if filename is None:
             filename = 'Mask' + suffix + '.nii.gz'
         self.file = NIDMFile(self.id, mask_file, filename, 
@@ -726,7 +729,6 @@ class GrandMeanMap(NIDMObject):
                  suffix='', label=None, filename=None, sha=None,
                  format=format, masked_median=None, oid=None):
         super(GrandMeanMap, self).__init__(oid=oid)
-        self.id = NIIRI[str(uuid.uuid4())]
         if filename is None:
             filename = 'GrandMean' + suffix + '.nii.gz'
         self.file = NIDMFile(self.id, org_file, filename, 

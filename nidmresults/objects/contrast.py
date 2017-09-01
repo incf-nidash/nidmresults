@@ -54,7 +54,6 @@ class ContrastWeights(NIDMObject):
         self.contrast_weights = contrast_weights
         self.contrast_num = contrast_num
         self.stat_type = stat_type
-        self.id = NIIRI[str(uuid.uuid4())]
         self.type = STATO_CONTRAST_WEIGHT_MATRIX
         self.prov_type = PROV['Entity']
         if label is None:
@@ -112,15 +111,11 @@ class ContrastMap(NIDMObject):
     """
 
     def __init__(self, contrast_file, contrast_num, contrast_name,
-                 coord_space, ident=None, sha=None, format=None, 
+                 coord_space, sha=None, format=None, 
                  label=None, filename=None, oid=None):
         super(ContrastMap, self).__init__(oid=oid)
         self.num = contrast_num
         self.name = contrast_name
-        if ident is None:
-            self.id = NIIRI[str(uuid.uuid4())]
-        else:
-            self.id = ident
         if filename is None:
             filename = 'Contrast' + self.num + '.nii.gz'
         self.file = NIDMFile(self.id, contrast_file, filename, sha=sha, format=format)
@@ -178,7 +173,6 @@ class ContrastExplainedMeanSquareMap(NIDMObject):
         self.stat_file = stat_file
         self.sigma_sq_file = sigma_sq_file
         self.num = contrast_num
-        self.id = NIIRI[str(uuid.uuid4())]
         self.coord_space = coord_space
         self.type = NIDM_CONTRAST_EXPLAINED_MEAN_SQUARE_MAP
         self.prov_type = PROV['Entity']
@@ -252,7 +246,6 @@ class ContrastStdErrMap(NIDMObject):
                  sha=None, filename=None, oid=None):
         super(ContrastStdErrMap, self).__init__(oid=oid)
         self.file = filepath
-        self.id = NIIRI[str(uuid.uuid4())]
         self.is_variance = is_variance
         self.num = contrast_num
         self.coord_space = coord_space
@@ -328,7 +321,6 @@ class ContrastVariance(NIDMObject):
     def __init__(self, coord_space, var_file, filename, format=None, 
                 oid=None):
         super(ContrastVariance, self).__init__(oid=oid)
-        self.id = NIIRI[str(uuid.uuid4())]
         self.coord_space = coord_space
         self.type = NIDM_CONTRAST_VARIANCE_MAP
         self.file = NIDMFile(self.id, var_file, format=format)

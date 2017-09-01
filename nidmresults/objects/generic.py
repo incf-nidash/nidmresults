@@ -7,6 +7,7 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 @copyright: University of Warwick 2013-2014
 """
 from prov.model import Identifier
+from prov.identifier import QualifiedName
 import numpy as np
 import os
 from nidmresults.objects.constants import *
@@ -32,6 +33,8 @@ class NIDMObject(object):
         if oid is None:
             self.id = NIIRI[str(uuid.uuid4())]
         else:
+            if not type(oid) is QualifiedName:
+                oid = NIIRI.qname(Identifier(oid))
             self.id = oid
 
     def __str__(self):
