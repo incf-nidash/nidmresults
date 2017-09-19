@@ -303,6 +303,12 @@ class NIDMExporter():
                     # Copy Statistical map in export directory
                     self.add_object(contrast.stat_map.file)
 
+                    if contrast.stat_map.derfrom is not None:
+                        self.bundle.wasDerivedFrom(contrast.stat_map.id, contrast.stat_map.derfrom.id)
+                        self.add_object(contrast.stat_map.derfrom)
+                        self.add_object(contrast.stat_map.derfrom.coord_space)
+                        self.add_object(contrast.stat_map.derfrom.file)
+
                     # Create Z Statistic Map
                     if contrast.z_stat_map:
                         # contrast.z_stat_map.wasGeneratedBy(contrast.estimation)

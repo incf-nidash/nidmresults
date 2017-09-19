@@ -415,6 +415,7 @@ class StatisticMap(NIDMObject):
         self.dof = dof
         self.type = NIDM_STATISTIC_MAP
         self.prov_type = PROV['Entity']
+        self.label = label
         if label is not None:
             self.label = label
         else:
