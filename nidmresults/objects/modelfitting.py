@@ -30,13 +30,14 @@ class ModelFitting(object):
 
     def __init__(self, activity, design_matrix, data, error_model,
                  param_estimates, rms_map, mask_map, grand_mean_map,
-                 machine, subjects):
+                 machine, subjects, rpv_map):
         self.activity = activity
         self.design_matrix = design_matrix
         self.data = data
         self.error_model = error_model
         self.param_estimates = param_estimates
         self.rms_map = rms_map
+        self.rpv_map = rpv_map
         self.mask_map = mask_map
         self.grand_mean_map = grand_mean_map
         self.machine = machine
@@ -682,6 +683,57 @@ class ResidualMeanSquares(NIDMObject):
                 nfo:fileName ?filename ;
                 crypto:sha512 ?sha ;
                 prov:atLocation ?residual_file ;
+                dct:format ?format .
+        }
+        """
+        return query
+
+    def export(self, nidm_version, export_dir):
+        """
+        Create prov entities and activities.
+        """
+        self.add_attributes((
+            (PROV['type'], self.type,),
+            (PROV['label'], self.label),
+            (NIDM_IN_COORDINATE_SPACE, self.coord_space.id)))
+
+class ReselsPerVoxelMap(NIDMObject):
+
+    """
+    Object representing an ResidualMeanSquares entity.
+    """
+
+    def __init__(self, rpv_file, coord_space,
+                 temporary=False, suffix='', format=None, filename=None,
+                 sha=None, label=None, oid=None):
+        super(ReselsPerVoxelMap, self).__init__(oid=oid)
+        self.coord_space = coord_space
+        if filename is None:
+            filename = 'ReselsPerVoxelMap' + suffix + '.nii.gz'
+        self.file = NIDMFile(self.id, rpv_file, filename,
+                             temporary=temporary, format=format, sha=sha)
+        if label is None:
+            label = "Resels Per Voxel File"
+        self.label = label
+        self.type = NIDM_RESELS_PER_VOXEL_MAP
+        self.prov_type = PROV['Entity']
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix nidm_ReselsPerVoxelMap: <http://purl.org/nidash/nidm#NIDM_0000144>
+
+        SELECT DISTINCT * WHERE {
+            """ + oid_var + """ a nidm_ReselsPerVoxelMap: ;
+                rdfs:label ?label ;
+                nfo:fileName ?filename ;
+                crypto:sha512 ?sha ;
+                prov:atLocation ?rpv_file ;
                 dct:format ?format .
         }
         """

@@ -318,6 +318,7 @@ class NIDMResults():
         prefix nlx_SinglePhotonEmissionComputedTomographyScanner: <http://uri.neuinfo.org/nif/nifstd/ixl_0050001>
         prefix nlx_MagnetoencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/ixl_0050002>
         prefix nlx_ElectroencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/ixl_0050003>
+        prefix nidm_ReselsPerVoxelMap: <http://purl.org/nidash/nidm#NIDM_0000144>
 
         SELECT DISTINCT * WHERE {
 
@@ -353,6 +354,12 @@ class NIDMResults():
             ?gm_id a nidm_GrandMeanMap: ;
                 nidm_inCoordinateSpace: ?gm_coordspace_id ;
                 prov:wasGeneratedBy ?mpe_id .
+
+            OPTIONAL {
+                ?rpv_id a nidm_ReselsPerVoxelMap: ;
+                    nidm_inCoordinateSpace: ?rpv_coordspace_id ;
+                    prov:wasGeneratedBy ?mpe_id .
+            }
         }
         """
         sd = self.graph.query(query)
@@ -412,6 +419,9 @@ class NIDMResults():
                 grand_mean_map = self.get_object(GrandMeanMap, args['gm_id'], coord_space=mask_coord_space, 
                     mask_file=None)
 
+                rpv_coord_space = self.get_object(CoordinateSpace, args['rpv_coordspace_id'])
+                rpv_map = self.get_object(ReselsPerVoxelMap, args['rpv_id'], coord_space=mask_coord_space)
+
                 machine = self.get_object(ImagingInstrument, args['machine_id'])
 
                 # Find subject or group(s)
@@ -447,7 +457,7 @@ class NIDMResults():
 
                 model_fittings.append(ModelFitting(activity, design_matrix, data, error_model,
                  param_estimates, rms_map, mask_map, grand_mean_map,
-                 machine, subjects))
+                 machine, subjects, rpv_map))
 
                 con_num = row_num + 1   
 
