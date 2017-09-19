@@ -112,7 +112,7 @@ class ExcursionSet(NIDMObject):
     def __init__(self, location, coord_space, visu=None,
                  oid=None, format=None, label=None,
                  sha=None, filename=None, inference=None, suffix='',
-                 clust_map=None):
+                 clust_map=None, mip=None, num_clusters=None, p_value=None):
         super(ExcursionSet, self).__init__(oid)
         if not filename:
             filename = 'ExcursionSet' + suffix + '.nii.gz'
@@ -131,8 +131,11 @@ class ExcursionSet(NIDMObject):
         self.label = label
         self.coord_space = coord_space
         self.clust_map = clust_map
+        self.mip = mip
         # FIXME Not used for export yet (only for reading)
         self.inference = inference
+        self.num_clusters = num_clusters
+        self.p_value = p_value
 
     @classmethod
     def get_query(klass, oid=None):
@@ -146,7 +149,7 @@ class ExcursionSet(NIDMObject):
         prefix nidm_hasClusterLabelsMap: <http://purl.org/nidash/nidm#NIDM_0000098>
         prefix nidm_hasMaximumIntensityProjection: <http://purl.org/nidash/nidm#NIDM_0000138>
         prefix nidm_inCoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000104>
-        prefix nidm_numberOfSignificantClusters: <http://purl.org/nidash/nidm#NIDM_0000111>
+        prefix nidm_numberOfSupraThresholdClusters: <http://purl.org/nidash/nidm#NIDM_0000111>
         prefix nidm_pValue: <http://purl.org/nidash/nidm#NIDM_0000114>
 
         SELECT DISTINCT * WHERE {
@@ -157,7 +160,11 @@ class ExcursionSet(NIDMObject):
             dct:format ?format ;
             nfo:fileName ?filename ;
             crypto:sha512 ?sha .
+
+            OPTIONAL {""" + oid_var + """ nidm_numberOfSupraThresholdClusters: ?num_clusters .} .
+            OPTIONAL {""" + oid_var + """ nidm_pValue: ?p_value .} .
         }
+
         ORDER BY ?peak_label
 
         """
@@ -185,6 +192,20 @@ class ExcursionSet(NIDMObject):
                 (NIDM_HAS_CLUSTER_LABELS_MAP, self.clust_map.id),
             ))
 
+        if self.mip is not None:
+            self.add_attributes((
+                (NIDM_HAS_MAXIMUM_INTENSITY_PROJECTION, self.mip.id),
+            ))
+
+        if self.num_clusters is not None:
+            self.add_attributes((
+                (NIDM_NUMBER_OF_CLUSTERS, self.num_clusters),
+            ))
+
+        if self.p_value is not None:
+            self.add_attributes((
+                (NIDM_P_VALUE, self.p_value),
+            ))
 
 class ClusterLabelsMap(NIDMObject):
 
@@ -207,6 +228,27 @@ class ClusterLabelsMap(NIDMObject):
             label = "Cluster Labels Map"
         self.label = label
         self.coord_space = coord_space
+
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix nidm_ClusterLabelsMap: <http://purl.org/nidash/nidm#NIDM_0000008>
+
+        SELECT DISTINCT * WHERE {
+            """ + oid_var + """ a nidm_ClusterLabelsMap: ;
+                nfo:fileName ?filename ;
+                crypto:sha512 ?sha ;
+                prov:atLocation ?location ;
+                dct:format ?format .
+        }
+        """
+        return query
 
     def export(self, nidm_version, export_dir):
         """
@@ -387,6 +429,7 @@ class ExtentThreshold(NIDMObject):
             self.threshold_type = threshold_type
 
         self.extent = extent
+        self.value = value
         self.extent_rsl = extent_rsl
 
         if label is None:
@@ -451,7 +494,7 @@ class ExtentThreshold(NIDMObject):
             atts += [
                 (PROV['type'], self.threshold_type)
             ]
-            if self.extent is None:
+            if self.value is None:
                 atts += [
                     (PROV['value'], self.value)
                 ]

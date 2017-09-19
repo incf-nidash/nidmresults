@@ -302,7 +302,6 @@ class Image(NIDMObject):
         super(Image, self).__init__(oid=oid)
         self.type = DCTYPE['Image']
         self.prov_type = PROV['Entity']
-        self.id = NIIRI[str(uuid.uuid4())]
         self.file = NIDMFile(self.id, image_file, filename)
         self.label = "" # Enable printing
 

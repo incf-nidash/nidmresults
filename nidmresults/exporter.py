@@ -345,6 +345,10 @@ class NIDMExporter():
                         self.add_object(inference.excursion_set.clust_map.file)
                         self.add_object(inference.excursion_set.clust_map.coord_space)
 
+                    if inference.excursion_set.mip is not None:
+                        self.add_object(inference.excursion_set.mip)
+                        self.add_object(inference.excursion_set.mip.file)
+
                     # Height threshold
                     if inference.height_thresh.equiv_thresh is not None:
                         for equiv in inference.height_thresh.equiv_thresh:

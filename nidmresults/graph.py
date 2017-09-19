@@ -624,6 +624,8 @@ class NIDMResults():
         prefix nidm_SearchSpaceMaskMap: <http://purl.org/nidash/nidm#NIDM_0000068>
         prefix nidm_ConjunctionInference: <http://purl.org/nidash/nidm#NIDM_0000011>
         prefix spm_PartialConjunctionInference: <http://purl.org/nidash/spm#SPM_0000005>
+        prefix nidm_hasClusterLabelsMap: <http://purl.org/nidash/nidm#NIDM_0000098>
+        prefix nidm_hasMaximumIntensityProjection: <http://purl.org/nidash/nidm#NIDM_0000138>
 
         SELECT DISTINCT * WHERE {
             ?con_est_id a nidm_ContrastEstimation: .
@@ -657,6 +659,9 @@ class NIDMResults():
                 prov:wasGeneratedBy ?inference_id .
 
             OPTIONAL {?exc_set_id dc:description ?excset_visu_id}
+            OPTIONAL {?exc_set_id nidm_hasClusterLabelsMap: ?cluster_map_id .
+                      ?cluster_map_id nidm_inCoordinateSpace: ?cluster_map_coord_space_id . }
+            OPTIONAL {?exc_set_id nidm_hasMaximumIntensityProjection: ?mip_id}
 
             ?search_space_id a nidm_SearchSpaceMaskMap: ;
                 nidm_inCoordinateSpace: ?search_space_coord_space_id ;
@@ -722,9 +727,20 @@ class NIDMResults():
                 else:
                     excset_visu = None
 
+                if 'cluster_map_id' in args:
+                    clustermap_coordspace = self.get_object(CoordinateSpace, args['cluster_map_coord_space_id'])
+                    cluster_map = self.get_object(ClusterLabelsMap, args['cluster_map_id'], coord_space=clustermap_coordspace)
+                else:
+                    cluster_map = None
+
+                if 'mip_id' in args:
+                    mip = self.get_object(Image, args['mip_id'])
+                else:
+                    mip = None
+
                 excset_coordspace = self.get_object(CoordinateSpace, args['excset_coord_space_id'])
                 excursion_set = self.get_object(ExcursionSet, args['exc_set_id'], 
-                    coord_space=excset_coordspace, visu=excset_visu)
+                    coord_space=excset_coordspace, visu=excset_visu, clust_map=cluster_map, mip=mip)
 
                 searchspace_coordspace = self.get_object(CoordinateSpace, args['search_space_coord_space_id'])
                 search_space = self.get_object(SearchSpace, args['search_space_id'], 
