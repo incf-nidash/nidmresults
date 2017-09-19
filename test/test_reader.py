@@ -8,9 +8,12 @@ Test NIDM FSL export tool installation
 """
 import unittest
 from nidmresults.graph import *
+from nidmresults.test.test_results_doc import TestResultDataModel
 from future.standard_library import hooks
-with hooks():
-    from urllib.request import urlopen, Request
+# with hooks():
+#     from urllib.request import urlopen, Request
+
+from nidmresults.owl.owl_reader import OwlReader
 
 import zipfile
 import json
@@ -21,10 +24,18 @@ import glob
 import shutil
 from rdflib.compare import isomorphic, graph_diff
 
+import os
+
+
 # @ddt
-class TestReader(unittest.TestCase):
+class TestReader(unittest.TestCase, TestResultDataModel):
 
     def setUp(self):
+        self.my_execption = ""
+        
+        owl_file = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'nidmresults', 'owl', 'nidm-results_130.owl')
+        self.owl = OwlReader(owl_file)
+
         pwd = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
 
@@ -75,23 +86,25 @@ class TestReader(unittest.TestCase):
         exc = []
         for nidmpack in self.packs:
             print(nidmpack)
-            nidmres = NIDMResults(nidm_zip=nidmpack)
+
+            # This is a workaround to avoid confusion between attribute and class uncorrected p-value
+            # cf. https://github.com/incf-nidash/nidm/issues/421
+            to_replace = {'@prefix nidm_PValueUncorrected: <http://purl.org/nidash/nidm#NIDM_0000160>': 
+                          '@prefix nidm_UncorrectedPValue: <http://purl.org/nidash/nidm#NIDM_0000160>',
+                          'nidm_PValueUncorrected': 'nidm_UncorrectedPValue',
+                          'nidm_PValueUncorrected': 'nidm_UncorrectedPValue',
+                          'http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions/': 
+                          'http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions#'}
+
+            nidmres = NIDMResults(nidm_zip=nidmpack, to_replace=to_replace)
             new_name = os.path.join(self.out_dir, os.path.basename(nidmpack))
             nidmres.serialize(new_name)
-            print('Seralised to ' + new_name)
+            print('Serialised to ' + new_name)
             print("----")
 
             new_nidmres = NIDMResults(nidm_zip=new_name)
-            if not (isomorphic(nidmres.graph, new_nidmres.graph)):
-                in_both, in_first, in_second = graph_diff(nidmres.graph, new_nidmres.graph)
-                print('------ only in second')
-                for triple in in_second:
-                    print(triple)
 
-                print('------ only in first')
-                for triple in in_first:
-                    print(triple)
-                assert(isomorphic(nidmres.graph, new_nidmres.graph))
+            self.compare_full_graphs(nidmres.graph, new_nidmres.graph, self.owl, True, True)
 
             # nidm_graph.parse()
             # # exc_sets = nidm_graph.get_excursion_set_maps()

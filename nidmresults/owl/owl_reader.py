@@ -15,7 +15,7 @@ with hooks():
     from urllib.request import urlopen, Request
 
 import warnings
-import vcr
+# import vcr
 import os
 import logging
 import csv

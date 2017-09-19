@@ -14,6 +14,7 @@ import nibabel as nib
 from nidmresults.objects.generic import *
 import uuid
 from prov.model import Identifier
+from prov.identifier import QualifiedName
 
 
 class Contrast(object):
@@ -87,14 +88,18 @@ class ContrastWeights(NIDMObject):
         """
         Create prov graph.
         """
-        if self.stat_type.lower() == "t":
-            stat = STATO_TSTATISTIC
-        elif self.stat_type.lower() == "z":
-            stat = STATO_ZSTATISTIC
-        elif self.stat_type.lower() == "f":
-            stat = STATO_FSTATISTIC
-        elif self.stat_type.startswith('http'):
-            stat = Identifier(self.stat_type)
+        self.stat = None
+        if isinstance(self.stat_type, QualifiedName):
+            stat = self.stat_type
+        elif self.stat_type is not None:
+            if self.stat_type.lower() == "t":
+                stat = STATO_TSTATISTIC
+            elif self.stat_type.lower() == "z":
+                stat = STATO_ZSTATISTIC
+            elif self.stat_type.lower() == "f":
+                stat = STATO_FSTATISTIC
+            elif self.stat_type.startswith('http'):
+                stat = Identifier(self.stat_type)
 
         self.add_attributes((
             (PROV['type'], STATO_CONTRAST_WEIGHT_MATRIX),
@@ -112,7 +117,9 @@ class ContrastMap(NIDMObject):
 
     def __init__(self, contrast_file, contrast_num, contrast_name,
                  coord_space, sha=None, format=None, 
-                 label=None, filename=None, oid=None):
+                 label=None, filename=None, oid=None, derfrom_id=None, 
+                 derfrom_filename=None, derfrom_format=None,
+                 derfrom_sha=None):
         super(ContrastMap, self).__init__(oid=oid)
         self.num = contrast_num
         self.name = contrast_name
@@ -123,9 +130,19 @@ class ContrastMap(NIDMObject):
         self.type = NIDM_CONTRAST_MAP
         self.prov_type = PROV['Entity']
         if label is None:
-            self.label = "Contrast Map: " + self.name
+            if self.name:
+                self.label = "Contrast Map: " + self.name
+            else:
+                self.label = None
         else:
             self.label = label
+
+        if derfrom_id is not None:
+            self.derfrom = ContrastMap(contrast_file=None, contrast_num=None, 
+                contrast_name=None, oid=derfrom_id, coord_space=coord_space, 
+                filename=derfrom_filename, sha=derfrom_sha, format=derfrom_format)
+        else:
+            self.der_from = None
 
     @classmethod
     def get_query(klass, oid=None):
@@ -145,6 +162,14 @@ class ContrastMap(NIDMObject):
             nfo:fileName ?filename ;
             nidm_contrastName: ?contrast_name ;
             crypto:sha512 ?sha ;
+
+            OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
+
+            ?derfrom_id a nidm_ContrastMap: ;
+                nfo:fileName ?derfrom_filename ;
+                dct:format ?derfrom_format ;
+                crypto:sha512 ?derfrom_sha .
+             } .
         }
         """
         return query
@@ -154,11 +179,21 @@ class ContrastMap(NIDMObject):
         Create prov graph.
         """
         # Contrast Map entity
-        self.add_attributes((
+        atts = (
             (PROV['type'], NIDM_CONTRAST_MAP),
             (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
-            (NIDM_CONTRAST_NAME, self.name),
-            (PROV['label'], self.label)))
+            (NIDM_CONTRAST_NAME, self.name))
+
+        if self.label is not None:
+            atts = atts + (
+                (PROV['label'], self.label),)
+
+        if self.name is not None:
+            atts = atts + (
+                (NIDM_CONTRAST_NAME, self.name),)
+
+        # Parameter estimate entity
+        self.add_attributes(atts)
 
 
 class ContrastExplainedMeanSquareMap(NIDMObject):
@@ -340,21 +375,35 @@ class StatisticMap(NIDMObject):
     def __init__(self, location, stat_type, contrast_name, dof, coord_space,
                  contrast_num=None, label=None, oid=None,
                  format="image/nifti", effdof=None, filename=None, sha=None,
-                 contrast_estimation=None):
+                 contrast_estimation=None, derfrom_id=None, 
+                 derfrom_filename=None, derfrom_format=None,
+                 derfrom_sha=None):
         super(StatisticMap, self).__init__(oid=oid)
         self.num = contrast_num
         self.contrast_name = contrast_name
         self.stat_type = stat_type
-        if self.stat_type.lower() == "t":
-            self.stat = STATO_TSTATISTIC
-        elif self.stat_type.lower() == "z":
-            self.stat = STATO_ZSTATISTIC
-        elif self.stat_type.lower() == "f":
-            self.stat = STATO_FSTATISTIC
-        elif self.stat_type.startswith('http'):
-            self.stat = Identifier(self.stat_type)
+
+        self.stat = None
+        if isinstance(self.stat_type, QualifiedName):
+            self.stat = self.stat_type
+        elif self.stat_type is not None:
+            if self.stat_type.lower() == "t":
+                self.stat = STATO_TSTATISTIC
+            elif self.stat_type.lower() == "z":
+                self.stat = STATO_ZSTATISTIC
+            elif self.stat_type.lower() == "f":
+                self.stat = STATO_FSTATISTIC
+            elif self.stat_type.startswith('http'):
+                self.stat = Identifier(self.stat_type)
+            else:
+                raise Exception('Unrecognised statistic: ' + str(self.stat_type))
+
+        if derfrom_id is not None:
+            self.derfrom = StatisticMap(None, None, None, None, 
+                coord_space, oid=derfrom_id,
+                filename=derfrom_filename, sha=derfrom_sha, format=derfrom_format)
         else:
-            raise Exception('Unrecognised statistic: ' + str(self.stat_type))
+            self.der_from = None
 
         # FIXME use new 'preferred mathematical notation from stato'
         if self.num is not None:
@@ -369,9 +418,10 @@ class StatisticMap(NIDMObject):
         if label is not None:
             self.label = label
         else:
-            self.label = "Statistic Map: " + self.contrast_name
-            # Include statistic type in the label
-            self.label = self.stat_type + '-' + self.label
+            if self.contrast_name:
+                self.label = "Statistic Map: " + self.contrast_name
+                # Include statistic type in the label
+                self.label = self.stat_type + '-' + self.label
 
         self.format = format
         if effdof is None:
@@ -412,6 +462,14 @@ class StatisticMap(NIDMObject):
             nidm_statisticType: ?stat_type ;
             nidm_effectDegreesOfFreedom: ?effdof ;
             nidm_errorDegreesOfFreedom: ?dof .
+
+            OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
+
+            ?derfrom_id a nidm_StatisticMap: ;
+                nfo:fileName ?derfrom_filename ;
+                dct:format ?derfrom_format ;
+                crypto:sha512 ?derfrom_sha .
+             } .
         }
         """
         return query
@@ -422,9 +480,6 @@ class StatisticMap(NIDMObject):
         """
         attributes = [(PROV['type'], NIDM_STATISTIC_MAP),
                       (DCT['format'], self.format),
-                      (PROV['label'], self.label),
-                      (NIDM_STATISTIC_TYPE, self.stat),
-                      (NIDM_CONTRAST_NAME, self.contrast_name),
                       (NIDM_IN_COORDINATE_SPACE, self.coord_space.id)]
 
         if not self.stat_type == 'Z':
@@ -434,6 +489,15 @@ class StatisticMap(NIDMObject):
             # For Z-Statistic error dof is infinity and effect dof is 1
             attributes.insert(0, (NIDM_ERROR_DEGREES_OF_FREEDOM, float("inf")))
             attributes.insert(0, (NIDM_EFFECT_DEGREES_OF_FREEDOM, self.effdof))
+
+        if self.stat is not None:
+            attributes.insert(0, (NIDM_STATISTIC_TYPE, self.stat))
+
+        if self.contrast_name is not None:
+            attributes.insert(0, (NIDM_CONTRAST_NAME, self.contrast_name))
+
+        if self.label is not None:
+            attributes.insert(0, (PROV['label'], self.label))
 
         # Create "Statistic Map" entity
         # FIXME: Deal with other than t-contrast maps: dof + statisticType

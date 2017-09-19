@@ -14,6 +14,7 @@ from math import erf, sqrt
 import rdflib
 from prov.model import Literal
 from prov.constants import XSD_FLOAT
+from prov.model import Identifier
 
 
 class Inference(object):
@@ -227,11 +228,14 @@ class HeightThreshold(NIDMObject):
 
     def __init__(self, stat_threshold=None, p_corr_threshold=None,
                  p_uncorr_threshold=None, threshold_type=None, value=None, label=None,
-                 version={'num': '1.3.0'}, oid=None):
+                 version={'num': '1.3.0'}, oid=None, equiv_thresh=None):
         super(HeightThreshold, self).__init__(oid=oid)
         if not stat_threshold and not p_corr_threshold and \
            not p_uncorr_threshold and not value:
             raise Exception('No threshold defined')
+
+        if isinstance(threshold_type, str):
+            threshold_type = Identifier(threshold_type)
 
         thresh_desc = ""
         if stat_threshold is not None:
@@ -273,7 +277,7 @@ class HeightThreshold(NIDMObject):
 
         self.type = NIDM_HEIGHT_THRESHOLD
         self.prov_type = PROV['Entity']
-        
+        self.equiv_thresh = equiv_thresh
 
     @classmethod
     def get_query(klass, oid=None):
@@ -288,8 +292,11 @@ class HeightThreshold(NIDMObject):
 
             SELECT DISTINCT * WHERE {
             """ + oid_var + """ a nidm_HeightThreshold: ;
+                a ?threshold_type ;
                 rdfs:label ?label ;
                 prov:value ?value .
+
+            FILTER ( ?threshold_type NOT IN (prov:Entity, nidm_HeightThreshold:) )
         }
         """
         return query
@@ -476,6 +483,8 @@ class Cluster(NIDMObject):
         else:
             self.label = label
 
+        self.clust_size_resels = clust_size_resels
+
 
     @classmethod
     def get_query(klass, oid=None):
@@ -518,13 +527,34 @@ class Cluster(NIDMObject):
             cluster_naming = "Supra-Threshold Cluster"
 
         # FIXME deal with multiple contrasts
-        self.add_attributes((
+        atts = (
             (PROV['type'], NIDM_SIGNIFICANT_CLUSTER),
             (PROV['label'], "%s %04d" % (cluster_naming, self.num)),
             (NIDM_CLUSTER_LABEL_ID, self.num),
-            (NIDM_CLUSTER_SIZE_IN_VOXELS, self.size),
-            (NIDM_P_VALUE_FWER, Literal(self.pFWER, datatype=XSD_FLOAT))))
+            (NIDM_CLUSTER_SIZE_IN_VOXELS, self.size)
+            )
 
+        if self.clust_size_resels is not None:
+            atts = atts + (
+                (NIDM_CLUSTER_SIZE_IN_RESELS, self.clust_size_resels),
+                )
+
+        if self.punc is not None:
+            atts = atts + (
+                (NIDM_P_VALUE_UNCORRECTED, Literal(self.punc, datatype=XSD_FLOAT)),
+                )
+
+        if self.pFDR is not None:
+            atts = atts + (
+                (NIDM_Q_VALUE_FDR, Literal(self.pFDR, datatype=XSD_FLOAT)),
+                )
+
+        if self.pFWER is not None:
+            atts = atts + (
+                (NIDM_P_VALUE_FWER, Literal(self.pFWER, datatype=XSD_FLOAT)),
+                )
+
+        self.add_attributes(atts)
 
 class DisplayMaskMap(NIDMObject):
 
@@ -787,6 +817,13 @@ class SearchSpace(NIDMObject):
         self.type = NIDM_SEARCH_SPACE_MASK_MAP
         self.prov_type = PROV['Entity']
         self.label = "Search Space Mask Map"
+        self.expected_num_voxels = expected_num_voxels
+        self.expected_num_clusters = expected_num_clusters
+        self.height_critical_fwe05 = height_critical_fwe05
+        self.height_critical_fdr05 = height_critical_fdr05
+        self.extent_critical_fwe05 = extent_critical_fwe05
+        self.extent_critical_fdr05 = extent_critical_fdr05
+        self.search_vol_geom = search_vol_geom
 
     @classmethod
     def get_query(klass, oid=None):
@@ -834,7 +871,6 @@ class SearchSpace(NIDMObject):
             OPTIONAL {""" + oid_var + """ nidm_heightCriticalThresholdFDR05: ?height_critical_fdr05 } .
             OPTIONAL {""" + oid_var + """ spm_smallestSignificantClusterSizeInVoxelsFWE05: ?extent_critical_fwe05 } .
             OPTIONAL {""" + oid_var + """ spm_smallestSignificantClusterSizeInVoxelsFDR05: ?extent_critical_fdr05 } .
-            OPTIONAL {""" + oid_var + """ spm_smallestSignificantClusterSizeInVoxelsFDR05: ?extent_critical_fdr05 } .
             OPTIONAL {""" + oid_var + """ spm_searchVolumeReselsGeometry: ?search_vol_geom } .
             
 
@@ -867,6 +903,22 @@ class SearchSpace(NIDMObject):
                 atts = atts + (
                     (NIDM_NOISE_FWHM_IN_VOXELS, self.noise_fwhm_in_voxels),
                     (NIDM_NOISE_FWHM_IN_UNITS, self.noise_fwhm_in_units))
+
+        if self.height_critical_fwe05 is not None:
+            atts = atts + ((NIDM_HEIGHT_CRITICAL_THRESHOLD_FWE_05, self.height_critical_fwe05),)
+
+        if self.height_critical_fdr05 is not None:
+            atts = atts + ((NIDM_HEIGHT_CRITICAL_THRESHOLD_FDR_05, self.height_critical_fdr05),)
+
+        if self.extent_critical_fwe05 is not None:
+            atts = atts + ((SPM_SMALLEST_SIGNIFICANT_CLUSTER_SIZE_IN_VOXELS_FWE05, self.extent_critical_fwe05),)
+
+        if self.extent_critical_fdr05 is not None:
+            atts = atts + ((SPM_SMALLEST_SIGNIFICANT_CLUSTER_SIZE_IN_VOXELS_FDR05, self.extent_critical_fdr05),)
+
+        if self.search_vol_geom is not None:
+            atts = atts + ((SPM_SEARCH_VOLUME_RESELS_GEOMETRY, self.search_vol_geom),)
+
 
         # Create "Search Space Mask map" entity
         self.add_attributes(atts)
@@ -1008,11 +1060,35 @@ class Peak(NIDMObject):
             norm_cdf_z = (1.0 + erf(self.equiv_z / sqrt(2.0))) / 2.0
             self.p_unc = 1 - norm_cdf_z
 
-        self.add_attributes([
+        atts = (
             (PROV['type'], self.type),
             (PROV['label'], self.label),
-            (NIDM_EQUIVALENT_ZSTATISTIC,
-                Literal(self.equiv_z, datatype=XSD_FLOAT)),
-            (NIDM_P_VALUE_UNCORRECTED,
-                Literal(self.p_unc, datatype=XSD_FLOAT)),
-            (PROV['location'], self.coordinate.id)])
+            (PROV['location'], self.coordinate.id))
+
+        if self.value is not None:
+            atts = atts + (
+                (PROV['value'], self.value),
+                )
+
+        if self.p_unc is not None:
+            atts = atts + (
+                (NIDM_P_VALUE_UNCORRECTED, Literal(self.p_unc, datatype=XSD_FLOAT)),
+                )
+
+        if self.equiv_z is not None:
+            atts = atts + (
+                (NIDM_EQUIVALENT_ZSTATISTIC, Literal(self.equiv_z, datatype=XSD_FLOAT)),
+                )
+
+        if self.p_fdr is not None:
+            atts = atts + (
+                (NIDM_Q_VALUE_FDR, Literal(self.p_fdr, datatype=XSD_FLOAT)),
+                )
+
+        if self.p_fwer is not None:
+            atts = atts + (
+                (NIDM_P_VALUE_FWER, Literal(self.p_fwer, datatype=XSD_FLOAT)),
+                )
+
+        self.add_attributes(atts)
+

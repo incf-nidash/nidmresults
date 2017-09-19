@@ -50,18 +50,21 @@ class ImagingInstrument(NIDMObject):
 
     def __init__(self, machine_type, label=None, oid=None):
         super(ImagingInstrument, self).__init__(oid=oid)
-        machine_type = machine_type.lower()
-        machine_term = dict(
-            mri=NIF_MRI, eeg=NIF_EEG, meg=NIF_MEG, pet=NIF_PET,
-            spect=NIF_SPECT)
-        machine_label = dict(
-            mri='MRI Scanner', eeg='EEG Machine', meg='MEG Machine',
-            pet='PET Scanner', spect='SPECT Machine')
 
-        if not machine_type.startswith('http:'):
-            self.type = machine_term[machine_type]
-        else:    
+        if not isinstance(machine_type, QualifiedName):
+            machine_type = machine_type.lower()
+            machine_term = dict(
+                mri=NIF_MRI, eeg=NIF_EEG, meg=NIF_MEG, pet=NIF_PET,
+                spect=NIF_SPECT)
+            machine_label = dict(
+                mri='MRI Scanner', eeg='EEG Machine', meg='MEG Machine',
+                pet='PET Scanner', spect='SPECT Machine')
+
+            if not machine_type.startswith('http:'):
+                self.type = machine_term[machine_type]
+        else:
             self.type = machine_type
+
         self.prov_type = PROV['Agent']
 
         if label is None:
@@ -306,9 +309,11 @@ class DriftModel(NIDMObject):
 
     def __init__(self, drift_type, parameter, label=None, oid=None):
         super(DriftModel, self).__init__(oid=oid)
+
+        # if not isinstance(drift_type, QualifiedName):
+        #     drift_type = namespace_manager.valid_qualified_name(drift_type)
+
         self.drift_type = drift_type
-        if not type(self.drift_type) is Identifier:
-            self.drift_type = Identifier(self.drift_type)
         self.parameter = parameter
         self.type = drift_type
         self.prov_type = PROV['Entity']
@@ -556,7 +561,8 @@ class ParameterEstimateMap(NIDMObject):
 
     def __init__(self, coord_space, pe_file=None, pe_num=None, filename=None, sha=None,
                  label=None, suffix='', model_param_estimation=None, oid=None,
-                 format=None):
+                 format=None, derfrom_id=None, derfrom_filename=None, derfrom_format=None,
+                 derfrom_sha=None):
         super(ParameterEstimateMap, self).__init__(oid=oid)
         # Column index in the corresponding design matrix
         self.num = pe_num
@@ -571,10 +577,20 @@ class ParameterEstimateMap(NIDMObject):
         self.type = NIDM_PARAMETER_ESTIMATE_MAP
         self.prov_type = PROV['Entity']
         if label is None:
-            label = "Parameter estimate " + str(self.num)
+            if self.num:
+                label = "Parameter estimate " + str(self.num)
+            else:
+                label = None
+
         self.label = label
         # Only used for reading (so far)
         self.model_param_estimation = model_param_estimation
+
+        if derfrom_id is not None:
+            self.derfrom = ParameterEstimateMap(oid=derfrom_id, coord_space=coord_space, 
+                filename=derfrom_filename, sha=derfrom_sha, format=derfrom_format)
+        else:
+            self.der_from = None
 
     @classmethod
     def get_query(klass, oid=None):
@@ -594,8 +610,22 @@ class ParameterEstimateMap(NIDMObject):
                 dct:format ?format .
 
             OPTIONAL {""" + oid_var + """ prov:atLocation ?pe_file .} .
+
+            OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
+
+            ?derfrom_id a nidm_ParameterEstimateMap: ;
+                nfo:fileName ?derfrom_filename ;
+                dct:format ?derfrom_format ;
+                crypto:sha512 ?derfrom_sha .
+             } .
         }
         """
+
+                #     ?derfrom_id a nidm_ParameterEstimateMap: ;
+                # nfo:fileName ?derfrom_filename ;
+                # dct:format ?derfrom_format ;
+                # crypto:sha512 ?derfrom_sha . } .
+
         return query
 
     # Generate prov for contrast map
@@ -603,11 +633,16 @@ class ParameterEstimateMap(NIDMObject):
         """
         Create prov entities and activities.
         """
-        # Parameter estimate entity
-        self.add_attributes((
+        atts = (
             (PROV['type'], self.type),
-            (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
-            (PROV['label'], self.label)))
+            (NIDM_IN_COORDINATE_SPACE, self.coord_space.id))
+
+        if self.label is not None:
+            atts = atts + (
+                (PROV['label'], self.label),)
+
+        # Parameter estimate entity
+        self.add_attributes(atts)
 
 
 class ResidualMeanSquares(NIDMObject):
@@ -669,7 +704,9 @@ class MaskMap(NIDMObject):
     """
 
     def __init__(self, mask_file, coord_space, user_defined,
-                 suffix='', filename=None, format=None, label=None, sha=None, oid=None):
+                 suffix='', filename=None, format=None, label=None, sha=None, oid=None,
+                 derfrom_id=None, derfrom_filename=None, derfrom_format=None,
+                 derfrom_sha=None):
         super(MaskMap, self).__init__(oid=oid)
         self.coord_space = coord_space
         if filename is None:
@@ -682,6 +719,12 @@ class MaskMap(NIDMObject):
         if label is None:
             label = "Mask"
         self.label = label
+        if derfrom_id is not None:
+            self.derfrom = MaskMap(None, coord_space, user_defined, 
+                oid=derfrom_id, filename=derfrom_filename, 
+                sha=derfrom_sha, format=derfrom_format)
+        else:
+            self.der_from = None
 
     @classmethod
     def get_query(klass, oid=None):
@@ -702,6 +745,14 @@ class MaskMap(NIDMObject):
                 crypto:sha512 ?sha ;
                 prov:atLocation ?mask_file ;
                 dct:format ?format .
+
+            OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
+
+            ?derfrom_id a nidm_MaskMap: ;
+                nfo:fileName ?derfrom_filename ;
+                dct:format ?derfrom_format ;
+                crypto:sha512 ?derfrom_sha .
+             } .
         }
         """
         return query

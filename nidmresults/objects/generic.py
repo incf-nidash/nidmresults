@@ -78,6 +78,10 @@ class CoordinateSpace(NIDMObject):
                  vox_size=None, dimensions=None, numdim=None, units=None,
                  oid=None, label="Coordinate space"):
         super(CoordinateSpace, self).__init__(oid)
+
+        if not isinstance(coordinate_system, QualifiedName):
+            coordinate_system = NIDM.qname(coordinate_system)
+
         self.coordinate_system = coordinate_system
         self.type = NIDM_COORDINATE_SPACE
         self.prov_type = PROV['Entity']
@@ -216,10 +220,15 @@ class NIDMFile(NIDMObject):
         self.temporary = temporary
 
     def is_nifti(self):
-        return self.path.endswith(".nii") or \
-            self.path.endswith(".nii.gz") or \
-            self.path.endswith(".img") or \
-            self.path.endswith(".hrd")
+        if self.path is not None:
+            name = self.path
+        else:
+            name = self.filename
+
+        return name.endswith(".nii") or \
+            name.endswith(".nii.gz") or \
+            name.endswith(".img") or \
+            name.endswith(".hrd")
 
     def get_sha_sum(self, nifti_file):
         nifti_img = nib.load(nifti_file)
@@ -255,32 +264,32 @@ class NIDMFile(NIDMObject):
             else:
                 new_file = self.path
 
-            if nidm_version['num'] in ["1.0.0", "1.1.0"]:
-                loc = Identifier("file://./" + self.filename)
-            else:
-                loc = Identifier(self.filename)
+        if nidm_version['num'] in ["1.0.0", "1.1.0"]:
+            loc = Identifier("file://./" + self.filename)
+        else:
+            loc = Identifier(self.filename)
 
-            self.add_attributes([(NFO['fileName'], self.filename)])
+        self.add_attributes([(NFO['fileName'], self.filename)])
 
-            if export_dir:
-                self.add_attributes([(PROV['atLocation'], loc)])
+        if export_dir:
+            self.add_attributes([(PROV['atLocation'], loc)])
 
-            if nidm_version['num'] in ("1.0.0", "1.1.0"):
-                path, org_filename = os.path.split(self.path)
-                if (org_filename is not self.filename) \
-                        and (not self.temporary):
-                    self.add_attributes([(NFO['fileName'], org_filename)])
+        if nidm_version['num'] in ("1.0.0", "1.1.0"):
+            path, org_filename = os.path.split(self.path)
+            if (org_filename is not self.filename) \
+                    and (not self.temporary):
+                self.add_attributes([(NFO['fileName'], org_filename)])
 
-            if self.is_nifti():
-                if self.sha is None:
-                    self.sha = self.get_sha_sum(new_file)
-                if self.format is None:
-                    self.format = "image/nifti"
+        if self.is_nifti():
+            if self.sha is None:
+                self.sha = self.get_sha_sum(new_file)
+            if self.format is None:
+                self.format = "image/nifti"
 
-                self.add_attributes([
-                    (CRYPTO['sha512'], self.sha),
-                    (DCT['format'], self.format)
-                ])
+            self.add_attributes([
+                (CRYPTO['sha512'], self.sha),
+                (DCT['format'], self.format)
+            ])
 
 
 class Image(NIDMObject):
@@ -339,14 +348,17 @@ class NeuroimagingSoftware(NIDMObject):
         self.id = NIIRI[str(uuid.uuid4())]
         self.version = version
 
-        if software_type.startswith('http'):         
-            self.type = Identifier(software_type)
-        elif software_type.lower() == "fsl":
-            self.name = "FSL"
+        if isinstance(software_type, QualifiedName):
+            self.type = software_type
         else:
-            warnings.warn('Unrecognised software: ' + str(software_type))
-            self.name = str(software_type)
-            self.type = None
+            if software_type.startswith('http'):         
+                self.type = Identifier(software_type)
+            elif software_type.lower() == "fsl":
+                self.name = "FSL"
+            else:
+                warnings.warn('Unrecognised software: ' + str(software_type))
+                self.name = str(software_type)
+                self.type = None
 
         # FIXME: get label from owl!
         if self.type == SCR_FSL:

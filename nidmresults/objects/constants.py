@@ -5,7 +5,7 @@ Definition of constants.
 @copyright: University of Warwick 2013-2014
 """
 
-from prov.model import PROV, Namespace
+from prov.model import PROV, Namespace, NamespaceManager
 
 NIDM = Namespace('nidm', "http://purl.org/nidash/nidm#")
 NIIRI = Namespace("niiri", "http://iri.nidash.org/")
@@ -13,7 +13,8 @@ CRYPTO = Namespace(
     "crypto",
     "http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions#")
 FSL = Namespace("fsl", "http://purl.org/nidash/fsl#")
-SPM = Namespace("fsl", "http://purl.org/nidash/spm#")
+SPM = Namespace("spm", "http://purl.org/nidash/spm#")
+AFNI = Namespace("afni", "http://purl.org/nidash/afni#")
 DCT = Namespace("dct", "http://purl.org/dc/terms/")
 OBO = Namespace("obo", "http://purl.obolibrary.org/obo/")
 DCTYPE = Namespace("dctype", "http://purl.org/dc/dcmitype/")
@@ -23,6 +24,11 @@ NFO = Namespace(
     "nfo", "http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#")
 SCR = Namespace("scr", "http://scicrunch.org/resolver/")
 NIF = Namespace("nif", "http://uri.neuinfo.org/nif/nifstd/")
+
+namespaces = (PROV, NIDM, NIIRI, CRYPTO, FSL, SPM, AFNI, DCT, OBO,
+    DCTYPE, DC, NFO, SCR, NIF)
+
+namespace_manager = NamespaceManager(namespaces)
 
 # Sciencrunch constants
 SCR_FSL = SCR['SCR_002823']
@@ -44,6 +50,9 @@ NLX_IMAGING_INSTRUMENT = NIF['birnlex_2094']
 # SPM constants
 SPM_DCT_DRIFT_MODEL = SPM['SPM_0000002']
 SPM_SPMS_DRIFT_CUT_OFF_PERIOD = SPM['SPM_0000001']
+SPM_SEARCH_VOLUME_RESELS_GEOMETRY = SPM['SPM_0000010']
+SPM_SMALLEST_SIGNIFICANT_CLUSTER_SIZE_IN_VOXELS_FDR05 = SPM['SPM_0000013']
+SPM_SMALLEST_SIGNIFICANT_CLUSTER_SIZE_IN_VOXELS_FWE05 = SPM['SPM_0000014']
 
 # NIDM constants
 FSL_FSLS_GAMMA_HRF = FSL['FSL_0000006']

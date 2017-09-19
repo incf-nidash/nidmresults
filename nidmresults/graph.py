@@ -29,13 +29,19 @@ class NIDMResults():
     NIDM-result object containing all metadata and link to image files.
     """
 
-    def __init__(self, nidm_zip=None, rdf_file=None, workaround=False):
+    def __init__(self, nidm_zip=None, rdf_file=None, workaround=False, to_replace=None):
         self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")      
         self.zip_path = nidm_zip
 
         # Load the turtle file
-        with zipfile.ZipFile(self.zip_path) as z:
+        with zipfile.ZipFile(self.zip_path, 'r') as z:
             rdf_data = z.read('nidm.ttl')
+        rdf_data = rdf_data.decode()
+
+        if to_replace is not None:
+            for to_rep, replacement in to_replace.items():
+                rdf_data = rdf_data.replace(to_rep, replacement)
+
         self.graph = rdflib.Graph()
         try:
             self.graph.parse(data=rdf_data, format="turtle")
@@ -244,10 +250,16 @@ class NIDMResults():
 
                 # Convert from rdflib Literal to appropriate Python datatype 
                 argums = {k: v.toPython() for k, v in argums.items()}
+                # Convert URIs to qnames
+                argums = {k: namespace_manager.valid_qualified_name(v) if namespace_manager.valid_qualified_name(v) is not None else v for k, v in argums.items()}
+
+                # for k,v in argums.items():
+
+                    # if not isinstance(drift_type, QualifiedName):
+                    #     drift_type = namespace_manager.valid_qualified_name(drift_type)
 
                 # Combine with passed arguments
                 argums.update(kwargs)
-
                 objects[oid] = klass(oid=oid, **argums)
 
         self.objects.update(objects)
@@ -658,7 +670,25 @@ class NIDMResults():
             for row in sd:
                 args = row.asdict()
                 inference = self.get_object(InferenceActivity, args['inference_id'], err_if_none=False)
-                height_thresh = self.get_object(HeightThreshold, args['height_thresh_id'])
+
+                # Find list of equivalent height thresholds
+                query_equiv_threshs = """
+                prefix nidm_equivalentThreshold: <http://purl.org/nidash/nidm#NIDM_0000161> .
+                
+                SELECT DISTINCT * WHERE {
+                    <""" + str(args['height_thresh_id']) + """> nidm_equivalentThreshold: ?equiv_thresh_id .
+                }
+                """
+                equiv_h_threshs = list()
+                sd_equiv_h_threshs = self.graph.query(query_equiv_threshs)
+                if sd_equiv_h_threshs:
+                    for row_equiv_h in sd_equiv_h_threshs:
+                        args_hequiv = row_equiv_h.asdict()
+
+                        equiv_h_threshs.append(self.get_object(HeightThreshold, args_cl['equiv_h_threshs']))
+
+                height_thresh = self.get_object(HeightThreshold, args['height_thresh_id'], equiv_thresh=equiv_h_threshs)
+
                 extent_thresh = self.get_object(ExtentThreshold, args['extent_thresh_id'])
                 peak_criteria = self.get_object(PeakCriteria, args['peak_criteria_id'], contrast_num=None)
                 cluster_criteria = self.get_object(ClusterCriteria, args['cluster_criteria_id'], contrast_num=None)

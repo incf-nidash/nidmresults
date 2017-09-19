@@ -199,6 +199,12 @@ class NIDMExporter():
                     self.add_object(param_estimate.coord_space)
                     self.add_object(param_estimate.file)
 
+                    if param_estimate.derfrom is not None:
+                        self.bundle.wasDerivedFrom(param_estimate.id, param_estimate.derfrom.id)
+                        self.add_object(param_estimate.derfrom)
+                        self.add_object(param_estimate.derfrom.coord_space)
+                        self.add_object(param_estimate.derfrom.file)
+
                 # Residual Mean Squares Map
                 # model_fitting.rms_map.wasGeneratedBy(model_fitting.activity)
                 self.bundle.wasGeneratedBy(model_fitting.rms_map.id, model_fitting.activity.id)
@@ -210,6 +216,12 @@ class NIDMExporter():
                 # model_fitting.mask_map.wasGeneratedBy(model_fitting.activity)
                 self.bundle.wasGeneratedBy(model_fitting.mask_map.id, model_fitting.activity.id)
                 self.add_object(model_fitting.mask_map)
+                if model_fitting.mask_map.derfrom is not None:
+                    self.bundle.wasDerivedFrom(model_fitting.mask_map.id, model_fitting.mask_map.derfrom.id)
+                    self.add_object(model_fitting.mask_map.derfrom)
+                    self.add_object(model_fitting.mask_map.derfrom.coord_space)
+                    self.add_object(model_fitting.mask_map.derfrom.file)
+
                 # Create coordinate space export
                 self.add_object(model_fitting.mask_map.coord_space)
                 # Create "Mask map" entity
@@ -264,6 +276,12 @@ class NIDMExporter():
                         self.add_object(contrast.contrast_map.coord_space)
                         # Copy contrast map in export directory
                         self.add_object(contrast.contrast_map.file)
+
+                        if contrast.contrast_map.derfrom is not None:
+                            self.bundle.wasDerivedFrom(contrast.contrast_map.id, contrast.contrast_map.derfrom.id)
+                            self.add_object(contrast.contrast_map.derfrom)
+                            self.add_object(contrast.contrast_map.derfrom.coord_space)
+                            self.add_object(contrast.contrast_map.derfrom.file)
 
                     # Create Std Err. Map (T-tests) or Explained Mean Sq. Map (F-tests)
                     # contrast.stderr_or_expl_mean_sq_map.wasGeneratedBy(contrast.estimation)
