@@ -99,6 +99,8 @@ class ImagingInstrument(NIDMObject):
 
             """ + oid_var + """ rdfs:label ?label ;
                 rdf:type ?machine_type .
+
+            FILTER ( ?machine_type NOT IN (nlx_Imaginginstrument:) )
         }
         """
         return query
