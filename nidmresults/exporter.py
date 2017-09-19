@@ -346,9 +346,15 @@ class NIDMExporter():
                         self.add_object(inference.excursion_set.clust_map.coord_space)
 
                     # Height threshold
+                    if inference.height_thresh.equiv_thresh is not None:
+                        for equiv in inference.height_thresh.equiv_thresh:
+                            self.add_object(equiv)
                     self.add_object(inference.height_thresh)
 
                     # Extent threshold
+                    if inference.extent_thresh.equiv_thresh is not None:
+                        for equiv in inference.extent_thresh.equiv_thresh:
+                            self.add_object(equiv)
                     self.add_object(inference.extent_thresh)
 
                     # Display Mask (potentially more than 1)

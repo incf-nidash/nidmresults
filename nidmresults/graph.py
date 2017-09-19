@@ -673,10 +673,10 @@ class NIDMResults():
 
                 # Find list of equivalent height thresholds
                 query_equiv_threshs = """
-                prefix nidm_equivalentThreshold: <http://purl.org/nidash/nidm#NIDM_0000161> .
+                prefix nidm_equivalentThreshold: <http://purl.org/nidash/nidm#NIDM_0000161>
                 
                 SELECT DISTINCT * WHERE {
-                    <""" + str(args['height_thresh_id']) + """> nidm_equivalentThreshold: ?equiv_thresh_id .
+                    <""" + str(args['height_thresh_id']) + """> nidm_equivalentThreshold: ?equiv_h_thresh_id .
                 }
                 """
                 equiv_h_threshs = list()
@@ -685,11 +685,27 @@ class NIDMResults():
                     for row_equiv_h in sd_equiv_h_threshs:
                         args_hequiv = row_equiv_h.asdict()
 
-                        equiv_h_threshs.append(self.get_object(HeightThreshold, args_cl['equiv_h_threshs']))
+                        equiv_h_threshs.append(self.get_object(HeightThreshold, args_hequiv['equiv_h_thresh_id']))
 
                 height_thresh = self.get_object(HeightThreshold, args['height_thresh_id'], equiv_thresh=equiv_h_threshs)
 
-                extent_thresh = self.get_object(ExtentThreshold, args['extent_thresh_id'])
+                # Find list of equivalent extent thresholds
+                query_equiv_threshs = """
+                prefix nidm_equivalentThreshold: <http://purl.org/nidash/nidm#NIDM_0000161>
+                
+                SELECT DISTINCT * WHERE {
+                    <""" + str(args['extent_thresh_id']) + """> nidm_equivalentThreshold: ?equiv_e_thresh_id .
+                }
+                """
+                equiv_e_threshs = list()
+                sd_equiv_e_threshs = self.graph.query(query_equiv_threshs)
+                if sd_equiv_e_threshs:
+                    for row_equiv_e in sd_equiv_e_threshs:
+                        args_eequiv = row_equiv_e.asdict()
+
+                        equiv_e_threshs.append(self.get_object(ExtentThreshold, args_eequiv['equiv_e_thresh_id']))
+
+                extent_thresh = self.get_object(ExtentThreshold, args['extent_thresh_id'], equiv_thresh=equiv_e_threshs)
                 peak_criteria = self.get_object(PeakCriteria, args['peak_criteria_id'], contrast_num=None)
                 cluster_criteria = self.get_object(ClusterCriteria, args['cluster_criteria_id'], contrast_num=None)
 

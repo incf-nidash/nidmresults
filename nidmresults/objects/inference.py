@@ -326,6 +326,12 @@ class HeightThreshold(NIDMObject):
                 (PROV['value'], self.value)
                 ]
 
+        if self.equiv_thresh is not None:
+            for equiv in self.equiv_thresh:
+                atts += [
+                    (NIDM_EQUIVALENT_THRESHOLD, equiv.id)
+                ]
+
         self.add_attributes([(k, v) for k, v in atts if v is not None])
 
 
@@ -336,7 +342,8 @@ class ExtentThreshold(NIDMObject):
     """
 
     def __init__(self, extent=None, p_corr=None, p_uncorr=None, extent_rsl=None, 
-            label=None, version={'num': '1.3.0'}, value=None, oid=None):
+            label=None, version={'num': '1.3.0'}, value=None, oid=None, 
+            equiv_thresh=None):
         super(ExtentThreshold, self).__init__(oid=oid)
         self.type = NIDM_EXTENT_THRESHOLD
         self.prov_type = PROV['Entity']
@@ -386,6 +393,8 @@ class ExtentThreshold(NIDMObject):
             self.label = "Extent Threshold: " + thresh_desc
         else:
             self.label = label
+
+        self.equiv_thresh = equiv_thresh
 
 
     @classmethod
@@ -445,6 +454,12 @@ class ExtentThreshold(NIDMObject):
             if self.extent is None:
                 atts += [
                     (PROV['value'], self.value)
+                ]
+
+        if self.equiv_thresh is not None:
+            for equiv in self.equiv_thresh:
+                atts += [
+                    (NIDM_EQUIVALENT_THRESHOLD, equiv.id)
                 ]
 
         self.add_attributes([(k, v) for k, v in atts if v is not None])
