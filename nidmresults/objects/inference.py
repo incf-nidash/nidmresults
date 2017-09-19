@@ -962,6 +962,12 @@ class SearchSpace(NIDMObject):
                     (NIDM_NOISE_FWHM_IN_VOXELS, self.noise_fwhm_in_voxels),
                     (NIDM_NOISE_FWHM_IN_UNITS, self.noise_fwhm_in_units))
 
+        if self.expected_num_voxels is not None:
+            atts = atts + ((NIDM_EXPECTED_NUMBER_OF_VOXELS_PER_CLUSTER, self.expected_num_voxels),)
+
+        if self.expected_num_clusters is not None:
+            atts = atts + ((NIDM_EXPECTED_NUMBER_OF_CLUSTERS, self.expected_num_clusters),)
+
         if self.height_critical_fwe05 is not None:
             atts = atts + ((NIDM_HEIGHT_CRITICAL_THRESHOLD_FWE_05, self.height_critical_fwe05),)
 
