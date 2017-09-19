@@ -385,41 +385,48 @@ class ExtentThreshold(NIDMObject):
 
     def __init__(self, extent=None, p_corr=None, p_uncorr=None, extent_rsl=None, 
             label=None, version={'num': '1.3.0'}, value=None, oid=None, 
-            equiv_thresh=None):
+            equiv_thresh=None, threshold_type=None):
         super(ExtentThreshold, self).__init__(oid=oid)
         self.type = NIDM_EXTENT_THRESHOLD
         self.prov_type = PROV['Entity']
 
         thresh_desc = ""
-        if extent is not None:
-            thresh_desc = "k>" + str(extent)
-            # NIDM-Results 1.0.0
-            user_threshold_type = "Cluster-size in voxels"
-            # NIDM-Results > 1.0.0
-            threshold_type = OBO_STATISTIC
-        elif not p_uncorr is None:
-            thresh_desc = "p<" + str(self.p_uncorr) + " (uncorrected)"
-            # NIDM-Results 1.0.0
-            user_threshold_type = "p-value uncorrected"
-            # NIDM-Results > 1.0.0
-            threshold_type = NIDM_P_VALUE_UNCORRECTED_CLASS
-            value = p_uncorr
-        elif not p_corr is None:
-            thresh_desc = "p<" + str(p_corr) + " (FWE)"
-            # NIDM-Results 1.0.0
-            user_threshold_type = "p-value FWE"
-            # NIDM-Results > 1.0.0
-            threshold_type = OBO_P_VALUE_FWER
-            value = p_corr
+
+        if threshold_type is not None:
+            self.threshold_type = threshold_type
         else:
-            thresh_desc = "k>=0"
-            extent = 0
-            if version['num'] == "1.0.0":
-                p_uncorr = 1.0
-                p_corr = 1.0
-                user_threshold_type = None
-            else:
+            if extent is not None:
+                thresh_desc = "k>" + str(extent)
+                # NIDM-Results 1.0.0
+                user_threshold_type = "Cluster-size in voxels"
+                # NIDM-Results > 1.0.0
                 threshold_type = OBO_STATISTIC
+            elif not p_uncorr is None:
+                thresh_desc = "p<" + str(self.p_uncorr) + " (uncorrected)"
+                # NIDM-Results 1.0.0
+                user_threshold_type = "p-value uncorrected"
+                # NIDM-Results > 1.0.0
+                threshold_type = NIDM_P_VALUE_UNCORRECTED_CLASS
+                value = p_uncorr
+            elif not p_corr is None:
+                thresh_desc = "p<" + str(p_corr) + " (FWE)"
+                # NIDM-Results 1.0.0
+                user_threshold_type = "p-value FWE"
+                # NIDM-Results > 1.0.0
+                threshold_type = OBO_P_VALUE_FWER
+                value = p_corr
+            else:
+                thresh_desc = "k>=0"
+                extent = 0
+                if version['num'] == "1.0.0":
+                    p_uncorr = 1.0
+                    p_corr = 1.0
+                    user_threshold_type = None
+                else:
+                    threshold_type = OBO_STATISTIC
+
+        self.threshold_type = threshold_type
+        self.value = value
 
         if version['num'] == "1.0.0":
             self.user_threshold_type = user_threshold_type
@@ -429,7 +436,6 @@ class ExtentThreshold(NIDMObject):
             self.threshold_type = threshold_type
 
         self.extent = extent
-        self.value = value
         self.extent_rsl = extent_rsl
 
         if label is None:
@@ -454,10 +460,13 @@ class ExtentThreshold(NIDMObject):
 
             SELECT DISTINCT * WHERE {
             """ + oid_var + """ a nidm_ExtentThreshold: ;
+                a ?threshold_type ;
                 rdfs:label ?label  .
             OPTIONAL {""" + oid_var + """ prov:value ?value .} .
             OPTIONAL {""" + oid_var + """ nidm_clusterSizeInVoxels: ?extent .} .
             OPTIONAL {""" + oid_var + """ nidm_clusterSizeInResels: ?extent_rsl .} .
+
+            FILTER ( ?threshold_type NOT IN (prov:Entity, nidm_ExtentThreshold:) )
         }
         """
         return query
@@ -494,7 +503,7 @@ class ExtentThreshold(NIDMObject):
             atts += [
                 (PROV['type'], self.threshold_type)
             ]
-            if self.value is None:
+            if self.value is not None:
                 atts += [
                     (PROV['value'], self.value)
                 ]
