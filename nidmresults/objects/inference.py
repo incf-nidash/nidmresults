@@ -596,7 +596,7 @@ class Cluster(NIDMObject):
         # FIXME deal with multiple contrasts
         atts = (
             (PROV['type'], NIDM_SIGNIFICANT_CLUSTER),
-            (PROV['label'], "%s %04d" % (cluster_naming, self.num)),
+            (PROV['label'], self.label),
             (NIDM_CLUSTER_LABEL_ID, self.num),
             (NIDM_CLUSTER_SIZE_IN_VOXELS, self.size)
             )
@@ -1110,6 +1110,7 @@ class Peak(NIDMObject):
                 prov:atLocation ?coord_id .
 
             ?coord_id a nidm_Coordinate: ;
+                rdfs:label ?coord_label ;
                 nidm_coordinateVector: ?coord_vector_std .
 
             OPTIONAL {""" + oid_var + """ prov:value ?value .} .

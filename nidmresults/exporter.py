@@ -223,6 +223,8 @@ class NIDMExporter():
                     self.bundle.wasGeneratedBy(model_fitting.rpv_map.id, model_fitting.activity.id)
                     self.add_object(model_fitting.rpv_map.coord_space)
                     self.add_object(model_fitting.rpv_map.file)
+                    if model_fitting.rpv_map.inf_id is not None:
+                        self.bundle.used(model_fitting.rpv_map.inf_id, model_fitting.rpv_map.id)
                     if model_fitting.rpv_map.derfrom is not None:
                         self.bundle.wasDerivedFrom(model_fitting.rpv_map.id, model_fitting.rpv_map.derfrom.id)
                         self.add_object(model_fitting.rpv_map.derfrom)

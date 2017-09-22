@@ -54,6 +54,7 @@ class NIDMResults():
 
         # Query the RDF document and create the objects
         self.software = self.load_software()
+        self.exporter = self.load_exporter()
         self.model_fittings = self.load_modelfitting()
         self.contrasts = self.load_contrasts(workaround=workaround)
         self.inferences = self.load_inferences()
@@ -64,7 +65,6 @@ class NIDMResults():
         return nidmr
 
     def get_info(self):
-        
         if self.info is None:
             self.info = collections.OrderedDict()
 
@@ -300,7 +300,54 @@ class NIDMResults():
             raise Exception('No results found for query:' + query)
         
         return software
+
+    def load_exporter(self):
+        #         query =  """
+        # prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
+        # prefix nidm_NIDMResultsExport: <http://purl.org/nidash/nidm#NIDM_0000166>
+
+        # SELECT DISTINCT * WHERE
+        #     {
+        #     ?exporter_id a prov:SoftwareAgent ;
+        #         prov:label ?label ;
+        #         prov:type ?software_type ;
+        #         nidm_softwareVersion: ?version .
+
+        #     ?export_id a nidm_NIDMResultsExport: ;
+        #         prov:wasAssociatedWith ?exporter_id .
+
+        #     FILTER ( ?software_type NOT IN (prov:SoftwareAgent, prov:Agent) )
+        #     }
+        # """
+        query =  """
+        prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
+        prefix nidm_NIDMResultsExport: <http://purl.org/nidash/nidm#NIDM_0000166>
+
+        SELECT DISTINCT * WHERE
+            {
+                ?exporter_id a prov:SoftwareAgent .
+
+                ?export_id a nidm_NIDMResultsExport: ;
+                    prov:wasAssociatedWith ?exporter_id .
+
+            }
+        """
         
+        sd = self.graph.query(query)
+
+        if len(sd) > 1:
+            raise Exception('More than one result found for query:' + query)
+
+        exporter = None
+        if sd:
+            for row in sd:
+                args = row.asdict()
+                exporter = self.get_object(ExporterSoftware, args['exporter_id'])
+
+        if exporter is None:
+            raise Exception('No results found for query:' + query)
+
+        return exporter
 
     def load_modelfitting(self):
         query = """
@@ -830,6 +877,7 @@ class NIDMResults():
             exporter.exporter = ExporterSoftware('nidmresults', nidmresults.__version__)
             exporter.software = self.software
             exporter.prepend_path = self.zip_path
+            exporter.exporter = self.exporter
             exporter.export()
 
         elif format == "mkda":

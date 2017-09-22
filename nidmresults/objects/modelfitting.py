@@ -726,7 +726,7 @@ class ReselsPerVoxelMap(NIDMObject):
                  temporary=False, suffix='', format=None, filename=None,
                  sha=None, label=None, oid=None,
                  derfrom_id=None, derfrom_filename=None, derfrom_format=None,
-                 derfrom_sha=None):
+                 derfrom_sha=None, inf_id=None):
         super(ReselsPerVoxelMap, self).__init__(oid=oid)
         self.coord_space = coord_space
         if filename is None:
@@ -744,6 +744,7 @@ class ReselsPerVoxelMap(NIDMObject):
                 sha=derfrom_sha, format=derfrom_format)
         else:
             self.derfrom = None
+        self.inf_id = inf_id
 
     @classmethod
     def get_query(klass, oid=None):
@@ -762,6 +763,8 @@ class ReselsPerVoxelMap(NIDMObject):
                 crypto:sha512 ?sha ;
                 prov:atLocation ?rpv_file ;
                 dct:format ?format .
+
+            ?inf_id prov:used """ + oid_var + """ .
 
             OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
 

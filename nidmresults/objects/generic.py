@@ -344,7 +344,6 @@ class NeuroimagingSoftware(NIDMObject):
 
     def __init__(self, software_type, version, label=None, feat_version=None, oid=None):
         super(NeuroimagingSoftware, self).__init__(oid=oid)
-        self.id = NIIRI[str(uuid.uuid4())]
         self.version = version
 
         if isinstance(software_type, QualifiedName):
@@ -384,11 +383,15 @@ class NeuroimagingSoftware(NIDMObject):
         query = """
         prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
         prefix fsl_featVersion: <http://purl.org/nidash/fsl#FSL_0000005>
+        prefix nidm_ModelParametersEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
 
         SELECT DISTINCT * WHERE
                 {
             """ + oid_var + """ a prov:SoftwareAgent ;
                 nidm_softwareVersion: ?version .
+
+            [] a nidm_ModelParametersEstimation: ;
+                prov:wasAssociatedWith """ + oid_var + """ .
 
             OPTIONAL {""" + oid_var + """ a ?software_type .} .
             OPTIONAL {""" + oid_var + """ fsl_featVersion: ?feat_version .} .
@@ -396,7 +399,7 @@ class NeuroimagingSoftware(NIDMObject):
             FILTER ( ?software_type NOT IN (prov:SoftwareAgent, prov:Agent) )
             }
         """
-        return query    
+        return query  
 
     def export(self, nidm_version, export_dir):
         """
@@ -419,19 +422,43 @@ class ExporterSoftware(NIDMObject):
     Class representing a Software Agent.
     """
 
-    def __init__(self, software_type, version, oid=None):
+    def __init__(self, software_type, version, oid=None, label=None):
         super(ExporterSoftware, self).__init__(oid=oid)
         self.id = NIIRI[str(uuid.uuid4())]
         self.type = software_type
         self.prov_type = PROV['Agent']
         self.version = version
 
-        if software_type == NIDM_FSL:
-            self.name = "nidmfsl"
+        if label is None:
+            if software_type == NIDM_FSL:
+                self.label = "nidmfsl"
+            else:
+                self.label = str(software_type)
         else:
-            warnings.warn('Unrecognised software: ' + str(software_type))
-            self.name = str(software_type)
-            self.type = None
+            self.label = label
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
+        prefix nidm_NIDMResultsExport: <http://purl.org/nidash/nidm#NIDM_0000166>
+
+        SELECT DISTINCT * WHERE
+                {
+            """ + oid_var + """ a prov:SoftwareAgent ;
+                rdfs:label  ?label ;
+                rdf:type ?software_type ;
+                nidm_softwareVersion: ?version .
+
+            FILTER ( ?software_type NOT IN (prov:SoftwareAgent, prov:Agent) )
+            }
+        """
+        return query
 
 
     def export(self, nidm_version, export_dir):
@@ -441,7 +468,7 @@ class ExporterSoftware(NIDMObject):
         self.add_attributes((
             (PROV['type'], self.type),
             (PROV['type'], PROV['SoftwareAgent']),
-            (PROV['label'], self.name),
+            (PROV['label'], self.label),
             (NIDM_SOFTWARE_VERSION, self.version))
         )
 
