@@ -211,6 +211,11 @@ class NIDMExporter():
                 self.bundle.wasGeneratedBy(model_fitting.rms_map.id, model_fitting.activity.id)
                 self.add_object(model_fitting.rms_map.coord_space)
                 self.add_object(model_fitting.rms_map.file)
+                if model_fitting.rms_map.derfrom is not None:
+                    self.bundle.wasDerivedFrom(model_fitting.rms_map.id, model_fitting.rms_map.derfrom.id)
+                    self.add_object(model_fitting.rms_map.derfrom)
+                    self.add_object(model_fitting.rms_map.derfrom.coord_space)
+                    self.add_object(model_fitting.rms_map.derfrom.file)
 
                 # Resels per Voxel Map
                 if model_fitting.rpv_map is not None:
@@ -218,6 +223,11 @@ class NIDMExporter():
                     self.bundle.wasGeneratedBy(model_fitting.rpv_map.id, model_fitting.activity.id)
                     self.add_object(model_fitting.rpv_map.coord_space)
                     self.add_object(model_fitting.rpv_map.file)
+                    if model_fitting.rpv_map.derfrom is not None:
+                        self.bundle.wasDerivedFrom(model_fitting.rpv_map.id, model_fitting.rpv_map.derfrom.id)
+                        self.add_object(model_fitting.rpv_map.derfrom)
+                        self.add_object(model_fitting.rpv_map.derfrom.coord_space)
+                        self.add_object(model_fitting.rpv_map.derfrom.file)
 
                 # Mask
                 # model_fitting.mask_map.wasGeneratedBy(model_fitting.activity)

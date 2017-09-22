@@ -593,7 +593,7 @@ class ParameterEstimateMap(NIDMObject):
             self.derfrom = ParameterEstimateMap(oid=derfrom_id, coord_space=coord_space, 
                 filename=derfrom_filename, sha=derfrom_sha, format=derfrom_format)
         else:
-            self.der_from = None
+            self.derfrom = None
 
     @classmethod
     def get_query(klass, oid=None):
@@ -656,7 +656,9 @@ class ResidualMeanSquares(NIDMObject):
 
     def __init__(self, residual_file, coord_space,
                  temporary=False, suffix='', format=None, filename=None,
-                 sha=None, label=None, oid=None):
+                 sha=None, label=None, oid=None,
+                 derfrom_id=None, derfrom_filename=None, derfrom_format=None,
+                 derfrom_sha=None):
         super(ResidualMeanSquares, self).__init__(oid=oid)
         self.coord_space = coord_space
         if filename is None:
@@ -668,6 +670,12 @@ class ResidualMeanSquares(NIDMObject):
         self.label = label
         self.type = NIDM_RESIDUAL_MEAN_SQUARES_MAP
         self.prov_type = PROV['Entity']
+        if derfrom_id is not None:
+            self.derfrom = ResidualMeanSquares(None, coord_space, 
+                oid=derfrom_id, filename=derfrom_filename, 
+                sha=derfrom_sha, format=derfrom_format)
+        else:
+            self.derfrom = None
 
     @classmethod
     def get_query(klass, oid=None):
@@ -686,6 +694,15 @@ class ResidualMeanSquares(NIDMObject):
                 crypto:sha512 ?sha ;
                 prov:atLocation ?residual_file ;
                 dct:format ?format .
+
+            OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
+
+            ?derfrom_id a nidm_ResidualMeanSquaresMap: ;
+                nfo:fileName ?derfrom_filename ;
+                dct:format ?derfrom_format ;
+                crypto:sha512 ?derfrom_sha .
+             } .
+
         }
         """
         return query
@@ -707,7 +724,9 @@ class ReselsPerVoxelMap(NIDMObject):
 
     def __init__(self, rpv_file, coord_space,
                  temporary=False, suffix='', format=None, filename=None,
-                 sha=None, label=None, oid=None):
+                 sha=None, label=None, oid=None,
+                 derfrom_id=None, derfrom_filename=None, derfrom_format=None,
+                 derfrom_sha=None):
         super(ReselsPerVoxelMap, self).__init__(oid=oid)
         self.coord_space = coord_space
         if filename is None:
@@ -719,6 +738,12 @@ class ReselsPerVoxelMap(NIDMObject):
         self.label = label
         self.type = NIDM_RESELS_PER_VOXEL_MAP
         self.prov_type = PROV['Entity']
+        if derfrom_id is not None:
+            self.derfrom = ReselsPerVoxelMap(None, coord_space, 
+                oid=derfrom_id, filename=derfrom_filename, 
+                sha=derfrom_sha, format=derfrom_format)
+        else:
+            self.derfrom = None
 
     @classmethod
     def get_query(klass, oid=None):
@@ -737,6 +762,14 @@ class ReselsPerVoxelMap(NIDMObject):
                 crypto:sha512 ?sha ;
                 prov:atLocation ?rpv_file ;
                 dct:format ?format .
+
+            OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
+
+            ?derfrom_id a nidm_ReselsPerVoxelMap: ;
+                nfo:fileName ?derfrom_filename ;
+                dct:format ?derfrom_format ;
+                crypto:sha512 ?derfrom_sha .
+             } .
         }
         """
         return query
@@ -778,7 +811,7 @@ class MaskMap(NIDMObject):
                 oid=derfrom_id, filename=derfrom_filename, 
                 sha=derfrom_sha, format=derfrom_format)
         else:
-            self.der_from = None
+            self.derfrom = None
 
     @classmethod
     def get_query(klass, oid=None):
