@@ -207,15 +207,15 @@ class NIDMExporter():
 
                 # Residual Mean Squares Map
                 # model_fitting.rms_map.wasGeneratedBy(model_fitting.activity)
-                self.bundle.wasGeneratedBy(model_fitting.rms_map.id, model_fitting.activity.id)
                 self.add_object(model_fitting.rms_map)
+                self.bundle.wasGeneratedBy(model_fitting.rms_map.id, model_fitting.activity.id)
                 self.add_object(model_fitting.rms_map.coord_space)
                 self.add_object(model_fitting.rms_map.file)
 
                 # Resels per Voxel Map
                 if model_fitting.rpv_map is not None:
-                    self.bundle.wasGeneratedBy(model_fitting.rpv_map.id, model_fitting.activity.id)
                     self.add_object(model_fitting.rpv_map)
+                    self.bundle.wasGeneratedBy(model_fitting.rpv_map.id, model_fitting.activity.id)
                     self.add_object(model_fitting.rpv_map.coord_space)
                     self.add_object(model_fitting.rpv_map.file)
 
