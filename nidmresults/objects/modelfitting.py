@@ -217,7 +217,10 @@ class DesignMatrix(NIDMObject):
             self.image = image_file
         else:
             self.image = Image(image_file, img_filename)
+        if isinstance(regressors, str):
+            regressors = json.loads(regressors)
         self.regressors = regressors
+
         self.design_type = design_type
         self.hrf_model = hrf_model
         if type(self.hrf_model) is not Identifier:
