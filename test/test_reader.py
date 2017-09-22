@@ -94,7 +94,8 @@ class TestReader(unittest.TestCase, TestResultDataModel):
                           'nidm_PValueUncorrected': 'nidm_UncorrectedPValue',
                           'nidm_PValueUncorrected': 'nidm_UncorrectedPValue',
                           'http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions/': 
-                          'http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions#'}
+                          'http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions#',
+                          ' \\ntask': '\\\\n task'}
 
             nidmres = NIDMResults(nidm_zip=nidmpack, to_replace=to_replace)
             new_name = os.path.join(self.out_dir, os.path.basename(nidmpack))
