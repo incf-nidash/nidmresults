@@ -104,7 +104,7 @@ class TestReader(unittest.TestCase, TestResultDataModel):
 
             new_nidmres = NIDMResults(nidm_zip=new_name)
 
-            self.compare_full_graphs(nidmres.graph, new_nidmres.graph, self.owl, True, True)
+            self.compare_full_graphs(nidmres.graph, new_nidmres.graph, self.owl, True, True, reconcile=False)
 
             # nidm_graph.parse()
             # # exc_sets = nidm_graph.get_excursion_set_maps()
