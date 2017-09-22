@@ -326,7 +326,7 @@ class TestResultDataModel(object):
 
         in_both, in_gt, in_other = graph_diff(gt_graph, other_graph)
 
-        exc = list()
+        exc_missing = list()
         for s, p, o in in_gt:
             # If there is a corresponding s,p check if
             # there is an equivalent o
@@ -336,13 +336,14 @@ class TestResultDataModel(object):
                 if same_json_array or close_float or same_str:
                     break
             else:
-                exc.append("\nMissing :\t '%s %s %s'" \
+                exc_missing.append("\nMissing :\t '%s %s %s'" \
                     % (
                         self.get_readable_name(owl, gt_graph, s),
                         self.get_readable_name(owl, gt_graph, p),
                         self.get_readable_name(owl, gt_graph, o)
                     ))
 
+        exc_added = list()
         if include:
             for s, p, o in in_other:
                 # If there is a corresponding s,p check if 
@@ -353,14 +354,14 @@ class TestResultDataModel(object):
                     if same_json_array or close_float or same_str:
                         break
                 else:
-                    exc.append("\nAdded :\t '%s %s %s'" \
+                    exc_added.append("\nAdded :\t '%s %s %s'" \
                         % (
                             self.get_readable_name(owl, other_graph, s),
                             self.get_readable_name(owl, other_graph, p),
                             self.get_readable_name(owl, other_graph, o)
                         ))
 
-        self.my_execption += "".join(exc)
+        self.my_execption += "".join(sorted(exc_missing) + sorted(exc_added))
 
         if raise_now and self.my_execption:
             raise Exception(self.my_execption)
