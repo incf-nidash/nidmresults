@@ -223,8 +223,6 @@ class DesignMatrix(NIDMObject):
 
         self.design_type = design_type
         self.hrf_model = hrf_model
-        if type(self.hrf_model) is not Identifier:
-            self.hrf_model = Identifier(self.hrf_model)
 
         self.drift_model = drift_model
         if csv_file is None:
