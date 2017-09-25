@@ -424,7 +424,6 @@ class ExporterSoftware(NIDMObject):
 
     def __init__(self, software_type, version, oid=None, label=None):
         super(ExporterSoftware, self).__init__(oid=oid)
-        self.id = NIIRI[str(uuid.uuid4())]
         self.type = software_type
         self.prov_type = PROV['Agent']
         self.version = version

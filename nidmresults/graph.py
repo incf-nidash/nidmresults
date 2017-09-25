@@ -302,23 +302,6 @@ class NIDMResults():
         return software
 
     def load_exporter(self):
-        #         query =  """
-        # prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
-        # prefix nidm_NIDMResultsExport: <http://purl.org/nidash/nidm#NIDM_0000166>
-
-        # SELECT DISTINCT * WHERE
-        #     {
-        #     ?exporter_id a prov:SoftwareAgent ;
-        #         prov:label ?label ;
-        #         prov:type ?software_type ;
-        #         nidm_softwareVersion: ?version .
-
-        #     ?export_id a nidm_NIDMResultsExport: ;
-        #         prov:wasAssociatedWith ?exporter_id .
-
-        #     FILTER ( ?software_type NOT IN (prov:SoftwareAgent, prov:Agent) )
-        #     }
-        # """
         query =  """
         prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
         prefix nidm_NIDMResultsExport: <http://purl.org/nidash/nidm#NIDM_0000166>
