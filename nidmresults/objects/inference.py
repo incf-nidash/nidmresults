@@ -47,9 +47,12 @@ class InferenceActivity(NIDMObject):
     Object representing an Inference activity.
     """
 
-    def __init__(self, oid=None, tail=None, label=None, contrast_name=None):
+    def __init__(self, oid=None, tail=None, label=None, contrast_name=None, inference_type=None):
         super(InferenceActivity, self).__init__(oid=oid)
-        self.type = NIDM_INFERENCE
+        if inference_type is None:
+            self.type = NIDM_INFERENCE
+        else:
+            self.type = inference_type
         self.prov_type = PROV['Activity']
         if tail is None:
             tail = NIDM_ONE_TAILED_TEST
@@ -59,7 +62,6 @@ class InferenceActivity(NIDMObject):
             if contrast_name:
                 label += ": " + self.contrast_name
         self.label = label
-
 
     @classmethod
     def get_query(klass, oid=None):
@@ -84,7 +86,10 @@ class InferenceActivity(NIDMObject):
             }
 
             """ + oid_var + """ rdfs:label ?label ;
+                a ?inference_type ;
                 nidm_hasAlternativeHypothesis: ?tail .
+
+            FILTER ( ?inference_type NOT IN (prov:Activity))
         }
         """
         return query
