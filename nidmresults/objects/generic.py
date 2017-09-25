@@ -477,12 +477,33 @@ class NIDMResultsExport(NIDMObject):
     """
     Class representing a NIDM-Results Export activity.
     """
-    def __init__(self, oid=None):
+    def __init__(self, oid=None, label=None):
         super(NIDMResultsExport, self).__init__(oid=oid)
-        self.id = NIIRI[str(uuid.uuid4())]
         self.type = NIDM_NIDM_RESULTS_EXPORT
         self.prov_type = PROV['Activity']
-        self.label = "NIDM-Results export"
+        if label is None:
+            self.label = "NIDM-Results export"
+        else:
+            self.label = label
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix nidm_NIDMResultsExport: <http://purl.org/nidash/nidm#NIDM_0000166>
+
+        SELECT DISTINCT * WHERE
+            {
+            """ + oid_var + """ a prov:Activity, nidm_NIDMResultsExport: ; 
+                rdfs:label ?label .
+
+            }
+        """
+        return query
 
     def export(self, nidm_version, export_dir):
         """

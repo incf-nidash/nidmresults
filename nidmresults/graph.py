@@ -54,7 +54,7 @@ class NIDMResults():
 
         # Query the RDF document and create the objects
         self.software = self.load_software()
-        self.exporter = self.load_exporter()
+        (self.exporter, self.export_act) = self.load_exporter()
         self.model_fittings = self.load_modelfitting()
         self.contrasts = self.load_contrasts(workaround=workaround)
         self.inferences = self.load_inferences()
@@ -343,11 +343,12 @@ class NIDMResults():
             for row in sd:
                 args = row.asdict()
                 exporter = self.get_object(ExporterSoftware, args['exporter_id'])
+                export = self.get_object(NIDMResultsExport, args['export_id'])
 
-        if exporter is None:
+        if (exporter is None) or (export is None):
             raise Exception('No results found for query:' + query)
 
-        return exporter
+        return (exporter, export)
 
     def load_modelfitting(self):
         query = """
@@ -878,6 +879,7 @@ class NIDMResults():
             exporter.software = self.software
             exporter.prepend_path = self.zip_path
             exporter.exporter = self.exporter
+            exporter.export_act = self.export_act
             exporter.export()
 
         elif format == "mkda":
