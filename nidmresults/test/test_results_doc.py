@@ -334,6 +334,8 @@ class TestResultDataModel(object):
                 same_json_array, close_float, same_str = \
                             self._same_json_or_float(o, o_other)
                 if same_json_array or close_float or same_str:
+                    # Remove equivalent o from other as well
+                    in_other.remove( (s, p, o_other) )
                     break
             else:
                 exc_missing.append("\nMissing :\t '%s %s %s'" \
@@ -346,20 +348,12 @@ class TestResultDataModel(object):
         exc_added = list()
         if include:
             for s, p, o in in_other:
-                # If there is a corresponding s,p check if 
-                # there is an equivalent o
-                for o_gt in in_gt.objects(s,  p):
-                    same_json_array, close_float, same_str = \
-                                self._same_json_or_float(o, o_gt)
-                    if same_json_array or close_float or same_str:
-                        break
-                else:
-                    exc_added.append("\nAdded :\t '%s %s %s'" \
-                        % (
-                            self.get_readable_name(owl, other_graph, s),
-                            self.get_readable_name(owl, other_graph, p),
-                            self.get_readable_name(owl, other_graph, o)
-                        ))
+                exc_added.append("\nAdded :\t '%s %s %s'" \
+                    % (
+                        self.get_readable_name(owl, other_graph, s),
+                        self.get_readable_name(owl, other_graph, p),
+                        self.get_readable_name(owl, other_graph, o)
+                    ))
 
         self.my_execption += "".join(sorted(exc_missing) + sorted(exc_added))
 
