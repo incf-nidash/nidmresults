@@ -91,8 +91,21 @@ class TestReader(unittest.TestCase, TestResultDataModel):
                 export_act_id = 'b8fe52e0f830755481e30d6fae8f6636'
             elif 'ex_spm_contrast_mask' in nidmpack:
                 export_act_id = '380868f11cf96af46cc4ea3bf625081f'
-            elif '' in nidmpack:
+            elif 'ex_spm_default' in nidmpack:
                 export_act_id = 'e9f2bcf056a679e65838722ab961237c'
+            elif 'ex_spm_full_example001' in nidmpack:
+                export_act_id = 'fa83bdc818b89b5c70d211d1e03fc7e6'
+            elif 'ex_spm_group_ols' in nidmpack:
+                export_act_id = '3c3c654f514122eb8007fdf0d2bc03c8'
+            elif 'ex_spm_group_wls' in nidmpack:
+                export_act_id = 'abb2940ffe4c819e8adb0ab5cd2ecac1'
+            elif 'ex_spm_HRF_informed_basis' in nidmpack:
+                export_act_id = '85408216d7db19206dcfee6d17c212d3'
+            elif 'ex_spm_partial_conjunction' in nidmpack:
+                export_act_id = 'f219fd38405d063a1ed632fcb2147443'
+            elif 'ex_spm_temporal_derivative' in nidmpack:
+                export_act_id = '659c46e2d1c780606dffaab2340049d2'
+
 
             # This is a workaround to avoid confusion between attribute and class uncorrected p-value
             # cf. https://github.com/incf-nidash/nidm/issues/421
