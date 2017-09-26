@@ -189,8 +189,6 @@ class ContrastMap(NIDMObject):
             atts = atts + (
                 (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),)
 
-        self.add_attributes(atts)
-
         if self.label is not None:
             atts = atts + (
                 (PROV['label'], self.label),)

@@ -396,6 +396,12 @@ class NIDMExporter():
                             # Create "Display Mask Map" entity
                             self.add_object(mask.file)
 
+                            if mask.derfrom is not None:
+                                self.bundle.wasDerivedFrom(mask.id, mask.derfrom.id)
+                                self.add_object(mask.derfrom)
+                                self.add_object(mask.derfrom.file, export_file=False)
+
+
                     # Search Space
                     self.bundle.wasGeneratedBy(inference.search_space.id, inference.inference_act.id)
                     # inference.search_space.wasGeneratedBy(inference.inference_act)

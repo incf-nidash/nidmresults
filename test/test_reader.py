@@ -87,6 +87,13 @@ class TestReader(unittest.TestCase, TestResultDataModel):
         for nidmpack in self.packs:
             print(nidmpack)
 
+            if 'ex_spm_conjunction' in nidmpack:
+                export_act_id = 'b8fe52e0f830755481e30d6fae8f6636'
+            elif 'ex_spm_contrast_mask' in nidmpack:
+                export_act_id = '380868f11cf96af46cc4ea3bf625081f'
+            elif '' in nidmpack:
+                export_act_id = 'e9f2bcf056a679e65838722ab961237c'
+
             # This is a workaround to avoid confusion between attribute and class uncorrected p-value
             # cf. https://github.com/incf-nidash/nidm/issues/421
             to_replace = {'@prefix nidm_PValueUncorrected: <http://purl.org/nidash/nidm#NIDM_0000160>': 
@@ -96,7 +103,7 @@ class TestReader(unittest.TestCase, TestResultDataModel):
                           'http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions/': 
                           'http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions#',
                           ' \\ntask': '\\\\n task',
-                          'a prov:Generation .': 'a prov:Generation ; prov:activity niiri:b8fe52e0f830755481e30d6fae8f6636 .'}
+                          'a prov:Generation .': 'a prov:Generation ; prov:activity niiri:' + export_act_id + ' .'}
 
             nidmres = NIDMResults(nidm_zip=nidmpack, to_replace=to_replace)
             new_name = os.path.join(self.out_dir, os.path.basename(nidmpack))
@@ -106,7 +113,11 @@ class TestReader(unittest.TestCase, TestResultDataModel):
 
             new_nidmres = NIDMResults(nidm_zip=new_name)
 
-            self.compare_full_graphs(nidmres.graph, new_nidmres.graph, self.owl, True, True, reconcile=False)
+            self.compare_full_graphs(nidmres.graph, new_nidmres.graph, self.owl, 
+                            include=False, raise_now=False, reconcile=False)
+
+        if self.my_execption:
+            raise Exception(self.my_execption)
 
             # nidm_graph.parse()
             # # exc_sets = nidm_graph.get_excursion_set_maps()

@@ -634,7 +634,9 @@ class DisplayMaskMap(NIDMObject):
     Object representing a DisplayMaskMap entity.
     """
     def __init__(self, contrast_num, mask_file, mask_num, coord_space,
-                 sha=None, filename=None, format=None, label=None, oid=None):
+                 sha=None, filename=None, format=None, label=None, oid=None, 
+                 derfrom_id=None, derfrom_filename=None, derfrom_format=None,
+                 derfrom_sha=None, isderfrommap=False):
         super(DisplayMaskMap, self).__init__(oid=oid)
         if not filename:
             filename = 'DisplayMask' + str(self.mask_num) + '.nii.gz'
@@ -647,6 +649,14 @@ class DisplayMaskMap(NIDMObject):
             self.label = "Display Mask Map " + str(mask_num)
         else:
             self.label = label
+        if derfrom_id is not None:
+            self.derfrom = DisplayMaskMap(None, None, None, 
+                coord_space=None, oid=derfrom_id,
+                filename=derfrom_filename, sha=derfrom_sha, format=derfrom_format,
+                isderfrommap=True)
+        else:
+            self.der_from = None
+        self.isderfrommap = isderfrommap
 
     @classmethod
     def get_query(klass, oid=None):
@@ -665,6 +675,15 @@ class DisplayMaskMap(NIDMObject):
                 crypto:sha512 ?sha ;
                 prov:atLocation ?mask_file ;
                 dct:format ?format .
+
+            OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
+
+            ?derfrom_id a nidm_DisplayMaskMap: ;
+                nfo:fileName ?derfrom_filename ;
+                dct:format ?derfrom_format ;
+                crypto:sha512 ?derfrom_sha .
+             } .
+
         }
         """
         return query
@@ -673,11 +692,16 @@ class DisplayMaskMap(NIDMObject):
         """
         Create prov entities and activities.
         """
-        self.add_attributes((
+        atts = (
             (PROV['type'], self.type),
             (PROV['label'], self.label),
-            (NIDM_IN_COORDINATE_SPACE, self.coord_space.id)
-            ))
+            )
+
+        if not self.isderfrommap:
+            atts = atts + (
+                (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),)
+
+        self.add_attributes(atts)
 
 
 class PeakCriteria(NIDMObject):
