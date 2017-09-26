@@ -69,6 +69,53 @@ class NIDMObject(object):
             self.attributes = attributes
 
 
+class NIDMResultsBundle(NIDMObject):
+    """
+    Object representing a NIDM-Results bundle entity.
+    """
+
+    def __init__(self, nidm_version=None, label=None, oid=None):
+        super(NIDMResultsBundle, self).__init__(oid=oid)
+        self.type = NIDM_RESULTS
+        self.nidm_version = nidm_version
+        if label is None:
+            self.label = "NIDM-Results"
+        else:
+            self.label = label
+        self.prov_type = PROV['Bundle']
+
+    @classmethod
+    def get_query(klass, oid=None):
+        if oid is None:
+            oid_var = "?oid"
+        else:
+            oid_var = "<" + str(oid) + ">"
+
+        query = """
+        prefix dctype: <http://purl.org/dc/dcmitype/>
+
+
+        SELECT * WHERE
+                {
+            """ + oid_var + """ a nidm_NIDMResults: ;  
+              rdfs:label ?label ;
+              nidm_version: ?nidm_version .
+            }
+        """
+        return query    
+
+    def export(self, nidm_version, export_dir):
+        """
+        Create prov entity.
+        """
+        self.add_attributes([
+            (PROV['type'], self.type),
+            (PROV['type'], PROV['Bundle']), # Explicitely add bundle type 
+            (PROV['label'], self.label),
+            (NIDM_VERSION, self.nidm_version),
+        ])
+
+
 class CoordinateSpace(NIDMObject):
     """
     Object representing a CoordinateSpace entity.
@@ -497,9 +544,8 @@ class NIDMResultsExport(NIDMObject):
 
         SELECT DISTINCT * WHERE
             {
-            """ + oid_var + """ a prov:Activity, nidm_NIDMResultsExport: ; 
+            """ + oid_var + """ a nidm_NIDMResultsExport: ; 
                 rdfs:label ?label .
-
             }
         """
         return query

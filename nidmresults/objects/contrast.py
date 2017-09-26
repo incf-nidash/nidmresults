@@ -161,7 +161,7 @@ class ContrastMap(NIDMObject):
             dct:format ?format ;
             nfo:fileName ?filename ;
             nidm_contrastName: ?contrast_name ;
-            crypto:sha512 ?sha ;
+            crypto:sha512 ?sha .
 
             OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
 
@@ -335,7 +335,7 @@ class ContrastStdErrMap(NIDMObject):
             prov:atLocation ?filepath ;
             nfo:fileName ?filename ;
             dct:format ?format ;
-            crypto:sha512 ?sha ;
+            crypto:sha512 ?sha .
         }
         """
         return query        
@@ -400,7 +400,7 @@ class StatisticMap(NIDMObject):
 
         if derfrom_id is not None:
             self.derfrom = StatisticMap(None, None, None, None, 
-                coord_space, oid=derfrom_id,
+                coord_space=None, oid=derfrom_id,
                 filename=derfrom_filename, sha=derfrom_sha, format=derfrom_format)
         else:
             self.der_from = None
@@ -425,9 +425,9 @@ class StatisticMap(NIDMObject):
                 self.label = self.stat_type + '-' + self.label
 
         self.format = format
-        if effdof is None:
-            # FIXME: this should not be 1 for F-test
-            effdof = 1.0
+        # if effdof is None:
+        #     # FIXME: this should not be 1 for F-test
+        #     effdof = 1.0
 
         self.effdof = effdof
 
@@ -480,8 +480,10 @@ class StatisticMap(NIDMObject):
         Create prov graph.
         """
         attributes = [(PROV['type'], NIDM_STATISTIC_MAP),
-                      (DCT['format'], self.format),
-                      (NIDM_IN_COORDINATE_SPACE, self.coord_space.id)]
+                      (DCT['format'], self.format)]
+
+        if self.coord_space is not None:
+            attributes.insert(0, (NIDM_IN_COORDINATE_SPACE,  self.coord_space.id))
 
         if not self.stat_type == 'Z':
             attributes.insert(0, (NIDM_ERROR_DEGREES_OF_FREEDOM, self.dof))

@@ -54,7 +54,7 @@ class NIDMResults():
 
         # Query the RDF document and create the objects
         self.software = self.load_software()
-        (self.exporter, self.export_act) = self.load_exporter()
+        (self.bundle, self.exporter, self.export_act, self.export_time) = self.load_bundle_export()
         self.model_fittings = self.load_modelfitting()
         self.contrasts = self.load_contrasts(workaround=workaround)
         self.inferences = self.load_inferences()
@@ -301,13 +301,36 @@ class NIDMResults():
         
         return software
 
-    def load_exporter(self):
+    def load_bundle_export(self):
+        # query =  """
+        # prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
+        # prefix nidm_NIDMResultsExport: <http://purl.org/nidash/nidm#NIDM_0000166>
+
+        # SELECT DISTINCT * WHERE
+        #     {
+        #         ?bundle_id a prov:Bundle .
+
+        #         ?exporter_id a prov:SoftwareAgent .
+
+        #         ?export_id  a nidm_NIDMResultsExport: ;
+        #             prov:wasAssociatedWith ?exporter_id .
+
+        #     }
+        # """
+        
         query =  """
         prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
         prefix nidm_NIDMResultsExport: <http://purl.org/nidash/nidm#NIDM_0000166>
 
         SELECT DISTINCT * WHERE
             {
+                ?bundle_id a prov:Bundle ;
+                    prov:qualifiedGeneration ?blank_node .
+
+                ?blank_node a prov:Generation ;
+                    prov:activity ?export_id ;
+                    prov:atTime ?export_time .
+
                 ?exporter_id a prov:SoftwareAgent .
 
                 ?export_id a nidm_NIDMResultsExport: ;
@@ -315,23 +338,26 @@ class NIDMResults():
 
             }
         """
-        
+
         sd = self.graph.query(query)
 
-        if len(sd) > 1:
-            raise Exception('More than one result found for query:' + query)
+        # if len(sd) > 1:
+        #     raise Exception('More than one result found for query:' + query)
 
         exporter = None
+        export = None
+        bundle = None
         if sd:
             for row in sd:
                 args = row.asdict()
                 exporter = self.get_object(ExporterSoftware, args['exporter_id'])
                 export = self.get_object(NIDMResultsExport, args['export_id'])
-
-        if (exporter is None) or (export is None):
+                bundle = self.get_object(NIDMResultsBundle, args['bundle_id'])
+                export_time = args['export_time'].toPython()
+        else:
             raise Exception('No results found for query:' + query)
 
-        return (exporter, export)
+        return (bundle, exporter, export, export_time)
 
     def load_modelfitting(self):
         query = """
@@ -858,11 +884,14 @@ class NIDMResults():
             exporter.model_fittings = self.model_fittings
             exporter.contrasts = self.contrasts
             exporter.inferences = self.inferences
-            exporter.exporter = ExporterSoftware('nidmresults', nidmresults.__version__)
+            exporter.bundle = self.bundle
+            # exporter.exporter = ExporterSoftware('nidmresults', nidmresults.__version__)
             exporter.software = self.software
             exporter.prepend_path = self.zip_path
             exporter.exporter = self.exporter
+            exporter.bundle_ent = self.bundle
             exporter.export_act = self.export_act
+            exporter.export_time = self.export_time
             exporter.export()
 
         elif format == "mkda":
