@@ -360,6 +360,67 @@ class NIDMResults():
         return (bundle, exporter, export, export_time)
 
     def load_modelfitting(self):
+        # query = """
+        # prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+        # prefix nidm_hasDriftModel: <http://purl.org/nidash/nidm#NIDM_0000088>
+        # prefix nidm_Data: <http://purl.org/nidash/nidm#NIDM_0000169>
+        # prefix nidm_ErrorModel: <http://purl.org/nidash/nidm#NIDM_0000023>
+        # prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
+        # prefix nidm_ResidualMeanSquaresMap: <http://purl.org/nidash/nidm#NIDM_0000066>
+        # prefix nidm_MaskMap: <http://purl.org/nidash/nidm#NIDM_0000054>
+        # prefix nidm_GrandMeanMap: <http://purl.org/nidash/nidm#NIDM_0000033>
+        # prefix nlx_Imaginginstrument: <http://uri.neuinfo.org/nif/nifstd/birnlex_2094>
+        # prefix nlx_MagneticResonanceImagingScanner: <http://uri.neuinfo.org/nif/nifstd/birnlex_2100>
+        # prefix nlx_PositronEmissionTomographyScanner: <http://uri.neuinfo.org/nif/nifstd/ixl_0050000>
+        # prefix nlx_SinglePhotonEmissionComputedTomographyScanner: <http://uri.neuinfo.org/nif/nifstd/ixl_0050001>
+        # prefix nlx_MagnetoencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/ixl_0050002>
+        # prefix nlx_ElectroencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/ixl_0050003>
+        # prefix nidm_ReselsPerVoxelMap: <http://purl.org/nidash/nidm#NIDM_0000144>
+
+        # SELECT DISTINCT * WHERE {
+
+        #     ?design_id a nidm_DesignMatrix: .
+        #     OPTIONAL { ?design_id dc:description ?png_id . } .
+        #     OPTIONAL { ?design_id nidm_hasDriftModel: ?drift_model_id . } .
+
+        #     ?data_id a nidm_Data: ;
+        #         prov:wasAttributedTo ?machine_id .
+            
+        #     {?machine_id a nlx_Imaginginstrument: .} UNION
+        #     {?machine_id a nlx_MagneticResonanceImagingScanner: .} UNION
+        #     {?machine_id a nlx_PositronEmissionTomographyScanner: .} UNION
+        #     {?machine_id a nlx_SinglePhotonEmissionComputedTomographyScanner: .} UNION
+        #     {?machine_id a nlx_MagnetoencephalographyMachine: .} UNION
+        #     {?machine_id a nlx_ElectroencephalographyMachine: .}
+
+        #     ?error_id a nidm_ErrorModel: .
+
+        #     ?mpe_id a nidm_ModelParameterEstimation: ;
+        #         prov:used ?design_id ;
+        #         prov:used ?data_id ;
+        #         prov:used ?error_id .
+
+        #     ?rms_id a nidm_ResidualMeanSquaresMap: ;
+        #         nidm_inCoordinateSpace: ?rms_coordspace_id ;
+        #         prov:wasGeneratedBy ?mpe_id .
+
+        #     ?mask_id a nidm_MaskMap: ;
+        #         nidm_inCoordinateSpace: ?mask_coordspace_id ;
+        #         prov:wasGeneratedBy ?mpe_id .
+
+        #     ?gm_id a nidm_GrandMeanMap: ;
+        #         nidm_inCoordinateSpace: ?gm_coordspace_id ;
+        #         prov:wasGeneratedBy ?mpe_id .
+
+        #     OPTIONAL {
+        #         ?rpv_id a nidm_ReselsPerVoxelMap: ;
+        #             nidm_inCoordinateSpace: ?rpv_coordspace_id ;
+        #             prov:wasGeneratedBy ?mpe_id .
+        #     }
+        # }
+        # """
+
+
         query = """
         prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
         prefix nidm_hasDriftModel: <http://purl.org/nidash/nidm#NIDM_0000088>
@@ -517,8 +578,7 @@ class NIDMResults():
                  machine, subjects, rpv_map))
 
                 con_num = row_num + 1   
-
-        if not model_fittings:
+        else:
             raise Exception('No model fitting found')     
 
         return model_fittings

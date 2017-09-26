@@ -119,14 +119,19 @@ class NIDMExporter():
         if os.path.isdir(self.export_dir):
             shutil.rmtree(self.export_dir)
 
-    def add_object(self, nidm_object):
+    def add_object(self, nidm_object, export_file=True):
         """
         Add a NIDMObject to a NIDM-Results export.
         """
-        if not isinstance(nidm_object, NIDMFile):
-            nidm_object.export(self.version, self.export_dir)
+        if not export_file:
+            export_dir = None
         else:
-            nidm_object.export(self.version, self.export_dir, self.prepend_path)
+            export_dir = self.export_dir
+
+        if not isinstance(nidm_object, NIDMFile):
+            nidm_object.export(self.version, export_dir)
+        else:
+            nidm_object.export(self.version, export_dir, self.prepend_path)
         # ProvDocument: add object to the bundle
         if nidm_object.prov_type == PROV['Activity']:
             self.bundle.activity(nidm_object.id, other_attributes=nidm_object.attributes)
@@ -202,7 +207,7 @@ class NIDMExporter():
                     if param_estimate.derfrom is not None:
                         self.bundle.wasDerivedFrom(param_estimate.id, param_estimate.derfrom.id)
                         self.add_object(param_estimate.derfrom)
-                        self.add_object(param_estimate.derfrom.file)
+                        self.add_object(param_estimate.derfrom.file, export_file=False)
 
                 # Residual Mean Squares Map
                 # model_fitting.rms_map.wasGeneratedBy(model_fitting.activity)
@@ -213,7 +218,7 @@ class NIDMExporter():
                 if model_fitting.rms_map.derfrom is not None:
                     self.bundle.wasDerivedFrom(model_fitting.rms_map.id, model_fitting.rms_map.derfrom.id)
                     self.add_object(model_fitting.rms_map.derfrom)
-                    self.add_object(model_fitting.rms_map.derfrom.file)
+                    self.add_object(model_fitting.rms_map.derfrom.file, export_file=False)
 
                 # Resels per Voxel Map
                 if model_fitting.rpv_map is not None:
@@ -226,7 +231,7 @@ class NIDMExporter():
                     if model_fitting.rpv_map.derfrom is not None:
                         self.bundle.wasDerivedFrom(model_fitting.rpv_map.id, model_fitting.rpv_map.derfrom.id)
                         self.add_object(model_fitting.rpv_map.derfrom)
-                        self.add_object(model_fitting.rpv_map.derfrom.file)
+                        self.add_object(model_fitting.rpv_map.derfrom.file, export_file=False)
 
                 # Mask
                 # model_fitting.mask_map.wasGeneratedBy(model_fitting.activity)
@@ -235,7 +240,7 @@ class NIDMExporter():
                 if model_fitting.mask_map.derfrom is not None:
                     self.bundle.wasDerivedFrom(model_fitting.mask_map.id, model_fitting.mask_map.derfrom.id)
                     self.add_object(model_fitting.mask_map.derfrom)
-                    self.add_object(model_fitting.mask_map.derfrom.file)
+                    self.add_object(model_fitting.mask_map.derfrom.file, export_file=False)
 
                 # Create coordinate space export
                 self.add_object(model_fitting.mask_map.coord_space)
@@ -295,7 +300,7 @@ class NIDMExporter():
                         if contrast.contrast_map.derfrom is not None:
                             self.bundle.wasDerivedFrom(contrast.contrast_map.id, contrast.contrast_map.derfrom.id)
                             self.add_object(contrast.contrast_map.derfrom)
-                            self.add_object(contrast.contrast_map.derfrom.file)
+                            self.add_object(contrast.contrast_map.derfrom.file, export_file=False)
 
                     # Create Std Err. Map (T-tests) or Explained Mean Sq. Map (F-tests)
                     # contrast.stderr_or_expl_mean_sq_map.wasGeneratedBy(contrast.estimation)
@@ -320,7 +325,7 @@ class NIDMExporter():
                     if contrast.stat_map.derfrom is not None:
                         self.bundle.wasDerivedFrom(contrast.stat_map.id, contrast.stat_map.derfrom.id)
                         self.add_object(contrast.stat_map.derfrom)
-                        self.add_object(contrast.stat_map.derfrom.file)
+                        self.add_object(contrast.stat_map.derfrom.file, export_file=False)
 
                     # Create Z Statistic Map
                     if contrast.z_stat_map:

@@ -119,7 +119,7 @@ class ContrastMap(NIDMObject):
                  coord_space, sha=None, format=None, 
                  label=None, filename=None, oid=None, derfrom_id=None, 
                  derfrom_filename=None, derfrom_format=None,
-                 derfrom_sha=None):
+                 derfrom_sha=None, isderfrommap=False):
         super(ContrastMap, self).__init__(oid=oid)
         self.num = contrast_num
         self.name = contrast_name
@@ -140,9 +140,11 @@ class ContrastMap(NIDMObject):
         if derfrom_id is not None:
             self.derfrom = ContrastMap(contrast_file=None, contrast_num=None, 
                 contrast_name=None, oid=derfrom_id, coord_space=coord_space, 
-                filename=derfrom_filename, sha=derfrom_sha, format=derfrom_format)
+                filename=derfrom_filename, sha=derfrom_sha, format=derfrom_format,
+                isderfrommap=True)
         else:
             self.der_from = None
+        self.isderfrommap = isderfrommap
 
     @classmethod
     def get_query(klass, oid=None):
@@ -181,8 +183,13 @@ class ContrastMap(NIDMObject):
         # Contrast Map entity
         atts = (
             (PROV['type'], NIDM_CONTRAST_MAP),
-            (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
             (NIDM_CONTRAST_NAME, self.name))
+
+        if not self.isderfrommap:
+            atts = atts + (
+                (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),)
+
+        self.add_attributes(atts)
 
         if self.label is not None:
             atts = atts + (
@@ -377,7 +384,7 @@ class StatisticMap(NIDMObject):
                  format="image/nifti", effdof=None, filename=None, sha=None,
                  contrast_estimation=None, derfrom_id=None, 
                  derfrom_filename=None, derfrom_format=None,
-                 derfrom_sha=None):
+                 derfrom_sha=None, isderfrommap=False):
         super(StatisticMap, self).__init__(oid=oid)
         self.num = contrast_num
         self.contrast_name = contrast_name
@@ -401,7 +408,8 @@ class StatisticMap(NIDMObject):
         if derfrom_id is not None:
             self.derfrom = StatisticMap(None, None, None, None, 
                 coord_space=None, oid=derfrom_id,
-                filename=derfrom_filename, sha=derfrom_sha, format=derfrom_format)
+                filename=derfrom_filename, sha=derfrom_sha, format=derfrom_format,
+                isderfrommap=True)
         else:
             self.der_from = None
 
@@ -433,6 +441,8 @@ class StatisticMap(NIDMObject):
 
         # Only used when reading (so far)
         self.contrast_estimation = contrast_estimation
+
+        self.isderfrommap = isderfrommap
 
     def __str__(self):
         return '%s\t%s' % (self.label, self.file)
@@ -482,8 +492,9 @@ class StatisticMap(NIDMObject):
         attributes = [(PROV['type'], NIDM_STATISTIC_MAP),
                       (DCT['format'], self.format)]
 
-        if self.coord_space is not None:
+        if not self.isderfrommap:
             attributes.insert(0, (NIDM_IN_COORDINATE_SPACE,  self.coord_space.id))
+            attributes.insert(0, (PROV['label'], self.label))
 
         if not self.stat_type == 'Z':
             attributes.insert(0, (NIDM_ERROR_DEGREES_OF_FREEDOM, self.dof))
@@ -499,8 +510,6 @@ class StatisticMap(NIDMObject):
         if self.contrast_name is not None:
             attributes.insert(0, (NIDM_CONTRAST_NAME, self.contrast_name))
 
-        if self.label is not None:
-            attributes.insert(0, (PROV['label'], self.label))
 
         # Create "Statistic Map" entity
         # FIXME: Deal with other than t-contrast maps: dof + statisticType

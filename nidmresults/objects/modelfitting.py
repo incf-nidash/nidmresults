@@ -566,7 +566,7 @@ class ParameterEstimateMap(NIDMObject):
     def __init__(self, coord_space, pe_file=None, pe_num=None, filename=None, sha=None,
                  label=None, suffix='', model_param_estimation=None, oid=None,
                  format=None, derfrom_id=None, derfrom_filename=None, derfrom_format=None,
-                 derfrom_sha=None):
+                 derfrom_sha=None, isderfrommap=False):
         super(ParameterEstimateMap, self).__init__(oid=oid)
         # Column index in the corresponding design matrix
         self.num = pe_num
@@ -592,9 +592,11 @@ class ParameterEstimateMap(NIDMObject):
 
         if derfrom_id is not None:
             self.derfrom = ParameterEstimateMap(oid=derfrom_id, coord_space=coord_space, 
-                filename=derfrom_filename, sha=derfrom_sha, format=derfrom_format)
+                filename=derfrom_filename, sha=derfrom_sha, format=derfrom_format,
+                isderfrommap=True)
         else:
             self.derfrom = None
+        self.isderfrommap = isderfrommap
 
     @classmethod
     def get_query(klass, oid=None):
@@ -638,8 +640,11 @@ class ParameterEstimateMap(NIDMObject):
         Create prov entities and activities.
         """
         atts = (
-            (PROV['type'], self.type),
-            (NIDM_IN_COORDINATE_SPACE, self.coord_space.id))
+            (PROV['type'], self.type),)
+
+        if not self.isderfrommap:
+            atts = atts + (
+                (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),)
 
         if self.label is not None:
             atts = atts + (
@@ -659,7 +664,7 @@ class ResidualMeanSquares(NIDMObject):
                  temporary=False, suffix='', format=None, filename=None,
                  sha=None, label=None, oid=None,
                  derfrom_id=None, derfrom_filename=None, derfrom_format=None,
-                 derfrom_sha=None):
+                 derfrom_sha=None, isderfrommap=False):
         super(ResidualMeanSquares, self).__init__(oid=oid)
         self.coord_space = coord_space
         if filename is None:
@@ -674,9 +679,11 @@ class ResidualMeanSquares(NIDMObject):
         if derfrom_id is not None:
             self.derfrom = ResidualMeanSquares(None, coord_space, 
                 oid=derfrom_id, filename=derfrom_filename, 
-                sha=derfrom_sha, format=derfrom_format)
+                sha=derfrom_sha, format=derfrom_format,
+                isderfrommap=True)
         else:
             self.derfrom = None
+        self.isderfrommap = isderfrommap
 
     @classmethod
     def get_query(klass, oid=None):
@@ -712,10 +719,16 @@ class ResidualMeanSquares(NIDMObject):
         """
         Create prov entities and activities.
         """
-        self.add_attributes((
+        atts = (
             (PROV['type'], self.type,),
-            (PROV['label'], self.label),
-            (NIDM_IN_COORDINATE_SPACE, self.coord_space.id)))
+            )
+
+        if not self.isderfrommap:
+            atts = atts + (
+                (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
+                (PROV['label'], self.label))
+
+        self.add_attributes(atts)
 
 class ReselsPerVoxelMap(NIDMObject):
 
@@ -727,7 +740,7 @@ class ReselsPerVoxelMap(NIDMObject):
                  temporary=False, suffix='', format=None, filename=None,
                  sha=None, label=None, oid=None,
                  derfrom_id=None, derfrom_filename=None, derfrom_format=None,
-                 derfrom_sha=None, inf_id=None):
+                 derfrom_sha=None, inf_id=None, isderfrommap=False):
         super(ReselsPerVoxelMap, self).__init__(oid=oid)
         self.coord_space = coord_space
         if filename is None:
@@ -742,10 +755,12 @@ class ReselsPerVoxelMap(NIDMObject):
         if derfrom_id is not None:
             self.derfrom = ReselsPerVoxelMap(None, coord_space, 
                 oid=derfrom_id, filename=derfrom_filename, 
-                sha=derfrom_sha, format=derfrom_format)
+                sha=derfrom_sha, format=derfrom_format,
+                isderfrommap=True)
         else:
             self.derfrom = None
         self.inf_id = inf_id
+        self.isderfrommap = isderfrommap
 
     @classmethod
     def get_query(klass, oid=None):
@@ -782,10 +797,16 @@ class ReselsPerVoxelMap(NIDMObject):
         """
         Create prov entities and activities.
         """
-        self.add_attributes((
+        atts = (
             (PROV['type'], self.type,),
-            (PROV['label'], self.label),
-            (NIDM_IN_COORDINATE_SPACE, self.coord_space.id)))
+            )
+
+        if not self.isderfrommap:
+            atts = atts + (
+                (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
+                (PROV['label'], self.label))
+
+        self.add_attributes(atts)
 
 
 class MaskMap(NIDMObject):
@@ -797,7 +818,7 @@ class MaskMap(NIDMObject):
     def __init__(self, mask_file, coord_space, user_defined,
                  suffix='', filename=None, format=None, label=None, sha=None, oid=None,
                  derfrom_id=None, derfrom_filename=None, derfrom_format=None,
-                 derfrom_sha=None):
+                 derfrom_sha=None, isderfrommap=False):
         super(MaskMap, self).__init__(oid=oid)
         self.coord_space = coord_space
         if filename is None:
@@ -813,9 +834,11 @@ class MaskMap(NIDMObject):
         if derfrom_id is not None:
             self.derfrom = MaskMap(None, coord_space, user_defined, 
                 oid=derfrom_id, filename=derfrom_filename, 
-                sha=derfrom_sha, format=derfrom_format)
+                sha=derfrom_sha, format=derfrom_format,
+                isderfrommap=True)
         else:
             self.derfrom = None
+        self.isderfrommap = isderfrommap
 
     @classmethod
     def get_query(klass, oid=None):
@@ -852,12 +875,17 @@ class MaskMap(NIDMObject):
         """
         Create prov entities and activities.
         """
-        self.add_attributes((
+        atts = (
             (PROV['type'], self.type,),
-            (PROV['label'], self.label),
-            (NIDM_IS_USER_DEFINED, self.user_defined),
-            (NIDM_IN_COORDINATE_SPACE, self.coord_space.id))
         )
+
+        if not self.isderfrommap:
+            atts = atts + (
+                (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
+                (PROV['label'], self.label),
+                (NIDM_IS_USER_DEFINED, self.user_defined))
+
+        self.add_attributes(atts)
 
 
 class GrandMeanMap(NIDMObject):
