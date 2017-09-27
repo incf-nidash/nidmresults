@@ -554,8 +554,11 @@ class NIDMResults():
                 grand_mean_map = self.get_object(GrandMeanMap, args['gm_id'], coord_space=mask_coord_space, 
                     mask_file=None)
 
-                rpv_coord_space = self.get_object(CoordinateSpace, args['rpv_coordspace_id'])
-                rpv_map = self.get_object(ReselsPerVoxelMap, args['rpv_id'], coord_space=mask_coord_space)
+                if 'rpv_coordspace_id' in args:
+                    rpv_coord_space = self.get_object(CoordinateSpace, args['rpv_coordspace_id'])
+                    rpv_map = self.get_object(ReselsPerVoxelMap, args['rpv_id'], coord_space=mask_coord_space)
+                else:
+                    rpv_map = None
 
                 machine = self.get_object(ImagingInstrument, args['machine_id'])
 
