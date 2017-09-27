@@ -491,6 +491,23 @@ class NIDMResults():
                 # TODO: should software_id really be an input?
                 activity = self.get_object(ModelParametersEstimation, args['mpe_id'])
 
+                # Find list of HRF basis
+                query_hrf_bases = """
+                prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+                prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
+                
+                SELECT DISTINCT * WHERE {
+                    <""" + args['design_id'] + """> nidm_hasHRFBasis: ?hrf_basis .
+                }
+                """
+                hrf_models = list()
+                sd_hrf = self.graph.query(query_hrf_bases)
+                if sd_hrf:
+                    # TODO: we probably can avoid the loop below
+                    for row_hrf in sd_hrf:
+                        args_hrf = row_hrf.asdict()
+                        hrf_models.append(namespace_manager.valid_qualified_name(args_hrf['hrf_basis']))
+
                 if 'png_id' in args:
                     design_matrix_png = self.get_object(Image, args['png_id'])
                 else:
@@ -502,7 +519,7 @@ class NIDMResults():
                     drift_model = None
 
                 design_matrix = self.get_object(DesignMatrix, args['design_id'], matrix=None, 
-                    image_file=design_matrix_png, drift_model=drift_model)
+                    image_file=design_matrix_png, drift_model=drift_model, hrf_models=hrf_models)
                 data = self.get_object(Data, args['data_id'])
                 error_model = self.get_object(ErrorModel, args['error_id'])
 

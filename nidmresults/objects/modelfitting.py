@@ -207,7 +207,7 @@ class DesignMatrix(NIDMObject):
     """
 
     def __init__(self, matrix, image_file, regressors=None,
-                 design_type=None, hrf_model=None, drift_model=None,
+                 design_type=None, hrf_models=None, drift_model=None,
                  suffix='', csv_file=None, filename=None, label=None, oid=None):
         super(DesignMatrix, self).__init__(oid=oid)
         self.type = NIDM_DESIGN_MATRIX
@@ -222,7 +222,7 @@ class DesignMatrix(NIDMObject):
         self.regressors = regressors
 
         self.design_type = design_type
-        self.hrf_model = hrf_model
+        self.hrf_models = hrf_models
 
         self.drift_model = drift_model
         if csv_file is None:
@@ -262,7 +262,6 @@ class DesignMatrix(NIDMObject):
                 nfo:fileName ?filename .
 
             OPTIONAL { """  + oid_var + """ nidm_regressorNames: ?regressors . } .
-            OPTIONAL { """  + oid_var + """ nidm_hasHRFBasis: ?hrf_model . } .
         }
         """
         return query
@@ -288,7 +287,7 @@ class DesignMatrix(NIDMObject):
                       (DC['description'], self.image.id),
                       (PROV['location'], csv_location)]
 
-        if self.hrf_model is not None:
+        if self.hrf_models is not None:
             if nidm_version['num'] in ("1.0.0", "1.1.0"):
                 if self.design_type is not None:
                     attributes.append(
@@ -297,7 +296,8 @@ class DesignMatrix(NIDMObject):
                     warnings.warn("Design type is missing")
 
             # hrf model
-            attributes.append((NIDM_HAS_HRF_BASIS, self.hrf_model))
+            for hrf_model in self.hrf_models:
+                attributes.append((NIDM_HAS_HRF_BASIS, hrf_model))
             # drift model
             attributes.append((NIDM_HAS_DRIFT_MODEL, self.drift_model.id))
 

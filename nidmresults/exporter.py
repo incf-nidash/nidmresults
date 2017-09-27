@@ -169,7 +169,7 @@ class NIDMExporter():
                 if model_fitting.design_matrix.image.file is not None:
                     self.add_object(model_fitting.design_matrix.image.file)
 
-                if model_fitting.design_matrix.hrf_model is not None:
+                if model_fitting.design_matrix.hrf_models is not None:
                     # drift model
                     self.add_object(model_fitting.design_matrix.drift_model)
 
