@@ -47,7 +47,8 @@ class InferenceActivity(NIDMObject):
     Object representing an Inference activity.
     """
 
-    def __init__(self, oid=None, tail=None, label=None, contrast_name=None, inference_type=None):
+    def __init__(self, oid=None, tail=None, label=None, contrast_name=None, 
+            inference_type=None, partial_degree=None):
         super(InferenceActivity, self).__init__(oid=oid)
         if inference_type is None:
             self.type = NIDM_INFERENCE
@@ -62,6 +63,7 @@ class InferenceActivity(NIDMObject):
             if contrast_name:
                 label += ": " + self.contrast_name
         self.label = label
+        self.partial_degree = partial_degree
 
     @classmethod
     def get_query(klass, oid=None):
@@ -75,6 +77,7 @@ class InferenceActivity(NIDMObject):
         prefix nidm_ConjunctionInference: <http://purl.org/nidash/nidm#NIDM_0000011>
         prefix nidm_hasAlternativeHypothesis: <http://purl.org/nidash/nidm#NIDM_0000097>
         prefix spm_PartialConjunctionInference: <http://purl.org/nidash/spm#SPM_0000005>
+        prefix spm_PartialConjunctionDegree: <http://purl.org/nidash/spm#SPM_0000015>
 
             SELECT DISTINCT * WHERE {
             {
@@ -89,6 +92,8 @@ class InferenceActivity(NIDMObject):
                 a ?inference_type ;
                 nidm_hasAlternativeHypothesis: ?tail .
 
+            OPTIONAL {""" + oid_var + """ spm_PartialConjunctionDegree: ?partial_degree .} .
+
             FILTER ( ?inference_type NOT IN (prov:Activity))
         }
         """
@@ -102,10 +107,16 @@ class InferenceActivity(NIDMObject):
         # In FSL we have a single thresholding (extent, height) applied to all
         # contrasts
         # FIXME: Deal with two-tailed inference?
-        self.add_attributes((
+        atts = (
             (PROV['type'], self.type),
             (PROV['label'], self.label),
-            (NIDM_HAS_ALTERNATIVE_HYPOTHESIS, self.tail)))
+            (NIDM_HAS_ALTERNATIVE_HYPOTHESIS, self.tail))
+
+        if self.partial_degree is not None:
+            atts += (
+                (SPM_PARTIAL_CONJUNCTION_DEGREE, self.partial_degree),)
+
+        self.add_attributes(atts)
 
 
 class ExcursionSet(NIDMObject):
