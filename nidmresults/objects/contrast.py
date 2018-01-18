@@ -283,7 +283,7 @@ class ContrastStdErrMap(NIDMObject):
 
     def __init__(self, contrast_num, filepath, is_variance, coord_space,
                  var_coord_space, label=None, format=None, 
-                 sha=None, filename=None, oid=None):
+                 sha=None, filename=None, oid=None, derfrom_id=None):
         super(ContrastStdErrMap, self).__init__(oid=oid)
         self.file = filepath
         self.is_variance = is_variance
@@ -324,6 +324,15 @@ class ContrastStdErrMap(NIDMObject):
         else:
             self.file = NIDMFile(self.id, self.file, self.filename, format=self.format, sha=self.sha)
 
+        if derfrom_id is not None:
+            self.derfrom = ContrastStdErrMap(
+                None, None, True, None,
+                coord_space=None, oid=derfrom_id,
+                filename=derfrom_filename, sha=derfrom_sha,
+                format=derfrom_format)
+        else:
+            self.derfrom = None
+
     @classmethod
     def get_query(klass, oid=None):
         if oid is None:
@@ -341,6 +350,14 @@ class ContrastStdErrMap(NIDMObject):
             nfo:fileName ?filename ;
             dct:format ?format ;
             crypto:sha512 ?sha .
+
+            OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
+
+            ?derfrom_id a nidm_ContrastVarianceMap: ;
+                nfo:fileName ?derfrom_filename ;
+                dct:format ?derfrom_format ;
+                crypto:sha512 ?derfrom_sha .
+             } .
         }
         """
         return query        
