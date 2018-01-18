@@ -29,8 +29,9 @@ class NIDMResults():
     NIDM-result object containing all metadata and link to image files.
     """
 
-    def __init__(self, nidm_zip=None, rdf_file=None, workaround=False, to_replace=None):
-        self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")      
+    def __init__(self, nidm_zip=None, rdf_file=None, workaround=False,
+                 to_replace=None):
+        self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")
         self.zip_path = nidm_zip
 
         # Load the turtle file
@@ -54,7 +55,8 @@ class NIDMResults():
 
         # Query the RDF document and create the objects
         self.software = self.load_software()
-        (self.bundle, self.exporter, self.export_act, self.export_time) = self.load_bundle_export()
+        (self.bundle, self.exporter, self.export_act, self.export_time) = \
+            self.load_bundle_export()
         self.model_fittings = self.load_modelfitting()
         self.contrasts = self.load_contrasts(workaround=workaround)
         self.inferences = self.load_inferences()
@@ -68,30 +70,49 @@ class NIDMResults():
         if self.info is None:
             self.info = collections.OrderedDict()
 
-            # TODO: here we assume that there is a single mpe activity per nidm-results pack, this should 
+            # TODO: here we assume that there is a single mpe activity per
+            # nidm-results pack, this should
             # be stated explicitely in the spec?
             if len(self.model_fittings) > 1:
-                raise Exception("Can't handle NIDM-Results packs with multiple model parameter estimation activities")
+                raise Exception("Can't handle NIDM-Results packs with \
+                    multiple model parameter estimation activities")
 
             self.info['NeuroimagingAnalysisSoftware_type'] = self.software.name
-            self.info['NeuroimagingAnalysisSoftware_softwareVersion'] = self.software.version
-            self.info['Data_grandMeanScaling'] = self.model_fittings[0].data.grand_mean_sc
-            self.info['Data_targetIntensity'] = self.model_fittings[0].data.target_intensity
-            self.info['DesignMatrix_atLocation'] = self.model_fittings[0].design_matrix.csv_file
-            self.info['DesignMatrix_regressorNames'] = self.model_fittings[0].design_matrix.regressors
-            self.info['ErrorModel_hasErrorDistribution'] = self.model_fittings[0].error_model.error_distribution
-            self.info['ErrorModel_errorVarianceHomogeneous'] = self.model_fittings[0].error_model.variance_homo
+            self.info['NeuroimagingAnalysisSoftware_softwareVersion'] = \
+                self.software.version
+            self.info['Data_grandMeanScaling'] = \
+                self.model_fittings[0].data.grand_mean_sc
+            self.info['Data_targetIntensity'] = \
+                self.model_fittings[0].data.target_intensity
+            self.info['DesignMatrix_atLocation'] = \
+                self.model_fittings[0].design_matrix.csv_file
+            self.info['DesignMatrix_regressorNames'] = \
+                self.model_fittings[0].design_matrix.regressors
+            self.info['ErrorModel_hasErrorDistribution'] = \
+                self.model_fittings[0].error_model.error_distribution
+            self.info['ErrorModel_errorVarianceHomogeneous'] = \
+                self.model_fittings[0].error_model.variance_homo
             # TODO: replace IRIs by preferred prefixes for readability
-            self.info['ErrorModel_varianceMapWiseDependence'] = self.model_fittings[0].error_model.variance_spatial
-            self.info['ErrorModel_hasErrorDependence'] = self.model_fittings[0].error_model.dependance
-            self.info['ErrorModel_dependenceMapWiseDependence'] = self.model_fittings[0].error_model.dependance_spatial
-            self.info['ModelParameterEstimation_withEstimationMethod'] = self.model_fittings[0].activity.estimation_method
-            self.info['ResidualMeanSquaresMap_atLocation'] = self.model_fittings[0].rms_map.file.filename
-            self.info['ResidualMeanSquaresMap_inWorldCoordinateSystem'] = self.model_fittings[0].rms_map.coord_space.coordinate_system
-            self.info['GrandMeanMap_atLocation'] = self.model_fittings[0].grand_mean_map.file.filename
-            self.info['GrandMeanMap_inWorldCoordinateSystem'] = self.model_fittings[0].grand_mean_map.coord_space.coordinate_system
-            self.info['MaskMap_atLocation'] = self.model_fittings[0].mask_map.file.filename
-            self.info['MaskMap_inWorldCoordinateSystem'] = self.model_fittings[0].mask_map.coord_space.coordinate_system
+            self.info['ErrorModel_varianceMapWiseDependence'] = \
+                self.model_fittings[0].error_model.variance_spatial
+            self.info['ErrorModel_hasErrorDependence'] = \
+                self.model_fittings[0].error_model.dependance
+            self.info['ErrorModel_dependenceMapWiseDependence'] = \
+                self.model_fittings[0].error_model.dependance_spatial
+            self.info['ModelParameterEstimation_withEstimationMethod'] = \
+                self.model_fittings[0].activity.estimation_method
+            self.info['ResidualMeanSquaresMap_atLocation'] = \
+                self.model_fittings[0].rms_map.file.filename
+            self.info['ResidualMeanSquaresMap_inWorldCoordinateSystem'] = \
+                self.model_fittings[0].rms_map.coord_space.coordinate_system
+            self.info['GrandMeanMap_atLocation'] = \
+                self.model_fittings[0].grand_mean_map.file.filename
+            self.info['GrandMeanMap_inWorldCoordinateSystem'] = \
+                self.model_fittings[0].grand_mean_map.coord_space.coordinate_system
+            self.info['MaskMap_atLocation'] = \
+                self.model_fittings[0].mask_map.file.filename
+            self.info['MaskMap_inWorldCoordinateSystem'] = \
+                self.model_fittings[0].mask_map.coord_space.coordinate_system
 
             self.info['ParameterEstimateMaps'] = list()
             # TODO the order of the pe maps matters!!
@@ -102,21 +123,27 @@ class NIDMResults():
             for contrasts in self.contrasts.values():
                 for contrast in contrasts:
                     self.info['Contrasts'].append(collections.OrderedDict())
-                    self.info['Contrasts'][-1]['StatisticMap_contrastName'] = contrast.stat_map.contrast_name
-                    self.info['Contrasts'][-1]['ContrastWeightMatrix_value'] = contrast.weights.contrast_weights
-                    self.info['Contrasts'][-1]['StatisticMap_statisticType'] = str(contrast.stat_map.stat_type)
+                    self.info['Contrasts'][-1]['StatisticMap_contrastName'] = \
+                        contrast.stat_map.contrast_name
+                    self.info['Contrasts'][-1]['ContrastWeightMatrix_value'] =\
+                        contrast.weights.contrast_weights
+                    self.info['Contrasts'][-1]['StatisticMap_statisticType'] =\
+                        str(contrast.stat_map.stat_type)
                     self.info['Contrasts'][-1]['StatisticMap_errorDegreesOfFreedom'] = contrast.stat_map.dof
                     if contrast.stat_map.effdof:
                         self.info['Contrasts'][-1]['StatisticMap_effectDegreesOfFreedom'] = contrast.stat_map.effdof
-                    self.info['Contrasts'][-1]['StatisticMap_atLocation'] = contrast.stat_map.file.filename
+                    self.info['Contrasts'][-1]['StatisticMap_atLocation'] \
+                        = contrast.stat_map.file.filename
                     self.info['Contrasts'][-1]['StatisticMap_inWorldCoordinateSystem'] = contrast.stat_map.coord_space.coordinate_system
 
                     if contrast.z_stat_map is not None:
-                        self.info['Contrasts'][-1]['ZStatisticMap_atLocation'] = contrast.z_stat_map.file.filename
+                        self.info['Contrasts'][-1]['ZStatisticMap_atLocation']\
+                            = contrast.z_stat_map.file.filename
                         self.info['Contrasts'][-1]['ZStatisticMap_inWorldCoordinateSystem'] = contrast.z_stat_map.coord_space.coordinate_system
 
                     if contrast.contrast_map:
-                        self.info['Contrasts'][-1]['ContrastMap_atLocation'] = contrast.contrast_map.file.filename
+                        self.info['Contrasts'][-1]['ContrastMap_atLocation'] =\
+                            contrast.contrast_map.file.filename
                         self.info['Contrasts'][-1]['ContrastMap_inWorldCoordinateSystem'] = contrast.contrast_map.coord_space.coordinate_system
                         # TODO: deal when this is not created yet...
                         self.info['Contrasts'][-1]['ContrastStandardErrorMap_atLocation'] = contrast.stderr_or_expl_mean_sq_map.file.filename
@@ -125,13 +152,17 @@ class NIDMResults():
             self.info['Inferences'] = list()
             for con_est_id, inferences in self.inferences.items():
                 for inference in inferences:
-                    if 'ClusterDefinitionCriteria_hasConnectivityCriterion' not in self.info:
-                        # Assume that all inference have the same cluster def and peak def > should be stated explicitely in JSON spec and tested
+                    if 'ClusterDefinitionCriteria_hasConnectivityCriterion' \
+                            not in self.info:
+                        # Assume that all inference have the same cluster def
+                        # and peak def > should be stated explicitely in JSON
+                        # spec and tested
                         self.info['ClusterDefinitionCriteria_hasConnectivityCriterion'] = inference.cluster_criteria.connectivity
                         self.info['PeakDefinitionCriteria_minDistanceBetweenPeaks'] = inference.peak_criteria.peak_dist
                         self.info['PeakDefinitionCriteria_maxNumberOfPeaksPerCluster'] = inference.peak_criteria.num_peak
                     else:
-                        if not inference.cluster_criteria.connectivity == self.info['ClusterDefinitionCriteria_hasConnectivityCriterion']:
+                        if not inference.cluster_criteria.connectivity == \
+                            self.info['ClusterDefinitionCriteria_hasConnectivityCriterion']:
                             raise Exception('Inferences using multiple connectivity criteria ' +
                               str(inference.cluster_criteria.connectivity) + str(self.info['ClusterDefinitionCriteria_hasConnectivityCriterion']) 
                               + ' not handled yet.')
@@ -144,14 +175,18 @@ class NIDMResults():
                               str(inference.peak_criteria.num_peak) + str(self.info['PeakDefinitionCriteria_maxNumberOfPeaksPerCluster']) 
                               + ' not handled yet.')
 
-
                     contrast = self._get_contrast(con_est_id)
-                    # (model_fitting, pe_map_ids) = self._get_model_fitting(con_est_id)               
+                    # (model_fitting, pe_map_ids) =
+                    # self._get_model_fitting(con_est_id)
                     self.info['Inferences'].append(collections.OrderedDict())
-                    self.info['Inferences'][-1]['StatisticMap_contrastName'] = contrast.stat_map.contrast_name
-                    self.info['Inferences'][-1]['HeightThreshold_type'] = str(inference.height_thresh.threshold_type)
-                    self.info['Inferences'][-1]['HeightThreshold_value'] = inference.height_thresh.value
-                    self.info['Inferences'][-1]['ExtentThreshold_type'] = str(inference.extent_thresh.threshold_type)
+                    self.info['Inferences'][-1]['StatisticMap_contrastName'] =\
+                        contrast.stat_map.contrast_name
+                    self.info['Inferences'][-1]['HeightThreshold_type'] =\
+                        str(inference.height_thresh.threshold_type)
+                    self.info['Inferences'][-1]['HeightThreshold_value'] = \
+                        inference.height_thresh.value
+                    self.info['Inferences'][-1]['ExtentThreshold_type'] = \
+                        str(inference.extent_thresh.threshold_type)
                     self.info['Inferences'][-1]['ExtentThreshold_clusterSizeInVoxels'] = inference.extent_thresh.extent
                     self.info['Inferences'][-1]['Inference_hasAlternativeHypothesis'] = inference.inference_act.tail
                     self.info['Inferences'][-1]['SearchSpaceMaskMap_atLocation'] = inference.search_space.file.filename
@@ -196,7 +231,8 @@ class NIDMResults():
 
     def _get_model_fitting(self, con_est_id):
         """
-        Retreive model fitting that corresponds to contrast with identifier 'con_id' 
+        Retreive model fitting that corresponds to contrast with identifier
+        'con_id'
         from the list of model fitting objects stored in self.model_fittings
         """
         for (mpe_id, pe_ids), contrasts in self.contrasts.items():
@@ -248,15 +284,15 @@ class NIDMResults():
             for row in sd:
                 argums = row.asdict()
 
-                # Convert from rdflib Literal to appropriate Python datatype 
+                # Convert from rdflib Literal to appropriate Python datatype
                 argums = {k: v.toPython() for k, v in argums.items()}
                 # Convert URIs to qnames
                 argums = {k: namespace_manager.valid_qualified_name(v) if namespace_manager.valid_qualified_name(v) is not None else v for k, v in argums.items()}
 
                 # for k,v in argums.items():
-
-                    # if not isinstance(drift_type, QualifiedName):
-                    #     drift_type = namespace_manager.valid_qualified_name(drift_type)
+                #     if not isinstance(drift_type, QualifiedName):
+                #         drift_type = namespace_manager.valid_qualified_name(
+                # drift_type)
 
                 # Combine with passed arguments
                 argums.update(kwargs)
@@ -298,7 +334,7 @@ class NIDMResults():
 
         if software is None:
             raise Exception('No results found for query:' + query)
-        
+
         return software
 
     def load_bundle_export(self):
