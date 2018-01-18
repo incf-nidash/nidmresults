@@ -536,9 +536,10 @@ class NIDMResults():
                     <""" + args['design_id'] + """> nidm_hasHRFBasis: ?hrf_basis .
                 }
                 """
-                hrf_models = list()
+                hrf_models = None
                 sd_hrf = self.graph.query(query_hrf_bases)
                 if sd_hrf:
+                    hrf_models = list()
                     # TODO: we probably can avoid the loop below
                     for row_hrf in sd_hrf:
                         args_hrf = row_hrf.asdict()

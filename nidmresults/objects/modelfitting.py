@@ -71,7 +71,7 @@ class ImagingInstrument(NIDMObject):
         if label is None:
             self.label = machine_label[machine_type]
         else:
-            self.label = label        
+            self.label = label 
 
     @classmethod
     def get_query(klass, oid=None):
