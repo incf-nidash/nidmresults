@@ -849,7 +849,7 @@ class CenterOfGravity(NIDMObject):
         self.coordinate = Coordinate("%04d" % cluster_num, x=x, y=y, z=z,
                                      x_std=x_std, y_std=y_std, z_std=z_std,
                                      coord_vector_std=coord_vector_std,
-                                     coord_vector=coord_vector)
+                                     coord_vector=coord_vector, oid=coord_id)
         self.type = NIDM_CLUSTER_CENTER_OF_GRAVITY
         self.prov_type = PROV['Entity']
         if label is None:
@@ -1143,6 +1143,8 @@ class Peak(NIDMObject):
         prefix nidm_equivalentZStatistic: <http://purl.org/nidash/nidm#NIDM_0000092>
         prefix nidm_pValueFWER: <http://purl.org/nidash/nidm#NIDM_0000115>
         prefix nidm_qValueFDR: <http://purl.org/nidash/nidm#NIDM_0000119>
+        prefix nidm_coordinateVectorInVoxels: <http://purl.org/nidash/nidm#NIDM_0000139>
+        prefix nidm_coordinateVector: <http://purl.org/nidash/nidm#NIDM_0000086>
 
         SELECT DISTINCT * WHERE {
             """ + oid_var + """ a nidm_Peak: ;
@@ -1152,6 +1154,8 @@ class Peak(NIDMObject):
             ?coord_id a nidm_Coordinate: ;
                 rdfs:label ?coord_label ;
                 nidm_coordinateVector: ?coord_vector_std .
+
+            OPTIONAL {?coord_id nidm_coordinateVectorInVoxels: ?coord_vector .} .
 
             OPTIONAL {""" + oid_var + """ prov:value ?value .} .
             OPTIONAL {""" + oid_var + """ nidm_pValueUncorrected: ?p_unc .} .
