@@ -280,26 +280,25 @@ class ContrastStdErrMap(NIDMObject):
     """
     Object representing a ContrastStdErrMap entity.
     """
+# stderr_or_expl_mean_sq_map = self.get_object(ContrastStdErrMap, args['constdm_id'], 
+#                         coord_space=contraststd_map_coordspace, contrast_num=contrast_num, is_variance=False, var_coord_space=None)
 
     def __init__(self, contrast_num, filepath, is_variance, coord_space,
-                 var_coord_space, label=None, format=None, 
-                 sha=None, filename=None, oid=None, derfrom_id=None):
+                 var_coord_space, label=None, format=None,
+                 sha=None, filename=None, oid=None, derfrom_id=None,
+                 derfrom_filename=None, derfrom_sha=None, derfrom_format=None):
         super(ContrastStdErrMap, self).__init__(oid=oid)
         self.file = filepath
         self.is_variance = is_variance
         self.num = contrast_num
         self.coord_space = coord_space
-        if is_variance:
+        if is_variance or derfrom_id:
             self.var_coord_space = var_coord_space
         self.type = NIDM_CONTRAST_STANDARD_ERROR_MAP
         self.prov_type = PROV['Entity']
         self.format = format
         self.sha = sha
         self.filename = filename
-        if label is None:
-            self.label = "Contrast Map: " + self.name
-        else:
-            self.label = label
 
         std_filename = "ContrastStandardError" + self.num + ".nii.gz"
         if self.is_variance:
@@ -325,13 +324,11 @@ class ContrastStdErrMap(NIDMObject):
             self.file = NIDMFile(self.id, self.file, self.filename, format=self.format, sha=self.sha)
 
         if derfrom_id is not None:
-            self.derfrom = ContrastStdErrMap(
-                None, None, True, None,
-                coord_space=None, oid=derfrom_id,
-                filename=derfrom_filename, sha=derfrom_sha,
-                format=derfrom_format)
+            self.contrast_var = ContrastVariance(
+                coord_space=None, var_file=None, filename=derfrom_filename,
+                format=derfrom_format, oid=derfrom_id,)
         else:
-            self.derfrom = None
+            self.contrast_var = None
 
     @classmethod
     def get_query(klass, oid=None):
@@ -342,6 +339,7 @@ class ContrastStdErrMap(NIDMObject):
 
         query = """
         prefix nidm_ContrastStandardErrorMap: <http://purl.org/nidash/nidm#NIDM_0000013>
+        prefix nidm_ContrastVarianceMap: <http://purl.org/nidash/nidm#NIDM_0000135>
 
         SELECT DISTINCT * WHERE {
             """ + oid_var + """ a nidm_ContrastStandardErrorMap: ;
@@ -380,8 +378,9 @@ class ContrastVariance(NIDMObject):
         super(ContrastVariance, self).__init__(oid=oid)
         self.coord_space = coord_space
         self.type = NIDM_CONTRAST_VARIANCE_MAP
-        self.file = NIDMFile(self.id, var_file, format=format)
         self.filename = filename
+        self.format = format
+        self.file = NIDMFile(self.id, var_file, filename=self.filename, format=self.format)
         self.prov_type = PROV['Entity']
 
     def export(self, nidm_version, export_dir):
