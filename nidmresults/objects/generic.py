@@ -419,6 +419,7 @@ class NeuroimagingSoftware(NIDMObject):
         else:
             self.label = label
         self.prov_type = PROV['Agent']
+        self.feat_version = feat_version
 
     @classmethod
     def get_query(klass, oid=None):
@@ -456,12 +457,17 @@ class NeuroimagingSoftware(NIDMObject):
                 (nidm_version['major'] == 1 and nidm_version['minor'] < 3):
             self.type = NLX_OLD_FSL
 
-        self.add_attributes((
+        atts = (
             (PROV['type'], self.type),
             (PROV['type'], PROV['SoftwareAgent']),
             (PROV['label'], Literal(self.label, datatype=XSD_STRING)),
-            (NIDM_SOFTWARE_VERSION, self.version))
-        )
+            (NIDM_SOFTWARE_VERSION, self.version)
+            )
+
+        if self.feat_version:
+            atts = atts + ((FSL_FEAT_VERSION, self.feat_version),)
+
+        self.add_attributes(atts)
 
 
 class ExporterSoftware(NIDMObject):
