@@ -50,7 +50,7 @@ class ContrastWeights(NIDMObject):
                  stat_type, label=None, oid=None):
         super(ContrastWeights, self).__init__(oid=oid)
         self.contrast_name = contrast_name
-        if isinstance(contrast_weights, str):
+        if not type(contrast_weights) is list:
             contrast_weights = json.loads(contrast_weights)
         self.contrast_weights = contrast_weights
         self.contrast_num = contrast_num
