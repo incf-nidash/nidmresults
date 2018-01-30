@@ -217,7 +217,7 @@ class DesignMatrix(NIDMObject):
             self.image = image_file
         else:
             self.image = Image(image_file, img_filename)
-        if isinstance(regressors, str):
+        if not type(regressors) is list:
             regressors = json.loads(regressors)
         self.regressors = regressors
 
