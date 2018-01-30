@@ -346,7 +346,7 @@ class TestResultDataModel(object):
                     ))
 
         exc_added = list()
-        if include:
+        if not include:
             for s, p, o in in_other:
                 exc_added.append("\nAdded :\t '%s %s %s'" \
                     % (
