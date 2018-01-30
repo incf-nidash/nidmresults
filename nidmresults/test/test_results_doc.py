@@ -381,16 +381,16 @@ class TestResultDataModel(object):
                     # Actually this string was not json
                     same_json_array = False
 
-            if o.datatype in [XSD.float, XSD.double]:
-                if o_other.datatype in [XSD.float, XSD.double]:
+            numeric_types = [XSD.float, XSD.double, XSD.long, XSD.int]
+            if o.datatype in numeric_types:
+                if o_other.datatype in numeric_types:
                     # If both are zero but of different type isclose returns false
                     if o.value == 0 and o_other.value == 0:
                         close_float = True
 
                     # Avoid None
                     if o.value and o_other.value:
-                        close_float = np.isclose(
-                            o.value, o_other.value)
+                        close_float = np.isclose(o.value, o_other.value)
 
             if o.datatype in [XSD.string, None]:
                 if o_other.datatype in [XSD.string, None]:
