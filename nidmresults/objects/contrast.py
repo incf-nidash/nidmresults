@@ -322,11 +322,14 @@ class ContrastStdErrMap(NIDMObject):
 
         else:
             self.file = NIDMFile(self.id, self.file, self.filename, format=self.format, sha=self.sha)
+            self.contrast_var = None
 
         if derfrom_id is not None:
+            # TODO: assuming same coordinate space for derived from 
             self.contrast_var = ContrastVariance(
-                coord_space=None, var_file=None, filename=derfrom_filename,
-                format=derfrom_format, oid=derfrom_id,)
+                coord_space=self.coord_space, var_file=None, 
+                filename=derfrom_filename, format=derfrom_format, 
+                sha=derfrom_sha, oid=derfrom_id)
         else:
             self.contrast_var = None
 
@@ -374,13 +377,15 @@ class ContrastStdErrMap(NIDMObject):
 
 class ContrastVariance(NIDMObject):
     def __init__(self, coord_space, var_file, filename, format=None, 
-                oid=None):
+                sha=None, oid=None):
         super(ContrastVariance, self).__init__(oid=oid)
         self.coord_space = coord_space
         self.type = NIDM_CONTRAST_VARIANCE_MAP
         self.filename = filename
         self.format = format
-        self.file = NIDMFile(self.id, var_file, filename=self.filename, format=self.format)
+        self.sha = sha
+        self.file = NIDMFile(self.id, var_file, filename=self.filename, 
+            format=self.format, sha=self.sha)
         self.prov_type = PROV['Entity']
 
     def export(self, nidm_version, export_dir):

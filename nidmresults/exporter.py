@@ -353,11 +353,14 @@ class NIDMExporter():
                         contrast.stderr_or_expl_mean_sq_map.coord_space)
                     if isinstance(contrast.stderr_or_expl_mean_sq_map,
                                   ContrastStdErrMap) and \
-                            contrast.stderr_or_expl_mean_sq_map.is_variance:
+                            contrast.stderr_or_expl_mean_sq_map.contrast_var:
                         self.add_object(
                             contrast.stderr_or_expl_mean_sq_map.contrast_var)
-                        self.add_object(
-                            contrast.stderr_or_expl_mean_sq_map.var_coord_space)
+                        if contrast.stderr_or_expl_mean_sq_map.var_coord_space:
+                            self.add_object(
+                                contrast.stderr_or_expl_mean_sq_map.var_coord_space)
+                        if contrast.stderr_or_expl_mean_sq_map.contrast_var.coord_space:
+                            self.add_object(contrast.stderr_or_expl_mean_sq_map.contrast_var.coord_space)
                         self.add_object(
                             contrast.stderr_or_expl_mean_sq_map.contrast_var.file)
                         self.bundle.wasDerivedFrom(
