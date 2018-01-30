@@ -666,7 +666,7 @@ class DisplayMaskMap(NIDMObject):
                 filename=derfrom_filename, sha=derfrom_sha, format=derfrom_format,
                 isderfrommap=True)
         else:
-            self.der_from = None
+            self.derfrom = None
         self.isderfrommap = isderfrommap
 
     @classmethod
