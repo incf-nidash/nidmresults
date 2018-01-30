@@ -362,7 +362,8 @@ class NIDMExporter():
                         if contrast.stderr_or_expl_mean_sq_map.contrast_var.coord_space:
                             self.add_object(contrast.stderr_or_expl_mean_sq_map.contrast_var.coord_space)
                         self.add_object(
-                            contrast.stderr_or_expl_mean_sq_map.contrast_var.file)
+                            contrast.stderr_or_expl_mean_sq_map.contrast_var.file,
+                            export_file=False)
                         self.bundle.wasDerivedFrom(
                             contrast.stderr_or_expl_mean_sq_map.id,
                             contrast.stderr_or_expl_mean_sq_map.contrast_var.id)
