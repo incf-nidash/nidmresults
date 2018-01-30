@@ -128,7 +128,8 @@ class TestReader(unittest.TestCase, TestResultDataModel):
                           'http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions/': 
                           'http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions#',
                           ' \\ntask': '\\\\n task',
-                          'a prov:Generation .': 'a prov:Generation ; prov:activity niiri:' + export_act_id + ' .'}
+                          'a prov:Generation .': 'a prov:Generation ; prov:activity niiri:' + export_act_id + ' .',
+                          ';\n    nidm_coordinateVectorInVoxels: "null"^^xsd:string .': '.'}
 
             nidmres = NIDMResults(nidm_zip=nidmpack, to_replace=to_replace)
             new_name = os.path.join(self.out_dir, os.path.basename(nidmpack))
