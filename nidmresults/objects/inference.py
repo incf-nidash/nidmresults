@@ -899,13 +899,14 @@ class SearchSpace(NIDMObject):
     """
 
     def __init__(self, search_space_file, vol_in_voxels, vol_in_units,
-                 vol_in_resels, resel_size_in_voxels, dlh,
+                 vol_in_resels, resel_size_in_voxels,
                  random_field_stationarity, noise_fwhm_in_voxels,
                  noise_fwhm_in_units, coord_space, 
                  expected_num_voxels=None, expected_num_clusters=None,
                  height_critical_fwe05=None, height_critical_fdr05=None,
                  extent_critical_fwe05=None, extent_critical_fdr05=None,
-                 search_vol_geom=None, filename=None, sha=None, format=None,
+                 search_vol_geom=None, noise_roughness=None, 
+                 filename=None, sha=None, format=None,
                  label=None, oid=None):
         super(SearchSpace, self).__init__(oid=oid)
         if not filename:
@@ -914,7 +915,6 @@ class SearchSpace(NIDMObject):
             sha=sha, format=format)
         self.coord_space = coord_space
         self.resel_size_in_voxels = resel_size_in_voxels
-        self.dlh = dlh
         self.search_volume_in_voxels = vol_in_voxels
         self.search_volume_in_units = vol_in_units
         self.search_volume_in_resels = vol_in_resels
@@ -931,6 +931,7 @@ class SearchSpace(NIDMObject):
         self.extent_critical_fwe05 = extent_critical_fwe05
         self.extent_critical_fdr05 = extent_critical_fdr05
         self.search_vol_geom = search_vol_geom
+        self.noise_roughness = noise_roughness
 
     @classmethod
     def get_query(klass, oid=None):
@@ -979,7 +980,7 @@ class SearchSpace(NIDMObject):
             OPTIONAL {""" + oid_var + """ spm_smallestSignificantClusterSizeInVoxelsFWE05: ?extent_critical_fwe05 } .
             OPTIONAL {""" + oid_var + """ spm_smallestSignificantClusterSizeInVoxelsFDR05: ?extent_critical_fdr05 } .
             OPTIONAL {""" + oid_var + """ spm_searchVolumeReselsGeometry: ?search_vol_geom } .
-            
+            OPTIONAL {""" + oid_var + """ nidm_noiseRoughnessInVoxels: ?noise_roughness } .
 
         }
 
@@ -999,8 +1000,7 @@ class SearchSpace(NIDMObject):
             (NIDM_SEARCH_VOLUME_IN_VOXELS, self.search_volume_in_voxels),
             (NIDM_SEARCH_VOLUME_IN_UNITS, self.search_volume_in_units),
             (NIDM_SEARCH_VOLUME_IN_RESELS, self.search_volume_in_resels),
-            (NIDM_RESEL_SIZE_IN_VOXELS, self.resel_size_in_voxels),
-            (NIDM_NOISE_ROUGHNESS_IN_VOXELS, self.dlh))
+            (NIDM_RESEL_SIZE_IN_VOXELS, self.resel_size_in_voxels))
 
         # Noise FWHM was introduced in NIDM-Results 1.1.0
         if self.noise_fwhm_in_voxels is not None:
@@ -1032,6 +1032,8 @@ class SearchSpace(NIDMObject):
         if self.search_vol_geom is not None:
             atts = atts + ((SPM_SEARCH_VOLUME_RESELS_GEOMETRY, self.search_vol_geom),)
 
+        if self.noise_roughness:
+            atts = atts + ((NIDM_NOISE_ROUGHNESS_IN_VOXELS, self.noise_roughness),)            
 
         # Create "Search Space Mask map" entity
         self.add_attributes(atts)

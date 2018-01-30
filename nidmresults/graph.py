@@ -929,7 +929,7 @@ class NIDMResults():
 
                 searchspace_coordspace = self.get_object(CoordinateSpace, args['search_space_coord_space_id'])
                 search_space = self.get_object(SearchSpace, args['search_space_id'], 
-                    coord_space=searchspace_coordspace, dlh=None)
+                    coord_space=searchspace_coordspace)
 
                 # TODO
                 software_id = self.software.id
