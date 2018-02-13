@@ -956,6 +956,8 @@ class SearchSpace(NIDMObject):
         prefix spm_smallestSignificantClusterSizeInVoxelsFWE05: <http://purl.org/nidash/spm#SPM_0000014>
         prefix spm_smallestSignificantClusterSizeInVoxelsFDR05: <http://purl.org/nidash/spm#SPM_0000013>
         prefix spm_searchVolumeReselsGeometry: <http://purl.org/nidash/spm#SPM_0000010>
+        prefix nidm_noiseRoughnessInVoxels: <http://purl.org/nidash/nidash/nidm#NIDM_0000145>
+
         SELECT DISTINCT * WHERE {
 
         """ + oid_var + """ a nidm_SearchSpaceMaskMap: ;
