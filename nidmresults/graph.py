@@ -105,10 +105,11 @@ class NIDMResults():
                 self.model_fittings[0].rms_map.file.filename
             self.info['ResidualMeanSquaresMap_inWorldCoordinateSystem'] = \
                 self.model_fittings[0].rms_map.coord_space.coordinate_system
+            gm_map = self.model_fittings[0].grand_mean_map
             self.info['GrandMeanMap_atLocation'] = \
-                self.model_fittings[0].grand_mean_map.file.filename
+                gm_map.file.filename
             self.info['GrandMeanMap_inWorldCoordinateSystem'] = \
-                self.model_fittings[0].grand_mean_map.coord_space.coordinate_system
+                gm_map.coord_space.coordinate_system
             self.info['MaskMap_atLocation'] = \
                 self.model_fittings[0].mask_map.file.filename
             self.info['MaskMap_inWorldCoordinateSystem'] = \
