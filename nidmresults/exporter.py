@@ -345,29 +345,32 @@ class NIDMExporter():
                     # (F-tests)
                     # contrast.stderr_or_expl_mean_sq_map.wasGeneratedBy
                     # (contrast.estimation)
+                    stderr_explmeansq_map = (
+                        contrast.stderr_or_expl_mean_sq_map)
                     self.bundle.wasGeneratedBy(
-                        contrast.stderr_or_expl_mean_sq_map.id,
+                        stderr_explmeansq_map.id,
                         contrast.estimation.id)
-                    self.add_object(contrast.stderr_or_expl_mean_sq_map)
+                    self.add_object(stderr_explmeansq_map)
                     self.add_object(
-                        contrast.stderr_or_expl_mean_sq_map.coord_space)
-                    if isinstance(contrast.stderr_or_expl_mean_sq_map,
+                        stderr_explmeansq_map.coord_space)
+                    if isinstance(stderr_explmeansq_map,
                                   ContrastStdErrMap) and \
-                            contrast.stderr_or_expl_mean_sq_map.contrast_var:
+                            stderr_explmeansq_map.contrast_var:
                         self.add_object(
-                            contrast.stderr_or_expl_mean_sq_map.contrast_var)
-                        if contrast.stderr_or_expl_mean_sq_map.var_coord_space:
+                            stderr_explmeansq_map.contrast_var)
+                        if stderr_explmeansq_map.var_coord_space:
                             self.add_object(
-                                contrast.stderr_or_expl_mean_sq_map.var_coord_space)
-                        if contrast.stderr_or_expl_mean_sq_map.contrast_var.coord_space:
-                            self.add_object(contrast.stderr_or_expl_mean_sq_map.contrast_var.coord_space)
+                                stderr_explmeansq_map.var_coord_space)
+                        if stderr_explmeansq_map.contrast_var.coord_space:
+                            self.add_object(
+                                stderr_explmeansq_map.contrast_var.coord_space)
                         self.add_object(
-                            contrast.stderr_or_expl_mean_sq_map.contrast_var.file,
+                            stderr_explmeansq_map.contrast_var.file,
                             export_file=False)
                         self.bundle.wasDerivedFrom(
-                            contrast.stderr_or_expl_mean_sq_map.id,
-                            contrast.stderr_or_expl_mean_sq_map.contrast_var.id)
-                    self.add_object(contrast.stderr_or_expl_mean_sq_map.file)
+                            stderr_explmeansq_map.id,
+                            stderr_explmeansq_map.contrast_var.id)
+                    self.add_object(stderr_explmeansq_map.file)
 
                     # Create Statistic Map
                     # contrast.stat_map.wasGeneratedBy(contrast.estimation)
