@@ -92,17 +92,16 @@ class NIDMResultsBundle(NIDMObject):
             oid_var = "<" + str(oid) + ">"
 
         query = """
-        prefix dctype: <http://purl.org/dc/dcmitype/>
+prefix dctype: <http://purl.org/dc/dcmitype/>
 
-
-        SELECT * WHERE
-                {
-            """ + oid_var + """ a nidm_NIDMResults: ;  
-              rdfs:label ?label ;
-              nidm_version: ?nidm_version .
-            }
+SELECT * WHERE
+{
+    """ + oid_var + """ a nidm_NIDMResults: ;  
+    rdfs:label ?label ;
+    nidm_version: ?nidm_version .
+}
         """
-        return query    
+        return query
 
     def export(self, nidm_version, export_dir):
         """
@@ -110,7 +109,8 @@ class NIDMResultsBundle(NIDMObject):
         """
         self.add_attributes([
             (PROV['type'], self.type),
-            (PROV['type'], PROV['Bundle']), # Explicitely add bundle type 
+            (PROV['type'], PROV['Bundle']),
+            # Explicitely add bundle type
             (PROV['label'], self.label),
             (NIDM_VERSION, self.nidm_version),
         ])
@@ -200,29 +200,29 @@ class CoordinateSpace(NIDMObject):
             oid_var = "<" + str(oid) + ">"
 
         query = """
-        prefix nidm_CoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000016>
-        prefix nidm_voxelToWorldMapping: <http://purl.org/nidash/nidm#NIDM_0000132>
-        prefix nidm_voxelUnits: <http://purl.org/nidash/nidm#NIDM_0000133>
-        prefix nidm_voxelSize: <http://purl.org/nidash/nidm#NIDM_0000131>
-        prefix nidm_inWorldCoordinateSystem: <http://purl.org/nidash/nidm#NIDM_0000105>
-        prefix nidm_MNICoordinateSystem: <http://purl.org/nidash/nidm#NIDM_0000051>
-        prefix nidm_numberOfDimensions: <http://purl.org/nidash/nidm#NIDM_0000112>
-        prefix nidm_dimensionsInVoxels: <http://purl.org/nidash/nidm#NIDM_0000090>
+prefix nidm_CoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000016>
+prefix nidm_voxelToWorldMapping: <http://purl.org/nidash/nidm#NIDM_0000132>
+prefix nidm_voxelUnits: <http://purl.org/nidash/nidm#NIDM_0000133>
+prefix nidm_voxelSize: <http://purl.org/nidash/nidm#NIDM_0000131>
+prefix nidm_inWorldCoordinateSystem: <http://purl.org/nidash/nidm#NIDM_0000105>
+prefix nidm_MNICoordinateSystem: <http://purl.org/nidash/nidm#NIDM_0000051>
+prefix nidm_numberOfDimensions: <http://purl.org/nidash/nidm#NIDM_0000112>
+prefix nidm_dimensionsInVoxels: <http://purl.org/nidash/nidm#NIDM_0000090>
 
 
-        SELECT ?oid ?label ?vox_to_world ?units ?vox_size ?coordinate_system ?numdim
-        ?dimensions
-                WHERE
-                {
-            """ + oid_var + """ a nidm_CoordinateSpace: ;
-            rdfs:label ?label ;
-            nidm_voxelToWorldMapping: ?vox_to_world ;
-            nidm_voxelUnits: ?units ;
-            nidm_voxelSize: ?vox_size ;
-            nidm_inWorldCoordinateSystem: ?coordinate_system ;
-            nidm_numberOfDimensions: ?numdim ;
-            nidm_dimensionsInVoxels: ?dimensions .
-            }
+SELECT ?oid ?label ?vox_to_world ?units ?vox_size ?coordinate_system ?numdim
+?dimensions
+        WHERE
+        {
+    """ + oid_var + """ a nidm_CoordinateSpace: ;
+    rdfs:label ?label ;
+    nidm_voxelToWorldMapping: ?vox_to_world ;
+    nidm_voxelUnits: ?units ;
+    nidm_voxelSize: ?vox_size ;
+    nidm_inWorldCoordinateSystem: ?coordinate_system ;
+    nidm_numberOfDimensions: ?numdim ;
+    nidm_dimensionsInVoxels: ?dimensions .
+    }
         """
         return query
 
@@ -389,14 +389,15 @@ class NeuroimagingSoftware(NIDMObject):
     Class representing a NeuroimagingSoftware Agent.
     """
 
-    def __init__(self, software_type, version, label=None, feat_version=None, oid=None):
+    def __init__(self, software_type, version, label=None, feat_version=None,
+                 oid=None):
         super(NeuroimagingSoftware, self).__init__(oid=oid)
         self.version = version
 
         if isinstance(software_type, QualifiedName):
             self.type = software_type
         else:
-            if software_type.startswith('http'):         
+            if software_type.startswith('http'):
                 self.type = Identifier(software_type)
             elif software_type.lower() == "fsl":
                 self.name = "FSL"
@@ -429,25 +430,25 @@ class NeuroimagingSoftware(NIDMObject):
             oid_var = "<" + str(oid) + ">"
 
         query = """
-        prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
-        prefix fsl_featVersion: <http://purl.org/nidash/fsl#FSL_0000005>
-        prefix nidm_ModelParametersEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
+prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
+prefix fsl_featVersion: <http://purl.org/nidash/fsl#FSL_0000005>
+prefix nidm_ModelParametersEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
 
-        SELECT DISTINCT * WHERE
-                {
-            """ + oid_var + """ a prov:SoftwareAgent ;
-                nidm_softwareVersion: ?version .
+SELECT DISTINCT * WHERE
+        {
+    """ + oid_var + """ a prov:SoftwareAgent ;
+        nidm_softwareVersion: ?version .
 
-            [] a nidm_ModelParametersEstimation: ;
-                prov:wasAssociatedWith """ + oid_var + """ .
+    [] a nidm_ModelParametersEstimation: ;
+        prov:wasAssociatedWith """ + oid_var + """ .
 
-            OPTIONAL {""" + oid_var + """ a ?software_type .} .
-            OPTIONAL {""" + oid_var + """ fsl_featVersion: ?feat_version .} .
+    OPTIONAL {""" + oid_var + """ a ?software_type .} .
+    OPTIONAL {""" + oid_var + """ fsl_featVersion: ?feat_version .} .
 
-            FILTER ( ?software_type NOT IN (prov:SoftwareAgent, prov:Agent) )
-            }
+    FILTER ( ?software_type NOT IN (prov:SoftwareAgent, prov:Agent) )
+    }
         """
-        return query  
+        return query
 
     def export(self, nidm_version, export_dir):
         """

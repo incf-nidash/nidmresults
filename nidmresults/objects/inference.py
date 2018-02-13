@@ -941,50 +941,50 @@ class SearchSpace(NIDMObject):
             oid_var = "<" + str(oid) + ">"
 
         query = """
-        prefix nidm_SearchSpaceMaskMap: <http://purl.org/nidash/nidm#NIDM_0000068>
-        prefix nidm_expectedNumberOfVoxelsPerCluster: <http://purl.org/nidash/nidm#NIDM_0000143>
-        prefix nidm_expectedNumberOfClusters: <http://purl.org/nidash/nidm#NIDM_0000141>
-        prefix nidm_heightCriticalThresholdFWE05: <http://purl.org/nidash/nidm#NIDM_0000147>
-        prefix nidm_heightCriticalThresholdFDR05: <http://purl.org/nidash/nidm#NIDM_0000146>
-        prefix nidm_searchVolumeInVoxels: <http://purl.org/nidash/nidm#NIDM_0000121>
-        prefix nidm_searchVolumeInUnits: <http://purl.org/nidash/nidm#NIDM_0000136>
-        prefix nidm_searchVolumeInResels: <http://purl.org/nidash/nidm#NIDM_0000149>
-        prefix nidm_reselSizeInVoxels: <http://purl.org/nidash/nidm#NIDM_0000148>
-        prefix nidm_noiseFWHMInVoxels: <http://purl.org/nidash/nidm#NIDM_0000159>
-        prefix nidm_noiseFWHMInUnits: <http://purl.org/nidash/nidm#NIDM_0000157>
-        prefix nidm_randomFieldStationarity: <http://purl.org/nidash/nidm#NIDM_0000120>
-        prefix spm_smallestSignificantClusterSizeInVoxelsFWE05: <http://purl.org/nidash/spm#SPM_0000014>
-        prefix spm_smallestSignificantClusterSizeInVoxelsFDR05: <http://purl.org/nidash/spm#SPM_0000013>
-        prefix spm_searchVolumeReselsGeometry: <http://purl.org/nidash/spm#SPM_0000010>
-        prefix nidm_noiseRoughnessInVoxels: <http://purl.org/nidash/nidash/nidm#NIDM_0000145>
+prefix nidm_SearchSpaceMaskMap: <http://purl.org/nidash/nidm#NIDM_0000068>
+prefix nidm_expectedNumberOfVoxelsPerCluster: <http://purl.org/nidash/nidm#NIDM_0000143>
+prefix nidm_expectedNumberOfClusters: <http://purl.org/nidash/nidm#NIDM_0000141>
+prefix nidm_heightCriticalThresholdFWE05: <http://purl.org/nidash/nidm#NIDM_0000147>
+prefix nidm_heightCriticalThresholdFDR05: <http://purl.org/nidash/nidm#NIDM_0000146>
+prefix nidm_searchVolumeInVoxels: <http://purl.org/nidash/nidm#NIDM_0000121>
+prefix nidm_searchVolumeInUnits: <http://purl.org/nidash/nidm#NIDM_0000136>
+prefix nidm_searchVolumeInResels: <http://purl.org/nidash/nidm#NIDM_0000149>
+prefix nidm_reselSizeInVoxels: <http://purl.org/nidash/nidm#NIDM_0000148>
+prefix nidm_noiseFWHMInVoxels: <http://purl.org/nidash/nidm#NIDM_0000159>
+prefix nidm_noiseFWHMInUnits: <http://purl.org/nidash/nidm#NIDM_0000157>
+prefix nidm_randomFieldStationarity: <http://purl.org/nidash/nidm#NIDM_0000120>
+prefix spm_smallestSignificantClusterSizeInVoxelsFWE05: <http://purl.org/nidash/spm#SPM_0000014>
+prefix spm_smallestSignificantClusterSizeInVoxelsFDR05: <http://purl.org/nidash/spm#SPM_0000013>
+prefix spm_searchVolumeReselsGeometry: <http://purl.org/nidash/spm#SPM_0000010>
+prefix nidm_noiseRoughnessInVoxels: <http://purl.org/nidash/nidm#NIDM_0000145>
 
-        SELECT DISTINCT * WHERE {
+SELECT DISTINCT * WHERE {
 
-        """ + oid_var + """ a nidm_SearchSpaceMaskMap: ;
-            rdfs:label ?label ;
-            nidm_searchVolumeInVoxels: ?vol_in_voxels ;
-            nidm_searchVolumeInUnits: ?vol_in_units ;
-            nidm_searchVolumeInResels: ?vol_in_resels ;
-            nidm_reselSizeInVoxels: ?resel_size_in_voxels ;
-            nidm_reselSizeInVoxels: ?resel_size_in_voxels ;
-            nidm_noiseFWHMInVoxels: ?noise_fwhm_in_voxels ;
-            nidm_noiseFWHMInUnits: ?noise_fwhm_in_units ;
-            nidm_randomFieldStationarity: ?random_field_stationarity ;
-            prov:atLocation ?search_space_file ;
-            dct:format ?format ;
-            nfo:fileName ?filename ;
-            crypto:sha512 ?sha .
-        
-            OPTIONAL {""" + oid_var + """ nidm_expectedNumberOfVoxelsPerCluster: ?expected_num_voxels } .
-            OPTIONAL {""" + oid_var + """ nidm_expectedNumberOfClusters: ?expected_num_clusters } .
-            OPTIONAL {""" + oid_var + """ nidm_heightCriticalThresholdFWE05: ?height_critical_fwe05 } .
-            OPTIONAL {""" + oid_var + """ nidm_heightCriticalThresholdFDR05: ?height_critical_fdr05 } .
-            OPTIONAL {""" + oid_var + """ spm_smallestSignificantClusterSizeInVoxelsFWE05: ?extent_critical_fwe05 } .
-            OPTIONAL {""" + oid_var + """ spm_smallestSignificantClusterSizeInVoxelsFDR05: ?extent_critical_fdr05 } .
-            OPTIONAL {""" + oid_var + """ spm_searchVolumeReselsGeometry: ?search_vol_geom } .
-            OPTIONAL {""" + oid_var + """ nidm_noiseRoughnessInVoxels: ?noise_roughness } .
+""" + oid_var + """ a nidm_SearchSpaceMaskMap: ;
+    rdfs:label ?label ;
+    nidm_searchVolumeInVoxels: ?vol_in_voxels ;
+    nidm_searchVolumeInUnits: ?vol_in_units ;
+    nidm_searchVolumeInResels: ?vol_in_resels ;
+    nidm_reselSizeInVoxels: ?resel_size_in_voxels ;
+    nidm_reselSizeInVoxels: ?resel_size_in_voxels ;
+    nidm_noiseFWHMInVoxels: ?noise_fwhm_in_voxels ;
+    nidm_noiseFWHMInUnits: ?noise_fwhm_in_units ;
+    nidm_randomFieldStationarity: ?random_field_stationarity ;
+    prov:atLocation ?search_space_file ;
+    dct:format ?format ;
+    nfo:fileName ?filename ;
+    crypto:sha512 ?sha .
 
-        }
+    OPTIONAL {""" + oid_var + """ nidm_expectedNumberOfVoxelsPerCluster: ?expected_num_voxels } .
+    OPTIONAL {""" + oid_var + """ nidm_expectedNumberOfClusters: ?expected_num_clusters } .
+    OPTIONAL {""" + oid_var + """ nidm_heightCriticalThresholdFWE05: ?height_critical_fwe05 } .
+    OPTIONAL {""" + oid_var + """ nidm_heightCriticalThresholdFDR05: ?height_critical_fdr05 } .
+    OPTIONAL {""" + oid_var + """ spm_smallestSignificantClusterSizeInVoxelsFWE05: ?extent_critical_fwe05 } .
+    OPTIONAL {""" + oid_var + """ spm_smallestSignificantClusterSizeInVoxelsFDR05: ?extent_critical_fdr05 } .
+    OPTIONAL {""" + oid_var + """ spm_searchVolumeReselsGeometry: ?search_vol_geom } .
+    OPTIONAL {""" + oid_var + """ nidm_noiseRoughnessInVoxels: ?noise_roughness } .
+
+}
 
         """
         return query

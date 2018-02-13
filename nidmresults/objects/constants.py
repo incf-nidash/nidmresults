@@ -26,7 +26,7 @@ SCR = Namespace("scr", "http://scicrunch.org/resolver/")
 NIF = Namespace("nif", "http://uri.neuinfo.org/nif/nifstd/")
 
 namespaces = (PROV, NIDM, NIIRI, CRYPTO, FSL, SPM, AFNI, DCT, OBO,
-    DCTYPE, DC, NFO, SCR, NIF)
+              DCTYPE, DC, NFO, SCR, NIF)
 
 namespace_manager = NamespaceManager(namespaces)
 

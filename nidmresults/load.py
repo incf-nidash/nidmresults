@@ -3,8 +3,11 @@ from .graph import NIDMResults
 
 import os
 
+
 def load(filename, workaround=False):
-    ''' Load NIDM-Results file given filename, guessing if it is a NIDM-Results pack or a JSON file
+    ''' Load NIDM-Results file given filename, guessing if it is a
+    NIDM-Results pack or a JSON file
+
     Parameters
     ----------
     filename : string
@@ -23,4 +26,3 @@ def load(filename, workaround=False):
         nidm = NIDMResults.load_from_pack(filename, workaround)
 
     return nidm
-
