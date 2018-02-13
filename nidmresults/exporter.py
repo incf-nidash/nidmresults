@@ -455,7 +455,7 @@ class NIDMExporter():
                     if inference.disp_mask:
                         for mask in inference.disp_mask:
                             # inference.inference_act.used(mask)
-                            self.bundle.used(inference.inference_act.id, 
+                            self.bundle.used(inference.inference_act.id,
                                              mask.id)
                             self.add_object(mask)
                             # Create coordinate space entity

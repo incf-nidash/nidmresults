@@ -162,7 +162,7 @@ class NIDMResults():
                         self.info['PeakDefinitionCriteria_maxNumberOfPeaksPerCluster'] = inference.peak_criteria.num_peak
                     else:
                         if not inference.cluster_criteria.connectivity == \
-                            self.info['ClusterDefinitionCriteria_hasConnectivityCriterion']:
+                                self.info['ClusterDefinitionCriteria_hasConnectivityCriterion']:
                             raise Exception('Inferences using multiple connectivity criteria ' +
                               str(inference.cluster_criteria.connectivity) + str(self.info['ClusterDefinitionCriteria_hasConnectivityCriterion']) 
                               + ' not handled yet.')
