@@ -6,15 +6,11 @@ Test NIDM FSL export tool installation
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>
 @copyright: University of Warwick 2013-2015
 """
+from nidmresults.owl.owl_reader import OwlReader
 import unittest
 from nidmresults.graph import *
 from nidmresults.test.test_results_doc import TestResultDataModel
 from future.standard_library import hooks
-with hooks():
-    from urllib.request import urlopen, Request
-
-from nidmresults.owl.owl_reader import OwlReader
-
 import zipfile
 import json
 # from ddt import ddt, data, unpack
@@ -23,8 +19,9 @@ import inspect
 import glob
 import shutil
 from rdflib.compare import isomorphic, graph_diff
-
 import os
+with hooks():
+    from urllib.request import urlopen, Request
 
 
 # @ddt
@@ -32,8 +29,12 @@ class TestReader(unittest.TestCase, TestResultDataModel):
 
     def setUp(self):
         self.my_execption = ""
-        
-        owl_file = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'nidmresults', 'owl', 'nidm-results_130.owl')
+
+        owl_file = os.path.join(os.path.dirname(
+            os.path.dirname(
+                os.path.realpath(__file__))),
+                'nidmresults', 'owl',
+                'nidm-results_130.owl')
         self.owl = OwlReader(owl_file)
 
         pwd = os.path.dirname(
@@ -53,22 +54,22 @@ class TestReader(unittest.TestCase, TestResultDataModel):
         response = rep.read()
         data = json.loads(response.decode('utf-8'))
 
-        # Download the NIDM-Results packs from NeuroVault if not available
-        # locally
-        self.packs = list()
-        for nidm_res in data["results"]:
-            url = nidm_res["zip_file"]
-            study = nidm_res["name"]
+        # # Download the NIDM-Results packs from NeuroVault if not available
+        # # locally
+        # self.packs = list()
+        # for nidm_res in data["results"]:
+        #     url = nidm_res["zip_file"]
+        #     study = nidm_res["name"]
 
-            nidmpack = os.path.join(data_dir, study + ".zip")
-            if not os.path.isfile(nidmpack):
-                f = urlopen(url)
-                print("downloading " + url + " at " + nidmpack)
-                with open(nidmpack, "wb") as local_file:
-                    local_file.write(f.read())
-            self.packs.append(nidmpack)
+        #     nidmpack = os.path.join(data_dir, study + ".zip")
+        #     if not os.path.isfile(nidmpack):
+        #         f = urlopen(url)
+        #         print("downloading " + url + " at " + nidmpack)
+        #         with open(nidmpack, "wb") as local_file:
+        #             local_file.write(f.read())
+        #     self.packs.append(nidmpack)
 
-        # self.packs = glob.glob(os.path.join(data_dir, '*.nidm.zip'))
+        self.packs = glob.glob(os.path.join(data_dir, '*.nidm.zip'))
         self.out_dir = os.path.join(data_dir, 'recomputed')
 
         if os.path.isdir(self.out_dir):
@@ -110,7 +111,7 @@ class TestReader(unittest.TestCase, TestResultDataModel):
             elif 'ex_spm_thr_clustunck10' in nidmpack:
                 export_act_id = 'd917e70463d0a73d9dd1b9ebd8edbf12'
             elif 'ex_spm_thr_voxelfdrp05' in nidmpack:
-                export_act_id ='824058887a650fffd1658a75fffd3204'
+                export_act_id = '824058887a650fffd1658a75fffd3204'
             elif 'ex_spm_thr_voxelfwep05' in nidmpack:
                 export_act_id = '5dacfe9b4b68e90ce4283bf549bb2b50'
             elif 'ex_spm_thr_voxelunct4' in nidmpack:
@@ -118,18 +119,26 @@ class TestReader(unittest.TestCase, TestResultDataModel):
             else:
                 export_act_id = ''
 
-
-            # This is a workaround to avoid confusion between attribute and class uncorrected p-value
+            # This is a workaround to avoid confusion between attribute and
+            # class uncorrected p-value
             # cf. https://github.com/incf-nidash/nidm/issues/421
-            to_replace = {'@prefix nidm_PValueUncorrected: <http://purl.org/nidash/nidm#NIDM_0000160>': 
-                          '@prefix nidm_UncorrectedPValue: <http://purl.org/nidash/nidm#NIDM_0000160>',
-                          'nidm_PValueUncorrected': 'nidm_UncorrectedPValue',
-                          'nidm_PValueUncorrected': 'nidm_UncorrectedPValue',
-                          'http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions/': 
-                          'http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions#',
-                          ' \\ntask': '\\\\n task',
-                          'a prov:Generation .': 'a prov:Generation ; prov:activity niiri:' + export_act_id + ' .',
-                          ';\n    nidm_coordinateVectorInVoxels: "null"^^xsd:string .': '.'}
+            to_replace = {
+                ('@prefix nidm_PValueUncorrected: ' +
+                    '<http://purl.org/nidash/nidm#NIDM_0000160>'):
+                ('@prefix nidm_UncorrectedPValue: ' +
+                    '<http://purl.org/nidash/nidm#NIDM_0000160>',)
+                'nidm_PValueUncorrected': 'nidm_UncorrectedPValue',
+                'nidm_PValueUncorrected': 'nidm_UncorrectedPValue',
+                ('http://id.loc.gov/vocabulary/preservation/' +
+                    'cryptographicHashFunctions/'):
+                ('http://id.loc.gov/vocabulary/preservation/' +
+                    'cryptographicHashFunctions#'),
+                ' \\ntask': '\\\\n task',
+                'a prov:Generation .':
+                'a prov:Generation ; prov:activity niiri:' + export_act_id +
+                ' .',
+                ';\n    nidm_coordinateVectorInVoxels: "null"^^xsd:string .':
+                '.'}
 
             nidmres = NIDMResults(nidm_zip=nidmpack, to_replace=to_replace)
             new_name = os.path.join(self.out_dir, os.path.basename(nidmpack))
@@ -139,8 +148,9 @@ class TestReader(unittest.TestCase, TestResultDataModel):
 
             new_nidmres = NIDMResults(nidm_zip=new_name)
 
-            self.compare_full_graphs(nidmres.graph, new_nidmres.graph, self.owl, 
-                            include=False, raise_now=False, reconcile=False)
+            self.compare_full_graphs(
+                nidmres.graph, new_nidmres.graph, self.owl,
+                include=False, raise_now=False, reconcile=False)
 
         if self.my_execption:
             raise Exception(self.my_execption)
@@ -162,6 +172,7 @@ class TestReader(unittest.TestCase, TestResultDataModel):
 
         # if exc:
         #     raise Exception("\n ".join(exc))
+
 
 if __name__ == '__main__':
     unittest.main()
