@@ -96,7 +96,7 @@ prefix dctype: <http://purl.org/dc/dcmitype/>
 
 SELECT * WHERE
 {
-    """ + oid_var + """ a nidm_NIDMResults: ;  
+    """ + oid_var + """ a nidm_NIDMResults: ;
     rdfs:label ?label ;
     nidm_version: ?nidm_version .
 }
@@ -350,7 +350,7 @@ class Image(NIDMObject):
         self.type = DCTYPE['Image']
         self.prov_type = PROV['Entity']
         self.file = NIDMFile(self.id, image_file, filename)
-        self.label = "" # Enable printing
+        self.label = ""  # Enable printing
 
     @classmethod
     def get_query(klass, oid=None):
@@ -371,7 +371,7 @@ class Image(NIDMObject):
             dct:format ?format .
             }
         """
-        return query    
+        return query
 
     def export(self, nidm_version, export_dir):
         """
@@ -432,7 +432,8 @@ class NeuroimagingSoftware(NIDMObject):
         query = """
 prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
 prefix fsl_featVersion: <http://purl.org/nidash/fsl#FSL_0000005>
-prefix nidm_ModelParametersEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
+prefix nidm_ModelParametersEstimation: <http://purl.org/nidash/nidm#NIDM_00000\
+56>
 
 SELECT DISTINCT * WHERE
         {
@@ -498,21 +499,20 @@ class ExporterSoftware(NIDMObject):
             oid_var = "<" + str(oid) + ">"
 
         query = """
-        prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
-        prefix nidm_NIDMResultsExport: <http://purl.org/nidash/nidm#NIDM_0000166>
+prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
+prefix nidm_NIDMResultsExport: <http://purl.org/nidash/nidm#NIDM_0000166>
 
-        SELECT DISTINCT * WHERE
-                {
-            """ + oid_var + """ a prov:SoftwareAgent ;
-                rdfs:label  ?label ;
-                rdf:type ?software_type ;
-                nidm_softwareVersion: ?version .
+SELECT DISTINCT * WHERE
+        {
+    """ + oid_var + """ a prov:SoftwareAgent ;
+        rdfs:label  ?label ;
+        rdf:type ?software_type ;
+        nidm_softwareVersion: ?version .
 
-            FILTER ( ?software_type NOT IN (prov:SoftwareAgent, prov:Agent) )
-            }
+    FILTER ( ?software_type NOT IN (prov:SoftwareAgent, prov:Agent) )
+    }
         """
         return query
-
 
     def export(self, nidm_version, export_dir):
         """
@@ -547,13 +547,13 @@ class NIDMResultsExport(NIDMObject):
             oid_var = "<" + str(oid) + ">"
 
         query = """
-        prefix nidm_NIDMResultsExport: <http://purl.org/nidash/nidm#NIDM_0000166>
+prefix nidm_NIDMResultsExport: <http://purl.org/nidash/nidm#NIDM_0000166>
 
-        SELECT DISTINCT * WHERE
-            {
-            """ + oid_var + """ a nidm_NIDMResultsExport: ; 
-                rdfs:label ?label .
-            }
+SELECT DISTINCT * WHERE
+    {
+    """ + oid_var + """ a nidm_NIDMResultsExport: ;
+        rdfs:label ?label .
+    }
         """
         return query
 

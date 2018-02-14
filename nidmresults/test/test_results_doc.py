@@ -5,7 +5,11 @@ The software-specific test classes must inherit from this class.
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>, Satrajit Ghosh
 @copyright: University of Warwick 2014
 '''
-
+from nidmresults.objects.constants_rdflib import *
+from nidmresults.owl.owl_reader import OwlReader
+from rdflib.namespace import RDF
+from rdflib.graph import Graph
+from rdflib.compare import graph_diff
 import os
 import rdflib
 import re
@@ -17,12 +21,6 @@ import logging
 
 # Append parent script directory to path
 RELPATH = os.path.dirname(os.path.abspath(__file__))
-
-from nidmresults.objects.constants_rdflib import *
-from nidmresults.owl.owl_reader import OwlReader
-from rdflib.namespace import RDF
-from rdflib.graph import Graph
-from rdflib.compare import graph_diff
 
 logger = logging.getLogger(__name__)
 
@@ -152,7 +150,7 @@ class TestResultDataModel(object):
         return True
 
         # if not self.successful_retreive(self.spmexport.query(query),
-        #'ContrastMap and ContrastStandardErrorMap'):
+        # 'ContrastMap and ContrastStandardErrorMap'):
         #     raise Exception(self.my_execption)
 
     def _replace_match(self, graph1, graph2, rdf_type):

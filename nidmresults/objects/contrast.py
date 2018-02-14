@@ -232,7 +232,8 @@ class ContrastExplainedMeanSquareMap(NIDMObject):
             oid_var = "<" + str(oid) + ">"
 
         query = """
-prefix nidm_ContrastExplainedMeanSquareMap: <http://purl.org/nidash/nidm#NIDM_0000163>
+prefix nidm_ContrastExplainedMeanSquareMap: <http://purl.org/nidash/nidm#NIDM_\
+0000163>
 
 SELECT DISTINCT * WHERE {
     """ + oid_var + """ a nidm_ContrastExplainedMeanSquareMap: ;
@@ -349,7 +350,8 @@ class ContrastStdErrMap(NIDMObject):
             oid_var = "<" + str(oid) + ">"
 
         query = """
-prefix nidm_ContrastStandardErrorMap: <http://purl.org/nidash/nidm#NIDM_0000013>
+prefix nidm_ContrastStandardErrorMap: <http://purl.org/nidash/nidm#NIDM_000001\
+3>
 prefix nidm_ContrastVarianceMap: <http://purl.org/nidash/nidm#NIDM_0000135>
 
 SELECT DISTINCT * WHERE {

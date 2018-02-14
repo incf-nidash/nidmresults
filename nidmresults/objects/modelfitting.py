@@ -71,7 +71,7 @@ class ImagingInstrument(NIDMObject):
         if label is None:
             self.label = machine_label[machine_type]
         else:
-            self.label = label 
+            self.label = label
 
     @classmethod
     def get_query(klass, oid=None):
@@ -82,26 +82,32 @@ class ImagingInstrument(NIDMObject):
 
         # TODO: handle multiple basis
         query = """
-        prefix nlx_Imaginginstrument: <http://uri.neuinfo.org/nif/nifstd/birnlex_2094>
-        prefix nlx_MagneticResonanceImagingScanner: <http://uri.neuinfo.org/nif/nifstd/birnlex_2100>
-        prefix nlx_PositronEmissionTomographyScanner: <http://uri.neuinfo.org/nif/nifstd/ixl_0050000>
-        prefix nlx_SinglePhotonEmissionComputedTomographyScanner: <http://uri.neuinfo.org/nif/nifstd/ixl_0050001>
-        prefix nlx_MagnetoencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/ixl_0050002>
-        prefix nlx_ElectroencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/ixl_0050003>
+prefix nlx_Imaginginstrument: <http://uri.neuinfo.org/nif/nifstd/birnlex_2094>
+prefix nlx_MagneticResonanceImagingScanner: <http://uri.neuinfo.org/nif/nifstd\
+/birnlex_2100>
+prefix nlx_PositronEmissionTomographyScanner: <http://uri.neuinfo.org/nif/nifs\
+td/ixl_0050000>
+prefix nlx_SinglePhotonEmissionComputedTomographyScanner: <http://uri.neuinfo.\
+org/nif/nifstd/ixl_0050001>
+prefix nlx_MagnetoencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/i\
+xl_0050002>
+prefix nlx_ElectroencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/i\
+xl_0050003>
 
-        SELECT DISTINCT * WHERE {
-            {""" + oid_var + """ a nlx_Imaginginstrument: .} UNION
-            {""" + oid_var + """ a nlx_MagneticResonanceImagingScanner: .} UNION
-            {""" + oid_var + """ a nlx_PositronEmissionTomographyScanner: .} UNION
-            {""" + oid_var + """ a nlx_SinglePhotonEmissionComputedTomographyScanner: .} UNION
-            {""" + oid_var + """ a nlx_MagnetoencephalographyMachine: .} UNION
-            {""" + oid_var + """ a nlx_ElectroencephalographyMachine: .}
+SELECT DISTINCT * WHERE {
+    {""" + oid_var + """ a nlx_Imaginginstrument: .} UNION
+    {""" + oid_var + """ a nlx_MagneticResonanceImagingScanner: .} UNION
+    {""" + oid_var + """ a nlx_PositronEmissionTomographyScanner: .} UNION
+    {""" + oid_var + """ a nlx_SinglePhotonEmissionComputedTomographyScanner: .} UNION
+    {""" + oid_var + """ a nlx_MagnetoencephalographyMachine: .} UNION
+    {""" + oid_var + """ a nlx_ElectroencephalographyMachine: .}
 
-            """ + oid_var + """ rdfs:label ?label ;
-                rdf:type ?machine_type .
+    """ + oid_var + """ rdfs:label ?label ;
+        rdf:type ?machine_type .
 
-            FILTER ( ?machine_type NOT IN (prov:Agent, prov:SoftwareAgent, nlx_Imaginginstrument:) )
-        }
+    FILTER ( ?machine_type NOT IN (prov:Agent, prov:SoftwareAgent, nlx_Imaging\
+instrument:) )
+}
         """
         return query
 
@@ -138,16 +144,16 @@ class Group(NIDMObject):
             oid_var = "<" + str(oid) + ">"
 
         query = """
-        prefix obo_studygrouppopulation: <http://purl.obolibrary.org/obo/STATO_0000193>
-        prefix nidm_groupName: <http://purl.org/nidash/nidm#NIDM_0000170>
-        prefix nidm_numberOfSubjects: <http://purl.org/nidash/nidm#NIDM_0000171>
+prefix obo_studygrouppopulation: <http://purl.obolibrary.org/obo/STATO_0000193>
+prefix nidm_groupName: <http://purl.org/nidash/nidm#NIDM_0000170>
+prefix nidm_numberOfSubjects: <http://purl.org/nidash/nidm#NIDM_0000171>
 
-        SELECT DISTINCT * WHERE {
-            """ + oid_var + """ a obo_studygrouppopulation: ;
-                rdfs:label ?label ;
-                nidm_groupName: ?group_name ;
-                nidm_numberOfSubjects: ?num_subjects .
-        }
+SELECT DISTINCT * WHERE {
+    """ + oid_var + """ a obo_studygrouppopulation: ;
+        rdfs:label ?label ;
+        nidm_groupName: ?group_name ;
+        nidm_numberOfSubjects: ?num_subjects .
+}
         """
         return query
 
@@ -208,7 +214,8 @@ class DesignMatrix(NIDMObject):
 
     def __init__(self, matrix, image_file, regressors=None,
                  design_type=None, hrf_models=None, drift_model=None,
-                 suffix='', csv_file=None, filename=None, label=None, oid=None):
+                 suffix='', csv_file=None, filename=None, label=None,
+                 oid=None):
         super(DesignMatrix, self).__init__(oid=oid)
         self.type = NIDM_DESIGN_MATRIX
         self.prov_type = PROV['Entity']
@@ -230,7 +237,8 @@ class DesignMatrix(NIDMObject):
             self.matrix = matrix
         else:
             self.csv_file = csv_file
-            # TODO: this fails as csv_file is only a relative path and we don't have the root to append...
+            # TODO: this fails as csv_file is only a relative path and we don't
+            # have the root to append...
             # self.matrix = genfromtxt(self.csv_file, delimiter=',')
             self.matrix = []
         if filename is None:
@@ -240,7 +248,7 @@ class DesignMatrix(NIDMObject):
         if label is not None:
             self.label = label
         else:
-            self.label="Design Matrix"
+            self.label = "Design Matrix"
 
     @classmethod
     def get_query(klass, oid=None):
@@ -251,18 +259,19 @@ class DesignMatrix(NIDMObject):
 
         # TODO: handle multiple basis
         query = """
-        prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
-        prefix nidm_withEstimationMethod: <http://purl.org/nidash/nidm#NIDM_0000134>
-        prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
+prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_000005\
+6>
+prefix nidm_withEstimationMethod: <http://purl.org/nidash/nidm#NIDM_0000134>
+prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
 
-        SELECT DISTINCT * WHERE {
-            """ + oid_var + """ a nidm_DesignMatrix: ;
-                rdfs:label ?label ;
-                prov:atLocation ?csv_file ;
-                nfo:fileName ?filename .
+SELECT DISTINCT * WHERE {
+    """ + oid_var + """ a nidm_DesignMatrix: ;
+        rdfs:label ?label ;
+        prov:atLocation ?csv_file ;
+        nfo:fileName ?filename .
 
-            OPTIONAL { """  + oid_var + """ nidm_regressorNames: ?regressors . } .
-        }
+    OPTIONAL { """ + oid_var + """ nidm_regressorNames: ?regressors . } .
+}
         """
         return query
 
@@ -335,22 +344,22 @@ class DriftModel(NIDMObject):
             oid_var = "<" + str(oid) + ">"
 
         query = """
-        prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
-        prefix spm_SPMsDriftCutoffPeriod: <http://purl.org/nidash/spm#SPM_0000001>
-        prefix fsl_driftCutoffPeriod: <http://purl.org/nidash/fsl#FSL_0000004>
+prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+prefix spm_SPMsDriftCutoffPeriod: <http://purl.org/nidash/spm#SPM_0000001>
+prefix fsl_driftCutoffPeriod: <http://purl.org/nidash/fsl#FSL_0000004>
 
-        SELECT DISTINCT * WHERE {
-            [] a nidm_DesignMatrix: ;
-                nidm_hasDriftModel: """ + oid_var + """ .
+SELECT DISTINCT * WHERE {
+    [] a nidm_DesignMatrix: ;
+        nidm_hasDriftModel: """ + oid_var + """ .
 
-            """ + oid_var + """ a ?drift_type ;
-                rdfs:label ?label .
+    """ + oid_var + """ a ?drift_type ;
+        rdfs:label ?label .
 
-            {""" + oid_var + """ spm_SPMsDriftCutoffPeriod: ?parameter .} UNION
-            {""" + oid_var + """ fsl_driftCutoffPeriod: ?parameter .} .
+    {""" + oid_var + """ spm_SPMsDriftCutoffPeriod: ?parameter .} UNION
+    {""" + oid_var + """ fsl_driftCutoffPeriod: ?parameter .} .
 
-            FILTER ( ?drift_type NOT IN (prov:Entity) )
-        }
+    FILTER ( ?drift_type NOT IN (prov:Entity) )
+}
         """
         return query
 
@@ -399,21 +408,22 @@ class Data(NIDMObject):
         else:
             oid_var = "<" + str(oid) + ">"
 
-        query = """  
-        prefix nidm_Data: <http://purl.org/nidash/nidm#NIDM_0000169>
-        prefix nidm_grandMeanScaling: <http://purl.org/nidash/nidm#NIDM_0000096>
-        prefix nidm_targetIntensity: <http://purl.org/nidash/nidm#NIDM_0000124>
-        prefix nidm_hasMRIProtocol: <http://purl.org/nidash/nidm#NIDM_0000172>
-        prefix nlx_FunctionalMRIprotocol: <http://uri.neuinfo.org/nif/nifstd/birnlex_2250>
+        query = """
+prefix nidm_Data: <http://purl.org/nidash/nidm#NIDM_0000169>
+prefix nidm_grandMeanScaling: <http://purl.org/nidash/nidm#NIDM_0000096>
+prefix nidm_targetIntensity: <http://purl.org/nidash/nidm#NIDM_0000124>
+prefix nidm_hasMRIProtocol: <http://purl.org/nidash/nidm#NIDM_0000172>
+prefix nlx_FunctionalMRIprotocol: <http://uri.neuinfo.org/nif/nifstd/birnlex_2\
+250>
 
 
-        SELECT DISTINCT * WHERE {
-            """ + oid_var + """ a nidm_Data: ;
-                rdfs:label ?label ;
-                nidm_grandMeanScaling: $grand_mean_scaling .
-            OPTIONAL {""" + oid_var + """ nidm_targetIntensity: ?target . } .
-            OPTIONAL {""" + oid_var + """ nidm_hasMRIProtocol: ?mri_protocol . } .
-        }
+SELECT DISTINCT * WHERE {
+    """ + oid_var + """ a nidm_Data: ;
+        rdfs:label ?label ;
+        nidm_grandMeanScaling: $grand_mean_scaling .
+    OPTIONAL {""" + oid_var + """ nidm_targetIntensity: ?target . } .
+    OPTIONAL {""" + oid_var + """ nidm_hasMRIProtocol: ?mri_protocol . } .
+}
         """
         return query
 
@@ -465,24 +475,27 @@ class ErrorModel(NIDMObject):
         else:
             oid_var = "<" + str(oid) + ">"
 
-        query = """  
-        prefix nidm_ErrorModel: <http://purl.org/nidash/nidm#NIDM_0000023>
-        prefix nidm_hasErrorDistribution: <http://purl.org/nidash/nidm#NIDM_0000101>
-        prefix nidm_errorVarianceHomogeneous: <http://purl.org/nidash/nidm#NIDM_0000094>
-        prefix nidm_varianceMapWiseDependence: <http://purl.org/nidash/nidm#NIDM_0000126>
-        prefix nidm_hasErrorDependence: <http://purl.org/nidash/nidm#NIDM_0000100>
-        prefix nidm_dependenceMapWiseDependence: <http://purl.org/nidash/nidm#NIDM_0000089>
+        query = """
+prefix nidm_ErrorModel: <http://purl.org/nidash/nidm#NIDM_0000023>
+prefix nidm_hasErrorDistribution: <http://purl.org/nidash/nidm#NIDM_0000101>
+prefix nidm_errorVarianceHomogeneous: <http://purl.org/nidash/nidm#NIDM_000009\
+4>
+prefix nidm_varianceMapWiseDependence: <http://purl.org/nidash/nidm#NIDM_00001\
+26>
+prefix nidm_hasErrorDependence: <http://purl.org/nidash/nidm#NIDM_0000100>
+prefix nidm_dependenceMapWiseDependence: <http://purl.org/nidash/nidm#NIDM_000\
+0089>
 
-        SELECT DISTINCT * WHERE {
-            """ + oid_var + """ a nidm_ErrorModel: ;
-                nidm_hasErrorDistribution: $error_distribution ;
-                nidm_errorVarianceHomogeneous: $variance_homo ;
-                nidm_varianceMapWiseDependence: $variance_spatial ;
-                nidm_hasErrorDependence: $dependance .
+SELECT DISTINCT * WHERE {
+    """ + oid_var + """ a nidm_ErrorModel: ;
+        nidm_hasErrorDistribution: $error_distribution ;
+        nidm_errorVarianceHomogeneous: $variance_homo ;
+        nidm_varianceMapWiseDependence: $variance_spatial ;
+        nidm_hasErrorDependence: $dependance .
 
-            OPTIONAL {""" + oid_var + """ rdfs:label ?label . } .
-            OPTIONAL {""" + oid_var + """ nidm_dependenceMapWiseDependence: ?dependance_spatial . } .
-        }
+    OPTIONAL {""" + oid_var + """ rdfs:label ?label . } .
+    OPTIONAL {""" + oid_var + """ nidm_dependenceMapWiseDependence: ?dependance_spatial . } .
+}
         """
         return query
 
@@ -534,15 +547,16 @@ class ModelParametersEstimation(NIDMObject):
             oid_var = "<" + str(oid) + ">"
 
         query = """
-        prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
-        prefix nidm_withEstimationMethod: <http://purl.org/nidash/nidm#NIDM_0000134>
+prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_000005\
+6>
+prefix nidm_withEstimationMethod: <http://purl.org/nidash/nidm#NIDM_0000134>
 
-        SELECT DISTINCT * WHERE {
-            """ + oid_var + """ a nidm_ModelParameterEstimation: ;
-                rdfs:label ?label ;
-                nidm_withEstimationMethod: ?estimation_method ;
-                prov:wasAssociatedWith ?software_id .
-        }
+SELECT DISTINCT * WHERE {
+    """ + oid_var + """ a nidm_ModelParameterEstimation: ;
+        rdfs:label ?label ;
+        nidm_withEstimationMethod: ?estimation_method ;
+        prov:wasAssociatedWith ?software_id .
+}
         """
         return query
 
@@ -563,10 +577,10 @@ class ParameterEstimateMap(NIDMObject):
     Object representing an ParameterEstimateMap entity.
     """
 
-    def __init__(self, coord_space, pe_file=None, pe_num=None, filename=None, sha=None,
-                 label=None, suffix='', model_param_estimation=None, oid=None,
-                 format=None, derfrom_id=None, derfrom_filename=None, derfrom_format=None,
-                 derfrom_sha=None, isderfrommap=False):
+    def __init__(self, coord_space, pe_file=None, pe_num=None, filename=None,
+                 sha=None, label=None, suffix='', model_param_estimation=None,
+                 oid=None, format=None, derfrom_id=None, derfrom_filename=None,
+                 derfrom_format=None, derfrom_sha=None, isderfrommap=False):
         super(ParameterEstimateMap, self).__init__(oid=oid)
         # Column index in the corresponding design matrix
         self.num = pe_num
@@ -591,9 +605,10 @@ class ParameterEstimateMap(NIDMObject):
         self.model_param_estimation = model_param_estimation
 
         if derfrom_id is not None:
-            self.derfrom = ParameterEstimateMap(oid=derfrom_id, coord_space=coord_space, 
-                filename=derfrom_filename, sha=derfrom_sha, format=derfrom_format,
-                isderfrommap=True)
+            self.derfrom = ParameterEstimateMap(
+                oid=derfrom_id, coord_space=coord_space,
+                filename=derfrom_filename, sha=derfrom_sha,
+                format=derfrom_format, isderfrommap=True)
         else:
             self.derfrom = None
         self.isderfrommap = isderfrommap
@@ -606,31 +621,31 @@ class ParameterEstimateMap(NIDMObject):
             oid_var = "<" + str(oid) + ">"
 
         query = """
-        prefix nidm_ParameterEstimateMap: <http://purl.org/nidash/nidm#NIDM_0000061>
+prefix nidm_ParameterEstimateMap: <http://purl.org/nidash/nidm#NIDM_0000061>
 
-        SELECT DISTINCT * WHERE {
-            """ + oid_var + """ a nidm_ParameterEstimateMap: ;
-                rdfs:label ?label ;
-                nfo:fileName ?filename ;
-                crypto:sha512 ?sha ;
-                dct:format ?format .
+SELECT DISTINCT * WHERE {
+    """ + oid_var + """ a nidm_ParameterEstimateMap: ;
+        rdfs:label ?label ;
+        nfo:fileName ?filename ;
+        crypto:sha512 ?sha ;
+        dct:format ?format .
 
-            OPTIONAL {""" + oid_var + """ prov:atLocation ?pe_file .} .
+    OPTIONAL {""" + oid_var + """ prov:atLocation ?pe_file .} .
 
-            OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
+    OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
 
-            ?derfrom_id a nidm_ParameterEstimateMap: ;
-                nfo:fileName ?derfrom_filename ;
-                dct:format ?derfrom_format ;
-                crypto:sha512 ?derfrom_sha .
-             } .
-        }
+    ?derfrom_id a nidm_ParameterEstimateMap: ;
+        nfo:fileName ?derfrom_filename ;
+        dct:format ?derfrom_format ;
+        crypto:sha512 ?derfrom_sha .
+     } .
+}
         """
 
-                #     ?derfrom_id a nidm_ParameterEstimateMap: ;
-                # nfo:fileName ?derfrom_filename ;
-                # dct:format ?derfrom_format ;
-                # crypto:sha512 ?derfrom_sha . } .
+#     ?derfrom_id a nidm_ParameterEstimateMap: ;
+# nfo:fileName ?derfrom_filename ;
+# dct:format ?derfrom_format ;
+# crypto:sha512 ?derfrom_sha . } .
 
         return query
 
@@ -677,8 +692,9 @@ class ResidualMeanSquares(NIDMObject):
         self.type = NIDM_RESIDUAL_MEAN_SQUARES_MAP
         self.prov_type = PROV['Entity']
         if derfrom_id is not None:
-            self.derfrom = ResidualMeanSquares(None, coord_space, 
-                oid=derfrom_id, filename=derfrom_filename, 
+            self.derfrom = ResidualMeanSquares(
+                None, coord_space,
+                oid=derfrom_id, filename=derfrom_filename,
                 sha=derfrom_sha, format=derfrom_format,
                 isderfrommap=True)
         else:
@@ -693,25 +709,25 @@ class ResidualMeanSquares(NIDMObject):
             oid_var = "<" + str(oid) + ">"
 
         query = """
-        prefix nidm_ResidualMeanSquaresMap: <http://purl.org/nidash/nidm#NIDM_0000066>
+prefix nidm_ResidualMeanSquaresMap: <http://purl.org/nidash/nidm#NIDM_0000066>
 
-        SELECT DISTINCT * WHERE {
-            """ + oid_var + """ a nidm_ResidualMeanSquaresMap: ;
-                rdfs:label ?label ;
-                nfo:fileName ?filename ;
-                crypto:sha512 ?sha ;
-                prov:atLocation ?residual_file ;
-                dct:format ?format .
+SELECT DISTINCT * WHERE {
+    """ + oid_var + """ a nidm_ResidualMeanSquaresMap: ;
+        rdfs:label ?label ;
+        nfo:fileName ?filename ;
+        crypto:sha512 ?sha ;
+        prov:atLocation ?residual_file ;
+        dct:format ?format .
 
-            OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
+    OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
 
-            ?derfrom_id a nidm_ResidualMeanSquaresMap: ;
-                nfo:fileName ?derfrom_filename ;
-                dct:format ?derfrom_format ;
-                crypto:sha512 ?derfrom_sha .
-             } .
+    ?derfrom_id a nidm_ResidualMeanSquaresMap: ;
+        nfo:fileName ?derfrom_filename ;
+        dct:format ?derfrom_format ;
+        crypto:sha512 ?derfrom_sha .
+     } .
 
-        }
+}
         """
         return query
 
@@ -729,6 +745,7 @@ class ResidualMeanSquares(NIDMObject):
                 (PROV['label'], self.label))
 
         self.add_attributes(atts)
+
 
 class ReselsPerVoxelMap(NIDMObject):
 
@@ -753,8 +770,9 @@ class ReselsPerVoxelMap(NIDMObject):
         self.type = NIDM_RESELS_PER_VOXEL_MAP
         self.prov_type = PROV['Entity']
         if derfrom_id is not None:
-            self.derfrom = ReselsPerVoxelMap(None, coord_space, 
-                oid=derfrom_id, filename=derfrom_filename, 
+            self.derfrom = ReselsPerVoxelMap(
+                None, coord_space,
+                oid=derfrom_id, filename=derfrom_filename,
                 sha=derfrom_sha, format=derfrom_format,
                 isderfrommap=True)
         else:
@@ -770,26 +788,26 @@ class ReselsPerVoxelMap(NIDMObject):
             oid_var = "<" + str(oid) + ">"
 
         query = """
-        prefix nidm_ReselsPerVoxelMap: <http://purl.org/nidash/nidm#NIDM_0000144>
+prefix nidm_ReselsPerVoxelMap: <http://purl.org/nidash/nidm#NIDM_0000144>
 
-        SELECT DISTINCT * WHERE {
-            """ + oid_var + """ a nidm_ReselsPerVoxelMap: ;
-                rdfs:label ?label ;
-                nfo:fileName ?filename ;
-                crypto:sha512 ?sha ;
-                prov:atLocation ?rpv_file ;
-                dct:format ?format .
+SELECT DISTINCT * WHERE {
+    """ + oid_var + """ a nidm_ReselsPerVoxelMap: ;
+        rdfs:label ?label ;
+        nfo:fileName ?filename ;
+        crypto:sha512 ?sha ;
+        prov:atLocation ?rpv_file ;
+        dct:format ?format .
 
-            ?inf_id prov:used """ + oid_var + """ .
+    ?inf_id prov:used """ + oid_var + """ .
 
-            OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
+    OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
 
-            ?derfrom_id a nidm_ReselsPerVoxelMap: ;
-                nfo:fileName ?derfrom_filename ;
-                dct:format ?derfrom_format ;
-                crypto:sha512 ?derfrom_sha .
-             } .
-        }
+    ?derfrom_id a nidm_ReselsPerVoxelMap: ;
+        nfo:fileName ?derfrom_filename ;
+        dct:format ?derfrom_format ;
+        crypto:sha512 ?derfrom_sha .
+     } .
+}
         """
         return query
 
@@ -816,15 +834,16 @@ class MaskMap(NIDMObject):
     """
 
     def __init__(self, mask_file, coord_space, user_defined,
-                 suffix='', filename=None, format=None, label=None, sha=None, oid=None,
+                 suffix='', filename=None, format=None, label=None, sha=None,
+                 oid=None,
                  derfrom_id=None, derfrom_filename=None, derfrom_format=None,
                  derfrom_sha=None, isderfrommap=False):
         super(MaskMap, self).__init__(oid=oid)
         self.coord_space = coord_space
         if filename is None:
             filename = 'Mask' + suffix + '.nii.gz'
-        self.file = NIDMFile(self.id, mask_file, filename, 
-            sha=sha, format=format)
+        self.file = NIDMFile(self.id, mask_file, filename,
+                             sha=sha, format=format)
         self.user_defined = user_defined
         self.type = NIDM_MASK_MAP
         self.prov_type = PROV['Entity']
@@ -832,8 +851,9 @@ class MaskMap(NIDMObject):
             label = "Mask"
         self.label = label
         if derfrom_id is not None:
-            self.derfrom = MaskMap(None, coord_space, user_defined, 
-                oid=derfrom_id, filename=derfrom_filename, 
+            self.derfrom = MaskMap(
+                None, coord_space, user_defined,
+                oid=derfrom_id, filename=derfrom_filename,
                 sha=derfrom_sha, format=derfrom_format,
                 isderfrommap=True)
         else:
@@ -901,8 +921,8 @@ class GrandMeanMap(NIDMObject):
         super(GrandMeanMap, self).__init__(oid=oid)
         if filename is None:
             filename = 'GrandMean' + suffix + '.nii.gz'
-        self.file = NIDMFile(self.id, org_file, filename, 
-            sha=sha, format=format)
+        self.file = NIDMFile(self.id, org_file, filename,
+                             sha=sha, format=format)
         self.mask_file = mask_file  # needed to compute masked median
         self.coord_space = coord_space
         self.type = NIDM_GRAND_MEAN_MAP
