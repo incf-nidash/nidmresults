@@ -837,8 +837,8 @@ class OwlReader():
                     or term_uri.startswith(SPM)
                     or term_uri.startswith(AFNI))
 
-    def is_prov(self, term_uri):        term_label = self.get_label(term_uri)
-
+    def is_prov(self, term_uri):
+        term_label = self.get_label(term_uri)
         return term_label.startswith("prov")
 
     def get_name(self, uri):
@@ -866,7 +866,7 @@ class OwlReader():
             label_words = re.findall(r"[\w']+", words)
 
             # Camel case terms that come from external ontologies
-            if self.is_external_namespace(uri):               
+            if self.is_external_namespace(uri):
                 if len(label_words) > 1:
                     words = ''
                     for word in label_words:
@@ -875,13 +875,15 @@ class OwlReader():
                         else:
                             words += word[0].upper()
 
-                if not self.is_class(uri) and not self.is_named_individual(uri):
+                if (not self.is_class(uri) and
+                        not self.is_named_individual(uri)):
                     # avoid lowercaseing acronyms
                     if not words[1].istitle() and words not in ('nidm', 'spm'):
                         words = words[0].lower() + words[1:]
                 else:
                     # avoid lowercaseing software names
-                    if not words in ('nidmfsl', 'spm_results_nidm', 'Legendre'):
+                    if words not in (
+                            'nidmfsl', 'spm_results_nidm', 'Legendre'):
                         words = words[0].upper() + words[1:]
 
                 prefix_name = prefix + '_' + words
