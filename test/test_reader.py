@@ -126,7 +126,7 @@ class TestReader(unittest.TestCase, TestResultDataModel):
                 ('@prefix nidm_PValueUncorrected: ' +
                     '<http://purl.org/nidash/nidm#NIDM_0000160>'):
                 ('@prefix nidm_UncorrectedPValue: ' +
-                    '<http://purl.org/nidash/nidm#NIDM_0000160>',)
+                    '<http://purl.org/nidash/nidm#NIDM_0000160>'),
                 'nidm_PValueUncorrected': 'nidm_UncorrectedPValue',
                 'nidm_PValueUncorrected': 'nidm_UncorrectedPValue',
                 ('http://id.loc.gov/vocabulary/preservation/' +
