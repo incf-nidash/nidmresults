@@ -17,6 +17,7 @@ from rdflib import RDF, term
 from rdflib.graph import Graph
 from rdflib.term import Literal
 from nidmresults.objects.constants_rdflib import *
+from nidmresults.objects.constants_rdflib import namespaces as namespace_names
 
 from future.standard_library import hooks
 with hooks():
@@ -93,6 +94,9 @@ class OwlReader():
 
     def is_class(self, uri):
         return (uri, RDF['type'], OWL['Class']) in self.graph
+
+    def is_named_individual(self, uri):
+        return (uri, RDF['type'], OWL['NamedIndividual']) in self.graph
 
     def all_of_rdf_type(self, rdf_type, prefix=None, but=set(),
                         but_type=OWL['AnnotationProperty']):
@@ -387,6 +391,10 @@ class OwlReader():
                 # import_graph.parse(data=import_txt, format='turtle')
 
                 owl_graph = owl_graph + import_graph
+
+        # Overwrite namespaces
+        for name, namespace in namespace_names.items():
+            owl_graph.bind(name, namespace)
 
         return owl_graph
 
@@ -829,8 +837,7 @@ class OwlReader():
                     or term_uri.startswith(SPM)
                     or term_uri.startswith(AFNI))
 
-    def is_prov(self, term_uri):
-        term_label = self.get_label(term_uri)
+    def is_prov(self, term_uri):        term_label = self.get_label(term_uri)
 
         return term_label.startswith("prov")
 
@@ -853,10 +860,34 @@ class OwlReader():
             # keep the id directly)
             prefix_name = None
         else:
-            prefix_name = self.get_label(uri).replace(" ", "")\
-                                             .replace(":", "_")\
-                                             .replace("'", "")\
-                                             .replace("-", "")
+            label = self.get_label(uri).replace("'", "")
+
+            prefix, words = label.split(':')
+            label_words = re.findall(r"[\w']+", words)
+
+            # Camel case terms that come from external ontologies
+            if self.is_external_namespace(uri):               
+                if len(label_words) > 1:
+                    words = ''
+                    for word in label_words:
+                        if len(word) > 1:
+                            words += word[0].upper() + word[1:]
+                        else:
+                            words += word[0].upper()
+
+                if not self.is_class(uri) and not self.is_named_individual(uri):
+                    # avoid lowercaseing acronyms
+                    if not words[1].istitle() and words not in ('nidm', 'spm'):
+                        words = words[0].lower() + words[1:]
+                else:
+                    # avoid lowercaseing software names
+                    if not words in ('nidmfsl', 'spm_results_nidm', 'Legendre'):
+                        words = words[0].upper() + words[1:]
+
+                prefix_name = prefix + '_' + words
+            else:
+                prefix_name = prefix + '_' + "".join(label_words)
+
         return prefix_name
 
     def sorted_by_labels(self, term_list):
