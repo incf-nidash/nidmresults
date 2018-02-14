@@ -105,7 +105,7 @@ class TestResultDataModel(object):
             try:
                 gt_file = [os.path.join(self.gt_dir, metadata["version"], x)
                            for x in metadata["ground_truth"]]
-            except:
+            except Exception:
                 # This part should be removed once SPM can modify json files
                 gt_file = [os.path.join(self.gt_dir, metadata["versions"][0],
                            x)
@@ -250,7 +250,7 @@ class TestResultDataModel(object):
             for g2_term, match_index in list(g2_match.items()):
                 if max(g2_match.values()) >= min_matching:
                     if (match_index == max(g2_match.values())) \
-                            and not g2_term in g2_matched:
+                            and g2_term not in g2_matched:
                         # Found matching term
                         g2_matched.add(g2_term)
 
@@ -302,7 +302,7 @@ class TestResultDataModel(object):
         # FIXME: reconcile entities+agents first (ignoring non attributes)
         # then reconcile activities based on everything
         # for each item select the closest match in the other graph (instead of
-            # perfect match)
+        # perfect match)
         # this is needed to get sensible error messages when comparing graph
         # do not do recursive anymore
 
@@ -320,7 +320,8 @@ class TestResultDataModel(object):
 
         # We reconcile gt_graph with other_graph
         if reconcile:
-            gt_graph, other_graph = self._reconcile_graphs(gt_graph, other_graph)
+            gt_graph, other_graph = self._reconcile_graphs(
+                gt_graph, other_graph)
 
         in_both, in_gt, in_other = graph_diff(gt_graph, other_graph)
 
@@ -333,10 +334,11 @@ class TestResultDataModel(object):
                             self._same_json_or_float(o, o_other)
                 if same_json_array or close_float or same_str:
                     # Remove equivalent o from other as well
-                    in_other.remove( (s, p, o_other) )
+                    in_other.remove((s, p, o_other))
                     break
             else:
-                exc_missing.append("\nMissing :\t '%s %s %s'" \
+                exc_missing.append(
+                    "\nMissing :\t '%s %s %s'"
                     % (
                         self.get_readable_name(owl, gt_graph, s),
                         self.get_readable_name(owl, gt_graph, p),
@@ -346,7 +348,8 @@ class TestResultDataModel(object):
         exc_added = list()
         if not include:
             for s, p, o in in_other:
-                exc_added.append("\nAdded :\t '%s %s %s'" \
+                exc_added.append(
+                    "\nAdded :\t '%s %s %s'"
                     % (
                         self.get_readable_name(owl, other_graph, s),
                         self.get_readable_name(owl, other_graph, p),
@@ -370,7 +373,8 @@ class TestResultDataModel(object):
 
         same_str = False
 
-        if isinstance(o, rdflib.term.Literal) and isinstance(o_other, rdflib.term.Literal):
+        if isinstance(o, rdflib.term.Literal) and isinstance(
+                o_other, rdflib.term.Literal):
             if o.startswith("[") and o.endswith("]"):
                 try:
                     if json.loads(o) == json.loads(o_other):
@@ -382,7 +386,8 @@ class TestResultDataModel(object):
             numeric_types = [XSD.float, XSD.double, XSD.long, XSD.int]
             if o.datatype in numeric_types:
                 if o_other.datatype in numeric_types:
-                    # If both are zero but of different type isclose returns false
+                    # If both are zero but of different type isclose returns
+                    # false
                     if o.value == 0 and o_other.value == 0:
                         close_float = True
 
