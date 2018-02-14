@@ -709,12 +709,12 @@ SELECT DISTINCT * WHERE {
         """
         atts = (
             (PROV['type'], self.type),
-            (PROV['label'], self.label),
             )
 
         if not self.isderfrommap:
             atts = atts + (
-                (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),)
+                (NIDM_IN_COORDINATE_SPACE, self.coord_space.id),
+                (PROV['label'], self.label))
 
         self.add_attributes(atts)
 
