@@ -385,7 +385,8 @@ class NIDMResults():
 
     def load_software(self):
         query = """
-prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
+prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_000005\
+6>
 
 SELECT DISTINCT * WHERE {
 
@@ -411,8 +412,10 @@ SELECT DISTINCT * WHERE {
 
     def load_bundle_export(self):
         # query =  """
-        # prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
-        # prefix nidm_NIDMResultsExport: <http://purl.org/nidash/nidm#NIDM_0000166>
+        # prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_00001\
+        # 22>
+        # prefix nidm_NIDMResultsExport: <http://purl.org/nidash/nidm#NIDM_000\
+        # 0166>
 
         # SELECT DISTINCT * WHERE
         #     {
@@ -469,80 +472,27 @@ SELECT DISTINCT * WHERE
         return (bundle, exporter, export, export_time)
 
     def load_modelfitting(self):
-        # query = """
-        # prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
-        # prefix nidm_hasDriftModel: <http://purl.org/nidash/nidm#NIDM_0000088>
-        # prefix nidm_Data: <http://purl.org/nidash/nidm#NIDM_0000169>
-        # prefix nidm_ErrorModel: <http://purl.org/nidash/nidm#NIDM_0000023>
-        # prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
-        # prefix nidm_ResidualMeanSquaresMap: <http://purl.org/nidash/nidm#NIDM_0000066>
-        # prefix nidm_MaskMap: <http://purl.org/nidash/nidm#NIDM_0000054>
-        # prefix nidm_GrandMeanMap: <http://purl.org/nidash/nidm#NIDM_0000033>
-        # prefix nlx_Imaginginstrument: <http://uri.neuinfo.org/nif/nifstd/birnlex_2094>
-        # prefix nlx_MagneticResonanceImagingScanner: <http://uri.neuinfo.org/nif/nifstd/birnlex_2100>
-        # prefix nlx_PositronEmissionTomographyScanner: <http://uri.neuinfo.org/nif/nifstd/ixl_0050000>
-        # prefix nlx_SinglePhotonEmissionComputedTomographyScanner: <http://uri.neuinfo.org/nif/nifstd/ixl_0050001>
-        # prefix nlx_MagnetoencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/ixl_0050002>
-        # prefix nlx_ElectroencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/ixl_0050003>
-        # prefix nidm_ReselsPerVoxelMap: <http://purl.org/nidash/nidm#NIDM_0000144>
-
-        # SELECT DISTINCT * WHERE {
-
-        #     ?design_id a nidm_DesignMatrix: .
-        #     OPTIONAL { ?design_id dc:description ?png_id . } .
-        #     OPTIONAL { ?design_id nidm_hasDriftModel: ?drift_model_id . } .
-
-        #     ?data_id a nidm_Data: ;
-        #         prov:wasAttributedTo ?machine_id .
-        #     {?machine_id a nlx_Imaginginstrument: .} UNION
-        #     {?machine_id a nlx_MagneticResonanceImagingScanner: .} UNION
-        #     {?machine_id a nlx_PositronEmissionTomographyScanner: .} UNION
-        #     {?machine_id a nlx_SinglePhotonEmissionComputedTomographyScanner: .} UNION
-        #     {?machine_id a nlx_MagnetoencephalographyMachine: .} UNION
-        #     {?machine_id a nlx_ElectroencephalographyMachine: .}
-
-        #     ?error_id a nidm_ErrorModel: .
-
-        #     ?mpe_id a nidm_ModelParameterEstimation: ;
-        #         prov:used ?design_id ;
-        #         prov:used ?data_id ;
-        #         prov:used ?error_id .
-
-        #     ?rms_id a nidm_ResidualMeanSquaresMap: ;
-        #         nidm_inCoordinateSpace: ?rms_coordspace_id ;
-        #         prov:wasGeneratedBy ?mpe_id .
-
-        #     ?mask_id a nidm_MaskMap: ;
-        #         nidm_inCoordinateSpace: ?mask_coordspace_id ;
-        #         prov:wasGeneratedBy ?mpe_id .
-
-        #     ?gm_id a nidm_GrandMeanMap: ;
-        #         nidm_inCoordinateSpace: ?gm_coordspace_id ;
-        #         prov:wasGeneratedBy ?mpe_id .
-
-        #     OPTIONAL {
-        #         ?rpv_id a nidm_ReselsPerVoxelMap: ;
-        #             nidm_inCoordinateSpace: ?rpv_coordspace_id ;
-        #             prov:wasGeneratedBy ?mpe_id .
-        #     }
-        # }
-        # """
-
         query = """
 prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
 prefix nidm_hasDriftModel: <http://purl.org/nidash/nidm#NIDM_0000088>
 prefix nidm_Data: <http://purl.org/nidash/nidm#NIDM_0000169>
 prefix nidm_ErrorModel: <http://purl.org/nidash/nidm#NIDM_0000023>
-prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
+prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_000005\
+6>
 prefix nidm_ResidualMeanSquaresMap: <http://purl.org/nidash/nidm#NIDM_0000066>
 prefix nidm_MaskMap: <http://purl.org/nidash/nidm#NIDM_0000054>
 prefix nidm_GrandMeanMap: <http://purl.org/nidash/nidm#NIDM_0000033>
 prefix nlx_Imaginginstrument: <http://uri.neuinfo.org/nif/nifstd/birnlex_2094>
-prefix nlx_MagneticResonanceImagingScanner: <http://uri.neuinfo.org/nif/nifstd/birnlex_2100>
-prefix nlx_PositronEmissionTomographyScanner: <http://uri.neuinfo.org/nif/nifstd/ixl_0050000>
-prefix nlx_SinglePhotonEmissionComputedTomographyScanner: <http://uri.neuinfo.org/nif/nifstd/ixl_0050001>
-prefix nlx_MagnetoencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/ixl_0050002>
-prefix nlx_ElectroencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/ixl_0050003>
+prefix nlx_MagneticResonanceImagingScanner: <http://uri.neuinfo.org/nif/nifstd\
+/birnlex_2100>
+prefix nlx_PositronEmissionTomographyScanner: <http://uri.neuinfo.org/nif/nifs\
+td/ixl_0050000>
+prefix nlx_SinglePhotonEmissionComputedTomographyScanner: <http://uri.neuinfo.\
+org/nif/nifstd/ixl_0050001>
+prefix nlx_MagnetoencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/i\
+xl_0050002>
+prefix nlx_ElectroencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/i\
+xl_0050003>
 prefix nidm_ReselsPerVoxelMap: <http://purl.org/nidash/nidm#NIDM_0000144>
 
 SELECT DISTINCT * WHERE {
@@ -601,12 +551,12 @@ SELECT DISTINCT * WHERE {
 
                 # Find list of HRF basis
                 query_hrf_bases = """
-                prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
-                prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
+prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
 
-                SELECT DISTINCT * WHERE {
-                    <""" + args['design_id'] + """> nidm_hasHRFBasis: ?hrf_basis .
-                }
+SELECT DISTINCT * WHERE {
+    <""" + args['design_id'] + """> nidm_hasHRFBasis: ?hrf_basis .
+}
                 """
                 hrf_models = None
                 sd_hrf = self.graph.query(query_hrf_bases)
@@ -639,14 +589,14 @@ SELECT DISTINCT * WHERE {
 
                 # Find list of model parameter estimate maps
                 query_pe_maps = """
-                prefix nidm_ParameterEstimateMap: <http://purl.org/nidash/nidm#NIDM_0000061>
-                prefix nidm_inCoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000104>
+prefix nidm_ParameterEstimateMap: <http://purl.org/nidash/nidm#NIDM_0000061>
+prefix nidm_inCoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000104>
 
-                SELECT DISTINCT * WHERE {
-                    ?pe_id a nidm_ParameterEstimateMap: ;
-                    nidm_inCoordinateSpace: ?pe_coordspace_id ;
-                    prov:wasGeneratedBy <""" + str(args['mpe_id']) + """> .
-                }
+SELECT DISTINCT * WHERE {
+    ?pe_id a nidm_ParameterEstimateMap: ;
+    nidm_inCoordinateSpace: ?pe_coordspace_id ;
+    prov:wasGeneratedBy <""" + str(args['mpe_id']) + """> .
+}
                 """
                 param_estimates = list()
                 sd_pe_maps = self.graph.query(query_pe_maps)
@@ -746,17 +696,21 @@ SELECT DISTINCT * WHERE {
 
         query = """
 prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
-prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_0000056>
+prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_000005\
+6>
 prefix nidm_contrastName: <http://purl.org/nidash/nidm#NIDM_0000085>
 prefix obo_contrastweightmatrix: <http://purl.obolibrary.org/obo/STATO_0000323>
 prefix nidm_ContrastEstimation: <http://purl.org/nidash/nidm#NIDM_0000001>
 prefix nidm_ContrastMap: <http://purl.org/nidash/nidm#NIDM_0000002>
-prefix nidm_ContrastStandardErrorMap: <http://purl.org/nidash/nidm#NIDM_0000013>
-prefix nidm_ContrastExplainedMeanSquareMap: <http://purl.org/nidash/nidm#NIDM_0000163>
+prefix nidm_ContrastStandardErrorMap: <http://purl.org/nidash/nidm#NIDM_000001\
+3>
+prefix nidm_ContrastExplainedMeanSquareMap: <http://purl.org/nidash/nidm#NIDM_\
+0000163>
 prefix nidm_StatisticMap: <http://purl.org/nidash/nidm#NIDM_0000076>
 prefix nidm_Inference: <http://purl.org/nidash/nidm#NIDM_0000049>
 prefix nidm_ConjunctionInference: <http://purl.org/nidash/nidm#NIDM_0000011>
-prefix spm_PartialConjunctionInference: <http://purl.org/nidash/spm#SPM_0000005>
+prefix spm_PartialConjunctionInference: <http://purl.org/nidash/spm#SPM_000000\
+5>
 prefix nidm_contrastName: <http://purl.org/nidash/nidm#NIDM_0000085>
 
 SELECT DISTINCT * WHERE {
@@ -917,15 +871,18 @@ prefix nidm_Inference: <http://purl.org/nidash/nidm#NIDM_0000049>
 prefix nidm_HeightThreshold: <http://purl.org/nidash/nidm#NIDM_0000034>
 prefix nidm_ExtentThreshold: <http://purl.org/nidash/nidm#NIDM_0000026>
 prefix nidm_PeakDefinitionCriteria: <http://purl.org/nidash/nidm#NIDM_0000063>
-prefix nidm_ClusterDefinitionCriteria: <http://purl.org/nidash/nidm#NIDM_0000007>
+prefix nidm_ClusterDefinitionCriteria: <http://purl.org/nidash/nidm#NIDM_00000\
+07>
 prefix nidm_DisplayMaskMap: <http://purl.org/nidash/nidm#NIDM_0000020>
 prefix nidm_ExcursionSetMap: <http://purl.org/nidash/nidm#NIDM_0000025>
 prefix nidm_inCoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000104>
 prefix nidm_SearchSpaceMaskMap: <http://purl.org/nidash/nidm#NIDM_0000068>
 prefix nidm_ConjunctionInference: <http://purl.org/nidash/nidm#NIDM_0000011>
-prefix spm_PartialConjunctionInference: <http://purl.org/nidash/spm#SPM_0000005>
+prefix spm_PartialConjunctionInference: <http://purl.org/nidash/spm#SPM_000000\
+5>
 prefix nidm_hasClusterLabelsMap: <http://purl.org/nidash/nidm#NIDM_0000098>
-prefix nidm_hasMaximumIntensityProjection: <http://purl.org/nidash/nidm#NIDM_0000138>
+prefix nidm_hasMaximumIntensityProjection: <http://purl.org/nidash/nidm#NIDM_0\
+000138>
 
 SELECT DISTINCT * WHERE {
     ?con_est_id a nidm_ContrastEstimation: .
@@ -959,8 +916,9 @@ SELECT DISTINCT * WHERE {
         prov:wasGeneratedBy ?inference_id .
 
     OPTIONAL {?exc_set_id dc:description ?excset_visu_id}
-    OPTIONAL {?exc_set_id nidm_hasClusterLabelsMap: ?cluster_map_id .
-              ?cluster_map_id nidm_inCoordinateSpace: ?cluster_map_coord_space_id . }
+    OPTIONAL {
+        ?exc_set_id nidm_hasClusterLabelsMap: ?cluster_map_id .
+        ?cluster_map_id nidm_inCoordinateSpace: ?cluster_map_coord_space_id . }
     OPTIONAL {?exc_set_id nidm_hasMaximumIntensityProjection: ?mip_id}
 
     ?search_space_id a nidm_SearchSpaceMaskMap: ;
