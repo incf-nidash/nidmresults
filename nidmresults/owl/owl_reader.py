@@ -227,7 +227,7 @@ class OwlReader():
                     parent_classes = self.get_direct_parents(class_name)
                     for parent_class in parent_classes:
                         prov_type = self.get_prov_class(parent_class,
-                                                        recursive=3)
+                                                        recursive=6)
                         if prov_type:
                             class_names.setdefault(prov_type, list())\
                                        .append(class_name)
