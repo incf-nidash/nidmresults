@@ -317,6 +317,7 @@ class TestResultDataModel(object):
     def compare_full_graphs(self, gt_graph, other_graph, owl, include=False,
                             raise_now=False, reconcile=True):
         ''' Compare gt_graph and other_graph '''
+        my_exception = ""
 
         # We reconcile gt_graph with other_graph
         if reconcile:
@@ -356,10 +357,12 @@ class TestResultDataModel(object):
                         self.get_readable_name(owl, other_graph, o)
                     ))
 
-        self.my_execption += "".join(sorted(exc_missing) + sorted(exc_added))
+        my_exception += "".join(sorted(exc_missing) + sorted(exc_added))
 
-        if raise_now and self.my_execption:
-            raise Exception(self.my_execption)
+        if raise_now and my_exception:
+            raise Exception(my_exception)
+
+        return my_exception
 
     def _same_json_or_float(self, o, o_other):
         # If string represents a json-array, then

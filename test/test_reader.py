@@ -84,7 +84,7 @@ class TestReader(unittest.TestCase, TestResultDataModel):
         """
         Test: Check that excursion set can be retreived
         """
-        exc = []
+        all_excs = ""
         for nidmpack in self.packs:
             print(nidmpack)
 
@@ -148,12 +148,14 @@ class TestReader(unittest.TestCase, TestResultDataModel):
 
             new_nidmres = NIDMResults(nidm_zip=new_name)
 
-            self.compare_full_graphs(
+            exc = self.compare_full_graphs(
                 nidmres.graph, new_nidmres.graph, self.owl,
                 include=False, raise_now=False, reconcile=False)
 
-        if self.my_execption:
-            raise Exception(self.my_execption)
+            all_excs = all_excs + exc
+
+        if all_excs:
+            raise Exception(all_excs)
 
             # nidm_graph.parse()
             # # exc_sets = nidm_graph.get_excursion_set_maps()
