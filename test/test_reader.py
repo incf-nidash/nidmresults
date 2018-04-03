@@ -54,20 +54,20 @@ class TestReader(unittest.TestCase, TestResultDataModel):
         response = rep.read()
         data = json.loads(response.decode('utf-8'))
 
-        # # Download the NIDM-Results packs from NeuroVault if not available
-        # # locally
-        # self.packs = list()
-        # for nidm_res in data["results"]:
-        #     url = nidm_res["zip_file"]
-        #     study = nidm_res["name"]
+        # Download the NIDM-Results packs from NeuroVault if not available
+        # locally
+        self.packs = list()
+        for nidm_res in data["results"]:
+            url = nidm_res["zip_file"]
+            study = nidm_res["name"]
 
-        #     nidmpack = os.path.join(data_dir, study + ".zip")
-        #     if not os.path.isfile(nidmpack):
-        #         f = urlopen(url)
-        #         print("downloading " + url + " at " + nidmpack)
-        #         with open(nidmpack, "wb") as local_file:
-        #             local_file.write(f.read())
-        #     self.packs.append(nidmpack)
+            nidmpack = os.path.join(data_dir, study + ".zip")
+            if not os.path.isfile(nidmpack):
+                f = urlopen(url)
+                print("downloading " + url + " at " + nidmpack)
+                with open(nidmpack, "wb") as local_file:
+                    local_file.write(f.read())
+            self.packs.append(nidmpack)
 
         self.packs = glob.glob(os.path.join(data_dir, '*.nidm.zip'))
         self.out_dir = os.path.join(data_dir, 'recomputed')
