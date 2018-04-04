@@ -326,8 +326,9 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
                             self.info['Inferences'][-1][clus][-1][cl_pfdr] = (
                                 cluster.pFDR)
                         self.info['Inferences'][-1][clus][-1][pk] = list()
+                        peaks = list()
                         for peak in cluster.peaks:
-                            peaks = collections.OrderedDict()
+                            peaks.append(collections.OrderedDict())
                             if peak.value is not None:
                                 peaks[-1]['Peak_value'] = peak.value
                             peaks[-1]['Coordinate_coordinateVector'] = (
