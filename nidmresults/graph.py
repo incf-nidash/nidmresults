@@ -9,7 +9,7 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 """
 
 import nidmresults
-from nidmresults.objects.constants import *
+from nidmresults.objects.constants_rdflib import *
 from nidmresults.objects.modelfitting import *
 from nidmresults.objects.contrast import *
 from nidmresults.objects.inference import *
@@ -39,6 +39,50 @@ class NIDMResults():
             rdf_data = z.read('nidm.ttl')
         rdf_data = rdf_data.decode()
 
+        # Exporter-version-specific fixes in the RDF
+        rdf_data = self.fix_for_specific_versions(rdf_data, to_replace)
+
+        # Parse turtle into RDF graph
+        self.graph = self.parse(rdf_data)
+
+        self.objects = dict()
+        self.info = None
+
+        # Query the RDF document and create the objects
+        self.software = self.load_software()
+        (self.bundle, self.exporter, self.export_act, self.export_time) = \
+            self.load_bundle_export()
+        self.model_fittings = self.load_modelfitting()
+        self.contrasts = self.load_contrasts(workaround=workaround)
+        self.inferences = self.load_inferences()
+
+    def fix_for_specific_versions(self, rdf_data, to_replace):
+        # Load the graph as is so that we can query
+        g = self.parse(rdf_data)
+
+        query = """
+prefix nidm_spm_results_nidm: <http://purl.org/nidash/nidm#NIDM_0000168>
+prefix nidm_nidmfsl: <http://purl.org/nidash/nidm#NIDM_0000167>
+prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
+
+SELECT DISTINCT ?type ?version WHERE {
+    {?exporter a nidm_nidmfsl: .} UNION {?exporter a nidm_spm_results_nidm: .}.
+    ?exporter a ?type ;
+        nidm_softwareVersion: ?version .
+
+    FILTER ( ?type NOT IN (prov:SoftwareAgent, prov:Agent))
+}
+        """
+
+        sd = g.query(query)
+        objects = dict()
+        if sd:
+            for row in sd:
+                argums = row.asdict()
+                if (argums['type'] == NIDM_SPM_RESULTS_NIDM and
+                        argums['version'].eq('12.6903')):
+                    print('yes')
+
         # This is a workaround to avoid confusion between attribute and
         # class uncorrected p-value
         # cf. https://github.com/incf-nidash/nidm/issues/421
@@ -52,23 +96,7 @@ class NIDMResults():
             for to_rep, replacement in to_replace.items():
                 rdf_data = rdf_data.replace(to_rep, replacement)
 
-        self.graph = rdflib.Graph()
-        try:
-            self.graph.parse(data=rdf_data, format="turtle")
-        except BadSyntax:
-            raise self.ParseException(
-                "RDFLib was unable to parse the RDF file.")
-
-        self.objects = dict()
-        self.info = None
-
-        # Query the RDF document and create the objects
-        self.software = self.load_software()
-        (self.bundle, self.exporter, self.export_act, self.export_time) = \
-            self.load_bundle_export()
-        self.model_fittings = self.load_modelfitting()
-        self.contrasts = self.load_contrasts(workaround=workaround)
-        self.inferences = self.load_inferences()
+        return rdf_data
 
     @classmethod
     def load_from_pack(klass, nidm_zip, workaround):
@@ -338,10 +366,10 @@ class NIDMResults():
         raise Exception("Contrast activity with id: " + str(con_id) +
                         " not found.")
 
-    def parse(self):
+    def parse(self, rdf_data, format="turtle"):
         g = rdflib.Graph()
         try:
-            g.parse(data=self.rdf_data, format=self.format)
+            g.parse(data=rdf_data, format=format)
         except BadSyntax:
             raise self.ParseException(
                 "RDFLib was unable to parse the RDF file.")
