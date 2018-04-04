@@ -88,7 +88,10 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
             for row in sd:
                 argums = row.asdict()
                 if (argums['type'] == NIDM_SPM_RESULTS_NIDM and
-                        argums['version'].eq('12.6903')):
+                        (argums['version'].eq('12.6903') or
+                         argums['version'].eq('12.575ac2c'))):
+                    warnings.warn('Applying fixes for SPM exporter ' +
+                                  str(argums['version']))
                     # crypto namespace inconsistent with NIDM-Results spec
                     to_replace[('http://id.loc.gov/vocabulary/preservation/' +
                                 'cryptographicHashFunctions/')] = (
