@@ -4,7 +4,7 @@ from .graph import NIDMResults
 import os
 
 
-def load(filename, workaround=False):
+def load(filename, to_replace=dict()):
     ''' Load NIDM-Results file given filename, guessing if it is a
     NIDM-Results pack or a JSON file
 
@@ -23,6 +23,6 @@ def load(filename, workaround=False):
     if filename.endswith('.json'):
         raise Exception('Minimal json file: not handled yet')
     elif filename.endswith('.nidm.zip'):
-        nidm = NIDMResults.load_from_pack(filename, workaround)
+        nidm = NIDMResults.load_from_pack(filename, to_replace=to_replace)
 
     return nidm

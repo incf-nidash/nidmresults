@@ -115,8 +115,9 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
         return rdf_data
 
     @classmethod
-    def load_from_pack(klass, nidm_zip, workaround):
-        nidmr = NIDMResults(nidm_zip=nidm_zip, workaround=workaround)
+    def load_from_pack(klass, nidm_zip, workaround=False, to_replace=dict()):
+        nidmr = NIDMResults(nidm_zip=nidm_zip, workaround=workaround,
+                            to_replace=to_replace)
         return nidmr
 
     def get_info(self):
