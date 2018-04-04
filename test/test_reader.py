@@ -77,30 +77,34 @@ class TestReader(unittest.TestCase, TestResultDataModel):
 
         os.mkdir(self.out_dir)
 
-    # @unpack
-    # @data({'name': 'excursion set', 'method_name': 'get_excursion_set_maps'},
-    #       {'name': 'statistic map', 'method_name': 'get_statistic_maps'})
     def test_read_object(self):
         """
-        Test: Check that excursion set can be retreived
+        Round-trip test. Check that we can read all NIDM packs, rewrite them
+        and get the same pack again
         """
         all_excs = ""
         for nidmpack in self.packs:
             print(nidmpack)
 
+            # Known issues in the NIDM packs
             to_replace = {
                 ' \\ntask': '\\\\n task',
                 ';\n    nidm_coordinateVectorInVoxels: "null"^^xsd:string .':
                 '.'}
 
+            # Read the NIDM pack
             nidmres = NIDMResults(nidm_zip=nidmpack, to_replace=to_replace)
+
+            # Rewrite the NIDM pack
             new_name = os.path.join(self.out_dir, os.path.basename(nidmpack))
             nidmres.serialize(new_name)
             print('Serialised to ' + new_name)
             print("----")
 
+            # Read the rewritten pack
             new_nidmres = NIDMResults(nidm_zip=new_name)
 
+            # Check equivalence between the two packs (original vs rewritten)
             exc = self.compare_full_graphs(
                 nidmres.graph, new_nidmres.graph, self.owl,
                 include=False, raise_now=False, reconcile=False)
@@ -109,24 +113,6 @@ class TestReader(unittest.TestCase, TestResultDataModel):
 
         if all_excs:
             raise Exception(all_excs)
-
-            # nidm_graph.parse()
-            # # exc_sets = nidm_graph.get_excursion_set_maps()
-
-            # method = getattr(nidm_graph, method_name)
-            # objects = method()
-
-            # if not objects:
-            #     exc.append('No ' + name + ' found for ' + nidmpack)
-
-            # for eid, eobj in objects.items():
-            #     with zipfile.ZipFile(nidmpack, 'r') as myzip:
-            #         if not str(eobj.file.path) in myzip.namelist():
-            #             exc.append(
-            #                 'Missing ' + name + ' file for ' + nidmpack)
-
-        # if exc:
-        #     raise Exception("\n ".join(exc))
 
 
 if __name__ == '__main__':
