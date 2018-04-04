@@ -57,18 +57,26 @@ class NIDMResults():
         self.inferences = self.load_inferences()
 
     def fix_for_specific_versions(self, rdf_data, to_replace):
+        """
+        Fixes of the RDF before loading the graph. All of these are workaround
+        to circuvent known issues of the SPM and FSL exporters.
+        """
+
         # Load the graph as is so that we can query
         g = self.parse(rdf_data)
 
+        # Retreive the exporter name and version
         query = """
 prefix nidm_spm_results_nidm: <http://purl.org/nidash/nidm#NIDM_0000168>
 prefix nidm_nidmfsl: <http://purl.org/nidash/nidm#NIDM_0000167>
 prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
 
-SELECT DISTINCT ?type ?version WHERE {
+SELECT DISTINCT ?type ?version ?exp_act WHERE {
     {?exporter a nidm_nidmfsl: .} UNION {?exporter a nidm_spm_results_nidm: .}.
     ?exporter a ?type ;
         nidm_softwareVersion: ?version .
+
+    ?exp_act prov:wasAssociatedWith ?exporter .
 
     FILTER ( ?type NOT IN (prov:SoftwareAgent, prov:Agent))
 }
@@ -81,9 +89,17 @@ SELECT DISTINCT ?type ?version WHERE {
                 argums = row.asdict()
                 if (argums['type'] == NIDM_SPM_RESULTS_NIDM and
                         argums['version'].eq('12.6903')):
-                    print('yes')
+                    # crypto namespace inconsistent with NIDM-Results spec
+                    to_replace[('http://id.loc.gov/vocabulary/preservation/' +
+                                'cryptographicHashFunctions/')] = (
+                                'http://id.loc.gov/vocabulary/preservation/' +
+                                'cryptographicHashFunctions#')
+                    # Missing 'activity' attribute in qualified Generation
+                    to_replace['a prov:Generation .'] = (
+                        'a prov:Generation ; prov:activity <' +
+                        str(argums['exp_act']) + '> .')
 
-        # This is a workaround to avoid confusion between attribute and
+        # Avoid confusion between attribute and
         # class uncorrected p-value
         # cf. https://github.com/incf-nidash/nidm/issues/421
         to_replace[('@prefix nidm_PValueUncorrected: ' +

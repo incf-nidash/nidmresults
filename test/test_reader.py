@@ -88,46 +88,8 @@ class TestReader(unittest.TestCase, TestResultDataModel):
         for nidmpack in self.packs:
             print(nidmpack)
 
-            if 'ex_spm_conjunction' in nidmpack:
-                export_act_id = 'b8fe52e0f830755481e30d6fae8f6636'
-            elif 'ex_spm_contrast_mask' in nidmpack:
-                export_act_id = '380868f11cf96af46cc4ea3bf625081f'
-            elif 'ex_spm_default' in nidmpack:
-                export_act_id = 'e9f2bcf056a679e65838722ab961237c'
-            elif 'ex_spm_full_example001' in nidmpack:
-                export_act_id = 'fa83bdc818b89b5c70d211d1e03fc7e6'
-            elif 'ex_spm_group_ols' in nidmpack:
-                export_act_id = '3c3c654f514122eb8007fdf0d2bc03c8'
-            elif 'ex_spm_group_wls' in nidmpack:
-                export_act_id = 'abb2940ffe4c819e8adb0ab5cd2ecac1'
-            elif 'ex_spm_HRF_informed_basis' in nidmpack:
-                export_act_id = '85408216d7db19206dcfee6d17c212d3'
-            elif 'ex_spm_partial_conjunction' in nidmpack:
-                export_act_id = 'f219fd38405d063a1ed632fcb2147443'
-            elif 'ex_spm_temporal_derivative' in nidmpack:
-                export_act_id = '659c46e2d1c780606dffaab2340049d2'
-            elif 'ex_spm_thr_clustfwep05' in nidmpack:
-                export_act_id = '67aaee6777a38b8d12724eac8d77eb3e'
-            elif 'ex_spm_thr_clustunck10' in nidmpack:
-                export_act_id = 'd917e70463d0a73d9dd1b9ebd8edbf12'
-            elif 'ex_spm_thr_voxelfdrp05' in nidmpack:
-                export_act_id = '824058887a650fffd1658a75fffd3204'
-            elif 'ex_spm_thr_voxelfwep05' in nidmpack:
-                export_act_id = '5dacfe9b4b68e90ce4283bf549bb2b50'
-            elif 'ex_spm_thr_voxelunct4' in nidmpack:
-                export_act_id = '3629454df7cfe3fbfb4c3ebc41023e67'
-            else:
-                export_act_id = ''
-
             to_replace = {
-                ('http://id.loc.gov/vocabulary/preservation/' +
-                    'cryptographicHashFunctions/'):
-                ('http://id.loc.gov/vocabulary/preservation/' +
-                    'cryptographicHashFunctions#'),
                 ' \\ntask': '\\\\n task',
-                'a prov:Generation .':
-                'a prov:Generation ; prov:activity niiri:' + export_act_id +
-                ' .',
                 ';\n    nidm_coordinateVectorInVoxels: "null"^^xsd:string .':
                 '.'}
 
