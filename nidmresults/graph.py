@@ -30,7 +30,7 @@ class NIDMResults():
     """
 
     def __init__(self, nidm_zip=None, rdf_file=None, workaround=False,
-                 to_replace=None):
+                 to_replace=dict()):
         self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")
         self.zip_path = nidm_zip
 
@@ -38,6 +38,15 @@ class NIDMResults():
         with zipfile.ZipFile(self.zip_path, 'r') as z:
             rdf_data = z.read('nidm.ttl')
         rdf_data = rdf_data.decode()
+
+        # This is a workaround to avoid confusion between attribute and
+        # class uncorrected p-value
+        # cf. https://github.com/incf-nidash/nidm/issues/421
+        to_replace[('@prefix nidm_PValueUncorrected: ' +
+                    '<http://purl.org/nidash/nidm#NIDM_0000160>')] = (
+                    '@prefix nidm_UncorrectedPValue: ' +
+                    '<http://purl.org/nidash/nidm#NIDM_0000160>')
+        to_replace['nidm_PValueUncorrected'] = 'nidm_UncorrectedPValue'
 
         if to_replace is not None:
             for to_rep, replacement in to_replace.items():

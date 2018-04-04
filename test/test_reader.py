@@ -119,16 +119,7 @@ class TestReader(unittest.TestCase, TestResultDataModel):
             else:
                 export_act_id = ''
 
-            # This is a workaround to avoid confusion between attribute and
-            # class uncorrected p-value
-            # cf. https://github.com/incf-nidash/nidm/issues/421
             to_replace = {
-                ('@prefix nidm_PValueUncorrected: ' +
-                    '<http://purl.org/nidash/nidm#NIDM_0000160>'):
-                ('@prefix nidm_UncorrectedPValue: ' +
-                    '<http://purl.org/nidash/nidm#NIDM_0000160>'),
-                'nidm_PValueUncorrected': 'nidm_UncorrectedPValue',
-                'nidm_PValueUncorrected': 'nidm_UncorrectedPValue',
                 ('http://id.loc.gov/vocabulary/preservation/' +
                     'cryptographicHashFunctions/'):
                 ('http://id.loc.gov/vocabulary/preservation/' +
