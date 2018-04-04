@@ -146,31 +146,31 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
             self.info['DesignMatrix_regressorNames'] = \
                 self.model_fittings[0].design_matrix.regressors
             self.info['ErrorModel_hasErrorDistribution'] = \
-                self.model_fittings[0].error_model.error_distribution
+                str(self.model_fittings[0].error_model.error_distribution)
             self.info['ErrorModel_errorVarianceHomogeneous'] = \
                 self.model_fittings[0].error_model.variance_homo
             # TODO: replace IRIs by preferred prefixes for readability
             self.info['ErrorModel_varianceMapWiseDependence'] = \
-                self.model_fittings[0].error_model.variance_spatial
+                str(self.model_fittings[0].error_model.variance_spatial)
             self.info['ErrorModel_hasErrorDependence'] = \
-                self.model_fittings[0].error_model.dependance
+                str(self.model_fittings[0].error_model.dependance)
             self.info['ErrorModel_dependenceMapWiseDependence'] = \
-                self.model_fittings[0].error_model.dependance_spatial
+                str(self.model_fittings[0].error_model.dependance_spatial)
             self.info['ModelParameterEstimation_withEstimationMethod'] = \
-                self.model_fittings[0].activity.estimation_method
+                str(self.model_fittings[0].activity.estimation_method)
             self.info['ResidualMeanSquaresMap_atLocation'] = \
                 self.model_fittings[0].rms_map.file.filename
-            self.info['ResidualMeanSquaresMap_inWorldCoordinateSystem'] = \
-                self.model_fittings[0].rms_map.coord_space.coordinate_system
+            self.info['ResidualMeanSquaresMap_inWorldCoordinateSystem'] = str(
+                self.model_fittings[0].rms_map.coord_space.coordinate_system)
             gm_map = self.model_fittings[0].grand_mean_map
             self.info['GrandMeanMap_atLocation'] = \
                 gm_map.file.filename
             self.info['GrandMeanMap_inWorldCoordinateSystem'] = \
-                gm_map.coord_space.coordinate_system
+                str(gm_map.coord_space.coordinate_system)
             self.info['MaskMap_atLocation'] = \
                 self.model_fittings[0].mask_map.file.filename
-            self.info['MaskMap_inWorldCoordinateSystem'] = \
-                self.model_fittings[0].mask_map.coord_space.coordinate_system
+            self.info['MaskMap_inWorldCoordinateSystem'] = str(
+                self.model_fittings[0].mask_map.coord_space.coordinate_system)
 
             self.info['ParameterEstimateMaps'] = list()
             # TODO the order of the pe maps matters!!
@@ -196,22 +196,22 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
                     self.info['Contrasts'][-1]['StatisticMap_atLocation'] \
                         = contrast.stat_map.file.filename
                     st_world = 'StatisticMap_inWorldCoordinateSystem'
-                    self.info['Contrasts'][-1][st_world] = (
+                    self.info['Contrasts'][-1][st_world] = str(
                         contrast.stat_map.coord_space.coordinate_system)
 
                     if contrast.z_stat_map is not None:
                         self.info['Contrasts'][-1]['ZStatisticMap_atLocation']\
                             = contrast.z_stat_map.file.filename
                         zst_world = 'ZStatisticMap_inWorldCoordinateSystem'
-                        self.info['Contrasts'][-1][zst_world] = (
+                        self.info['Contrasts'][-1][zst_world] = str(
                             contrast.z_stat_map.coord_space.coordinate_system)
 
                     if contrast.contrast_map:
                         self.info['Contrasts'][-1]['ContrastMap_atLocation'] =\
                             contrast.contrast_map.file.filename
                         c_world = 'ContrastMap_inWorldCoordinateSystem'
-                        self.info['Contrasts'][-1][c_world] = \
-                            contrast.contrast_map.coord_space.coordinate_system
+                        self.info['Contrasts'][-1][c_world] = str(
+                            contrast.contrast_map.coord_space.coordinate_system)
                         # TODO: deal when this is not created yet...
                         stderr_loc = 'ContrastStandardErrorMap_atLocation'
                         stderr_sys = (
@@ -220,7 +220,7 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
                             contrast.stderr_or_expl_mean_sq_map)
                         self.info['Contrasts'][-1][stderr_loc] = (
                             sderr_explmeansq_map.file.filename)
-                        self.info['Contrasts'][-1][stderr_sys] = (
+                        self.info['Contrasts'][-1][stderr_sys] = str(
                             sderr_explmeansq_map.coord_space.coordinate_system)
 
             self.info['Inferences'] = list()
@@ -237,14 +237,14 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
                         # and peak def > should be stated explicitely in JSON
                         # spec and tested
                         self.info[clustdef] = (
-                            inference.cluster_criteria.connectivity)
+                            str(inference.cluster_criteria.connectivity))
                         self.info[peakdef_mindist] = (
                             inference.peak_criteria.peak_dist)
                         self.info[peakdef_maxpeak] = (
                             inference.peak_criteria.num_peak)
                     else:
-                        if (not inference.cluster_criteria.connectivity ==
-                                self.info[clustdef]):
+                        if (not str(inference.cluster_criteria.connectivity) ==
+                                str(self.info[clustdef])):
                             raise Exception(
                                 'Inferences using multiple connectivity' +
                                 ' criteria ' +
@@ -284,13 +284,13 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
                     self.info['Inferences'][-1][clustsize_vox] = (
                         inference.extent_thresh.extent)
                     althyp = 'Inference_hasAlternativeHypothesis'
-                    self.info['Inferences'][-1][althyp] = (
+                    self.info['Inferences'][-1][althyp] = str(
                         inference.inference_act.tail)
                     search_loc = 'SearchSpaceMaskMap_atLocation'
                     self.info['Inferences'][-1][search_loc] = (
                         inference.search_space.file.filename)
                     search_sys = 'SearchSpaceMaskMap_inWorldCoordinateSystem'
-                    self.info['Inferences'][-1][search_sys] = (
+                    self.info['Inferences'][-1][search_sys] = str(
                         inference.search_space.coord_space.coordinate_system)
                     search_vol_vox = 'SearchSpaceMaskMap_searchVolumeInVoxels'
                     self.info['Inferences'][-1][search_vol_vox] = (
@@ -302,7 +302,7 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
                     self.info['Inferences'][-1][exc_loc] = (
                         inference.excursion_set.file.filename)
                     exc_sys = 'ExcursionSetMap_inWorldCoordinateSystem'
-                    self.info['Inferences'][-1][exc_sys] = (
+                    self.info['Inferences'][-1][exc_sys] = str(
                         inference.excursion_set.coord_space.coordinate_system)
                     self.info['Inferences'][-1]['Clusters'] = list()
                     clus = 'Clusters'
