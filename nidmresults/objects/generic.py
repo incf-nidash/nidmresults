@@ -400,7 +400,7 @@ class NeuroimagingSoftware(NIDMObject):
             if software_type.startswith('http'):
                 self.type = Identifier(software_type)
             elif software_type.lower() == "fsl":
-                self.name = "FSL"
+                self.type = SCR_FSL
             else:
                 warnings.warn('Unrecognised software: ' + str(software_type))
                 self.name = str(software_type)

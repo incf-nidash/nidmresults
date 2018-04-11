@@ -30,7 +30,7 @@ class ModelFitting(object):
 
     def __init__(self, activity, design_matrix, data, error_model,
                  param_estimates, rms_map, mask_map, grand_mean_map,
-                 machine, subjects, rpv_map):
+                 machine, subjects, rpv_map=None):
         self.activity = activity
         self.design_matrix = design_matrix
         self.data = data
