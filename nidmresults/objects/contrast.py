@@ -293,7 +293,8 @@ class ContrastStdErrMap(NIDMObject):
     def __init__(self, contrast_num, filepath, is_variance, coord_space,
                  var_coord_space, label=None, format=None,
                  sha=None, filename=None, oid=None, derfrom_id=None,
-                 derfrom_filename=None, derfrom_sha=None, derfrom_format=None):
+                 derfrom_filename=None, derfrom_sha=None, derfrom_format=None,
+                 export_dir=None):
         super(ContrastStdErrMap, self).__init__(oid=oid)
         self.file = filepath
         self.is_variance = is_variance
