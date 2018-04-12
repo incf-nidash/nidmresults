@@ -312,8 +312,8 @@ class ContrastStdErrMap(NIDMObject):
             # Copy contrast variance map in export directory
             path, var_cope_filename = os.path.split(self.file)
             contrast_var = ContrastVariance(
-                self.var_coord_space, self.file, var_cope_filename,
-                format=self.format, sha=self.sha, filename=self.filename)
+                coord_space=self.var_coord_space, var_file=self.file, 
+                filename=var_cope_filename, format=self.format, sha=self.sha)
             self.contrast_var = contrast_var
 
             # Create standard error map from contrast variance map
