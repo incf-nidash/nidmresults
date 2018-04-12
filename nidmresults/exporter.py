@@ -574,7 +574,7 @@ class NIDMExporter():
         Initialise NIDM-Results bundle.
         """
         # *** Bundle entity
-        if not self.bundle_ent:
+        if not hasattr(self, 'bundle_ent'):
             self.bundle_ent = NIDMResultsBundle(nidm_version=version['num'])
 
         self.bundle = ProvBundle(identifier=self.bundle_ent.id)
@@ -589,7 +589,7 @@ class NIDMExporter():
 
         # *** NIDM-Results Export Activity
         if version['num'] not in ["1.0.0", "1.1.0"]:
-            if not self.export_act:
+            if not hasattr(self, 'export_act'):
                 self.export_act = NIDMResultsExport()
             self.export_act.export(self.version, self.export_dir)
             # self.doc.update(self.export_act.p)
