@@ -61,7 +61,7 @@ class InferenceActivity(NIDMObject):
         if label is None:
             label = "Inference"
             if contrast_name:
-                label += ": " + self.contrast_name
+                label += ": " + contrast_name
         self.label = label
         self.partial_degree = partial_degree
 
@@ -140,10 +140,9 @@ class ExcursionSet(NIDMObject):
         self.file = NIDMFile(self.id, location, filename, sha)
         self.type = NIDM_EXCURSION_SET_MAP
         self.prov_type = PROV['Entity']
-        # if visu is not None:
-        self.visu = visu
-        # visu_filename = 'ExcursionSet' + suffix + '.png'
-        # self.visu = Image(visualisation, visu_filename)
+        if visu is not None:
+            visu_filename = 'ExcursionSet' + suffix + '.png'
+            self.visu = Image(visu, visu_filename)
         if label is None:
             label = "Excursion Set Map"
         self.label = label
