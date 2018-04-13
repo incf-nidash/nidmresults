@@ -314,7 +314,7 @@ class HeightThreshold(NIDMObject):
                 threshold_type = NIDM_P_VALUE_UNCORRECTED_CLASS
                 value = p_uncorr_threshold
         elif p_corr_threshold is not None:
-            thresh_desc = "p<" + str(self.p_corr_threshold) + " (FWE)"
+            thresh_desc = "p<" + str(p_corr_threshold) + " (FWE)"
             if version['num'] == "1.0.0":
                 user_threshold_type = "p-value FWE"
             else:
