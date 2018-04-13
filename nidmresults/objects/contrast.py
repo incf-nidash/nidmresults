@@ -259,13 +259,13 @@ SELECT DISTINCT * WHERE {
             sigma_sq_img = nib.load(self.sigma_sq_file)
             sigma_sq = sigma_sq_img.get_data()
 
-            expl_mean_sq = nib.Nifti1Image(
+            expl_mean_sq = nib.Nifti1Imaself.contrast_namege(
                 fstat*sigma_sq, fstat_img.get_qform())
 
             self.filename = ("ContrastExplainedMeanSquareMap" +
                              self.num + ".nii.gz")
             self.expl_mean_sq_file = os.path.join(
-                export_dir, expl_mean_sq_filename)
+                export_dir, self.filename)
             nib.save(expl_mean_sq, self.expl_mean_sq_file)
 
         self.file = NIDMFile(self.id, self.expl_mean_sq_file,
