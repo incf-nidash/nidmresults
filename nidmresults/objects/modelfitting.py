@@ -308,7 +308,8 @@ SELECT DISTINCT * WHERE {
             for hrf_model in self.hrf_models:
                 attributes.append((NIDM_HAS_HRF_BASIS, hrf_model))
             # drift model
-            attributes.append((NIDM_HAS_DRIFT_MODEL, self.drift_model.id))
+            if self.drift_model is not None:
+                attributes.append((NIDM_HAS_DRIFT_MODEL, self.drift_model.id))
 
         # Create "design matrix" entity
         self.add_attributes(attributes)

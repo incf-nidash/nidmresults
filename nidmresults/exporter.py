@@ -135,7 +135,6 @@ class NIDMExporter():
             nidm_object.export(self.version, export_dir, self.prepend_path)
         # ProvDocument: add object to the bundle
         if nidm_object.prov_type == PROV['Activity']:
-            print(repr(nidm_object))
             self.bundle.activity(nidm_object.id,
                                  other_attributes=nidm_object.attributes)
         elif nidm_object.prov_type == PROV['Entity']:
@@ -602,7 +601,8 @@ class NIDMExporter():
             self.export_time = str(datetime.datetime.now().time())
 
         if version['num'] in ["1.0.0", "1.1.0"]:
-            self.doc.wasGeneratedBy(bundle_id, time=self.export_time)
+            self.doc.wasGeneratedBy(entity=self.bundle_ent.id,
+                                    time=self.export_time)
         else:
             # provn
             self.doc.wasGeneratedBy(
