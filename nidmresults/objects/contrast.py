@@ -259,7 +259,7 @@ SELECT DISTINCT * WHERE {
             sigma_sq_img = nib.load(self.sigma_sq_file)
             sigma_sq = sigma_sq_img.get_data()
 
-            expl_mean_sq = nib.Nifti1Imaself.contrast_namege(
+            expl_mean_sq = nib.Nifti1Image(
                 fstat*sigma_sq, fstat_img.get_qform())
 
             self.filename = ("ContrastExplainedMeanSquareMap" +

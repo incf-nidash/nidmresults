@@ -299,7 +299,7 @@ class HeightThreshold(NIDMObject):
 
         thresh_desc = ""
         if stat_threshold is not None:
-            thresh_desc = "Z>" + str(self.stat_threshold)
+            thresh_desc = "Z>" + str(stat_threshold)
             if version['num'] == "1.0.0":
                 user_threshold_type = "Z-Statistic"
             else:
