@@ -651,7 +651,7 @@ class DisplayMaskMap(NIDMObject):
                  derfrom_sha=None, isderfrommap=False):
         super(DisplayMaskMap, self).__init__(oid=oid)
         if not filename:
-            filename = 'DisplayMask' + str(self.mask_num) + '.nii.gz'
+            filename = 'DisplayMask' + str(mask_num) + '.nii.gz'
         self.file = NIDMFile(self.id, mask_file, filename,
                              sha=sha, format=format)
         self.coord_space = coord_space
