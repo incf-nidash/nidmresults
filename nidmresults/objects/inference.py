@@ -142,7 +142,10 @@ class ExcursionSet(NIDMObject):
         self.prov_type = PROV['Entity']
         if visu is not None:
             visu_filename = 'ExcursionSet' + suffix + '.png'
-            self.visu = Image(visu, visu_filename)
+            print('v ' + str(visu))
+            visu = Image(visu, visu_filename)
+            print('vfn ' + visu_filename)
+        self.visu = visu
         if label is None:
             label = "Excursion Set Map"
         self.label = label

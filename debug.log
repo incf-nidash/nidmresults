@@ -1,0 +1,70 @@
+WARNING:rdflib.term:
+prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
+
+SELECT DISTINCT * WHERE {
+    <http://iri.nidash.org/b2fb1f19b77952496d9bc827fe17fc1f does not look like a valid URI, trying to serialize this will break.
+WARNING:rdflib.term:
+prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
+
+SELECT DISTINCT * WHERE {
+    <http://iri.nidash.org/b2fb1f19b77952496d9bc827fe17fc1f> nidm_hasHRFBasis: ?hrf_basis .
+}
+                 does not look like a valid URI, trying to serialize this will break.
+WARNING:rdflib.term:
+prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
+
+SELECT DISTINCT * WHERE {
+    <http://iri.nidash.org/b2fb1f19b77952496d9bc827fe17fc1f does not look like a valid URI, trying to serialize this will break.
+WARNING:rdflib.term:
+prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
+
+SELECT DISTINCT * WHERE {
+    <http://iri.nidash.org/b2fb1f19b77952496d9bc827fe17fc1f> nidm_hasHRFBasis: ?hrf_basis .
+}
+                 does not look like a valid URI, trying to serialize this will break.
+WARNING:rdflib.term:
+prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
+
+SELECT DISTINCT * WHERE {
+    <http://iri.nidash.org/0f12d0aff0c7e9a6b0695c09edc38dd3 does not look like a valid URI, trying to serialize this will break.
+WARNING:rdflib.term:
+prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
+
+SELECT DISTINCT * WHERE {
+    <http://iri.nidash.org/0f12d0aff0c7e9a6b0695c09edc38dd3> nidm_hasHRFBasis: ?hrf_basis .
+}
+                 does not look like a valid URI, trying to serialize this will break.
+WARNING:rdflib.term:
+prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
+
+SELECT DISTINCT * WHERE {
+    <http://iri.nidash.org/0f12d0aff0c7e9a6b0695c09edc38dd3 does not look like a valid URI, trying to serialize this will break.
+WARNING:rdflib.term:
+prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
+
+SELECT DISTINCT * WHERE {
+    <http://iri.nidash.org/0f12d0aff0c7e9a6b0695c09edc38dd3> nidm_hasHRFBasis: ?hrf_basis .
+}
+                 does not look like a valid URI, trying to serialize this will break.
+WARNING:rdflib.term:
+prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
+
+SELECT DISTINCT * WHERE {
+    <http://iri.nidash.org/e8ab34cd-ca20-4d83-aed5-44b56d226bf4 does not look like a valid URI, trying to serialize this will break.
+WARNING:rdflib.term:
+prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
+
+SELECT DISTINCT * WHERE {
+    <http://iri.nidash.org/e8ab34cd-ca20-4d83-aed5-44b56d226bf4> nidm_hasHRFBasis: ?hrf_basis .
+}
+                 does not look like a valid URI, trying to serialize this will break.

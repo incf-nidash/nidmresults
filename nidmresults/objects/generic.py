@@ -232,7 +232,8 @@ SELECT ?oid ?label ?vox_to_world ?units ?vox_size ?coordinate_system ?numdim
         """
         self.add_attributes({
             PROV['type']: self.type,
-            NIDM_DIMENSIONS_IN_VOXELS: json.dumps(list(self.dimensions)),
+            NIDM_DIMENSIONS_IN_VOXELS: json.dumps(
+                                            [str(x) for x in self.dimensions]),
             NIDM_NUMBER_OF_DIMENSIONS: self.number_of_dimensions,
             NIDM_VOXEL_TO_WORLD_MAPPING:
             json.dumps(self.voxel_to_world.tolist()),
@@ -350,6 +351,8 @@ class Image(NIDMObject):
         self.type = DCTYPE['Image']
         self.prov_type = PROV['Entity']
         self.file = NIDMFile(self.id, image_file, filename)
+        print('filename ' + filename)
+        print('image file ' + image_file)
         self.label = ""  # Enable printing
 
     @classmethod
