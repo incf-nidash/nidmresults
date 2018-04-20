@@ -233,7 +233,7 @@ SELECT ?oid ?label ?vox_to_world ?units ?vox_size ?coordinate_system ?numdim
         self.add_attributes({
             PROV['type']: self.type,
             NIDM_DIMENSIONS_IN_VOXELS: json.dumps(
-                                            [x for x in self.dimensions]),
+                                            [x.item() for x in self.dimensions]),
             NIDM_NUMBER_OF_DIMENSIONS: self.number_of_dimensions,
             NIDM_VOXEL_TO_WORLD_MAPPING:
             json.dumps(self.voxel_to_world.tolist()),
