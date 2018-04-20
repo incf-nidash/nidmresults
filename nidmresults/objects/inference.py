@@ -140,11 +140,11 @@ class ExcursionSet(NIDMObject):
         self.file = NIDMFile(self.id, location, filename, sha)
         self.type = NIDM_EXCURSION_SET_MAP
         self.prov_type = PROV['Entity']
-        if visu is not None:
-            visu_filename = 'ExcursionSet' + suffix + '.png'
-            print('v ' + str(visu))
-            visu = Image(visu, visu_filename)
-            print('vfn ' + visu_filename)
+#        if visu is not None:
+#            visu_filename = 'ExcursionSet' + suffix + '.png'
+#            print('v ' + str(visu))
+#            visu = Image(visu, visu_filename)
+#            print('vfn ' + visu_filename)
         self.visu = visu
         if label is None:
             label = "Excursion Set Map"
