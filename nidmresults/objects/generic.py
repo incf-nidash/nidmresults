@@ -351,9 +351,6 @@ class Image(NIDMObject):
         self.type = DCTYPE['Image']
         self.prov_type = PROV['Entity']
         self.file = NIDMFile(self.id, image_file, filename)
-        print('filename ' + filename)
-        print('image file ' + str(image_file))
-        print('image file type ' + str(type(image_file)))
         self.label = ""  # Enable printing
 
     @classmethod

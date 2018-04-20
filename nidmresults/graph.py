@@ -1057,10 +1057,6 @@ SELECT DISTINCT * WHERE {
                         Image, args['excset_visu_id'])
                 else:
                     excset_visu = None
-                    
-                print('excsetVisu: ' + str(excset_visu))
-                print('excsetVisu type: ' + str(type(excset_visu)))
-                
 
                 if 'cluster_map_id' in args:
                     clustermap_coordspace = self.get_object(
