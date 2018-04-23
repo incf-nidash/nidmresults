@@ -58,11 +58,9 @@ class ContrastWeights(NIDMObject):
         self.type = STATO_CONTRAST_WEIGHT_MATRIX
         self.prov_type = PROV['Entity']
         if label is None:
-            self.label = "Contrast Weights: " + self.contrast_name,
+            self.label = "Contrast Weights: " + self.contrast_name
         else:
             self.label = label
-            
-        print(self.label)
 
     @classmethod
     def get_query(klass, oid=None):
