@@ -249,7 +249,7 @@ class NIDMFile(NIDMObject):
     Object representing a File (to be used as attribute of another class)
     """
     def __init__(self, rdf_id, location, filename=None,
-                 sha=None, format=None, temporary=False):
+                 sha=None, fmt=None, temporary=False):
         super(NIDMFile, self).__init__()
         self.prov_type = PROV['Entity']
         self.path = location
@@ -265,7 +265,7 @@ class NIDMFile(NIDMObject):
         self.label = "'NIDM file'"  # used if display is called
 
         self.sha = sha
-        self.format = format
+        self.fmt = fmt
         self.temporary = temporary
 
     def is_nifti(self):
@@ -332,12 +332,12 @@ class NIDMFile(NIDMObject):
         if self.is_nifti():
             if self.sha is None:
                 self.sha = self.get_sha_sum(new_file)
-            if self.format is None:
-                self.format = "image/nifti"
+            if self.fmt is None:
+                self.fmt = "image/nifti"
 
             self.add_attributes([
                 (CRYPTO['sha512'], self.sha),
-                (DCT['format'], self.format)
+                (DCT['format'], self.fmt)
             ])
 
 
@@ -347,7 +347,7 @@ class Image(NIDMObject):
     Object representing an Image entity.
     """
 
-    def __init__(self, image_file, filename, format='png', oid=None):
+    def __init__(self, image_file, filename, fmt='png', oid=None):
         super(Image, self).__init__(oid=oid)
         self.type = DCTYPE['Image']
         self.prov_type = PROV['Entity']

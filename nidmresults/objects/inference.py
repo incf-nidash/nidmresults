@@ -128,7 +128,7 @@ class ExcursionSet(NIDMObject):
     """
 
     def __init__(self, location, coord_space, visu=None,
-                 oid=None, format=None, label=None,
+                 oid=None, fmt=None, label=None,
                  sha=None, filename=None, inference=None, suffix='',
                  clust_map=None, mip=None, num_clusters=None, p_value=None):
         super(ExcursionSet, self).__init__(oid)
@@ -230,7 +230,7 @@ class ClusterLabelsMap(NIDMObject):
     """
 
     def __init__(self, location, coord_space,
-                 oid=None, format=None, label=None,
+                 oid=None, fmt=None, label=None,
                  sha=None, filename=None, suffix='', temporary=False):
         super(ClusterLabelsMap, self).__init__(oid)
         if not filename:
@@ -644,14 +644,14 @@ class DisplayMaskMap(NIDMObject):
     Object representing a DisplayMaskMap entity.
     """
     def __init__(self, contrast_num, mask_file, mask_num, coord_space,
-                 sha=None, filename=None, format=None, label=None, oid=None,
-                 derfrom_id=None, derfrom_filename=None, derfrom_format=None,
+                 sha=None, filename=None, fmt=None, label=None, oid=None,
+                 derfrom_id=None, derfrom_filename=None, derfrom_fmt=None,
                  derfrom_sha=None, isderfrommap=False):
         super(DisplayMaskMap, self).__init__(oid=oid)
         if not filename:
             filename = 'DisplayMask' + str(mask_num) + '.nii.gz'
         self.file = NIDMFile(self.id, mask_file, filename,
-                             sha=sha, format=format)
+                             sha=sha, fmt=fmt)
         self.coord_space = coord_space
         self.type = NIDM_DISPLAY_MASK_MAP
         self.prov_type = PROV['Entity']
@@ -664,7 +664,7 @@ class DisplayMaskMap(NIDMObject):
                 None, None, None,
                 coord_space=None, oid=derfrom_id,
                 filename=derfrom_filename, sha=derfrom_sha,
-                format=derfrom_format,
+                fmt=derfrom_format,
                 isderfrommap=True)
         else:
             self.derfrom = None
@@ -912,13 +912,13 @@ class SearchSpace(NIDMObject):
                  height_critical_fwe05=None, height_critical_fdr05=None,
                  extent_critical_fwe05=None, extent_critical_fdr05=None,
                  search_vol_geom=None, noise_roughness=None,
-                 filename=None, sha=None, format=None,
+                 filename=None, sha=None, fmt=None,
                  label=None, oid=None):
         super(SearchSpace, self).__init__(oid=oid)
         if not filename:
             filename = 'SearchSpaceMask.nii.gz'
         self.file = NIDMFile(self.id, search_space_file, filename,
-                             sha=sha, format=format)
+                             sha=sha, fmt=fmt)
         self.coord_space = coord_space
         self.resel_size_in_voxels = resel_size_in_voxels
         self.search_volume_in_voxels = vol_in_voxels

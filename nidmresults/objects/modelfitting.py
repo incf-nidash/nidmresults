@@ -580,8 +580,8 @@ class ParameterEstimateMap(NIDMObject):
 
     def __init__(self, coord_space, pe_file=None, pe_num=None, filename=None,
                  sha=None, label=None, suffix='', model_param_estimation=None,
-                 oid=None, format=None, derfrom_id=None, derfrom_filename=None,
-                 derfrom_format=None, derfrom_sha=None, isderfrommap=False):
+                 oid=None, fmt=None, derfrom_id=None, derfrom_filename=None,
+                 derfrom_fmt=None, derfrom_sha=None, isderfrommap=False):
         super(ParameterEstimateMap, self).__init__(oid=oid)
         # Column index in the corresponding design matrix
         self.num = pe_num
@@ -591,7 +591,7 @@ class ParameterEstimateMap(NIDMObject):
             filename = 'ParameterEstimate' + suffix + '.nii.gz'
 
         self.file = NIDMFile(self.id, pe_file, filename=filename, sha=sha,
-                             format=format)
+                             fmt=fmt)
 
         self.type = NIDM_PARAMETER_ESTIMATE_MAP
         self.prov_type = PROV['Entity']
@@ -609,7 +609,7 @@ class ParameterEstimateMap(NIDMObject):
             self.derfrom = ParameterEstimateMap(
                 oid=derfrom_id, coord_space=coord_space,
                 filename=derfrom_filename, sha=derfrom_sha,
-                format=derfrom_format, isderfrommap=True)
+                fmt=derfrom_format, isderfrommap=True)
         else:
             self.derfrom = None
         self.isderfrommap = isderfrommap
@@ -677,16 +677,16 @@ class ResidualMeanSquares(NIDMObject):
     """
 
     def __init__(self, residual_file, coord_space,
-                 temporary=False, suffix='', format=None, filename=None,
+                 temporary=False, suffix='', fmt=None, filename=None,
                  sha=None, label=None, oid=None,
-                 derfrom_id=None, derfrom_filename=None, derfrom_format=None,
+                 derfrom_id=None, derfrom_filename=None, derfrom_fmt=None,
                  derfrom_sha=None, isderfrommap=False):
         super(ResidualMeanSquares, self).__init__(oid=oid)
         self.coord_space = coord_space
         if filename is None:
             filename = 'ResidualMeanSquares' + suffix + '.nii.gz'
         self.file = NIDMFile(self.id, residual_file, filename,
-                             temporary=temporary, format=format, sha=sha)
+                             temporary=temporary, fmt=fmt, sha=sha)
         if label is None:
             label = "Residual Mean Squares Map"
         self.label = label
@@ -696,7 +696,7 @@ class ResidualMeanSquares(NIDMObject):
             self.derfrom = ResidualMeanSquares(
                 None, coord_space,
                 oid=derfrom_id, filename=derfrom_filename,
-                sha=derfrom_sha, format=derfrom_format,
+                sha=derfrom_sha, fmt=derfrom_format,
                 isderfrommap=True)
         else:
             self.derfrom = None
@@ -755,16 +755,16 @@ class ReselsPerVoxelMap(NIDMObject):
     """
 
     def __init__(self, rpv_file, coord_space,
-                 temporary=False, suffix='', format=None, filename=None,
+                 temporary=False, suffix='', fmt=None, filename=None,
                  sha=None, label=None, oid=None,
-                 derfrom_id=None, derfrom_filename=None, derfrom_format=None,
+                 derfrom_id=None, derfrom_filename=None, derfrom_fmt=None,
                  derfrom_sha=None, inf_id=None, isderfrommap=False):
         super(ReselsPerVoxelMap, self).__init__(oid=oid)
         self.coord_space = coord_space
         if filename is None:
             filename = 'ReselsPerVoxelMap' + suffix + '.nii.gz'
         self.file = NIDMFile(self.id, rpv_file, filename,
-                             temporary=temporary, format=format, sha=sha)
+                             temporary=temporary, fmt=fmt, sha=sha)
         if label is None:
             label = "Resels Per Voxel File"
         self.label = label
@@ -774,7 +774,7 @@ class ReselsPerVoxelMap(NIDMObject):
             self.derfrom = ReselsPerVoxelMap(
                 None, coord_space,
                 oid=derfrom_id, filename=derfrom_filename,
-                sha=derfrom_sha, format=derfrom_format,
+                sha=derfrom_sha, fmt=derfrom_format,
                 isderfrommap=True)
         else:
             self.derfrom = None
@@ -835,16 +835,16 @@ class MaskMap(NIDMObject):
     """
 
     def __init__(self, mask_file, coord_space, user_defined,
-                 suffix='', filename=None, format=None, label=None, sha=None,
+                 suffix='', filename=None, fmt=None, label=None, sha=None,
                  oid=None,
-                 derfrom_id=None, derfrom_filename=None, derfrom_format=None,
+                 derfrom_id=None, derfrom_filename=None, derfrom_fmt=None,
                  derfrom_sha=None, isderfrommap=False):
         super(MaskMap, self).__init__(oid=oid)
         self.coord_space = coord_space
         if filename is None:
             filename = 'Mask' + suffix + '.nii.gz'
         self.file = NIDMFile(self.id, mask_file, filename,
-                             sha=sha, format=format)
+                             sha=sha, fmt=fmt)
         self.user_defined = user_defined
         self.type = NIDM_MASK_MAP
         self.prov_type = PROV['Entity']
@@ -855,7 +855,7 @@ class MaskMap(NIDMObject):
             self.derfrom = MaskMap(
                 None, coord_space, user_defined,
                 oid=derfrom_id, filename=derfrom_filename,
-                sha=derfrom_sha, format=derfrom_format,
+                sha=derfrom_sha, fmt=derfrom_format,
                 isderfrommap=True)
         else:
             self.derfrom = None
@@ -918,12 +918,12 @@ class GrandMeanMap(NIDMObject):
     # TODO: we should remove mask_file here and ask for masked data instead?
     def __init__(self, org_file, mask_file, coord_space,
                  suffix='', label=None, filename=None, sha=None,
-                 format=format, masked_median=None, oid=None):
+                 fmt=None, masked_median=None, oid=None):
         super(GrandMeanMap, self).__init__(oid=oid)
         if filename is None:
             filename = 'GrandMean' + suffix + '.nii.gz'
         self.file = NIDMFile(self.id, org_file, filename,
-                             sha=sha, format=format)
+                             sha=sha, fmt=fmt)
         self.mask_file = mask_file  # needed to compute masked median
         self.coord_space = coord_space
         self.type = NIDM_GRAND_MEAN_MAP
