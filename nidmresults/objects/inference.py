@@ -726,6 +726,7 @@ class PeakCriteria(NIDMObject):
                  oid=None):
         super(PeakCriteria, self).__init__(oid=oid)
         self.num_peak = num_peak
+        print('peak_dist ' + str(peak_dist))
         self.peak_dist = peak_dist
         self.type = NIDM_PEAK_DEFINITION_CRITERIA
         self.prov_type = PROV['Entity']

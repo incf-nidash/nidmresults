@@ -314,8 +314,11 @@ class ContrastStdErrMap(NIDMObject):
             path, var_cope_filename = os.path.split(self.file)
             contrast_var = ContrastVariance(
                 coord_space=self.var_coord_space, var_file=self.file, 
-                filename=var_cope_filename, fmt=self.fmt, sha=self.sha)
+                filename=var_cope_filename, fmt=self.fmt, sha=self.sha,
+                oid=derfrom_id)
             self.contrast_var = contrast_var
+            
+            print('Active1')
 
             # Create standard error map from contrast variance map
             var_cope_img = nib.load(self.file)
@@ -332,16 +335,17 @@ class ContrastStdErrMap(NIDMObject):
         else:
             self.file = NIDMFile(self.id, self.file, self.filename,
                                  fmt=self.fmt, sha=self.sha)
-            self.contrast_var = None
 
-        if derfrom_id is not None:
-            # TODO: assuming same coordinate space for derived from
-            self.contrast_var = ContrastVariance(
-                coord_space=self.coord_space, var_file=None,
-                filename=derfrom_filename, fmt=derfrom_fmt,
-                sha=derfrom_sha, oid=derfrom_id)
-        else:
-            self.contrast_var = None
+            if derfrom_id is not None:
+                # TODO: assuming same coordinate space for derived from
+                self.contrast_var = ContrastVariance(
+                    coord_space=self.coord_space, var_file=None,
+                    filename=derfrom_filename, fmt=derfrom_fmt,
+                    sha=derfrom_sha, oid=derfrom_id)
+                print('Active2')
+            else:
+                self.contrast_var = None
+                print('Active3')
 
     @classmethod
     def get_query(klass, oid=None):
