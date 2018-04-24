@@ -162,7 +162,7 @@ class ContrastMap(NIDMObject):
             """ + oid_var + """ a nidm_ContrastMap: ;
             rdfs:label ?label ;
             prov:atLocation ?contrast_file ;
-            dct:format ?format ;
+            dct:format ?fmt ;
             nfo:fileName ?filename ;
             nidm_contrastName: ?contrast_name ;
             crypto:sha512 ?sha .
@@ -171,7 +171,7 @@ class ContrastMap(NIDMObject):
 
             ?derfrom_id a nidm_ContrastMap: ;
                 nfo:fileName ?derfrom_filename ;
-                dct:format ?derfrom_format ;
+                dct:format ?derfrom_fmt ;
                 crypto:sha512 ?derfrom_sha .
              } .
         }
@@ -239,7 +239,7 @@ SELECT DISTINCT * WHERE {
     """ + oid_var + """ a nidm_ContrastExplainedMeanSquareMap: ;
     rdfs:label ?label ;
     prov:atLocation ?expl_mean_sq_file ;
-    dct:format ?format ;
+    dct:format ?fmt ;
     nfo:fileName ?filename ;
     crypto:sha512 ?sha .
 }
@@ -364,14 +364,14 @@ SELECT DISTINCT * WHERE {
     rdfs:label ?label ;
     prov:atLocation ?filepath ;
     nfo:fileName ?filename ;
-    dct:format ?format ;
+    dct:format ?fmt ;
     crypto:sha512 ?sha .
 
     OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
 
     ?derfrom_id a nidm_ContrastVarianceMap: ;
         nfo:fileName ?derfrom_filename ;
-        dct:format ?derfrom_format ;
+        dct:format ?derfrom_fmt ;
         crypto:sha512 ?derfrom_sha .
      } .
 }
@@ -503,7 +503,7 @@ SELECT DISTINCT * WHERE {
     """ + oid_var + """ a nidm_StatisticMap: ;
     rdfs:label ?label ;
     prov:atLocation ?location ;
-    dct:format ?format ;
+    dct:format ?fmt ;
     nfo:fileName ?filename ;
     nidm_contrastName: ?contrast_name ;
     crypto:sha512 ?sha ;
@@ -515,7 +515,7 @@ SELECT DISTINCT * WHERE {
 
     ?derfrom_id a nidm_StatisticMap: ;
         nfo:fileName ?derfrom_filename ;
-        dct:format ?derfrom_format ;
+        dct:format ?derfrom_fmt ;
         crypto:sha512 ?derfrom_sha .
      } .
 }

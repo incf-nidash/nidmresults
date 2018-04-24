@@ -609,7 +609,7 @@ class ParameterEstimateMap(NIDMObject):
             self.derfrom = ParameterEstimateMap(
                 oid=derfrom_id, coord_space=coord_space,
                 filename=derfrom_filename, sha=derfrom_sha,
-                fmt=derfrom_format, isderfrommap=True)
+                fmt=derfrom_fmt, isderfrommap=True)
         else:
             self.derfrom = None
         self.isderfrommap = isderfrommap
@@ -629,7 +629,7 @@ SELECT DISTINCT * WHERE {
         rdfs:label ?label ;
         nfo:fileName ?filename ;
         crypto:sha512 ?sha ;
-        dct:format ?format .
+        dct:format ?fmt .
 
     OPTIONAL {""" + oid_var + """ prov:atLocation ?pe_file .} .
 
@@ -637,7 +637,7 @@ SELECT DISTINCT * WHERE {
 
     ?derfrom_id a nidm_ParameterEstimateMap: ;
         nfo:fileName ?derfrom_filename ;
-        dct:format ?derfrom_format ;
+        dct:format ?derfrom_fmt ;
         crypto:sha512 ?derfrom_sha .
      } .
 }
@@ -696,7 +696,7 @@ class ResidualMeanSquares(NIDMObject):
             self.derfrom = ResidualMeanSquares(
                 None, coord_space,
                 oid=derfrom_id, filename=derfrom_filename,
-                sha=derfrom_sha, fmt=derfrom_format,
+                sha=derfrom_sha, fmt=derfrom_fmt,
                 isderfrommap=True)
         else:
             self.derfrom = None
@@ -718,13 +718,13 @@ SELECT DISTINCT * WHERE {
         nfo:fileName ?filename ;
         crypto:sha512 ?sha ;
         prov:atLocation ?residual_file ;
-        dct:format ?format .
+        dct:format ?fmt .
 
     OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
 
     ?derfrom_id a nidm_ResidualMeanSquaresMap: ;
         nfo:fileName ?derfrom_filename ;
-        dct:format ?derfrom_format ;
+        dct:format ?derfrom_fmt ;
         crypto:sha512 ?derfrom_sha .
      } .
 
@@ -774,7 +774,7 @@ class ReselsPerVoxelMap(NIDMObject):
             self.derfrom = ReselsPerVoxelMap(
                 None, coord_space,
                 oid=derfrom_id, filename=derfrom_filename,
-                sha=derfrom_sha, fmt=derfrom_format,
+                sha=derfrom_sha, fmt=derfrom_fmt,
                 isderfrommap=True)
         else:
             self.derfrom = None
@@ -797,7 +797,7 @@ SELECT DISTINCT * WHERE {
         nfo:fileName ?filename ;
         crypto:sha512 ?sha ;
         prov:atLocation ?rpv_file ;
-        dct:format ?format .
+        dct:format ?fmt .
 
     ?inf_id prov:used """ + oid_var + """ .
 
@@ -805,7 +805,7 @@ SELECT DISTINCT * WHERE {
 
     ?derfrom_id a nidm_ReselsPerVoxelMap: ;
         nfo:fileName ?derfrom_filename ;
-        dct:format ?derfrom_format ;
+        dct:format ?derfrom_fmt ;
         crypto:sha512 ?derfrom_sha .
      } .
 }
@@ -855,7 +855,7 @@ class MaskMap(NIDMObject):
             self.derfrom = MaskMap(
                 None, coord_space, user_defined,
                 oid=derfrom_id, filename=derfrom_filename,
-                sha=derfrom_sha, fmt=derfrom_format,
+                sha=derfrom_sha, fmt=derfrom_fmt,
                 isderfrommap=True)
         else:
             self.derfrom = None
@@ -879,13 +879,13 @@ class MaskMap(NIDMObject):
                 nfo:fileName ?filename ;
                 crypto:sha512 ?sha ;
                 prov:atLocation ?mask_file ;
-                dct:format ?format .
+                dct:format ?fmt .
 
             OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
 
             ?derfrom_id a nidm_MaskMap: ;
                 nfo:fileName ?derfrom_filename ;
-                dct:format ?derfrom_format ;
+                dct:format ?derfrom_fmt ;
                 crypto:sha512 ?derfrom_sha .
              } .
         }
@@ -951,7 +951,7 @@ class GrandMeanMap(NIDMObject):
                 prov:atLocation ?org_file ;
                 nfo:fileName ?filename ;
                 crypto:sha512 ?sha ;
-                dct:format ?format .
+                dct:format ?fmt .
         }
         """
         return query

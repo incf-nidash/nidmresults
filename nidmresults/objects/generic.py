@@ -370,7 +370,7 @@ class Image(NIDMObject):
             """ + oid_var + """ a dctype:Image ;
             prov:atLocation ?image_file ;
             nfo:fileName ?filename ;
-            dct:format ?format .
+            dct:format ?fmt .
             }
         """
         return query

@@ -1,0 +1,14 @@
+WARNING:rdflib.term:
+prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
+
+SELECT DISTINCT * WHERE {
+    <http://iri.nidash.org/b2fb1f19b77952496d9bc827fe17fc1f does not look like a valid URI, trying to serialize this will break.
+WARNING:rdflib.term:
+prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
+
+SELECT DISTINCT * WHERE {
+    <http://iri.nidash.org/b2fb1f19b77952496d9bc827fe17fc1f> nidm_hasHRFBasis: ?hrf_basis .
+}
+                 does not look like a valid URI, trying to serialize this will break.

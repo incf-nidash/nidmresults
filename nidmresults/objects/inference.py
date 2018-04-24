@@ -174,7 +174,7 @@ SELECT DISTINCT * WHERE {
 """ + oid_var + """ a nidm_ExcursionSetMap: ;
     prov:atLocation ?location ;
     rdfs:label ?label ;
-    dct:format ?format ;
+    dct:format ?fmt ;
     nfo:fileName ?filename ;
     crypto:sha512 ?sha .
 
@@ -260,7 +260,7 @@ SELECT DISTINCT * WHERE {
         nfo:fileName ?filename ;
         crypto:sha512 ?sha ;
         prov:atLocation ?location ;
-        dct:format ?format .
+        dct:format ?fmt .
         }
         """
         return query
@@ -664,7 +664,7 @@ class DisplayMaskMap(NIDMObject):
                 None, None, None,
                 coord_space=None, oid=derfrom_id,
                 filename=derfrom_filename, sha=derfrom_sha,
-                fmt=derfrom_format,
+                fmt=derfrom_fmt,
                 isderfrommap=True)
         else:
             self.derfrom = None
@@ -686,13 +686,13 @@ SELECT DISTINCT * WHERE {
         nfo:fileName ?filename ;
         crypto:sha512 ?sha ;
         prov:atLocation ?mask_file ;
-        dct:format ?format .
+        dct:format ?fmt .
 
     OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
 
     ?derfrom_id a nidm_DisplayMaskMap: ;
         nfo:fileName ?derfrom_filename ;
-        dct:format ?derfrom_format ;
+        dct:format ?derfrom_fmt ;
         crypto:sha512 ?derfrom_sha .
      } .
 
@@ -984,7 +984,7 @@ SELECT DISTINCT * WHERE {
     nidm_noiseFWHMInUnits: ?noise_fwhm_in_units ;
     nidm_randomFieldStationarity: ?random_field_stationarity ;
     prov:atLocation ?search_space_file ;
-    dct:format ?format ;
+    dct:format ?fmt ;
     nfo:fileName ?filename ;
     crypto:sha512 ?sha .
 

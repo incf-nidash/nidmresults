@@ -403,12 +403,14 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
                 return(self.objects[oid])
 
         query = klass.get_query(oid)
+        print(query)
         sd = self.graph.query(query)
 
         objects = dict()
         if sd:
             for row in sd:
                 argums = row.asdict()
+                print('argums ' + repr(argums))
 
                 # Convert from rdflib Literal to appropriate Python datatype
                 argums = {k: v.toPython() for k, v in argums.items()}
@@ -628,6 +630,7 @@ SELECT DISTINCT * WHERE {
                                 args_hrf['hrf_basis']))
 
                 if 'png_id' in args:
+                    print('args ' + repr(args['png_id']))
                     design_matrix_png = self.get_object(Image, args['png_id'])
                 else:
                     design_matrix_png = None
