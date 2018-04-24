@@ -390,7 +390,7 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
     def parse(self, rdf_data, fmt="turtle"):
         g = rdflib.Graph()
         try:
-            g.parse(data=rdf_data, fmt=fmt)
+            g.parse(data=rdf_data, format=fmt)
         except BadSyntax:
             raise self.ParseException(
                 "RDFLib was unable to parse the RDF file.")
