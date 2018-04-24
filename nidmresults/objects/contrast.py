@@ -317,8 +317,6 @@ class ContrastStdErrMap(NIDMObject):
                 filename=var_cope_filename, fmt=self.fmt, sha=self.sha,
                 oid=derfrom_id)
             self.contrast_var = contrast_var
-            
-            print('Active1')
 
             # Create standard error map from contrast variance map
             var_cope_img = nib.load(self.file)
@@ -342,10 +340,8 @@ class ContrastStdErrMap(NIDMObject):
                     coord_space=self.coord_space, var_file=None,
                     filename=derfrom_filename, fmt=derfrom_fmt,
                     sha=derfrom_sha, oid=derfrom_id)
-                print('Active2')
             else:
                 self.contrast_var = None
-                print('Active3')
 
     @classmethod
     def get_query(klass, oid=None):

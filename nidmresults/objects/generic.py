@@ -423,7 +423,6 @@ class NeuroimagingSoftware(NIDMObject):
             self.label = label
         self.prov_type = PROV['Agent']
         self.feat_version = feat_version
-        print('self.feat_Version ' + str(self.feat_version))
 
     @classmethod
     def get_query(klass, oid=None):
