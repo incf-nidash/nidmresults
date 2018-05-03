@@ -113,7 +113,7 @@ class NIDMExporter():
             self.cleanup()
             raise
 
-    def cleanup(self,):
+    def cleanup(self):
         if os.path.isdir(self.export_dir):
             shutil.rmtree(self.export_dir)
 
