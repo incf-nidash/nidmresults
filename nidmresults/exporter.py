@@ -693,12 +693,12 @@ class NIDMExporter():
             jsonld_fid.write(jsonld_txt)
 
         # provjsonld_file = os.path.join(self.export_dir, 'nidm.provjsonld')
-        # provjsonld_txt = self.doc.serialize(fmt='jsonld')
+        # provjsonld_txt = self.doc.serialize(format='jsonld')
         # with open(provjsonld_file, 'w') as provjsonld_fid:
         #     provjsonld_fid.write(provjsonld_txt)
 
         # provn_file = os.path.join(self.export_dir, 'nidm.provn')
-        # provn_txt = self.doc.serialize(fmt='provn')
+        # provn_txt = self.doc.serialize(format='provn')
         # with open(provn_file, 'w') as provn_fid:
         #     provn_fid.write(provn_txt)
 
@@ -722,9 +722,9 @@ class NIDMExporter():
         # ttl_fid = open(ttl_file, 'w');
         # serialization is done in xlm rdf
         # graph = Graph()
-        # graph.parse(data=self.doc.serialize(fmt='rdf'), fmt="xml")
-        # ttl_fid.write(graph.serialize(fmt="turtle"))
-        # ttl_fid.write(self.doc.serialize(fmt='rdf').
+        # graph.parse(data=self.doc.serialize(format='rdf'), format="xml")
+        # ttl_fid.write(graph.serialize(format="turtle"))
+        # ttl_fid.write(self.doc.serialize(format='rdf').
             # replace("inf", '"INF"'))
         # ttl_fid.close()
         # print("provconvert -infile " + provn_file + " -outfile " + ttl_file)
