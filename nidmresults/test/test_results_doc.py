@@ -315,7 +315,7 @@ class TestResultDataModel(object):
         return list([graph1, graph2])
 
     def compare_full_graphs(self, gt_graph, other_graph, owl, include=False,
-                            raise_now=False, reconcile=True):
+                            raise_now=False, reconcile=True, to_ignore=None):
         ''' Compare gt_graph and other_graph '''
         my_exception = ""
 
@@ -327,10 +327,6 @@ class TestResultDataModel(object):
         in_both, in_gt, in_other = graph_diff(gt_graph, other_graph)
 
         exc_missing = list()
-
-        # Attributes to ignore
-        # Version of NIDM exporter -- NIDM_SOFTWARE_VERSION
-        to_ignore = [NIDM_SOFTWARE_VERSION]
 
         for s, p, o in in_gt:
             # If there is a corresponding s,p check if
