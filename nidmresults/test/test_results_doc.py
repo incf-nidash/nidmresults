@@ -327,6 +327,11 @@ class TestResultDataModel(object):
         in_both, in_gt, in_other = graph_diff(gt_graph, other_graph)
 
         exc_missing = list()
+
+        # Attributes to ignore
+        # Version of NIDM exporter -- NIDM_SOFTWARE_VERSION
+        to_ignore = [NIDM_SOFTWARE_VERSION]
+
         for s, p, o in in_gt:
             # If there is a corresponding s,p check if
             # there is an equivalent o
@@ -338,24 +343,26 @@ class TestResultDataModel(object):
                     in_other.remove((s, p, o_other))
                     break
             else:
-                exc_missing.append(
-                    "\nMissing :\t '%s %s %s'"
-                    % (
-                        self.get_readable_name(owl, gt_graph, s),
-                        self.get_readable_name(owl, gt_graph, p),
-                        self.get_readable_name(owl, gt_graph, o)
-                    ))
+                if (p not in to_ignore):
+                    exc_missing.append(
+                        "\nMissing :\t '%s %s %s'"
+                        % (
+                            self.get_readable_name(owl, gt_graph, s),
+                            self.get_readable_name(owl, gt_graph, p),
+                            self.get_readable_name(owl, gt_graph, o)
+                        ))
 
         exc_added = list()
         if not include:
             for s, p, o in in_other:
-                exc_added.append(
-                    "\nAdded :\t '%s %s %s'"
-                    % (
-                        self.get_readable_name(owl, other_graph, s),
-                        self.get_readable_name(owl, other_graph, p),
-                        self.get_readable_name(owl, other_graph, o)
-                    ))
+                if p not in to_ignore:
+                    exc_added.append(
+                        "\nAdded :\t '%s %s %s'"
+                        % (
+                            self.get_readable_name(owl, other_graph, s),
+                            self.get_readable_name(owl, other_graph, p),
+                            self.get_readable_name(owl, other_graph, o)
+                        ))
 
         my_exception += "".join(sorted(exc_missing) + sorted(exc_added))
 
