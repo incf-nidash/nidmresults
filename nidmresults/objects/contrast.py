@@ -468,7 +468,8 @@ class StatisticMap(NIDMObject):
         self.fmt = fmt
 
         # Effect degrees of freedom for T-test is always 1
-        if (effdof is None) and (self.stat == STATO_TSTATISTIC):
+        if (effdof is None) and (self.stat in
+                                 [STATO_TSTATISTIC, STATO_ZSTATISTIC]):
             effdof = 1.0
 
         self.effdof = effdof
