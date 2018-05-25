@@ -602,9 +602,7 @@ SELECT DISTINCT * WHERE {
         Create prov entities and activities.
         """
         if nidm_version['num'] in ["1.0.0", "1.1.0"]:
-            cluster_naming = "Significant Cluster"
-        else:
-            cluster_naming = "Supra-Threshold Cluster"
+            self.label = self.label.replace("Supra-Threshold", "Significant")
 
         # FIXME deal with multiple contrasts
         atts = (
