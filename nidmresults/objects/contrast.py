@@ -466,9 +466,10 @@ class StatisticMap(NIDMObject):
                 self.label = self.stat_type + '-' + self.label
 
         self.fmt = fmt
-        # if effdof is None:
-        #     # FIXME: this should not be 1 for F-test
-        #     effdof = 1.0
+
+        # Effect degrees of freedom for T-test is always 1
+        if (effdof is None) and (self.stat == STATO_TSTATISTIC):
+            effdof = 1.0
 
         self.effdof = effdof
 
