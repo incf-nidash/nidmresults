@@ -13,7 +13,7 @@ from nidmresults.objects.constants_rdflib import *
 from nidmresults.objects.modelfitting import *
 from nidmresults.objects.contrast import *
 from nidmresults.objects.inference import *
-from nidmresults.exporter import NIDMExporter
+from nidmresults.exporter import NIDMExporter 
 import collections
 # from rdflib.term import Literal
 
