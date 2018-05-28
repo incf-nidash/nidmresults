@@ -58,7 +58,7 @@ class ContrastWeights(NIDMObject):
         self.type = STATO_CONTRAST_WEIGHT_MATRIX
         self.prov_type = PROV['Entity']
         if label is None:
-            self.label = "Contrast Weights: " + self.contrast_name,
+            self.label = "Contrast Weights: " + self.contrast_name
         else:
             self.label = label
 
@@ -116,9 +116,9 @@ class ContrastMap(NIDMObject):
     """
 
     def __init__(self, contrast_file, contrast_num, contrast_name,
-                 coord_space, sha=None, format=None,
+                 coord_space, sha=None, fmt=None,
                  label=None, filename=None, oid=None, derfrom_id=None,
-                 derfrom_filename=None, derfrom_format=None,
+                 derfrom_filename=None, derfrom_fmt=None,
                  derfrom_sha=None, isderfrommap=False):
         super(ContrastMap, self).__init__(oid=oid)
         self.num = contrast_num
@@ -126,7 +126,7 @@ class ContrastMap(NIDMObject):
         if filename is None:
             filename = 'Contrast' + self.num + '.nii.gz'
         self.file = NIDMFile(self.id, contrast_file, filename, sha=sha,
-                             format=format)
+                             fmt=fmt)
         self.coord_space = coord_space
         self.type = NIDM_CONTRAST_MAP
         self.prov_type = PROV['Entity']
@@ -143,7 +143,7 @@ class ContrastMap(NIDMObject):
                 contrast_file=None, contrast_num=None,
                 contrast_name=None, oid=derfrom_id, coord_space=coord_space,
                 filename=derfrom_filename, sha=derfrom_sha,
-                format=derfrom_format, isderfrommap=True)
+                fmt=derfrom_fmt, isderfrommap=True)
         else:
             self.derfrom = None
         self.isderfrommap = isderfrommap
@@ -162,7 +162,7 @@ class ContrastMap(NIDMObject):
             """ + oid_var + """ a nidm_ContrastMap: ;
             rdfs:label ?label ;
             prov:atLocation ?contrast_file ;
-            dct:format ?format ;
+            dct:format ?fmt ;
             nfo:fileName ?filename ;
             nidm_contrastName: ?contrast_name ;
             crypto:sha512 ?sha .
@@ -171,7 +171,7 @@ class ContrastMap(NIDMObject):
 
             ?derfrom_id a nidm_ContrastMap: ;
                 nfo:fileName ?derfrom_filename ;
-                dct:format ?derfrom_format ;
+                dct:format ?derfrom_fmt ;
                 crypto:sha512 ?derfrom_sha .
              } .
         }
@@ -209,7 +209,7 @@ class ContrastExplainedMeanSquareMap(NIDMObject):
     """
     def __init__(self, stat_file, sigma_sq_file, contrast_num,
                  coord_space, expl_mean_sq_file=None,
-                 sha=None, format=None, filename=None, oid=None,
+                 sha=None, fmt=None, filename=None, oid=None,
                  label="Contrast Explained Mean Square Map"):
         super(ContrastExplainedMeanSquareMap, self).__init__(oid=oid)
         self.stat_file = stat_file
@@ -221,7 +221,7 @@ class ContrastExplainedMeanSquareMap(NIDMObject):
         self.expl_mean_sq_file = expl_mean_sq_file
         self.sha = sha
         self.filename = filename
-        self.format = format
+        self.fmt = fmt
         self.label = label
 
     @classmethod
@@ -239,7 +239,7 @@ SELECT DISTINCT * WHERE {
     """ + oid_var + """ a nidm_ContrastExplainedMeanSquareMap: ;
     rdfs:label ?label ;
     prov:atLocation ?expl_mean_sq_file ;
-    dct:format ?format ;
+    dct:format ?fmt ;
     nfo:fileName ?filename ;
     crypto:sha512 ?sha .
 }
@@ -265,12 +265,12 @@ SELECT DISTINCT * WHERE {
             self.filename = ("ContrastExplainedMeanSquareMap" +
                              self.num + ".nii.gz")
             self.expl_mean_sq_file = os.path.join(
-                export_dir, expl_mean_sq_filename)
+                export_dir, self.filename)
             nib.save(expl_mean_sq, self.expl_mean_sq_file)
 
         self.file = NIDMFile(self.id, self.expl_mean_sq_file,
                              filename=self.filename,
-                             sha=self.sha, format=self.format)
+                             sha=self.sha, fmt=self.fmt)
 
         # Contrast Explained Mean Square Map entity
         path, filename = os.path.split(self.expl_mean_sq_file)
@@ -291,9 +291,10 @@ class ContrastStdErrMap(NIDMObject):
 # contrast_num=contrast_num, is_variance=False, var_coord_space=None)
 
     def __init__(self, contrast_num, filepath, is_variance, coord_space,
-                 var_coord_space, label=None, format=None,
+                 var_coord_space, label=None, fmt=None,
                  sha=None, filename=None, oid=None, derfrom_id=None,
-                 derfrom_filename=None, derfrom_sha=None, derfrom_format=None):
+                 derfrom_filename=None, derfrom_sha=None, derfrom_fmt=None,
+                 export_dir=None):
         super(ContrastStdErrMap, self).__init__(oid=oid)
         self.file = filepath
         self.is_variance = is_variance
@@ -303,7 +304,7 @@ class ContrastStdErrMap(NIDMObject):
             self.var_coord_space = var_coord_space
         self.type = NIDM_CONTRAST_STANDARD_ERROR_MAP
         self.prov_type = PROV['Entity']
-        self.format = format
+        self.fmt = fmt
         self.sha = sha
         self.filename = filename
 
@@ -312,8 +313,9 @@ class ContrastStdErrMap(NIDMObject):
             # Copy contrast variance map in export directory
             path, var_cope_filename = os.path.split(self.file)
             contrast_var = ContrastVariance(
-                self.var_coord_space, self.file, var_cope_filename,
-                format=self.format, sha=self.sha, filename=self.filename)
+                coord_space=self.var_coord_space, var_file=self.file, 
+                filename=var_cope_filename, fmt=self.fmt, sha=self.sha,
+                oid=derfrom_id)
             self.contrast_var = contrast_var
 
             # Create standard error map from contrast variance map
@@ -330,17 +332,16 @@ class ContrastStdErrMap(NIDMObject):
 
         else:
             self.file = NIDMFile(self.id, self.file, self.filename,
-                                 format=self.format, sha=self.sha)
-            self.contrast_var = None
+                                 fmt=self.fmt, sha=self.sha)
 
-        if derfrom_id is not None:
-            # TODO: assuming same coordinate space for derived from
-            self.contrast_var = ContrastVariance(
-                coord_space=self.coord_space, var_file=None,
-                filename=derfrom_filename, format=derfrom_format,
-                sha=derfrom_sha, oid=derfrom_id)
-        else:
-            self.contrast_var = None
+            if derfrom_id is not None:
+                # TODO: assuming same coordinate space for derived from
+                self.contrast_var = ContrastVariance(
+                    coord_space=self.coord_space, var_file=None,
+                    filename=derfrom_filename, fmt=derfrom_fmt,
+                    sha=derfrom_sha, oid=derfrom_id)
+            else:
+                self.contrast_var = None
 
     @classmethod
     def get_query(klass, oid=None):
@@ -359,14 +360,14 @@ SELECT DISTINCT * WHERE {
     rdfs:label ?label ;
     prov:atLocation ?filepath ;
     nfo:fileName ?filename ;
-    dct:format ?format ;
+    dct:format ?fmt ;
     crypto:sha512 ?sha .
 
     OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
 
     ?derfrom_id a nidm_ContrastVarianceMap: ;
         nfo:fileName ?derfrom_filename ;
-        dct:format ?derfrom_format ;
+        dct:format ?derfrom_fmt ;
         crypto:sha512 ?derfrom_sha .
      } .
 }
@@ -386,16 +387,16 @@ SELECT DISTINCT * WHERE {
 
 
 class ContrastVariance(NIDMObject):
-    def __init__(self, coord_space, var_file, filename, format=None,
+    def __init__(self, coord_space, var_file, filename, fmt=None,
                  sha=None, oid=None):
         super(ContrastVariance, self).__init__(oid=oid)
         self.coord_space = coord_space
         self.type = NIDM_CONTRAST_VARIANCE_MAP
         self.filename = filename
-        self.format = format
+        self.fmt = fmt
         self.sha = sha
         self.file = NIDMFile(self.id, var_file, filename=self.filename,
-                             format=self.format, sha=self.sha)
+                             fmt=self.fmt, sha=self.sha)
         self.prov_type = PROV['Entity']
 
     def export(self, nidm_version, export_dir):
@@ -410,9 +411,9 @@ class StatisticMap(NIDMObject):
 
     def __init__(self, location, stat_type, contrast_name, dof, coord_space,
                  contrast_num=None, label=None, oid=None,
-                 format="image/nifti", effdof=None, filename=None, sha=None,
+                 fmt="image/nifti", effdof=None, filename=None, sha=None,
                  contrast_estimation=None, derfrom_id=None,
-                 derfrom_filename=None, derfrom_format=None,
+                 derfrom_filename=None, derfrom_fmt=None,
                  derfrom_sha=None, isderfrommap=False):
         super(StatisticMap, self).__init__(oid=oid)
         self.num = contrast_num
@@ -440,7 +441,7 @@ class StatisticMap(NIDMObject):
                 None, None, None, None,
                 coord_space=None, oid=derfrom_id,
                 filename=derfrom_filename, sha=derfrom_sha,
-                format=derfrom_format,
+                fmt=derfrom_fmt,
                 isderfrommap=True)
         else:
             self.derfrom = None
@@ -464,10 +465,12 @@ class StatisticMap(NIDMObject):
                 # Include statistic type in the label
                 self.label = self.stat_type + '-' + self.label
 
-        self.format = format
-        # if effdof is None:
-        #     # FIXME: this should not be 1 for F-test
-        #     effdof = 1.0
+        self.fmt = fmt
+
+        # Effect degrees of freedom for T-test is always 1
+        if (effdof is None) and (self.stat in
+                                 [STATO_TSTATISTIC, STATO_ZSTATISTIC]):
+            effdof = 1.0
 
         self.effdof = effdof
 
@@ -498,7 +501,7 @@ SELECT DISTINCT * WHERE {
     """ + oid_var + """ a nidm_StatisticMap: ;
     rdfs:label ?label ;
     prov:atLocation ?location ;
-    dct:format ?format ;
+    dct:format ?fmt ;
     nfo:fileName ?filename ;
     nidm_contrastName: ?contrast_name ;
     crypto:sha512 ?sha ;
@@ -510,7 +513,7 @@ SELECT DISTINCT * WHERE {
 
     ?derfrom_id a nidm_StatisticMap: ;
         nfo:fileName ?derfrom_filename ;
-        dct:format ?derfrom_format ;
+        dct:format ?derfrom_fmt ;
         crypto:sha512 ?derfrom_sha .
      } .
 }
@@ -522,7 +525,7 @@ SELECT DISTINCT * WHERE {
         Create prov graph.
         """
         attributes = [(PROV['type'], NIDM_STATISTIC_MAP),
-                      (DCT['format'], self.format)]
+                      (DCT['format'], self.fmt)]
 
         if not self.isderfrommap:
             attributes.insert(0, (

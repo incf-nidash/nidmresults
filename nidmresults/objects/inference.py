@@ -61,7 +61,7 @@ class InferenceActivity(NIDMObject):
         if label is None:
             label = "Inference"
             if contrast_name:
-                label += ": " + self.contrast_name
+                label += ": " + contrast_name
         self.label = label
         self.partial_degree = partial_degree
 
@@ -128,7 +128,7 @@ class ExcursionSet(NIDMObject):
     """
 
     def __init__(self, location, coord_space, visu=None,
-                 oid=None, format=None, label=None,
+                 oid=None, fmt=None, label=None,
                  sha=None, filename=None, inference=None, suffix='',
                  clust_map=None, mip=None, num_clusters=None, p_value=None):
         super(ExcursionSet, self).__init__(oid)
@@ -140,10 +140,7 @@ class ExcursionSet(NIDMObject):
         self.file = NIDMFile(self.id, location, filename, sha)
         self.type = NIDM_EXCURSION_SET_MAP
         self.prov_type = PROV['Entity']
-        # if visu is not None:
         self.visu = visu
-        # visu_filename = 'ExcursionSet' + suffix + '.png'
-        # self.visu = Image(visualisation, visu_filename)
         if label is None:
             label = "Excursion Set Map"
         self.label = label
@@ -177,7 +174,7 @@ SELECT DISTINCT * WHERE {
 """ + oid_var + """ a nidm_ExcursionSetMap: ;
     prov:atLocation ?location ;
     rdfs:label ?label ;
-    dct:format ?format ;
+    dct:format ?fmt ;
     nfo:fileName ?filename ;
     crypto:sha512 ?sha .
 
@@ -233,7 +230,7 @@ class ClusterLabelsMap(NIDMObject):
     """
 
     def __init__(self, location, coord_space,
-                 oid=None, format=None, label=None,
+                 oid=None, fmt=None, label=None,
                  sha=None, filename=None, suffix='', temporary=False):
         super(ClusterLabelsMap, self).__init__(oid)
         if not filename:
@@ -263,7 +260,7 @@ SELECT DISTINCT * WHERE {
         nfo:fileName ?filename ;
         crypto:sha512 ?sha ;
         prov:atLocation ?location ;
-        dct:format ?format .
+        dct:format ?fmt .
         }
         """
         return query
@@ -300,7 +297,7 @@ class HeightThreshold(NIDMObject):
 
         thresh_desc = ""
         if stat_threshold is not None:
-            thresh_desc = "Z>" + str(self.stat_threshold)
+            thresh_desc = "Z>" + str(stat_threshold)
             if version['num'] == "1.0.0":
                 user_threshold_type = "Z-Statistic"
             else:
@@ -315,7 +312,7 @@ class HeightThreshold(NIDMObject):
                 threshold_type = NIDM_P_VALUE_UNCORRECTED_CLASS
                 value = p_uncorr_threshold
         elif p_corr_threshold is not None:
-            thresh_desc = "p<" + str(self.p_corr_threshold) + " (FWE)"
+            thresh_desc = "p<" + str(p_corr_threshold) + " (FWE)"
             if version['num'] == "1.0.0":
                 user_threshold_type = "p-value FWE"
             else:
@@ -605,9 +602,7 @@ SELECT DISTINCT * WHERE {
         Create prov entities and activities.
         """
         if nidm_version['num'] in ["1.0.0", "1.1.0"]:
-            cluster_naming = "Significant Cluster"
-        else:
-            cluster_naming = "Supra-Threshold Cluster"
+            self.label = self.label.replace("Supra-Threshold", "Significant")
 
         # FIXME deal with multiple contrasts
         atts = (
@@ -647,14 +642,14 @@ class DisplayMaskMap(NIDMObject):
     Object representing a DisplayMaskMap entity.
     """
     def __init__(self, contrast_num, mask_file, mask_num, coord_space,
-                 sha=None, filename=None, format=None, label=None, oid=None,
-                 derfrom_id=None, derfrom_filename=None, derfrom_format=None,
+                 sha=None, filename=None, fmt=None, label=None, oid=None,
+                 derfrom_id=None, derfrom_filename=None, derfrom_fmt=None,
                  derfrom_sha=None, isderfrommap=False):
         super(DisplayMaskMap, self).__init__(oid=oid)
         if not filename:
-            filename = 'DisplayMask' + str(self.mask_num) + '.nii.gz'
+            filename = 'DisplayMask' + str(mask_num) + '.nii.gz'
         self.file = NIDMFile(self.id, mask_file, filename,
-                             sha=sha, format=format)
+                             sha=sha, fmt=fmt)
         self.coord_space = coord_space
         self.type = NIDM_DISPLAY_MASK_MAP
         self.prov_type = PROV['Entity']
@@ -667,7 +662,7 @@ class DisplayMaskMap(NIDMObject):
                 None, None, None,
                 coord_space=None, oid=derfrom_id,
                 filename=derfrom_filename, sha=derfrom_sha,
-                format=derfrom_format,
+                fmt=derfrom_fmt,
                 isderfrommap=True)
         else:
             self.derfrom = None
@@ -689,13 +684,13 @@ SELECT DISTINCT * WHERE {
         nfo:fileName ?filename ;
         crypto:sha512 ?sha ;
         prov:atLocation ?mask_file ;
-        dct:format ?format .
+        dct:format ?fmt .
 
     OPTIONAL {""" + oid_var + """ prov:wasDerivedFrom ?derfrom_id .
 
     ?derfrom_id a nidm_DisplayMaskMap: ;
         nfo:fileName ?derfrom_filename ;
-        dct:format ?derfrom_format ;
+        dct:format ?derfrom_fmt ;
         crypto:sha512 ?derfrom_sha .
      } .
 
@@ -915,13 +910,13 @@ class SearchSpace(NIDMObject):
                  height_critical_fwe05=None, height_critical_fdr05=None,
                  extent_critical_fwe05=None, extent_critical_fdr05=None,
                  search_vol_geom=None, noise_roughness=None,
-                 filename=None, sha=None, format=None,
+                 filename=None, sha=None, fmt=None,
                  label=None, oid=None):
         super(SearchSpace, self).__init__(oid=oid)
         if not filename:
             filename = 'SearchSpaceMask.nii.gz'
         self.file = NIDMFile(self.id, search_space_file, filename,
-                             sha=sha, format=format)
+                             sha=sha, fmt=fmt)
         self.coord_space = coord_space
         self.resel_size_in_voxels = resel_size_in_voxels
         self.search_volume_in_voxels = vol_in_voxels
@@ -986,7 +981,7 @@ SELECT DISTINCT * WHERE {
     nidm_noiseFWHMInUnits: ?noise_fwhm_in_units ;
     nidm_randomFieldStationarity: ?random_field_stationarity ;
     prov:atLocation ?search_space_file ;
-    dct:format ?format ;
+    dct:format ?fmt ;
     nfo:fileName ?filename ;
     crypto:sha512 ?sha .
 

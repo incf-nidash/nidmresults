@@ -13,7 +13,7 @@ from nidmresults.objects.constants_rdflib import *
 from nidmresults.objects.modelfitting import *
 from nidmresults.objects.contrast import *
 from nidmresults.objects.inference import *
-from nidmresults.exporter import NIDMExporter
+from nidmresults.exporter import NIDMExporter 
 import collections
 # from rdflib.term import Literal
 
@@ -387,10 +387,10 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
         raise Exception("Contrast activity with id: " + str(con_id) +
                         " not found.")
 
-    def parse(self, rdf_data, format="turtle"):
+    def parse(self, rdf_data, fmt="turtle"):
         g = rdflib.Graph()
         try:
-            g.parse(data=rdf_data, format=format)
+            g.parse(data=rdf_data, format=fmt)
         except BadSyntax:
             raise self.ParseException(
                 "RDFLib was unable to parse the RDF file.")
@@ -1153,10 +1153,10 @@ SELECT DISTINCT * WHERE {
 
         return inferences
 
-    def serialize(self, destination, format="nidm", overwrite=False,
+    def serialize(self, destination, fmt="nidm", overwrite=False,
                   last_used_con_id=0):
 
-        if format == "nidm":
+        if fmt == "nidm":
             exporter = NIDMExporter(version="1.3.0",
                                     out_dir=destination.replace(
                                         '.nidm.zip', ''))
@@ -1174,7 +1174,7 @@ SELECT DISTINCT * WHERE {
             exporter.export_time = self.export_time
             exporter.export()
 
-        elif format == "mkda":
+        elif fmt == "mkda":
             if not destination.endswith(".csv"):
                 destination = destination + ".csv"
             csvfile = destination
