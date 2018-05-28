@@ -142,7 +142,7 @@ class CoordinateSpace(NIDMObject):
             thresImgHdr = thresImg.get_header()
 
             numdim = len(thresImg.shape)
-            dimensions = thresImg.shape
+            dimensions = np.asarray(thresImg.shape)
             # FIXME: is vox_to_world the qform?
             vox_to_world = thresImg.get_qform()
             vox_size = thresImgHdr['pixdim'][1:(numdim + 1)]
@@ -161,8 +161,6 @@ class CoordinateSpace(NIDMObject):
 
         self.voxel_to_world = vox_to_world
         self.voxel_size = vox_size
-        if type(dimensions[1])==np.int64:
-            dimensions = [x.item() for x in dimensions]
         self.dimensions = dimensions
         self.units = units
 
@@ -234,7 +232,7 @@ SELECT ?oid ?label ?vox_to_world ?units ?vox_size ?coordinate_system ?numdim
         """
         self.add_attributes({
             PROV['type']: self.type,
-            NIDM_DIMENSIONS_IN_VOXELS: json.dumps(self.dimensions),
+            NIDM_DIMENSIONS_IN_VOXELS: json.dumps(self.dimensions.tolist()),
             NIDM_NUMBER_OF_DIMENSIONS: self.number_of_dimensions,
             NIDM_VOXEL_TO_WORLD_MAPPING:
             json.dumps(self.voxel_to_world.tolist()),
