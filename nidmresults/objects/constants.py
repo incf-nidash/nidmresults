@@ -5,7 +5,7 @@ Definition of constants.
 @copyright: University of Warwick 2013-2014
 """
 
-from prov.model import PROV, Namespace
+from prov.model import PROV, Namespace, NamespaceManager
 
 NIDM = Namespace('nidm', "http://purl.org/nidash/nidm#")
 NIIRI = Namespace("niiri", "http://iri.nidash.org/")
@@ -13,7 +13,8 @@ CRYPTO = Namespace(
     "crypto",
     "http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions#")
 FSL = Namespace("fsl", "http://purl.org/nidash/fsl#")
-SPM = Namespace("fsl", "http://purl.org/nidash/spm#")
+SPM = Namespace("spm", "http://purl.org/nidash/spm#")
+AFNI = Namespace("afni", "http://purl.org/nidash/afni#")
 DCT = Namespace("dct", "http://purl.org/dc/terms/")
 OBO = Namespace("obo", "http://purl.obolibrary.org/obo/")
 DCTYPE = Namespace("dctype", "http://purl.org/dc/dcmitype/")
@@ -23,6 +24,11 @@ NFO = Namespace(
     "nfo", "http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#")
 SCR = Namespace("scr", "http://scicrunch.org/resolver/")
 NIF = Namespace("nif", "http://uri.neuinfo.org/nif/nifstd/")
+
+namespaces = (PROV, NIDM, NIIRI, CRYPTO, FSL, SPM, AFNI, DCT, OBO,
+              DCTYPE, DC, NFO, SCR, NIF)
+
+namespace_manager = NamespaceManager(namespaces)
 
 # Sciencrunch constants
 SCR_FSL = SCR['SCR_002823']
@@ -40,6 +46,13 @@ NIF_PET = NIF['ixl_0050000']
 NIF_SPECT = NIF['ixl_0050001']
 NLX_FMRI_PROTOCOL = NIF['birnlex_2250']
 NLX_IMAGING_INSTRUMENT = NIF['birnlex_2094']
+
+# SPM constants
+SPM_DCT_DRIFT_MODEL = SPM['SPM_0000002']
+SPM_SPMS_DRIFT_CUT_OFF_PERIOD = SPM['SPM_0000001']
+SPM_SEARCH_VOLUME_RESELS_GEOMETRY = SPM['SPM_0000010']
+SPM_SMALLEST_SIGNIFICANT_CLUSTER_SIZE_IN_VOXELS_FDR05 = SPM['SPM_0000013']
+SPM_SMALLEST_SIGNIFICANT_CLUSTER_SIZE_IN_VOXELS_FWE05 = SPM['SPM_0000014']
 
 # NIDM constants
 FSL_FSLS_GAMMA_HRF = FSL['FSL_0000006']
@@ -60,7 +73,7 @@ NIDM_P_VALUE_UNCORRECTED_CLASS = NIDM['NIDM_0000160']
 NIDM_NOISE_FWHM_IN_VOXELS = NIDM['NIDM_0000159']
 NIDM_NOISE_FWHM_IN_VERTICES = NIDM['NIDM_0000158']
 NIDM_NOISE_FWHM_IN_UNITS = NIDM['NIDM_0000157']
-NIDM_CLUSTERSIZEINRESELS = NIDM['NIDM_0000156']
+NIDM_CLUSTER_SIZE_IN_RESELS = NIDM['NIDM_0000156']
 NIDM_F_MRI_DESIGN = NIDM['NIDM_0000155']
 NIDM_MIXED_DESIGN = NIDM['NIDM_0000154']
 NIDM_EVENT_RELATED_DESIGN = NIDM['NIDM_0000153']
@@ -213,6 +226,8 @@ NIDM_LEGENDRE_POLYNOMIAL_ORDER = NIDM['NIDM_0000014']
 NIDM_CONTRAST_STANDARD_ERROR_MAP = NIDM['NIDM_0000013']
 NIDM_CONNECTIVITY_CRITERION = NIDM['NIDM_0000012']
 NIDM_CONJUNCTION_INFERENCE = NIDM['NIDM_0000011']
+SPM_PARTIAL_CONJUNCTION_DEGREE = SPM['SPM_0000015']
+SPM_KCONJUNCTION_INFERENCE = SPM['SPM_0000005']
 NIDM_HAS_FMRI_DESIGN = NIDM['NIDM_0000010']
 NIDM_COLIN27_COORDINATE_SYSTEM = NIDM['NIDM_0000009']
 NIDM_CLUSTER_LABELS_MAP = NIDM['NIDM_0000008']

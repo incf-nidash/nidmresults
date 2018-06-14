@@ -7,16 +7,16 @@ requirements = list(filter(None, reqs))
 
 setup(
     name="nidmresults",
-    version="1.2.1-dev1",
+    version="2.0.0",
     author="Camille Maumet",
     author_email="c.m.j.maumet@warwick.ac.uk",
     description=(
         "Export of neuroimaging statistical results using NIDM"
         " as specified at http://nidm.nidash.org/specs/nidm-results.html."),
-    license = "MIT",
+    license="MIT",
     scripts=['bin/nidmreader', 'bin/nidm_mkda_convert', 'bin/nidmresults'],
     url='https://github.com/incf-nidash/nidmresults',
-    keywords = "Prov, NIDM, Provenance",
+    keywords="Prov, NIDM, Provenance",
     packages=find_packages(),
     package_dir={
         'nidmresults': 'nidmresults'

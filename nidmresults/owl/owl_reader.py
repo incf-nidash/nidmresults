@@ -5,6 +5,14 @@
 @copyright: University of Warwick 2014
 '''
 
+import warnings
+# import vcr
+import os
+import logging
+import csv
+import collections
+import re
+import warnings
 from rdflib import RDF, term
 from rdflib.graph import Graph
 from rdflib.term import Literal
@@ -14,15 +22,6 @@ from nidmresults.objects.constants_rdflib import namespaces as namespace_names
 from future.standard_library import hooks
 with hooks():
     from urllib.request import urlopen, Request
-
-import warnings
-import vcr
-import os
-import logging
-import csv
-import collections
-import re
-import warnings
 
 RELPATH = os.path.dirname(os.path.abspath(__file__))
 NIDM_PATH = os.path.dirname(RELPATH)
@@ -134,7 +133,7 @@ class OwlReader():
                 try:
                     qname = self.graph.qname(uri)
                     nsp = qname.split(":")[0]
-                except:
+                except Exception:
                     qname = None
                     nsp = None
 
@@ -167,9 +166,11 @@ class OwlReader():
             terms = self.get_by_namespaces(self.all_of_rdf_type(owl_type), but)
             keys = set(all_terms).union(terms)
             no = []
-            all_terms = dict((k, all_terms.get(k, no) + terms.get(k, no)) for k in keys)
+            all_terms = dict(
+                (k, all_terms.get(k, no) + terms.get(k, no)) for k in keys)
 
-            len_dict = {key: (len(value), terms) for (key, value) in \
+            len_dict = {
+                key: (len(value), terms) for (key, value) in
                 list(terms.items()) if key is not None}
             num = sum([x[0] for x in list(len_dict.values())])
             type_id = self.graph.qname(owl_type).split(":")[1]
@@ -622,7 +623,7 @@ class OwlReader():
         # for class_name in ex_graph.subjects(RDF['type'], OWL['Class']):
         for class_name in ex_graph.objects(None, RDF.type):
             if not isinstance(class_name, term.BNode):
-                if not class_name in class_names:
+                if class_name not in class_names:
                     unrecognised_classes.append(class_name)
 
         for unrecognised_class in unrecognised_classes:
@@ -688,13 +689,13 @@ class OwlReader():
 
                 # if not found_attributes:
                     # if attributes:
-                        # if not (p in attributes):
+                    # if not (p in attributes):
                 if not found_attributes:
                     key = "\n Unrecognised attribute: " + \
                           ex_graph.qname(p) + \
                           " (i.e. " + self.get_label(p) + ")" + \
                           " in "+class_names[2:]
-                    if not key in my_exception:
+                    if key not in my_exception:
                         my_exception[key] = set([ex_name])
                     else:
                         my_exception[key].add(ex_name)
@@ -744,7 +745,7 @@ class OwlReader():
                         found_range_line = ""
                         # FIXME: This should be better handled to be able to do
                         # "if found_range"
-                        if not None in found_range:
+                        if None not in found_range:
                             found_range_line = ', '.join(
                                 map(self.get_name_label, sorted(found_range)))
                         owl_range_line = ""
@@ -764,7 +765,7 @@ class OwlReader():
                     key = "\n No range defined for: " + ex_graph.qname(p)
 
                 if not correct_range:
-                    if not key in my_range_exception:
+                    if key not in my_range_exception:
                         my_range_exception[key] = set([ex_name])
                     else:
                         my_range_exception[key].add(ex_name)
@@ -790,7 +791,7 @@ class OwlReader():
                             ' for '+ex_graph.qname(p) + \
                             ' does not observe contraints ' + \
                             ', '.join(sorted(owl_restrictions[p]))
-                        if not key in my_restriction_exception:
+                        if key not in my_restriction_exception:
                             my_restriction_exception[key] = set([ex_name])
                         else:
                             my_restriction_exception[key].add(ex_name)
@@ -814,8 +815,7 @@ class OwlReader():
         if not isinstance(uri, term.BNode):
             try:
                 name = self.graph.qname(uri)
-
-            except:
+            except Exception:
                 # For ontology names, qname fails not sure if this is a bug
                 name = uri
         else:
@@ -839,7 +839,6 @@ class OwlReader():
 
     def is_prov(self, term_uri):
         term_label = self.get_label(term_uri)
-
         return term_label.startswith("prov")
 
     def get_name(self, uri):
@@ -867,7 +866,7 @@ class OwlReader():
             label_words = re.findall(r"[\w']+", words)
 
             # Camel case terms that come from external ontologies
-            if self.is_external_namespace(uri):               
+            if self.is_external_namespace(uri):
                 if len(label_words) > 1:
                     words = ''
                     for word in label_words:
@@ -876,13 +875,15 @@ class OwlReader():
                         else:
                             words += word[0].upper()
 
-                if not self.is_class(uri) and not self.is_named_individual(uri):
+                if (not self.is_class(uri) and
+                        not self.is_named_individual(uri)):
                     # avoid lowercaseing acronyms
                     if not words[1].istitle() and words not in ('nidm', 'spm'):
                         words = words[0].lower() + words[1:]
                 else:
                     # avoid lowercaseing software names
-                    if not words in ('nidmfsl', 'spm_results_nidm', 'Legendre'):
+                    if words not in (
+                            'nidmfsl', 'spm_results_nidm', 'Legendre'):
                         words = words[0].upper() + words[1:]
 
                 prefix_name = prefix + '_' + words
@@ -907,7 +908,7 @@ class OwlReader():
             for s, o in sorted(self.graph.subject_objects(RDFS['label'])):
                 try:
                     self.graph.qname(s)
-                except:
+                except Exception:
                     # Some URIs don't have qname
                     # (e.g. http://www.w3.org/ns/prov-o#)
                     continue

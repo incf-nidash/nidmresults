@@ -6,23 +6,37 @@ Test NIDM FSL export tool installation
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>
 @copyright: University of Warwick 2013-2015
 """
+from nidmresults.owl.owl_reader import OwlReader
 import unittest
 from nidmresults.graph import *
+from nidmresults.test.test_results_doc import TestResultDataModel
 from future.standard_library import hooks
+import zipfile
+import json
+# from ddt import ddt, data, unpack
+import os
+import inspect
+import glob
+import shutil
+from rdflib.compare import isomorphic, graph_diff
+import os
 with hooks():
     from urllib.request import urlopen, Request
 
-import zipfile
-import json
-from ddt import ddt, data, unpack
-import os
-import inspect
 
-
-@ddt
-class TestReader(unittest.TestCase):
+# @ddt
+class TestReader(unittest.TestCase, TestResultDataModel):
 
     def setUp(self):
+        self.my_execption = ""
+
+        owl_file = os.path.join(os.path.dirname(
+            os.path.dirname(
+                os.path.realpath(__file__))),
+                'nidmresults', 'owl',
+                'nidm-results_130.owl')
+        self.owl = OwlReader(owl_file)
+
         pwd = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
 
@@ -34,7 +48,7 @@ class TestReader(unittest.TestCase):
 
         # Collection containing examples of NIDM-Results packs (1.3.0)
         req = Request(
-            "http://neurovault.org/api/collections/1692/nidm_results")
+            "http://neurovault.org/api/collections/2210/nidm_results")
         rep = urlopen(req)
 
         response = rep.read()
@@ -55,33 +69,51 @@ class TestReader(unittest.TestCase):
                     local_file.write(f.read())
             self.packs.append(nidmpack)
 
-    @unpack
-    @data({'name': 'excursion set', 'method_name': 'get_excursion_set_maps'},
-          {'name': 'statistic map', 'method_name': 'get_statistic_maps'})
-    def test_read_object(self, name, method_name):
+        self.packs = glob.glob(os.path.join(data_dir, '*.nidm.zip'))
+        self.out_dir = os.path.join(data_dir, 'recomputed')
+
+        if os.path.isdir(self.out_dir):
+            shutil.rmtree(self.out_dir)
+
+        os.mkdir(self.out_dir)
+
+    def test_read_object(self):
         """
-        Test: Check that excursion set can be retreived
+        Round-trip test. Check that we can read all NIDM packs, rewrite them
+        and get the same pack again
         """
-        exc = []
+        all_excs = ""
         for nidmpack in self.packs:
-            nidm_graph = Graph(nidm_zip=nidmpack)
-            nidm_graph.parse()
-            # exc_sets = nidm_graph.get_excursion_set_maps()
+            print(nidmpack)
 
-            method = getattr(nidm_graph, method_name)
-            objects = method()
+            # Known issues in the NIDM packs
+            to_replace = {
+                ' \\ntask': '\\\\n task',
+                ';\n    nidm_coordinateVectorInVoxels: "null"^^xsd:string .':
+                '.'}
 
-            if not objects:
-                exc.append('No ' + name + ' found for ' + nidmpack)
+            # Read the NIDM pack
+            nidmres = NIDMResults(nidm_zip=nidmpack, to_replace=to_replace)
 
-            for eid, eobj in objects.items():
-                with zipfile.ZipFile(nidmpack, 'r') as myzip:
-                    if not str(eobj.file.path) in myzip.namelist():
-                        exc.append(
-                            'Missing ' + name + ' file for ' + nidmpack)
+            # Rewrite the NIDM pack
+            new_name = os.path.join(self.out_dir, os.path.basename(nidmpack))
+            nidmres.serialize(new_name)
+            print('Serialised to ' + new_name)
+            print("----")
 
-        if exc:
-            raise Exception("\n ".join(exc))
+            # Read the rewritten pack
+            new_nidmres = NIDMResults(nidm_zip=new_name)
+
+            # Check equivalence between the two packs (original vs rewritten)
+            exc = self.compare_full_graphs(
+                nidmres.graph, new_nidmres.graph, self.owl,
+                include=False, raise_now=False, reconcile=False)
+
+            all_excs = all_excs + exc
+
+        if all_excs:
+            raise Exception(all_excs)
+
 
 if __name__ == '__main__':
     unittest.main()

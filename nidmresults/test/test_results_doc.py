@@ -5,7 +5,11 @@ The software-specific test classes must inherit from this class.
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>, Satrajit Ghosh
 @copyright: University of Warwick 2014
 '''
-
+from nidmresults.objects.constants_rdflib import *
+from nidmresults.owl.owl_reader import OwlReader
+from rdflib.namespace import RDF
+from rdflib.graph import Graph
+from rdflib.compare import graph_diff
 import os
 import rdflib
 import re
@@ -17,11 +21,6 @@ import logging
 
 # Append parent script directory to path
 RELPATH = os.path.dirname(os.path.abspath(__file__))
-
-from nidmresults.objects.constants_rdflib import *
-from nidmresults.owl.owl_reader import OwlReader
-from rdflib.namespace import RDF
-from rdflib.graph import Graph
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +105,7 @@ class TestResultDataModel(object):
             try:
                 gt_file = [os.path.join(self.gt_dir, metadata["version"], x)
                            for x in metadata["ground_truth"]]
-            except:
+            except Exception:
                 # This part should be removed once SPM can modify json files
                 gt_file = [os.path.join(self.gt_dir, metadata["versions"][0],
                            x)
@@ -151,7 +150,7 @@ class TestResultDataModel(object):
         return True
 
         # if not self.successful_retreive(self.spmexport.query(query),
-        #'ContrastMap and ContrastStandardErrorMap'):
+        # 'ContrastMap and ContrastStandardErrorMap'):
         #     raise Exception(self.my_execption)
 
     def _replace_match(self, graph1, graph2, rdf_type):
@@ -251,7 +250,7 @@ class TestResultDataModel(object):
             for g2_term, match_index in list(g2_match.items()):
                 if max(g2_match.values()) >= min_matching:
                     if (match_index == max(g2_match.values())) \
-                            and not g2_term in g2_matched:
+                            and g2_term not in g2_matched:
                         # Found matching term
                         g2_matched.add(g2_term)
 
@@ -303,7 +302,7 @@ class TestResultDataModel(object):
         # FIXME: reconcile entities+agents first (ignoring non attributes)
         # then reconcile activities based on everything
         # for each item select the closest match in the other graph (instead of
-            # perfect match)
+        # perfect match)
         # this is needed to get sensible error messages when comparing graph
         # do not do recursive anymore
 
@@ -316,294 +315,96 @@ class TestResultDataModel(object):
         return list([graph1, graph2])
 
     def compare_full_graphs(self, gt_graph, other_graph, owl, include=False,
-                            raise_now=False):
+                            raise_now=False, reconcile=True, to_ignore=None):
         ''' Compare gt_graph and other_graph '''
+        my_exception = ""
 
         # We reconcile gt_graph with other_graph
-        gt_graph, other_graph = self._reconcile_graphs(gt_graph, other_graph)
+        if reconcile:
+            gt_graph, other_graph = self._reconcile_graphs(
+                gt_graph, other_graph)
 
-        gt_m_other = gt_graph - other_graph
+        in_both, in_gt, in_other = graph_diff(gt_graph, other_graph)
+
+        exc_missing = list()
+
+        for s, p, o in in_gt:
+            # If there is a corresponding s,p check if
+            # there is an equivalent o
+            for o_other in in_other.objects(s,  p):
+                same_json_array, close_float, same_str = \
+                            self._same_json_or_float(o, o_other)
+                if same_json_array or close_float or same_str:
+                    # Remove equivalent o from other as well
+                    in_other.remove((s, p, o_other))
+                    break
+            else:
+                if (p not in to_ignore):
+                    exc_missing.append(
+                        "\nMissing :\t '%s %s %s'"
+                        % (
+                            self.get_readable_name(owl, gt_graph, s),
+                            self.get_readable_name(owl, gt_graph, p),
+                            self.get_readable_name(owl, gt_graph, o)
+                        ))
+
+        exc_added = list()
         if not include:
-            # Check for predicates which are not in common to both graphs (XOR)
-            diff_graph = gt_graph ^ other_graph
-        else:
-            diff_graph = gt_m_other
+            for s, p, o in in_other:
+                if p not in to_ignore:
+                    exc_added.append(
+                        "\nAdded :\t '%s %s %s'"
+                        % (
+                            self.get_readable_name(owl, other_graph, s),
+                            self.get_readable_name(owl, other_graph, p),
+                            self.get_readable_name(owl, other_graph, o)
+                        ))
 
-        # FIXME: There is probably something better than using os.path.basename
-        # to remove namespaces
-        exlude = list()
-        missing_s = list()
+        my_exception += "".join(sorted(exc_missing) + sorted(exc_added))
 
-        exc_wrong = ""
-        exc_wrong_literal = ""
-        exc_added = ""
-        exc_missing = ""
+        if raise_now and my_exception:
+            raise Exception(my_exception)
 
-        for s, p, o in diff_graph.triples((None,  None, None)):
-            # If triple is found in other_graph
-            if (s,  p, o) in other_graph and (not p == NIDM_SOFTWARE_VERSION):
-                # If subject is *not* found in gt_graph
-                if (s,  None, None) not in gt_graph:
-                    if not s in exlude:
-                        if not isinstance(s, rdflib.term.BNode):
-                            exc_added += "\nAdded s:\t'%s' should be removed" \
-                                % (self.get_readable_name(owl, other_graph, s))
-                            exlude.append(s)
-                # If subject, predicate s, p is *not* found in gt_graph
-                elif (s,  p, None) not in gt_graph:
-                    if not p in exlude:
-                        exc_added += "\nAdded p:\t'%s' should be removed" \
-                            % (self.get_readable_name(owl, other_graph, p))
-                        exlude.append(p)
-                # If subject and predicate found in gt_graph, then object is
-                # wrong (unless there is twice the same attribute and one value
-                # is correct and the other wrong)
-                # Alternatives are o_gt such as (s,p,o_gt) in gt and
-                # (s,p,o_gt) *not* in other
-                elif ((s,  p, None) in gt_graph):
-                    if isinstance(o, rdflib.term.Literal):
-                        same_json_array = False
-                        close_float = False
-                        same_str = False
-                        for o_gt in gt_m_other.objects(s,  p):
-                            same_json_array, close_float, same_str = \
-                                self._same_json_or_float(o, o_gt)
-
-                            if same_json_array or close_float or same_str:
-                                # We found a match
-                                break
-
-                        if not same_json_array and not close_float and \
-                                not same_str:
-                            # Alternatives are o such as (s,p,o) in gt and
-                            # (s,p,o) *not* in other
-                            exc_wrong_literal += \
-                                "\nWrong o:\t %s should be %s?" \
-                                "\n\t\t ... in '%s %s %s'" \
-                                % (
-                                    self.get_readable_name(
-                                        owl, other_graph, o),
-                                    self.get_alternatives(
-                                        owl, gt_m_other, s=s, p=p),
-                                    self.get_readable_name(
-                                        owl, other_graph, s),
-                                    self.get_readable_name(
-                                        owl, other_graph, p),
-                                    self.get_readable_name(owl, other_graph, o)
-                                )
-
-                    elif not isinstance(o, rdflib.term.BNode):
-                        exc_wrong += \
-                            "\nWrong o:\t %s should be %s?" \
-                            "\n\t\t ... in '%s %s %s'" \
-                            % (
-                                self.get_readable_name(owl, other_graph, o),
-                                self.get_alternatives(owl, gt_graph, s=s, p=p),
-                                self.get_readable_name(owl, other_graph, s),
-                                self.get_readable_name(owl, other_graph, p),
-                                self.get_readable_name(owl, other_graph, o)
-                            )
-                        # If object o is *not* found in gt_graph (and o is a
-                        # URI, i.e. not the value of an attribute)
-                elif (None,  None, o) not in gt_graph \
-                        and isinstance(o, rdflib.term.URIRef):
-                    if not o in exlude:
-                        exc_added += "\nAdded o:\t'%s'" % (
-                            self.get_readable_name(owl, other_graph, o))
-                        exlude.append(o)
-                # If subject and object found in gt_graph, then predicate is
-                # wrong
-                elif (s,  None, o) in gt_graph:
-                    exc_wrong += "\nWrong p:\tBetween '%s' and '%s' " \
-                                 "is '%s' (should be '%s'?)" \
-                                 % (self.get_readable_name(
-                                    owl, other_graph, s),
-                                    self.get_readable_name(
-                                        owl, other_graph, o),
-                                    self.get_readable_name(
-                                        owl, other_graph, p),
-                                    self.get_alternatives(
-                                        owl, gt_graph, s=s, o=o))
-                # If predicate and object found in gt_graph, then subject is
-                # wrong
-                elif (None,  p, o) in gt_graph:
-                    if not (s, None, None) in gt_graph:
-                        if not s in exlude:
-                            exc_added += "\nAdded:\t'%s'" % (s)
-                            exlude.append(s)
-                    else:
-                        exc_wrong += "\nWrong s:\ts('%s') p('%s') o('%s')" \
-                                     " not in gold std (should be s: '%s'?)" \
-                                     % (self.get_readable_name(
-                                        owl, other_graph, s),
-                                        self.get_readable_name(
-                                            owl, other_graph, p),
-                                        self.get_readable_name(
-                                            owl, other_graph, o),
-                                        self.get_alternatives(
-                                            owl, gt_graph, p=p, o=o))
-                        # exc_wrong += "\nWrong s:\t'%s' \tto '%s' \tis '%s'
-                        # (instead of %s)."%(os.path.basename(p),
-                        # self.get_readable_name(owl, other_graph, o),
-                        #  os.path.basename(s),found_subject)
-                # If only subject found in gt_graph
-                elif (s,  None, None) in gt_graph:
-                    # gt_graph_possible_value = ""
-                    # for (s_gt_graph,  p_gt_graph, o_gt_graph)
-                    #  in gt_graph.triples((s,  p, None)):
-                    #     gt_graph_possible_value += "; "+
-                    # os.path.basename(p_gt_graph)
-                    exc_added += "\nAdded:\tin '%s', '%s' \t ('%s')." \
-                        % (self.get_readable_name(owl, gt_graph, s),
-                           self.get_readable_name(owl, other_graph, p),
-                           self.get_readable_name(owl, other_graph, o))
-                else:
-                    exc_added += "\nAdded:\tin '%s', '%s' \t ('%s')." \
-                        % (self.get_readable_name(owl, gt_graph, s),
-                           self.get_readable_name(owl, other_graph, p),
-                           self.get_readable_name(owl, other_graph, o))
-
-            # If subject and predicate are found in gt_graph
-            elif (s,  p, o) in gt_graph and (not p == NIDM_SOFTWARE_VERSION):
-                if (s,  p, None) in other_graph:
-                    if isinstance(o, rdflib.term.Literal):
-                        same_json_array = False
-                        close_float = False
-
-                        for o_gt in gt_graph.objects(s,  p):
-                            same_json_array, close_float, same_str = \
-                                self._same_json_or_float(o, o_gt)
-
-                            if same_json_array or close_float or same_str:
-                                # We found a match
-                                break
-
-                        if not same_json_array and not close_float and \
-                                not same_str:
-                            exc_wrong_literal += \
-                                "\nWrong o:\t %s should be %s?" \
-                                "\n\t\t ... in '%s %s %s'" \
-                                % (
-                                    self.get_alternatives(
-                                        owl, other_graph, s=s, p=p),
-                                    self.get_readable_name(owl, gt_graph, o),
-                                    self.get_readable_name(
-                                        owl, other_graph, s),
-                                    self.get_readable_name(
-                                        owl, other_graph, p),
-                                    self.get_alternatives(
-                                        owl, other_graph, s=s, p=p)
-                                )
-
-                        # exc_wrong_literal += "\nWrong literal o:\t p('%s') of
-                        #  s('%s') is o(%s) but should be o(%s)." % (
-                        #     self.get_readable_name(owl, other_graph, p),
-                        #     self.get_readable_name(owl, other_graph, s),
-                        #     self.get_alternatives(owl, other_graph, s=s,
-                            # p=p),
-                        #     self.get_readable_name(owl, gt_graph, o))
-                    elif not isinstance(o, rdflib.term.BNode):
-                        # Look for possible mimatched value (decide between
-                        # wrong or missing)
-                        wrong_o = list()
-                        for o_alt in other_graph.objects(s,  p):
-                            if (s, p, o_alt) not in gt_graph:
-                                wrong_o.append(o_alt)
-
-                        if wrong_o:
-                            exc_wrong += "\nWrong o:\ts('%s') p('%s') o('%s') \
-                            missing, o should be o(%s)?)" % (
-                                self.get_readable_name(owl, other_graph, s),
-                                self.get_readable_name(owl, other_graph, p),
-                                self.get_alternatives(owl, other_graph, s=s, p=p),
-                                self.get_readable_name(owl, gt_graph, o))
-                        else:
-                            exc_missing += "\nMissg o:\t %s is missing in %s?" \
-                                "\n\t\t ... in %s %s %s'" \
-                                % (
-                                    self.get_readable_name(owl, gt_graph, o),
-                                    self.get_readable_name(owl, gt_graph, s),
-                                    self.get_readable_name(owl, gt_graph, s),
-                                    self.get_readable_name(owl, gt_graph, p),
-                                    self.get_readable_name(owl, gt_graph, o),
-                                )
-                        # If object o is *not* found in gt_graph (and o is a
-                        # URI, i.e. not the value of an attribute)
-                else:
-                    #     if isinstance(o, rdflib.term.Literal):
-                    #         if (not exc_wrong_literal):
-                    #             exc_wrong_literal += "\nWrong literal o:\t
-                    # p('%s') of s('%s') is ('%s') (instead o: '%s'?)"
-                    # %(self.get_readable_name(owl, gt_graph, p),
-                        # self.get_readable_name(owl, gt_graph, s),
-                        # self.get_readable_name(owl, gt_graph, o),
-                        # self.get_alternatives(owl, other_graph,s=s,p=p))
-                    # else:
-                    #     if (not exc_missing):
-                    #         exc_missing += "\nMissing o (%s):\tp('%s')
-                    # o('%s') \ton '%s'"%(type(o), self.get_readable_name(owl,
-                        # gt_graph,
-                    # p),self.get_readable_name(owl, gt_graph,o),
-                    # self.get_readable_name(owl, gt_graph,s))
-                    # If subject found in other_graph
-                    if (s,  None, None) in other_graph:
-                        exc_missing += "\nMissg p:\t %s is missing in %s?" \
-                            "\n\t\t ... in %s %s %s'" \
-                            % (
-                                self.get_readable_name(owl, gt_graph, p),
-                                self.get_readable_name(owl, gt_graph, s),
-                                self.get_readable_name(owl, gt_graph, s),
-                                self.get_readable_name(owl, gt_graph, p),
-                                self.get_readable_name(owl, gt_graph, o),
-                            )
-                    # If subject is *not* found in other_graph
-                    else:
-                        if not s in missing_s:
-                            if not isinstance(s, rdflib.term.BNode):
-                                exc_missing += "\nMissg s:\t%s is missing " % (
-                                    self.get_readable_name(owl, gt_graph, s))
-                                missing_s.append(s)
-            elif not p == NIDM_SOFTWARE_VERSION:
-                exc_missing += "\nUNTRACKED ERROR"
-
-        self.my_execption += exc_missing + \
-            exc_added + exc_wrong + exc_wrong_literal
-
-        if raise_now and self.my_execption:
-            raise Exception(self.my_execption)
+        return my_exception
 
     def _same_json_or_float(self, o, o_other):
         # If string represents a json-array, then
         # compare as json data
         same_json_array = False
-        if o.startswith("[") and o.endswith("]"):
-            try:
-                if json.loads(o) == json.loads(o_other):
-                    same_json_array = True
-            except ValueError:
-                # Actually this string was not json
-                same_json_array = False
 
         # If literal is a float allow for a small
         # tolerance to deal with possibly different
         # roundings
         close_float = False
-        if o.datatype in [XSD.float, XSD.double]:
-            if o_other.datatype in [XSD.float, XSD.double]:
-                # If both are zero but of different type isclose returns false
-                if o.value == 0 and o_other.value == 0:
-                    close_float = True
-
-                # Avoid None
-                if o.value and o_other.value:
-                    close_float = np.isclose(
-                        o.value, o_other.value)
 
         same_str = False
-        if o.datatype in [XSD.string, None]:
-            if o_other.datatype in [XSD.string, None]:
-                if o.value == o_other.value:
-                    same_str = True
+
+        if isinstance(o, rdflib.term.Literal) and isinstance(
+                o_other, rdflib.term.Literal):
+            if o.startswith("[") and o.endswith("]"):
+                try:
+                    if json.loads(o) == json.loads(o_other):
+                        same_json_array = True
+                except ValueError:
+                    # Actually this string was not json
+                    same_json_array = False
+
+            numeric_types = [XSD.float, XSD.double, XSD.long, XSD.int]
+            if o.datatype in numeric_types:
+                if o_other.datatype in numeric_types:
+                    # If both are zero but of different type isclose returns
+                    # false
+                    if o.value == 0 and o_other.value == 0:
+                        close_float = True
+
+                    # Avoid None
+                    if o.value and o_other.value:
+                        close_float = np.isclose(o.value, o_other.value)
+
+            if o.datatype in [XSD.string, None]:
+                if o_other.datatype in [XSD.string, None]:
+                    if o.value == o_other.value:
+                        same_str = True
 
         return (same_json_array, close_float, same_str)
 
