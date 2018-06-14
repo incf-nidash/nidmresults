@@ -7,7 +7,7 @@ requirements = list(filter(None, reqs))
 
 setup(
     name="nidmresults",
-    version="2.0.0-rc1",
+    version="2.0.0",
     author="Camille Maumet",
     author_email="c.m.j.maumet@warwick.ac.uk",
     description=(
