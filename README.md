@@ -16,7 +16,9 @@ python setup.py install
 
 ## Example of usage
 
-## Contributing
+Examples are available in the [examples](examples) folder.
 
+## Contributing
+Thanks for your interest in contributing to nidmresults. All contributions are very welcome! If you experience difficulties using the library, please [open an issue](https://github.com/incf-nidash/nidmresults/issues/new) describing the problem. See the list of [current issues](https://github.com/incf-nidash/nidmresults/issues).
 
 
