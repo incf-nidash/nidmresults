@@ -1,10 +1,10 @@
 # nidmresults
-The Python library to read and write [NIDM-Results](http://nidm.nidash.org/specs/nidm-results.html) packs.
+A Python library to read and write [NIDM-Results](http://nidm.nidash.org/specs/nidm-results.html) packs.
 
 You are free to copy, modify, and distribute nidmresults with attribution under the terms of the MIT license. See the [LICENSE file](LICENSE.md) for details.
 
 ## Install
-nidmresults is distributed through pypi, to install the latest relase you can use:
+nidmresults is distributed with [PyPI](https://pypi.org/project/nidmresults/), to install the latest relase you can use:
 ```
 pip install nidmresults
 ```
