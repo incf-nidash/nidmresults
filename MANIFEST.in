@@ -1,2 +1,7 @@
 include requirements.txt
 include nidmresults/prefixes.csv
+include owl/nidm-results_020.owl
+include owl/nidm-results_100.owl
+include owl/nidm-results_110.owl
+include owl/nidm-results_120.owl
+include owl/nidm-results_130.owl
