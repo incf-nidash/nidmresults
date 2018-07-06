@@ -714,10 +714,12 @@ class NIDMExporter():
                 for root, dirnames, filenames in os.walk("."):
                     for filename in filenames:
                         zf.write(os.path.join(filename))
-                shutil.rmtree(os.path.join("..", self.export_dir))
             finally:
                 zf.close()
+                # Need to move up before deleting the folder
                 os.chdir("..")
+                shutil.rmtree(os.path.join("..", self.export_dir))
+
 
         # ttl_fid = open(ttl_file, 'w');
         # serialization is done in xlm rdf
