@@ -720,7 +720,6 @@ class NIDMExporter():
                 os.chdir("..")
                 shutil.rmtree(os.path.join("..", self.export_dir))
 
-
         # ttl_fid = open(ttl_file, 'w');
         # serialization is done in xlm rdf
         # graph = Graph()
