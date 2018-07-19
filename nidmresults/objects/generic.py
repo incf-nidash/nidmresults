@@ -401,6 +401,8 @@ class NeuroimagingSoftware(NIDMObject):
                 self.type = Identifier(software_type)
             elif software_type.lower() == "fsl":
                 self.type = SCR_FSL
+            elif software_type.lower() == "spm":
+                self.type = SCR_SPM
             else:
                 warnings.warn('Unrecognised software: ' + str(software_type))
                 self.name = str(software_type)

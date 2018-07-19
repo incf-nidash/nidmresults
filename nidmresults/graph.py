@@ -13,7 +13,7 @@ from nidmresults.objects.constants_rdflib import *
 from nidmresults.objects.modelfitting import *
 from nidmresults.objects.contrast import *
 from nidmresults.objects.inference import *
-from nidmresults.exporter import NIDMExporter 
+from nidmresults.exporter import NIDMExporter
 import collections
 # from rdflib.term import Literal
 
@@ -29,26 +29,38 @@ class NIDMResults():
     NIDM-result object containing all metadata and link to image files.
     """
 
-    def __init__(self, nidm_zip=None, rdf_file=None, workaround=False,
-                 to_replace=dict()):
-        self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")
-        self.zip_path = nidm_zip
+    def __init__(self, nidm_zip=None, rdf_file=None, json_file=None,
+                 workaround=False, to_replace=dict()):
+        self.zip_path = None
+        self.nidm_zip = None
 
-        # Load the turtle file
-        with zipfile.ZipFile(self.zip_path, 'r') as z:
-            rdf_data = z.read('nidm.ttl')
-        rdf_data = rdf_data.decode()
+        if nidm_zip is not None:
+            self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")
+            self.zip_path = nidm_zip
 
-        # Exporter-version-specific fixes in the RDF
-        rdf_data = self.fix_for_specific_versions(rdf_data, to_replace)
+            # Load the turtle file
+            with zipfile.ZipFile(self.zip_path, 'r') as z:
+                rdf_data = z.read('nidm.ttl')
+            rdf_data = rdf_data.decode()
 
-        # Parse turtle into RDF graph
-        self.graph = self.parse(rdf_data)
+            # Exporter-version-specific fixes in the RDF
+            rdf_data = self.fix_for_specific_versions(rdf_data, to_replace)
+
+            # Parse turtle into RDF graph
+            self.graph = self.parse(rdf_data)
+
+        else:
+            self.study_name = os.path.basename(json_file).replace(".json", "")
+            self.json_file = json_file
+            with open(json_file) as json_data:
+                self.json = json.load(json_data)
+
+            # TODO: add validation here of the JSON file according to JSON API
 
         self.objects = dict()
         self.info = None
 
-        # Query the RDF document and create the objects
+        # Query the RDF or JSON document and create the objects
         self.software = self.load_software()
         (self.bundle, self.exporter, self.export_act, self.export_time) = \
             self.load_bundle_export()
@@ -120,6 +132,12 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
     @classmethod
     def load_from_pack(klass, nidm_zip, workaround=False, to_replace=dict()):
         nidmr = NIDMResults(nidm_zip=nidm_zip, workaround=workaround,
+                            to_replace=to_replace)
+        return nidmr
+
+    @classmethod
+    def load_from_json(klass, json_file, workaround=False, to_replace=dict()):
+        nidmr = NIDMResults(json_file=json_file, workaround=workaround,
                             to_replace=to_replace)
         return nidmr
 
@@ -442,29 +460,36 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
         return(to_return)
 
     def load_software(self):
-        query = """
-prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_000005\
-6>
 
-SELECT DISTINCT * WHERE {
+        if self.nidm_zip is not None:
+            query = """
+    prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_000005\
+    6>
 
-    ?ni_software_id a prov:SoftwareAgent .
+    SELECT DISTINCT * WHERE {
 
-    ?mpe_id a nidm_ModelParameterEstimation: ;
-        prov:wasAssociatedWith ?ni_software_id .
-}
-        """
-        sd = self.graph.query(query)
+        ?ni_software_id a prov:SoftwareAgent .
 
-        software = None
-        if sd:
-            for row in sd:
-                args = row.asdict()
-                software = self.get_object(NeuroimagingSoftware,
-                                           args['ni_software_id'])
+        ?mpe_id a nidm_ModelParameterEstimation: ;
+            prov:wasAssociatedWith ?ni_software_id .
+    }
+            """
+            sd = self.graph.query(query)
 
-        if software is None:
-            raise Exception('No results found for query:' + query)
+            software = None
+            if sd:
+                for row in sd:
+                    args = row.asdict()
+                    software = self.get_object(NeuroimagingSoftware,
+                                               args['ni_software_id'])
+
+            if software is None:
+                raise Exception('No results found for query:' + query)
+        elif self.json_file is not None:
+            soft_type = self.json['NeuroimagingAnalysisSoftware_type']
+            version = self.json['NeuroimagingAnalysisSoftware_type']
+            label = self.json.get('NeuroimagingAnalysisSoftware_label', None)
+            software = NeuroimagingSoftware(soft_type, version, label)
 
         return software
 

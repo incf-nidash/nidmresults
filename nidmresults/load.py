@@ -21,7 +21,7 @@ def load(filename, to_replace=dict()):
         raise IOException('File does not exist: %s' % filename)
 
     if filename.endswith('.json'):
-        raise Exception('Minimal json file: not handled yet')
+        nidm = NIDMResults.load_from_json(filename, to_replace=to_replace)
     elif filename.endswith('.nidm.zip'):
         nidm = NIDMResults.load_from_pack(filename, to_replace=to_replace)
     else:
