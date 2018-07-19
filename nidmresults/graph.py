@@ -460,7 +460,6 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
         return(to_return)
 
     def load_software(self):
-
         if self.nidm_zip is not None:
             query = """
     prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_000005\
@@ -486,10 +485,7 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
             if software is None:
                 raise Exception('No results found for query:' + query)
         elif self.json_file is not None:
-            soft_type = self.json['NeuroimagingAnalysisSoftware_type']
-            version = self.json['NeuroimagingAnalysisSoftware_type']
-            label = self.json.get('NeuroimagingAnalysisSoftware_label', None)
-            software = NeuroimagingSoftware(soft_type, version, label)
+            software = NeuroimagingSoftware.load(self.json)
 
         return software
 
@@ -555,150 +551,154 @@ SELECT DISTINCT * WHERE
         return (bundle, exporter, export, export_time)
 
     def load_modelfitting(self):
-        sd = self.graph.query(ModelFitting.get_query())
 
-        model_fittings = list()
-        if sd:
-            for row in sd:
-                row_num = 0
-                args = row.asdict()
+        if self.nidm_zip is not None:
+            sd = self.graph.query(ModelFitting.get_query())
 
-                # TODO: should software_id really be an input?
-                activity = self.get_object(
-                    ModelParametersEstimation, args['mpe_id'])
+            model_fittings = list()
+            if sd:
+                for row in sd:
+                    row_num = 0
+                    args = row.asdict()
 
-                # Find list of HRF basis
-                query_hrf_bases = """
-prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
-prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
+                    # TODO: should software_id really be an input?
+                    activity = self.get_object(
+                        ModelParametersEstimation, args['mpe_id'])
 
-SELECT DISTINCT * WHERE {
-    <""" + args['design_id'] + """> nidm_hasHRFBasis: ?hrf_basis .
-}
-                """
-                hrf_models = None
-                sd_hrf = self.graph.query(query_hrf_bases)
-                if sd_hrf:
-                    hrf_models = list()
-                    # TODO: we probably can avoid the loop below
-                    for row_hrf in sd_hrf:
-                        args_hrf = row_hrf.asdict()
-                        hrf_models.append(
-                            namespace_manager.valid_qualified_name(
-                                args_hrf['hrf_basis']))
+                    # Find list of HRF basis
+                    query_hrf_bases = """
+    prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+    prefix nidm_hasHRFBasis: <http://purl.org/nidash/nidm#NIDM_0000102>
 
-                if 'png_id' in args:
-                    design_matrix_png = self.get_object(Image, args['png_id'])
-                else:
-                    design_matrix_png = None
+    SELECT DISTINCT * WHERE {
+        <""" + args['design_id'] + """> nidm_hasHRFBasis: ?hrf_basis .
+    }
+                    """
+                    hrf_models = None
+                    sd_hrf = self.graph.query(query_hrf_bases)
+                    if sd_hrf:
+                        hrf_models = list()
+                        # TODO: we probably can avoid the loop below
+                        for row_hrf in sd_hrf:
+                            args_hrf = row_hrf.asdict()
+                            hrf_models.append(
+                                namespace_manager.valid_qualified_name(
+                                    args_hrf['hrf_basis']))
 
-                if 'drift_model_id' in args:
-                    drift_model = self.get_object(
-                        DriftModel, args['drift_model_id'])
-                else:
-                    drift_model = None
+                    if 'png_id' in args:
+                        design_matrix_png = self.get_object(Image, args['png_id'])
+                    else:
+                        design_matrix_png = None
 
-                design_matrix = self.get_object(
-                    DesignMatrix, args['design_id'], matrix=None,
-                    image_file=design_matrix_png, drift_model=drift_model,
-                    hrf_models=hrf_models)
-                data = self.get_object(Data, args['data_id'])
-                error_model = self.get_object(ErrorModel, args['error_id'])
+                    if 'drift_model_id' in args:
+                        drift_model = self.get_object(
+                            DriftModel, args['drift_model_id'])
+                    else:
+                        drift_model = None
 
-                # Find list of model parameter estimate maps
-                query_pe_maps = """
-prefix nidm_ParameterEstimateMap: <http://purl.org/nidash/nidm#NIDM_0000061>
-prefix nidm_inCoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000104>
+                    design_matrix = self.get_object(
+                        DesignMatrix, args['design_id'], matrix=None,
+                        image_file=design_matrix_png, drift_model=drift_model,
+                        hrf_models=hrf_models)
+                    data = self.get_object(Data, args['data_id'])
+                    error_model = self.get_object(ErrorModel, args['error_id'])
 
-SELECT DISTINCT * WHERE {
-    ?pe_id a nidm_ParameterEstimateMap: ;
-    nidm_inCoordinateSpace: ?pe_coordspace_id ;
-    prov:wasGeneratedBy <""" + str(args['mpe_id']) + """> .
-}
-                """
-                param_estimates = list()
-                sd_pe_maps = self.graph.query(query_pe_maps)
-                if sd_pe_maps:
-                    for row_pe in sd_pe_maps:
-                        args_pe = row_pe.asdict()
-                        pe_map_coordspace = self.get_object(
-                            CoordinateSpace, args_pe['pe_coordspace_id'])
+                    # Find list of model parameter estimate maps
+                    query_pe_maps = """
+    prefix nidm_ParameterEstimateMap: <http://purl.org/nidash/nidm#NIDM_0000061>
+    prefix nidm_inCoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000104>
 
-                        param_estimates.append(self.get_object(
-                            ParameterEstimateMap, args_pe['pe_id'],
-                            coord_space=pe_map_coordspace, pe_num=None))
+    SELECT DISTINCT * WHERE {
+        ?pe_id a nidm_ParameterEstimateMap: ;
+        nidm_inCoordinateSpace: ?pe_coordspace_id ;
+        prov:wasGeneratedBy <""" + str(args['mpe_id']) + """> .
+    }
+                    """
+                    param_estimates = list()
+                    sd_pe_maps = self.graph.query(query_pe_maps)
+                    if sd_pe_maps:
+                        for row_pe in sd_pe_maps:
+                            args_pe = row_pe.asdict()
+                            pe_map_coordspace = self.get_object(
+                                CoordinateSpace, args_pe['pe_coordspace_id'])
 
-                rms_coord_space = self.get_object(
-                    CoordinateSpace, args['rms_coordspace_id'])
-                rms_map = self.get_object(
-                    ResidualMeanSquares, args['rms_id'],
-                    coord_space=rms_coord_space)
+                            param_estimates.append(self.get_object(
+                                ParameterEstimateMap, args_pe['pe_id'],
+                                coord_space=pe_map_coordspace, pe_num=None))
 
-                mask_coord_space = self.get_object(
-                    CoordinateSpace, args['mask_coordspace_id'])
-                mask_map = self.get_object(
-                    MaskMap, args['mask_id'], coord_space=mask_coord_space)
+                    rms_coord_space = self.get_object(
+                        CoordinateSpace, args['rms_coordspace_id'])
+                    rms_map = self.get_object(
+                        ResidualMeanSquares, args['rms_id'],
+                        coord_space=rms_coord_space)
 
-                gm_coord_space = self.get_object(
-                    CoordinateSpace, args['gm_coordspace_id'])
-                grand_mean_map = self.get_object(
-                    GrandMeanMap, args['gm_id'], coord_space=mask_coord_space,
-                    mask_file=None)
+                    mask_coord_space = self.get_object(
+                        CoordinateSpace, args['mask_coordspace_id'])
+                    mask_map = self.get_object(
+                        MaskMap, args['mask_id'], coord_space=mask_coord_space)
 
-                if 'rpv_coordspace_id' in args:
-                    rpv_coord_space = self.get_object(
-                        CoordinateSpace, args['rpv_coordspace_id'])
-                    rpv_map = self.get_object(
-                        ReselsPerVoxelMap, args['rpv_id'],
-                        coord_space=mask_coord_space)
-                else:
-                    rpv_map = None
+                    gm_coord_space = self.get_object(
+                        CoordinateSpace, args['gm_coordspace_id'])
+                    grand_mean_map = self.get_object(
+                        GrandMeanMap, args['gm_id'], coord_space=mask_coord_space,
+                        mask_file=None)
 
-                machine = self.get_object(
-                    ImagingInstrument, args['machine_id'])
+                    if 'rpv_coordspace_id' in args:
+                        rpv_coord_space = self.get_object(
+                            CoordinateSpace, args['rpv_coordspace_id'])
+                        rpv_map = self.get_object(
+                            ReselsPerVoxelMap, args['rpv_id'],
+                            coord_space=mask_coord_space)
+                    else:
+                        rpv_map = None
 
-                # Find subject or group(s)
-                query_subjects = """
-prefix nidm_Data: <http://purl.org/nidash/nidm#NIDM_0000169>
-prefix obo_studygrouppopulation: <http://purl.obolibrary.org/obo/STATO_0000193>
+                    machine = self.get_object(
+                        ImagingInstrument, args['machine_id'])
 
-SELECT DISTINCT * WHERE {
-    <""" + str(args['data_id']) + """> a nidm_Data: ;
-        prov:wasAttributedTo ?person_or_group_id .
+                    # Find subject or group(s)
+                    query_subjects = """
+    prefix nidm_Data: <http://purl.org/nidash/nidm#NIDM_0000169>
+    prefix obo_studygrouppopulation: <http://purl.obolibrary.org/obo/STATO_0000193>
 
-    {?person_or_group_id a prov:Person .} UNION
-    {?person_or_group_id a obo_studygrouppopulation: .} .
+    SELECT DISTINCT * WHERE {
+        <""" + str(args['data_id']) + """> a nidm_Data: ;
+            prov:wasAttributedTo ?person_or_group_id .
 
-}
-                """
+        {?person_or_group_id a prov:Person .} UNION
+        {?person_or_group_id a obo_studygrouppopulation: .} .
 
-                sd_subjects = self.graph.query(query_subjects)
-                subjects = None
+    }
+                    """
 
-                if sd_subjects:
-                    subjects = list()
-                    for row_sub in sd_subjects:
-                        args_sub = row_sub.asdict()
-                        group = self.get_object(
-                            Group, args_sub['person_or_group_id'],
-                            err_if_none=False)
+                    sd_subjects = self.graph.query(query_subjects)
+                    subjects = None
 
-                        if group is None:
-                            # Try loading as a single subject
-                            subject = self.get_object(
-                                Person, args_sub['person_or_group_id'])
-                            subjects.append(subject)
-                        else:
-                            subjects.append(group)
+                    if sd_subjects:
+                        subjects = list()
+                        for row_sub in sd_subjects:
+                            args_sub = row_sub.asdict()
+                            group = self.get_object(
+                                Group, args_sub['person_or_group_id'],
+                                err_if_none=False)
 
-                model_fittings.append(ModelFitting(
-                    activity, design_matrix, data, error_model,
-                    param_estimates, rms_map, mask_map, grand_mean_map,
-                    machine, subjects, rpv_map))
+                            if group is None:
+                                # Try loading as a single subject
+                                subject = self.get_object(
+                                    Person, args_sub['person_or_group_id'])
+                                subjects.append(subject)
+                            else:
+                                subjects.append(group)
 
-                con_num = row_num + 1
-        else:
-            raise Exception('No model fitting found')
+                    model_fittings.append(ModelFitting(
+                        activity, design_matrix, data, error_model,
+                        param_estimates, rms_map, mask_map, grand_mean_map,
+                        machine, subjects, rpv_map))
+
+                    con_num = row_num + 1
+            else:
+                raise Exception('No model fitting found')
+        elif self.json_file is not None:
+            model_fittings = ModelFitting.load(self.json, self.software.id)
 
         return model_fittings
 

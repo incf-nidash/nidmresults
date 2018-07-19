@@ -21,7 +21,7 @@ from numpy import genfromtxt
 from prov.identifier import QualifiedName
 
 
-class ModelFitting(object):
+class ModelFitting(NIDMObject):
 
     """
     Object representing a Model fitting step: including a
@@ -111,6 +111,18 @@ SELECT DISTINCT * WHERE {
 }
         """
         return query
+
+    @classmethod
+    def load_from_json(klass, json_dict, software_id):
+        # soft_type = json_dict['NeuroimagingAnalysisSoftware_type']
+        # version = json_dict['NeuroimagingAnalysisSoftware_type']
+        # label = json_dict.get('NeuroimagingAnalysisSoftware_label', None)
+        # return NeuroimagingSoftware(soft_type, version, label)
+
+        # TODO: currently assuming list of 1 ==> should be extended
+        model_fittings = list()
+        activity = ModelParametersEstimation.load(json_dict, software_id)
+        print(activity)
 
 
 class ImagingInstrument(NIDMObject):
@@ -629,6 +641,11 @@ SELECT DISTINCT * WHERE {
 }
         """
         return query
+
+    @classmethod
+    def load_from_json(self, json_dict, software_id):
+        est_method = json_dict['ModelParameterEstimation_withEstimationMethod']
+        return ModelParametersEstimation(est_method, software_id)
 
     def export(self, nidm_version, export_dir):
         """

@@ -68,6 +68,12 @@ class NIDMObject(object):
         else:
             self.attributes = attributes
 
+    @classmethod
+    def load(klass, loaded_from, *args, **kwargs):
+        if type(loaded_from) is dict:
+            obj = klass.load_from_json(loaded_from, *args, **kwargs)
+        return obj
+
 
 class NIDMResultsBundle(NIDMObject):
     """
@@ -423,6 +429,14 @@ class NeuroimagingSoftware(NIDMObject):
             self.label = label
         self.prov_type = PROV['Agent']
         self.feat_version = feat_version
+
+    @classmethod
+    def load_from_json(klass, json_dict):
+        soft_type = json_dict['NeuroimagingAnalysisSoftware_type']
+        version = json_dict['NeuroimagingAnalysisSoftware_type']
+        label = json_dict.get('NeuroimagingAnalysisSoftware_label', None)
+        soft = NeuroimagingSoftware(soft_type, version, label)
+        return soft
 
     @classmethod
     def get_query(klass, oid=None):
