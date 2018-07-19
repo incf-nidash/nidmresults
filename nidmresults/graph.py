@@ -62,11 +62,11 @@ class NIDMResults():
 
         # Query the RDF or JSON document and create the objects
         self.software = self.load_software()
-        (self.bundle, self.exporter, self.export_act, self.export_time) = \
-            self.load_bundle_export()
         self.model_fittings = self.load_modelfitting()
         self.contrasts = self.load_contrasts(workaround=workaround)
         self.inferences = self.load_inferences()
+        (self.bundle, self.exporter, self.export_act, self.export_time) = \
+            self.load_bundle_export()
 
     def fix_for_specific_versions(self, rdf_data, to_replace):
         """
@@ -555,72 +555,7 @@ SELECT DISTINCT * WHERE
         return (bundle, exporter, export, export_time)
 
     def load_modelfitting(self):
-        query = """
-prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
-prefix nidm_hasDriftModel: <http://purl.org/nidash/nidm#NIDM_0000088>
-prefix nidm_Data: <http://purl.org/nidash/nidm#NIDM_0000169>
-prefix nidm_ErrorModel: <http://purl.org/nidash/nidm#NIDM_0000023>
-prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_000005\
-6>
-prefix nidm_ResidualMeanSquaresMap: <http://purl.org/nidash/nidm#NIDM_0000066>
-prefix nidm_MaskMap: <http://purl.org/nidash/nidm#NIDM_0000054>
-prefix nidm_GrandMeanMap: <http://purl.org/nidash/nidm#NIDM_0000033>
-prefix nlx_Imaginginstrument: <http://uri.neuinfo.org/nif/nifstd/birnlex_2094>
-prefix nlx_MagneticResonanceImagingScanner: <http://uri.neuinfo.org/nif/nifstd\
-/birnlex_2100>
-prefix nlx_PositronEmissionTomographyScanner: <http://uri.neuinfo.org/nif/nifs\
-td/ixl_0050000>
-prefix nlx_SinglePhotonEmissionComputedTomographyScanner: <http://uri.neuinfo.\
-org/nif/nifstd/ixl_0050001>
-prefix nlx_MagnetoencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/i\
-xl_0050002>
-prefix nlx_ElectroencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/i\
-xl_0050003>
-prefix nidm_ReselsPerVoxelMap: <http://purl.org/nidash/nidm#NIDM_0000144>
-
-SELECT DISTINCT * WHERE {
-
-    ?design_id a nidm_DesignMatrix: .
-    OPTIONAL { ?design_id dc:description ?png_id . } .
-    OPTIONAL { ?design_id nidm_hasDriftModel: ?drift_model_id . } .
-
-    ?data_id a nidm_Data: ;
-        prov:wasAttributedTo ?machine_id .
-
-    {?machine_id a nlx_Imaginginstrument: .} UNION
-    {?machine_id a nlx_MagneticResonanceImagingScanner: .} UNION
-    {?machine_id a nlx_PositronEmissionTomographyScanner: .} UNION
-    {?machine_id a nlx_SinglePhotonEmissionComputedTomographyScanner: .} UNION
-    {?machine_id a nlx_MagnetoencephalographyMachine: .} UNION
-    {?machine_id a nlx_ElectroencephalographyMachine: .}
-
-    ?error_id a nidm_ErrorModel: .
-
-    ?mpe_id a nidm_ModelParameterEstimation: ;
-        prov:used ?design_id ;
-        prov:used ?data_id ;
-        prov:used ?error_id .
-
-    ?rms_id a nidm_ResidualMeanSquaresMap: ;
-        nidm_inCoordinateSpace: ?rms_coordspace_id ;
-        prov:wasGeneratedBy ?mpe_id .
-
-    ?mask_id a nidm_MaskMap: ;
-        nidm_inCoordinateSpace: ?mask_coordspace_id ;
-        prov:wasGeneratedBy ?mpe_id .
-
-    ?gm_id a nidm_GrandMeanMap: ;
-        nidm_inCoordinateSpace: ?gm_coordspace_id ;
-        prov:wasGeneratedBy ?mpe_id .
-
-    OPTIONAL {
-        ?rpv_id a nidm_ReselsPerVoxelMap: ;
-            nidm_inCoordinateSpace: ?rpv_coordspace_id ;
-            prov:wasGeneratedBy ?mpe_id .
-    }
-}
-        """
-        sd = self.graph.query(query)
+        sd = self.graph.query(ModelFitting.get_query())
 
         model_fittings = list()
         if sd:
