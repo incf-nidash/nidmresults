@@ -130,7 +130,7 @@ SELECT DISTINCT * WHERE {
         rms_map = ResidualMeanSquares.load(json_dict, base_dir)
         mask_map = MaskMap.load(json_dict, base_dir)
         grand_mean_map = GrandMeanMap.load(json_dict, base_dir)
-        machine = Machine.load(json_dict)
+        machine = ImagingInstrument.load(json_dict)
         subjects = Subject.load(json_dict)
 
         # self.design_matrix = design
@@ -158,14 +158,18 @@ class ImagingInstrument(NIDMObject):
     def __init__(self, machine_type, label=None, oid=None):
         super(ImagingInstrument, self).__init__(oid=oid)
 
+        machine_label = dict()
+        machine_label[NIF_MRI] = 'MRI Scanner'
+        machine_label[NIF_EEG] = 'EEG Machine'
+        machine_label[NIF_MEG] = 'MEG Machine'
+        machine_label[NIF_PET] = 'PET Scanner'
+        machine_label[NIF_SPECT] = 'SPECT Machine'
+
         if not isinstance(machine_type, QualifiedName):
             machine_type = machine_type.lower()
             machine_term = dict(
                 mri=NIF_MRI, eeg=NIF_EEG, meg=NIF_MEG, pet=NIF_PET,
                 spect=NIF_SPECT)
-            machine_label = dict(
-                mri='MRI Scanner', eeg='EEG Machine', meg='MEG Machine',
-                pet='PET Scanner', spect='SPECT Machine')
 
             if not machine_type.startswith('http:'):
                 self.type = machine_term[machine_type]
@@ -175,9 +179,22 @@ class ImagingInstrument(NIDMObject):
         self.prov_type = PROV['Agent']
 
         if label is None:
-            self.label = machine_label[machine_type]
+            self.label = machine_label[self.type]
         else:
             self.label = label
+
+    @classmethod
+    def load_from_json(klass, json_dict):
+        MACHINES = {
+            'nlx_ElectroencephalographyMachine': NIF_EEG,
+            'nlx_MagnetoencephalographyMachine': NIF_MEG,
+            'nlx_PositronEmissionTomographyScanner': NIF_PET,
+            'nlx_SinglePhotonEmissionComputedTomographyScanner': NIF_SPECT,
+            'nlx_MagneticResonanceImagingScanner': NIF_MRI
+        }
+        machine_type = MACHINES[json_dict['ImagingInstrument_type']]
+        instrument = ImagingInstrument(machine_type)
+        return instrument
 
     @classmethod
     def get_query(klass, oid=None):
