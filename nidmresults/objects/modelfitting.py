@@ -113,7 +113,7 @@ SELECT DISTINCT * WHERE {
         return query
 
     @classmethod
-    def load_from_json(klass, json_dict, software_id):
+    def load_from_json(klass, json_dict, base_dir, software_id):
         # soft_type = json_dict['NeuroimagingAnalysisSoftware_type']
         # version = json_dict['NeuroimagingAnalysisSoftware_type']
         # label = json_dict.get('NeuroimagingAnalysisSoftware_label', None)
@@ -126,7 +126,7 @@ SELECT DISTINCT * WHERE {
         design = DesignMatrix.load(json_dict)
         data = Data.load(json_dict)
         error = ErrorModel.load(json_dict)
-        param_estimates = ParameterEstimateMap.load(json_dict)
+        param_estimates = ParameterEstimateMap.load(json_dict, base_dir)
         rms_map = ResidualMeanSquares.load(json_dict)
         mask_map = MaskMap.load(json_dict)
         grand_mean_map = GrandMeanMap.load(json_dict)
@@ -746,16 +746,20 @@ class ParameterEstimateMap(NIDMObject):
     Object representing an ParameterEstimateMap entity.
     """
 
-    def __init__(self, coord_space, pe_file=None, pe_num=None, filename=None,
+    def __init__(self, coord_space=None, pe_file=None, pe_num=None, filename=None,
                  sha=None, label=None, suffix='', model_param_estimation=None,
                  oid=None, fmt=None, derfrom_id=None, derfrom_filename=None,
                  derfrom_fmt=None, derfrom_sha=None, isderfrommap=False):
         super(ParameterEstimateMap, self).__init__(oid=oid)
         # Column index in the corresponding design matrix
         self.num = pe_num
+
         self.coord_space = coord_space
+
         # Parameter Estimate Map is going to be copied over to export_dir
         if not filename:
+            if suffix is None and pe_num is not None:
+                suffix = str(pe_num)
             filename = 'ParameterEstimate' + suffix + '.nii.gz'
 
         self.file = NIDMFile(self.id, pe_file, filename=filename, sha=sha,
@@ -783,14 +787,19 @@ class ParameterEstimateMap(NIDMObject):
         self.isderfrommap = isderfrommap
 
     @classmethod
-    def load_from_json(klass, json_dict):
+    def load_from_json(klass, json_dict, base_dir):
+        pe_list = list()
         params = json_dict['ParameterEstimateMaps']
 
+        for idx, pe_file in enumerate(params):
+            # FIXME: deal with varying coordsys across maps
+            coordspace = CoordinateSpace.load_from_json(json_dict, 
+                os.path.join(base_dir, pe_file))
+
+            pe = ParameterEstimateMap(coordspace, pe_file, idx+1)
+            pe_list.append(pe)
         
-        version = json_dict['NeuroimagingAnalysisSoftware_type']
-        label = json_dict.get('NeuroimagingAnalysisSoftware_label', None)
-        soft = NeuroimagingSoftware(soft_type, version, label)
-        return soft
+        return pe_list
 
     @classmethod
     def get_query(klass, oid=None):

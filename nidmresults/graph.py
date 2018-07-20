@@ -55,6 +55,8 @@ class NIDMResults():
             with open(json_file) as json_data:
                 self.json = json.load(json_data)
 
+            self.json_path = os.path.dirname(json_file)
+
             # TODO: add validation here of the JSON file according to JSON API
 
         self.objects = dict()
@@ -698,7 +700,8 @@ SELECT DISTINCT * WHERE
             else:
                 raise Exception('No model fitting found')
         elif self.json_file is not None:
-            model_fittings = ModelFitting.load(self.json, self.software.id)
+            model_fittings = ModelFitting.load(self.json, self.json_path, 
+                                               self.software.id)
 
         return model_fittings
 
