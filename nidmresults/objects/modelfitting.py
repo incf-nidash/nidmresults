@@ -128,7 +128,7 @@ SELECT DISTINCT * WHERE {
         error = ErrorModel.load(json_dict)
         param_estimates = ParameterEstimateMap.load(json_dict, base_dir)
         rms_map = ResidualMeanSquares.load(json_dict, base_dir)
-        mask_map = MaskMap.load(json_dict)
+        mask_map = MaskMap.load(json_dict, base_dir)
         grand_mean_map = GrandMeanMap.load(json_dict)
         machine = Machine.load(json_dict)
         subjects = Subject.load(json_dict)
@@ -892,11 +892,9 @@ class ResidualMeanSquares(NIDMObject):
     @classmethod
     def load_from_json(klass, json_dict, base_dir):
         rms_file = json_dict['ResidualMeanSquaresMap_atLocation']
-
         # FIXME: deal with varying coordsys across maps
         coordspace = CoordinateSpace.load_from_json(json_dict, 
             os.path.join(base_dir, rms_file))
-
         rms = ResidualMeanSquares(rms_file, coordspace)
        
         return rms
@@ -1090,6 +1088,17 @@ class MaskMap(NIDMObject):
         }
         """
         return query
+
+    @classmethod
+    def load_from_json(klass, json_dict, base_dir):
+        mask_file = json_dict['MaskMap_atLocation']
+        # FIXME: deal with varying coordsys across maps
+        coordspace = CoordinateSpace.load_from_json(json_dict, 
+            os.path.join(base_dir, mask_file))
+        mask = MaskMap(mask_file, coordspace, False)
+       
+        return mask
+
 
     def export(self, nidm_version, export_dir):
         """
