@@ -43,6 +43,9 @@ class ModelFitting(NIDMObject):
         self.machine = machine
         self.subjects = subjects
 
+        # Useful for printing
+        self.label = 'Model fitting'
+
     @classmethod
     def get_query(klass):
         query = """
@@ -114,11 +117,6 @@ SELECT DISTINCT * WHERE {
 
     @classmethod
     def load_from_json(klass, json_dict, base_dir, software_id):
-        # soft_type = json_dict['NeuroimagingAnalysisSoftware_type']
-        # version = json_dict['NeuroimagingAnalysisSoftware_type']
-        # label = json_dict.get('NeuroimagingAnalysisSoftware_label', None)
-        # return NeuroimagingSoftware(soft_type, version, label)
-
         # TODO: currently assuming list of 1 ==> should be extended
         model_fittings = list()
 
@@ -131,23 +129,16 @@ SELECT DISTINCT * WHERE {
         mask_map = MaskMap.load(json_dict, base_dir)
         grand_mean_map = GrandMeanMap.load(json_dict, base_dir)
         machine = ImagingInstrument.load(json_dict)
-        subjects = Subject.load(json_dict)
+        subjects = Group.load(json_dict)
 
-        # self.design_matrix = design
-        # self.data = data
-        # self.error_model = error_model
-        # self.param_estimates = param_estimates
-        # self.rms_map = rms_map
-        # self.rpv_map = rpv_map
-        # self.mask_map = mask_map
-        # self.grand_mean_map = grand_mean_map
-        # self.machine = machine
-        # self.subjects = subjects
-
-        return ModelFitting(
+        mf = ModelFitting(
                 activity, design, data, error,
                 param_estimates, rms_map, mask_map, grand_mean_map,
                 machine, subjects, rpv_map=None)
+
+        print(mf)
+
+        return mf
 
 
 class ImagingInstrument(NIDMObject):
@@ -279,6 +270,22 @@ SELECT DISTINCT * WHERE {
 }
         """
         return query
+
+    @classmethod
+    def load_from_json(klass, json_dict):
+        groups = json_dict.get('groups', None)
+        grps = list()
+
+        if groups is not None:
+            for group in groups:
+                group_name = group['StudyGroupPopulation_groupName']
+                num_subjects = group['StudyGroupPopulation_numberOfSubjects']
+                grp = Group(num_subjects, group_name)
+                grps.append(grp)
+        else:
+            grps = Person()
+
+        return grps
 
     def export(self, nidm_version, export_dir):
         """
