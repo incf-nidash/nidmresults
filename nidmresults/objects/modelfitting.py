@@ -121,8 +121,33 @@ SELECT DISTINCT * WHERE {
 
         # TODO: currently assuming list of 1 ==> should be extended
         model_fittings = list()
+
         activity = ModelParametersEstimation.load(json_dict, software_id)
-        print(activity)
+        design = DesignMatrix.load(json_dict)
+        data = Data.load(json_dict)
+        error = ErrorModel.load(json_dict)
+        param_estimates = ParameterEstimateMap.load(json_dict)
+        rms_map = ResidualMeanSquares.load(json_dict)
+        mask_map = MaskMap.load(json_dict)
+        grand_mean_map = GrandMeanMap.load(json_dict)
+        machine = Machine.load(json_dict)
+        subjects = Subject.load(json_dict)
+
+        # self.design_matrix = design
+        # self.data = data
+        # self.error_model = error_model
+        # self.param_estimates = param_estimates
+        # self.rms_map = rms_map
+        # self.rpv_map = rpv_map
+        # self.mask_map = mask_map
+        # self.grand_mean_map = grand_mean_map
+        # self.machine = machine
+        # self.subjects = subjects
+
+        return ModelFitting(
+                activity, design, data, error,
+                param_estimates, rms_map, mask_map, grand_mean_map,
+                machine, subjects, rpv_map=None)
 
 
 class ImagingInstrument(NIDMObject):
@@ -305,7 +330,10 @@ class DesignMatrix(NIDMObject):
             self.image = image_file
         else:
             self.image = Image(image_file, img_filename)
-        if not type(regressors) is list:
+
+        # Note: changed to fit regressors passed as loaded json when creating
+        # NIDM pack from JSON --> check if this cause issue in the tests TODO
+        if not type(regressors) is not list:
             regressors = json.loads(regressors)
         self.regressors = regressors
 
@@ -330,6 +358,28 @@ class DesignMatrix(NIDMObject):
             self.label = label
         else:
             self.label = "Design Matrix"
+
+    @classmethod
+    def load_from_json(klass, json_dict):
+        if 'DesignMatrix_atLocation' in json_dict:
+            mat_csv = json_dict['DesignMatrix_atLocation']
+            # Note: this could be removed and the csv passed directly
+            matrix = genfromtxt(mat_csv, delimiter=',')
+        else:
+            matrix = json_dict['DesignMatrix_value']
+
+        # TODO: deal with optional png of design matric
+        image_file = None
+
+        regressors = json_dict['DesignMatrix_regressorNames']
+        # TODO deal with optional arguments
+
+        design = DesignMatrix(
+                    matrix, image_file, regressors=None,
+                    design_type=None, hrf_models=None, drift_model=None,
+                    suffix='', csv_file=None, filename=None, label=None,
+                    oid=None)
+        return design
 
     @classmethod
     def get_query(klass, oid=None):
@@ -484,6 +534,15 @@ class Data(NIDMObject):
         self.group_or_sub = group_or_sub
 
     @classmethod
+    def load_from_json(klass, json_dict):
+        grand_mean_scaling = json_dict['Data_grandMeanScaling']
+        target = json_dict['Data_targetIntensity']
+        # TODO deal with optional arguments
+        data = Data(grand_mean_scaling, mri_protocol=None,
+                 label=None, group_or_sub=None, oid=None)
+        return data
+
+    @classmethod
     def get_query(klass, oid=None):
         if oid is None:
             oid_var = "?oid"
@@ -549,6 +608,29 @@ class ErrorModel(NIDMObject):
         self.dependance_spatial = dependance_spatial
         self.type = NIDM_ERROR_MODEL
         self.prov_type = PROV['Entity']
+
+    @classmethod
+    def load_from_json(klass, json_dict):
+        DEP = {
+            'nidm_ConstantParameter': SPATIALLY_GLOBAL,
+            'nidm_IndependentParameter': SPATIALLY_LOCAL,
+            'nidm_RegularizedParameter': SPATIALLY_REGUL,
+        }
+        DIST = {
+            'obo_NormalDistribution': STATO_NORMAL_DISTRIBUTION,
+        }
+
+        error_distribution = DIST[json_dict['ErrorModel_hasErrorDistribution']]
+        variance_homo = json_dict['ErrorModel_errorVarianceHomogeneous']
+        variance_spatial = DEP[
+            json_dict['ErrorModel_varianceMapWiseDependence']]
+        dep = json_dict['ErrorModel_hasErrorDependence']
+        dep_spatial = DEP[json_dict['ErrorModel_dependenceMapWiseDependence']]
+
+        error = ErrorModel(
+                    error_distribution, variance_homo, variance_spatial,
+                    dep, dep_spatial, oid=None)
+        return error
 
     @classmethod
     def get_query(klass, oid=None):
@@ -699,6 +781,16 @@ class ParameterEstimateMap(NIDMObject):
         else:
             self.derfrom = None
         self.isderfrommap = isderfrommap
+
+    @classmethod
+    def load_from_json(klass, json_dict):
+        params = json_dict['ParameterEstimateMaps']
+
+        
+        version = json_dict['NeuroimagingAnalysisSoftware_type']
+        label = json_dict.get('NeuroimagingAnalysisSoftware_label', None)
+        soft = NeuroimagingSoftware(soft_type, version, label)
+        return soft
 
     @classmethod
     def get_query(klass, oid=None):
