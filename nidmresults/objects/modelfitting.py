@@ -129,7 +129,7 @@ SELECT DISTINCT * WHERE {
         param_estimates = ParameterEstimateMap.load(json_dict, base_dir)
         rms_map = ResidualMeanSquares.load(json_dict, base_dir)
         mask_map = MaskMap.load(json_dict, base_dir)
-        grand_mean_map = GrandMeanMap.load(json_dict)
+        grand_mean_map = GrandMeanMap.load(json_dict, base_dir)
         machine = Machine.load(json_dict)
         subjects = Subject.load(json_dict)
 
@@ -1163,6 +1163,16 @@ class GrandMeanMap(NIDMObject):
         }
         """
         return query
+
+    @classmethod
+    def load_from_json(klass, json_dict, base_dir):
+        gm_file = json_dict['GrandMeanMap_atLocation']
+        # FIXME: deal with varying coordsys across maps
+        coordspace = CoordinateSpace.load_from_json(json_dict, 
+            os.path.join(base_dir, gm_file))
+        mask = GrandMeanMap(gm_file, gm_file, coordspace)
+       
+        return mask
 
     def export(self, nidm_version, export_dir):
         """
