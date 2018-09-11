@@ -706,181 +706,185 @@ SELECT DISTINCT * WHERE
         return model_fittings
 
     def load_contrasts(self, workaround=False):
-        if workaround:
-            warnings.warn('Using workaround: links between contrast weights' +
-                          'and contrast estimations are not assessed')
-            con_est_att = "."
-        else:
-            con_est_att = """;
-                prov:used ?conw_id ;
-                prov:used ?design_id ."""
+        if self.nidm_zip is not None:
+            if workaround:
+                warnings.warn('Using workaround: links between contrast weights' +
+                              'and contrast estimations are not assessed')
+                con_est_att = "."
+            else:
+                con_est_att = """;
+                    prov:used ?conw_id ;
+                    prov:used ?design_id ."""
 
-        query = """
-prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
-prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_000005\
-6>
-prefix nidm_contrastName: <http://purl.org/nidash/nidm#NIDM_0000085>
-prefix obo_contrastweightmatrix: <http://purl.obolibrary.org/obo/STATO_0000323>
-prefix nidm_ContrastEstimation: <http://purl.org/nidash/nidm#NIDM_0000001>
-prefix nidm_ContrastMap: <http://purl.org/nidash/nidm#NIDM_0000002>
-prefix nidm_ContrastStandardErrorMap: <http://purl.org/nidash/nidm#NIDM_000001\
-3>
-prefix nidm_ContrastExplainedMeanSquareMap: <http://purl.org/nidash/nidm#NIDM_\
-0000163>
-prefix nidm_StatisticMap: <http://purl.org/nidash/nidm#NIDM_0000076>
-prefix nidm_Inference: <http://purl.org/nidash/nidm#NIDM_0000049>
-prefix nidm_ConjunctionInference: <http://purl.org/nidash/nidm#NIDM_0000011>
-prefix spm_PartialConjunctionInference: <http://purl.org/nidash/spm#SPM_000000\
-5>
-prefix nidm_contrastName: <http://purl.org/nidash/nidm#NIDM_0000085>
+            query = """
+    prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+    prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_000005\
+    6>
+    prefix nidm_contrastName: <http://purl.org/nidash/nidm#NIDM_0000085>
+    prefix obo_contrastweightmatrix: <http://purl.obolibrary.org/obo/STATO_0000323>
+    prefix nidm_ContrastEstimation: <http://purl.org/nidash/nidm#NIDM_0000001>
+    prefix nidm_ContrastMap: <http://purl.org/nidash/nidm#NIDM_0000002>
+    prefix nidm_ContrastStandardErrorMap: <http://purl.org/nidash/nidm#NIDM_000001\
+    3>
+    prefix nidm_ContrastExplainedMeanSquareMap: <http://purl.org/nidash/nidm#NIDM_\
+    0000163>
+    prefix nidm_StatisticMap: <http://purl.org/nidash/nidm#NIDM_0000076>
+    prefix nidm_Inference: <http://purl.org/nidash/nidm#NIDM_0000049>
+    prefix nidm_ConjunctionInference: <http://purl.org/nidash/nidm#NIDM_0000011>
+    prefix spm_PartialConjunctionInference: <http://purl.org/nidash/spm#SPM_000000\
+    5>
+    prefix nidm_contrastName: <http://purl.org/nidash/nidm#NIDM_0000085>
 
-SELECT DISTINCT * WHERE {
+    SELECT DISTINCT * WHERE {
 
-    ?design_id a nidm_DesignMatrix: .
+        ?design_id a nidm_DesignMatrix: .
 
-    ?conw_id a obo_contrastweightmatrix: .
+        ?conw_id a obo_contrastweightmatrix: .
 
-    ?conest_id a nidm_ContrastEstimation: """ + con_est_att + """
+        ?conest_id a nidm_ContrastEstimation: """ + con_est_att + """
 
-    ?mpe_id a nidm_ModelParameterEstimation: ;
-        prov:used ?design_id .
+        ?mpe_id a nidm_ModelParameterEstimation: ;
+            prov:used ?design_id .
 
-    {
-    ?conm_id a nidm_ContrastMap: ;
-        nidm_inCoordinateSpace: ?conm_coordspace_id ;
-        prov:wasGeneratedBy ?conest_id .
+        {
+        ?conm_id a nidm_ContrastMap: ;
+            nidm_inCoordinateSpace: ?conm_coordspace_id ;
+            prov:wasGeneratedBy ?conest_id .
 
-    ?constdm_id a nidm_ContrastStandardErrorMap: .
-    } UNION
-    {
-    ?constdm_id a nidm_ContrastExplainedMeanSquareMap: .
-    } .
+        ?constdm_id a nidm_ContrastStandardErrorMap: .
+        } UNION
+        {
+        ?constdm_id a nidm_ContrastExplainedMeanSquareMap: .
+        } .
 
-    ?constdm_id nidm_inCoordinateSpace: ?constdm_coordspace_id ;
-        prov:wasGeneratedBy ?conest_id .
+        ?constdm_id nidm_inCoordinateSpace: ?constdm_coordspace_id ;
+            prov:wasGeneratedBy ?conest_id .
 
-    ?statm_id a nidm_StatisticMap: ;
-        prov:wasGeneratedBy ?conest_id ;
-        nidm_contrastName: ?contrast_name ;
-        nidm_inCoordinateSpace: ?statm_coordspace_id .
+        ?statm_id a nidm_StatisticMap: ;
+            prov:wasGeneratedBy ?conest_id ;
+            nidm_contrastName: ?contrast_name ;
+            nidm_inCoordinateSpace: ?statm_coordspace_id .
 
-    {
-    ?inf_id a nidm_Inference: .
-    } UNION {
-    ?inf_id a nidm_ConjunctionInference: .
-    } UNION {
-    ?inf_id a spm_PartialConjunctionInference: .
-    } .
+        {
+        ?inf_id a nidm_Inference: .
+        } UNION {
+        ?inf_id a nidm_ConjunctionInference: .
+        } UNION {
+        ?inf_id a spm_PartialConjunctionInference: .
+        } .
 
-    ?inf_id prov:used ?statm_id .
+        ?inf_id prov:used ?statm_id .
 
-    OPTIONAL {
-        ?otherstatm_id a nidm_StatisticMap: ;
-        prov:wasGeneratedBy ?conest_id ;
-        nidm_inCoordinateSpace: ?otherstatm_coordspace_id .
-        FILTER (?otherstatm_id != ?statm_id)
-    } .
+        OPTIONAL {
+            ?otherstatm_id a nidm_StatisticMap: ;
+            prov:wasGeneratedBy ?conest_id ;
+            nidm_inCoordinateSpace: ?otherstatm_coordspace_id .
+            FILTER (?otherstatm_id != ?statm_id)
+        } .
 
-}
-        """
+    }
+            """
 
-        sd = self.graph.query(query)
+            sd = self.graph.query(query)
 
-        contrasts = dict()
-        if sd:
-            con_num = 0
-            for row in sd:
-                args = row.asdict()
-                contrast_num = str(con_num)
-                contrast_name = args['contrast_name']
+            contrasts = dict()
+            if sd:
+                con_num = 0
+                for row in sd:
+                    args = row.asdict()
+                    contrast_num = str(con_num)
+                    contrast_name = args['contrast_name']
 
-                weights = self.get_object(
-                    ContrastWeights, args['conw_id'],
-                    contrast_num=contrast_num)
-                estimation = self.get_object(
-                    ContrastEstimation, args['conest_id'],
-                    contrast_num=contrast_num)
-
-                contraststd_map_coordspace = self.get_object(
-                    CoordinateSpace, args['constdm_coordspace_id'])
-
-                if 'conm_id' in args:
-                    # T-contrast
-                    contrast_map_coordspace = self.get_object(
-                        CoordinateSpace, args['conm_coordspace_id'])
-                    contrast_map = self.get_object(
-                        ContrastMap, args['conm_id'],
-                        coord_space=contrast_map_coordspace,
+                    weights = self.get_object(
+                        ContrastWeights, args['conw_id'],
+                        contrast_num=contrast_num)
+                    estimation = self.get_object(
+                        ContrastEstimation, args['conest_id'],
                         contrast_num=contrast_num)
 
-                    stderr_or_expl_mean_sq_map = self.get_object(
-                        ContrastStdErrMap, args['constdm_id'],
-                        coord_space=contraststd_map_coordspace,
-                        contrast_num=contrast_num, is_variance=False,
-                        var_coord_space=None, filepath=None)
-                else:
-                    # F-contrast
-                    contrast_map = None
-                    stderr_or_expl_mean_sq_map = self.get_object(
-                        ContrastExplainedMeanSquareMap, args['constdm_id'],
-                        coord_space=contraststd_map_coordspace,
-                        contrast_num=contrast_num, stat_file=None,
-                        sigma_sq_file=None)
+                    contraststd_map_coordspace = self.get_object(
+                        CoordinateSpace, args['constdm_coordspace_id'])
 
-                stat_map_coordspace = self.get_object(
-                    CoordinateSpace, args['statm_coordspace_id'])
-                stat_map = self.get_object(
-                    StatisticMap, args['statm_id'],
-                    coord_space=stat_map_coordspace)
+                    if 'conm_id' in args:
+                        # T-contrast
+                        contrast_map_coordspace = self.get_object(
+                            CoordinateSpace, args['conm_coordspace_id'])
+                        contrast_map = self.get_object(
+                            ContrastMap, args['conm_id'],
+                            coord_space=contrast_map_coordspace,
+                            contrast_num=contrast_num)
 
-                zstat_exist = False
-                if 'otherstatm_id' in args:
-                    zstat_exist = True
+                        stderr_or_expl_mean_sq_map = self.get_object(
+                            ContrastStdErrMap, args['constdm_id'],
+                            coord_space=contraststd_map_coordspace,
+                            contrast_num=contrast_num, is_variance=False,
+                            var_coord_space=None, filepath=None)
+                    else:
+                        # F-contrast
+                        contrast_map = None
+                        stderr_or_expl_mean_sq_map = self.get_object(
+                            ContrastExplainedMeanSquareMap, args['constdm_id'],
+                            coord_space=contraststd_map_coordspace,
+                            contrast_num=contrast_num, stat_file=None,
+                            sigma_sq_file=None)
 
-                    otherstat_map_coordspace = self.get_object(
-                        CoordinateSpace, args['otherstatm_coordspace_id'])
-                    otherstat_map = self.get_object(
-                        StatisticMap, args['otherstatm_id'],
+                    stat_map_coordspace = self.get_object(
+                        CoordinateSpace, args['statm_coordspace_id'])
+                    stat_map = self.get_object(
+                        StatisticMap, args['statm_id'],
                         coord_space=stat_map_coordspace)
 
-                if zstat_exist:
-                    con = Contrast(
-                            contrast_num, args['contrast_name'], weights,
-                            estimation, contrast_map,
-                            stderr_or_expl_mean_sq_map, stat_map=otherstat_map,
-                            z_stat_map=stat_map)
-                else:
-                    con = Contrast(
-                            contrast_num, args['contrast_name'],
-                            weights, estimation, contrast_map,
-                            stderr_or_expl_mean_sq_map, stat_map=stat_map)
+                    zstat_exist = False
+                    if 'otherstatm_id' in args:
+                        zstat_exist = True
 
-                # Find list of model parameter estimate maps
-                query_pe_maps = """
-prefix nidm_ParameterEstimateMap: <http://purl.org/nidash/nidm#NIDM_0000061>
+                        otherstat_map_coordspace = self.get_object(
+                            CoordinateSpace, args['otherstatm_coordspace_id'])
+                        otherstat_map = self.get_object(
+                            StatisticMap, args['otherstatm_id'],
+                            coord_space=stat_map_coordspace)
 
-SELECT DISTINCT * WHERE {
-    <""" + str(args['conest_id']) + """> prov:used  ?pe_id .
-    ?pe_id a nidm_ParameterEstimateMap: .
-}
-                """
-                pe_ids = ()
-                sd_pe_maps = self.graph.query(query_pe_maps)
-                if sd_pe_maps:
-                    for row_pe in sd_pe_maps:
-                        args_pe = row_pe.asdict()
-                        pe_ids = pe_ids + (NIIRI.qname(str(args_pe['pe_id'])),)
+                    if zstat_exist:
+                        con = Contrast(
+                                contrast_num, args['contrast_name'], weights,
+                                estimation, contrast_map,
+                                stderr_or_expl_mean_sq_map, stat_map=otherstat_map,
+                                z_stat_map=stat_map)
+                    else:
+                        con = Contrast(
+                                contrast_num, args['contrast_name'],
+                                weights, estimation, contrast_map,
+                                stderr_or_expl_mean_sq_map, stat_map=stat_map)
 
-                mpe_id = NIIRI.qname(str(args['mpe_id']))
-                if not (mpe_id, pe_ids) in contrasts:
-                    contrasts[(mpe_id, pe_ids)] = [con]
-                else:
-                    contrasts[(mpe_id, pe_ids)].append(con)
+                    # Find list of model parameter estimate maps
+                    query_pe_maps = """
+    prefix nidm_ParameterEstimateMap: <http://purl.org/nidash/nidm#NIDM_0000061>
 
-                con_num = con_num + 1
+    SELECT DISTINCT * WHERE {
+        <""" + str(args['conest_id']) + """> prov:used  ?pe_id .
+        ?pe_id a nidm_ParameterEstimateMap: .
+    }
+                    """
+                    pe_ids = ()
+                    sd_pe_maps = self.graph.query(query_pe_maps)
+                    if sd_pe_maps:
+                        for row_pe in sd_pe_maps:
+                            args_pe = row_pe.asdict()
+                            pe_ids = pe_ids + (NIIRI.qname(str(args_pe['pe_id'])),)
 
-        if not contrasts:
-            raise Exception('No contrast found')
+                    mpe_id = NIIRI.qname(str(args['mpe_id']))
+                    if not (mpe_id, pe_ids) in contrasts:
+                        contrasts[(mpe_id, pe_ids)] = [con]
+                    else:
+                        contrasts[(mpe_id, pe_ids)].append(con)
+
+                    con_num = con_num + 1
+
+            if not contrasts:
+                raise Exception('No contrast found')
+        elif self.json_file is not None:
+            contrasts = Contrast.load(self.json, self.json_path, 
+                                      self.software.id)
 
         return contrasts
 

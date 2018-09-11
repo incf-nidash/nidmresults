@@ -17,7 +17,7 @@ from prov.model import Identifier
 from prov.identifier import QualifiedName
 
 
-class Contrast(object):
+class Contrast(NIDMObject):
 
     """
     Object representing a Contrast Estimation step: including a
@@ -38,6 +38,29 @@ class Contrast(object):
         self.stderr_or_expl_mean_sq_map = stderr_or_expl_mean_sq_map
         self.stat_map = stat_map
         self.z_stat_map = z_stat_map
+
+    @classmethod
+    def load_from_json(klass, json_dict, base_dir, software_id):
+        contrasts = list()
+
+        activity = ModelParametersEstimation.load(json_dict, software_id)
+        design = DesignMatrix.load(json_dict)
+        data = Data.load(json_dict)
+        error = ErrorModel.load(json_dict)
+        param_estimates = ParameterEstimateMap.load(json_dict, base_dir)
+        rms_map = ResidualMeanSquares.load(json_dict, base_dir)
+        mask_map = MaskMap.load(json_dict, base_dir)
+        grand_mean_map = GrandMeanMap.load(json_dict, base_dir)
+        machine = ImagingInstrument.load(json_dict)
+        subjects = Group.load(json_dict)
+
+        con = Contrast(contrast_num, contrast_name, weights, estimation,
+                 contrast_map, stderr_or_expl_mean_sq_map, stat_map,
+                 z_stat_map)
+
+        contrasts.append(con)
+
+        return mf
 
 
 class ContrastWeights(NIDMObject):
