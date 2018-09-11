@@ -17,7 +17,7 @@ from prov.constants import XSD_FLOAT
 from prov.model import Identifier
 
 
-class Inference(object):
+class Inference(NIDMObject):
 
     """
     Object representing an Inference step: including an Inference activity, its
@@ -39,6 +39,29 @@ class Inference(object):
         self.cluster_criteria = cluster_criteria
         self.disp_mask = disp_mask
         self.search_space = search_space
+
+    @classmethod
+    def load_from_json(klass, json_dict, base_dir, software_id):
+        inferences = list()
+
+        inference = InferenceActivity.load(json_dict)
+        height_thresh = HeightThreshold.load(json_dict)
+        extent_thresh = ExtentThreshold.load(json_dict)
+        peak_criteria = PeakCriteria.load(json_dict)
+        cluster_criteria = ClusterCriteria.load(json_dict)
+        # disp_mask = DisplayMaskMap.load(json_dict, base_dir)
+        disp_mask = None # TODO
+        excursion_set = ExcursionSet.load(json_dict, base_dir)
+        clusters = Cluster.load(json_dict)
+        search_space = SearchSpaceMaskMap.load(json_dict, base_dir)
+
+        inf = Inference(inference, height_thresh, extent_thresh,
+            peak_criteria, cluster_criteria, disp_mask, excursion_set,
+            clusters, search_space, software_id)
+
+        inferences.append(inf)
+
+        return inferences
 
 
 class InferenceActivity(NIDMObject):
@@ -100,6 +123,11 @@ prefix spm_PartialConjunctionDegree: <http://purl.org/nidash/spm#SPM_0000015>
         }
         """
         return query
+
+    @classmethod
+    def load_from_json(klass, json_dict):
+        inf_act = InferenceActivity()
+        return inf_act
 
     def export(self, nidm_version, export_dir):
         """
@@ -185,6 +213,16 @@ SELECT DISTINCT * WHERE {
 ORDER BY ?peak_label
         """
         return query
+
+    @classmethod
+    def load_from_json(klass, json_dict, base_dir):
+
+        location = json_dict['Inferences']["ExcursionSetMap_atLocation"]
+        coordspace = CoordinateSpace.load_from_json(json_dict, 
+            os.path.join(base_dir, location))
+
+        exc = ExcursionSet(location, coordspace)
+        return exc
 
     def export(self, nidm_version, export_dir):
         """
@@ -360,6 +398,16 @@ prefix nidm_hasAlternativeHypothesis: <http://purl.org/nidash/nidm#NIDM_000009\
         """
         return query
 
+    @classmethod
+    def load_from_json(klass, json_dict):
+
+        threshold_type = json_dict['Inferences']["HeightThreshold_type"]
+        threshold_value = json_dict['Inferences']["HeightThreshold_value"]
+
+        ht = HeightThreshold(threshold_type=threshold_type, 
+                             value=threshold_value)
+        return ht
+
     def export(self, version, export_dir):
         """
         Create prov entities and activities.
@@ -485,6 +533,15 @@ prefix nidm_clusterSizeInResels: <http://purl.org/nidash/nidm#NIDM_0000156>
         """
         return query
 
+    @classmethod
+    def load_from_json(klass, json_dict):
+        threshold_type = json_dict['Inferences']["ExtentThreshold_type"]
+        threshold_value = json_dict['Inferences']["ExtentThreshold_clusterSizeInVoxels"]
+
+        et = ExtentThreshold(threshold_type=threshold_type, 
+                             value=threshold_value)
+        return et
+
     def export(self, version, export_dir):
         """
         Create prov entities and activities.
@@ -596,6 +653,25 @@ SELECT DISTINCT * WHERE {
 }
         """
         return query
+
+    @classmethod
+    def load_from_json(klass, json_dict):
+
+        clusters = json_dict['Inferences']['Clusters']
+        clusts = list()
+
+        clid = 1
+        if clusts is not None:
+            for cl in clusts:
+                size = cl['SupraThresholdCluster_clusterSizeInVoxels']
+                pFWER = cl['SupraThresholdCluster_pValueFWER']
+
+                peaks = load_from_json(clust['peaks'])
+                clust = Cluster(clid, size, pFWER, peaks)
+                clusts.append(clust)
+
+        return clusters
+
 
     def export(self, nidm_version, export_dir):
         """
@@ -755,6 +831,14 @@ prefix nidm_maxNumberOfPeaksPerCluster: <http://purl.org/nidash/nidm#NIDM_0000\
         """
         return query
 
+    @classmethod
+    def load_from_json(klass, json_dict):
+        peak_dist = json_dict["PeakDefinitionCriteria_minDistanceBetweenPeaks"]
+        num_peak = json_dict["PeakDefinitionCriteria_maxNumberOfPeaksPerCluster"]
+
+        pc = PeakCriteria(None, peak_dist, num_peak)
+        return pc
+
     def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
@@ -808,6 +892,14 @@ prefix nidm_hasConnectivityCriterion: <http://purl.org/nidash/nidm#NIDM_000009\
 }
         """
         return query
+
+    @classmethod
+    def load_from_json(klass, json_dict):
+        connectivity = json_dict["ClusterDefinitionCriteria_hasConnectivityCriterion"]
+
+        cc = ClusterCriteria(None, connectivity)
+        
+        return cc
 
     def export(self, nidm_version, export_dir):
         """
@@ -1191,6 +1283,31 @@ SELECT DISTINCT * WHERE {
         }
         """
         return query
+
+    @classmethod
+    def load_from_json(klass, json_dict):
+        pks = list()
+
+        pid = 1
+        for pk in pks:
+
+            # "": 17.5207633972168,
+            #             "Coordinate_coordinateVector": [-60,-25,11],
+            #             "": 4.440892098500626e-16,
+            #             "": 0,
+            #             "": 1.191565917138381e-11
+
+            equiv_z = pk['Peak_equivalentZStatistic']
+            p_unc = pk.get('Peak_pValueUncorrected', None)
+            p_fwer = pk.get('Peak_pValueFWER', None)
+            p_fdr = pk.get('Peak_qValueFDR', None)
+            value = pk.get('Peak_value', None)
+
+            peaks = load_from_json(clust['peaks'])
+            clust = Peak(equiv_z, p_unc, p_fwer, p_fdr=p_fdr, value=value)
+            clusts.append(clust)
+
+        return clusters
 
     def __str__(self):
         return '%s \tz=%.2f \tp=%.2e (unc.) \t%s' % (

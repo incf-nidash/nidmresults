@@ -889,234 +889,239 @@ SELECT DISTINCT * WHERE
         return contrasts
 
     def load_inferences(self):
-        query = """
-prefix nidm_ContrastEstimation: <http://purl.org/nidash/nidm#NIDM_0000001>
+        if self.nidm_zip is not None:
+            query = """
+    prefix nidm_ContrastEstimation: <http://purl.org/nidash/nidm#NIDM_0000001>
 
-prefix nidm_Inference: <http://purl.org/nidash/nidm#NIDM_0000049>
-prefix nidm_HeightThreshold: <http://purl.org/nidash/nidm#NIDM_0000034>
-prefix nidm_ExtentThreshold: <http://purl.org/nidash/nidm#NIDM_0000026>
-prefix nidm_PeakDefinitionCriteria: <http://purl.org/nidash/nidm#NIDM_0000063>
-prefix nidm_ClusterDefinitionCriteria: <http://purl.org/nidash/nidm#NIDM_00000\
-07>
-prefix nidm_DisplayMaskMap: <http://purl.org/nidash/nidm#NIDM_0000020>
-prefix nidm_ExcursionSetMap: <http://purl.org/nidash/nidm#NIDM_0000025>
-prefix nidm_inCoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000104>
-prefix nidm_SearchSpaceMaskMap: <http://purl.org/nidash/nidm#NIDM_0000068>
-prefix nidm_ConjunctionInference: <http://purl.org/nidash/nidm#NIDM_0000011>
-prefix spm_PartialConjunctionInference: <http://purl.org/nidash/spm#SPM_000000\
-5>
-prefix nidm_hasClusterLabelsMap: <http://purl.org/nidash/nidm#NIDM_0000098>
-prefix nidm_hasMaximumIntensityProjection: <http://purl.org/nidash/nidm#NIDM_0\
-000138>
+    prefix nidm_Inference: <http://purl.org/nidash/nidm#NIDM_0000049>
+    prefix nidm_HeightThreshold: <http://purl.org/nidash/nidm#NIDM_0000034>
+    prefix nidm_ExtentThreshold: <http://purl.org/nidash/nidm#NIDM_0000026>
+    prefix nidm_PeakDefinitionCriteria: <http://purl.org/nidash/nidm#NIDM_0000063>
+    prefix nidm_ClusterDefinitionCriteria: <http://purl.org/nidash/nidm#NIDM_00000\
+    07>
+    prefix nidm_DisplayMaskMap: <http://purl.org/nidash/nidm#NIDM_0000020>
+    prefix nidm_ExcursionSetMap: <http://purl.org/nidash/nidm#NIDM_0000025>
+    prefix nidm_inCoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000104>
+    prefix nidm_SearchSpaceMaskMap: <http://purl.org/nidash/nidm#NIDM_0000068>
+    prefix nidm_ConjunctionInference: <http://purl.org/nidash/nidm#NIDM_0000011>
+    prefix spm_PartialConjunctionInference: <http://purl.org/nidash/spm#SPM_000000\
+    5>
+    prefix nidm_hasClusterLabelsMap: <http://purl.org/nidash/nidm#NIDM_0000098>
+    prefix nidm_hasMaximumIntensityProjection: <http://purl.org/nidash/nidm#NIDM_0\
+    000138>
 
-SELECT DISTINCT * WHERE {
-    ?con_est_id a nidm_ContrastEstimation: .
+    SELECT DISTINCT * WHERE {
+        ?con_est_id a nidm_ContrastEstimation: .
 
-    { ?inference_id a nidm_Inference: . }
-    UNION { ?inference_id a nidm_ConjunctionInference: . }
-    UNION { ?inference_id a spm_PartialConjunctionInference: . } .
+        { ?inference_id a nidm_Inference: . }
+        UNION { ?inference_id a nidm_ConjunctionInference: . }
+        UNION { ?inference_id a spm_PartialConjunctionInference: . } .
 
-    ?inference_id prov:used/prov:wasGeneratedBy ?con_est_id ;
-        prov:used ?height_thresh_id ;
-        prov:used ?extent_thresh_id ;
-        prov:used ?peak_criteria_id ;
-        prov:used ?cluster_criteria_id .
+        ?inference_id prov:used/prov:wasGeneratedBy ?con_est_id ;
+            prov:used ?height_thresh_id ;
+            prov:used ?extent_thresh_id ;
+            prov:used ?peak_criteria_id ;
+            prov:used ?cluster_criteria_id .
 
-    ?height_thresh_id a nidm_HeightThreshold: .
+        ?height_thresh_id a nidm_HeightThreshold: .
 
-    ?extent_thresh_id a nidm_ExtentThreshold: .
+        ?extent_thresh_id a nidm_ExtentThreshold: .
 
-    ?peak_criteria_id a nidm_PeakDefinitionCriteria: .
+        ?peak_criteria_id a nidm_PeakDefinitionCriteria: .
 
-    ?cluster_criteria_id a nidm_ClusterDefinitionCriteria: .
+        ?cluster_criteria_id a nidm_ClusterDefinitionCriteria: .
 
-    OPTIONAL {
-    ?inference_id prov:used ?display_mask_id .
-    ?display_mask_id a nidm_DisplayMaskMap: ;
-        nidm_inCoordinateSpace: ?disp_coord_space_id .
-    } .
+        OPTIONAL {
+        ?inference_id prov:used ?display_mask_id .
+        ?display_mask_id a nidm_DisplayMaskMap: ;
+            nidm_inCoordinateSpace: ?disp_coord_space_id .
+        } .
 
-    ?exc_set_id a nidm_ExcursionSetMap: ;
-        nidm_inCoordinateSpace: ?excset_coord_space_id ;
-        prov:wasGeneratedBy ?inference_id .
+        ?exc_set_id a nidm_ExcursionSetMap: ;
+            nidm_inCoordinateSpace: ?excset_coord_space_id ;
+            prov:wasGeneratedBy ?inference_id .
 
-    OPTIONAL {?exc_set_id dc:description ?excset_visu_id}
-    OPTIONAL {
-        ?exc_set_id nidm_hasClusterLabelsMap: ?cluster_map_id .
-        ?cluster_map_id nidm_inCoordinateSpace: ?cluster_map_coord_space_id . }
-    OPTIONAL {?exc_set_id nidm_hasMaximumIntensityProjection: ?mip_id}
+        OPTIONAL {?exc_set_id dc:description ?excset_visu_id}
+        OPTIONAL {
+            ?exc_set_id nidm_hasClusterLabelsMap: ?cluster_map_id .
+            ?cluster_map_id nidm_inCoordinateSpace: ?cluster_map_coord_space_id . }
+        OPTIONAL {?exc_set_id nidm_hasMaximumIntensityProjection: ?mip_id}
 
-    ?search_space_id a nidm_SearchSpaceMaskMap: ;
-        nidm_inCoordinateSpace: ?search_space_coord_space_id ;
-        prov:wasGeneratedBy ?inference_id .
-}
-    """
-        sd = self.graph.query(query)
-
-        inferences = dict()
-        if sd:
-            for row in sd:
-                args = row.asdict()
-                inference = self.get_object(
-                    InferenceActivity, args['inference_id'], err_if_none=False)
-
-                # Find list of equivalent height thresholds
-                query_equiv_threshs = """
-prefix nidm_equivalentThreshold: <http://purl.org/nidash/nidm#NIDM_0000161>
-
-SELECT DISTINCT * WHERE {
-    <""" + str(args['height_thresh_id']) + """> nidm_equivalentThreshold: ?equiv_h_thresh_id .
-}
-                """
-                equiv_h_threshs = list()
-                sd_equiv_h_threshs = self.graph.query(query_equiv_threshs)
-                if sd_equiv_h_threshs:
-                    for row_equiv_h in sd_equiv_h_threshs:
-                        args_hequiv = row_equiv_h.asdict()
-
-                        equiv_h_threshs.append(self.get_object(
-                            HeightThreshold,
-                            args_hequiv['equiv_h_thresh_id']))
-
-                height_thresh = self.get_object(
-                    HeightThreshold, args['height_thresh_id'],
-                    equiv_thresh=equiv_h_threshs)
-
-                # Find list of equivalent extent thresholds
-                query_equiv_threshs = """
-prefix nidm_equivalentThreshold: <http://purl.org/nidash/nidm#NIDM_0000161>
-
-SELECT DISTINCT * WHERE {
-    <""" + str(args['extent_thresh_id']) + """> nidm_equivalentThreshold: ?equiv_e_thresh_id .
-}
-                """
-                equiv_e_threshs = list()
-                sd_equiv_e_threshs = self.graph.query(query_equiv_threshs)
-                if sd_equiv_e_threshs:
-                    for row_equiv_e in sd_equiv_e_threshs:
-                        args_eequiv = row_equiv_e.asdict()
-
-                        equiv_e_threshs.append(self.get_object(
-                            ExtentThreshold, args_eequiv['equiv_e_thresh_id']))
-
-                extent_thresh = self.get_object(
-                    ExtentThreshold, args['extent_thresh_id'],
-                    equiv_thresh=equiv_e_threshs)
-                peak_criteria = self.get_object(
-                    PeakCriteria, args['peak_criteria_id'], contrast_num=None)
-                cluster_criteria = self.get_object(
-                    ClusterCriteria, args['cluster_criteria_id'],
-                    contrast_num=None)
-
-                if 'display_mask_id' in args:
-                    disp_coordspace = self.get_object(
-                        CoordinateSpace, args['disp_coord_space_id'])
-                    # TODO we need to deal with more than 1 DisplayMaskMap
-                    disp_mask = [self.get_object(
-                        DisplayMaskMap, args['display_mask_id'],
-                        contrast_num=None, coord_space=disp_coordspace,
-                        mask_num=None)]
-                else:
-                    disp_mask = None
-
-                if 'excset_visu_id' in args:
-                    excset_visu = self.get_object(
-                        Image, args['excset_visu_id'])
-                else:
-                    excset_visu = None
-
-                if 'cluster_map_id' in args:
-                    clustermap_coordspace = self.get_object(
-                        CoordinateSpace, args['cluster_map_coord_space_id'])
-                    cluster_map = self.get_object(
-                        ClusterLabelsMap, args['cluster_map_id'],
-                        coord_space=clustermap_coordspace)
-                else:
-                    cluster_map = None
-
-                if 'mip_id' in args:
-                    mip = self.get_object(Image, args['mip_id'])
-                else:
-                    mip = None
-
-                excset_coordspace = self.get_object(
-                    CoordinateSpace, args['excset_coord_space_id'])
-                excursion_set = self.get_object(
-                    ExcursionSet, args['exc_set_id'],
-                    coord_space=excset_coordspace, visu=excset_visu,
-                    clust_map=cluster_map, mip=mip)
-
-                searchspace_coordspace = self.get_object(
-                    CoordinateSpace, args['search_space_coord_space_id'])
-                search_space = self.get_object(
-                    SearchSpace, args['search_space_id'],
-                    coord_space=searchspace_coordspace)
-
-                # TODO
-                software_id = self.software.id
-
-                # Find list of clusters
-                query_clusters = """
-prefix nidm_SupraThresholdCluster: <http://purl.org/nidash/nidm#NIDM_0000070>
-prefix nidm_ClusterCenterOfGravity: <http://purl.org/nidash/nidm#NIDM_0000140>
-prefix nidm_clusterLabelId: <http://purl.org/nidash/nidm#NIDM_0000082>
-
-SELECT DISTINCT * WHERE {
-    ?cluster_id a nidm_SupraThresholdCluster: ;
-        nidm_clusterLabelId: ?cluster_num ;
-        prov:wasDerivedFrom <""" + str(args['exc_set_id']) + """> .
-
-    OPTIONAL {
-    ?cog_id a nidm_ClusterCenterOfGravity: ;
-        prov:wasDerivedFrom ?cluster_id .
+        ?search_space_id a nidm_SearchSpaceMaskMap: ;
+            nidm_inCoordinateSpace: ?search_space_coord_space_id ;
+            prov:wasGeneratedBy ?inference_id .
     }
-}
-                """
-                clusters = list()
-                sd_clusters = self.graph.query(query_clusters)
-                if sd_clusters:
-                    for row_cluster in sd_clusters:
-                        args_cl = row_cluster.asdict()
+        """
+            sd = self.graph.query(query)
 
-                        if 'cog_id' in args_cl:
-                            cog = self.get_object(
-                                CenterOfGravity, args_cl['cog_id'],
-                                cluster_num=args_cl['cluster_num'].toPython())
-                        else:
-                            cog = None
+            inferences = dict()
+            if sd:
+                for row in sd:
+                    args = row.asdict()
+                    inference = self.get_object(
+                        InferenceActivity, args['inference_id'], err_if_none=False)
 
-                        # Find list of peaks
-                        query_peaks = """
-prefix nidm_Peak: <http://purl.org/nidash/nidm#NIDM_0000062>
+                    # Find list of equivalent height thresholds
+                    query_equiv_threshs = """
+    prefix nidm_equivalentThreshold: <http://purl.org/nidash/nidm#NIDM_0000161>
 
-SELECT DISTINCT * WHERE {
-    ?peak_id a nidm_Peak: ;
-    prov:wasDerivedFrom <""" + str(args_cl['cluster_id']) + """> .
-}
-                        """
-                        peaks = list()
-                        sd_peaks = self.graph.query(query_peaks)
-                        if sd_peaks:
-                            for row_peak in sd_peaks:
-                                args_peak = row_peak.asdict()
+    SELECT DISTINCT * WHERE {
+        <""" + str(args['height_thresh_id']) + """> nidm_equivalentThreshold: ?equiv_h_thresh_id .
+    }
+                    """
+                    equiv_h_threshs = list()
+                    sd_equiv_h_threshs = self.graph.query(query_equiv_threshs)
+                    if sd_equiv_h_threshs:
+                        for row_equiv_h in sd_equiv_h_threshs:
+                            args_hequiv = row_equiv_h.asdict()
 
-                                peaks.append(self.get_object(
-                                    Peak, args_peak['peak_id']))
+                            equiv_h_threshs.append(self.get_object(
+                                HeightThreshold,
+                                args_hequiv['equiv_h_thresh_id']))
 
-                        clusters.append(self.get_object(
-                            Cluster, args_cl['cluster_id'], peaks=peaks,
-                            cog=cog))
+                    height_thresh = self.get_object(
+                        HeightThreshold, args['height_thresh_id'],
+                        equiv_thresh=equiv_h_threshs)
 
-                # Dictionary of (key, value) pairs where key is the identifier
-                # of a ContrastEstimation object and value is an object of type
-                # Inference describing the inference step in NIDM-Results (main
-                # activity: Inference)
-                # TODO: if key exist we need to append!
-                inferences[NIIRI.qname(args['con_est_id'])] = [
-                    Inference(
-                        inference, height_thresh, extent_thresh,
-                        peak_criteria, cluster_criteria, disp_mask,
-                        excursion_set, clusters, search_space, software_id)]
+                    # Find list of equivalent extent thresholds
+                    query_equiv_threshs = """
+    prefix nidm_equivalentThreshold: <http://purl.org/nidash/nidm#NIDM_0000161>
+
+    SELECT DISTINCT * WHERE {
+        <""" + str(args['extent_thresh_id']) + """> nidm_equivalentThreshold: ?equiv_e_thresh_id .
+    }
+                    """
+                    equiv_e_threshs = list()
+                    sd_equiv_e_threshs = self.graph.query(query_equiv_threshs)
+                    if sd_equiv_e_threshs:
+                        for row_equiv_e in sd_equiv_e_threshs:
+                            args_eequiv = row_equiv_e.asdict()
+
+                            equiv_e_threshs.append(self.get_object(
+                                ExtentThreshold, args_eequiv['equiv_e_thresh_id']))
+
+                    extent_thresh = self.get_object(
+                        ExtentThreshold, args['extent_thresh_id'],
+                        equiv_thresh=equiv_e_threshs)
+                    peak_criteria = self.get_object(
+                        PeakCriteria, args['peak_criteria_id'], contrast_num=None)
+                    cluster_criteria = self.get_object(
+                        ClusterCriteria, args['cluster_criteria_id'],
+                        contrast_num=None)
+
+                    if 'display_mask_id' in args:
+                        disp_coordspace = self.get_object(
+                            CoordinateSpace, args['disp_coord_space_id'])
+                        # TODO we need to deal with more than 1 DisplayMaskMap
+                        disp_mask = [self.get_object(
+                            DisplayMaskMap, args['display_mask_id'],
+                            contrast_num=None, coord_space=disp_coordspace,
+                            mask_num=None)]
+                    else:
+                        disp_mask = None
+
+                    if 'excset_visu_id' in args:
+                        excset_visu = self.get_object(
+                            Image, args['excset_visu_id'])
+                    else:
+                        excset_visu = None
+
+                    if 'cluster_map_id' in args:
+                        clustermap_coordspace = self.get_object(
+                            CoordinateSpace, args['cluster_map_coord_space_id'])
+                        cluster_map = self.get_object(
+                            ClusterLabelsMap, args['cluster_map_id'],
+                            coord_space=clustermap_coordspace)
+                    else:
+                        cluster_map = None
+
+                    if 'mip_id' in args:
+                        mip = self.get_object(Image, args['mip_id'])
+                    else:
+                        mip = None
+
+                    excset_coordspace = self.get_object(
+                        CoordinateSpace, args['excset_coord_space_id'])
+                    excursion_set = self.get_object(
+                        ExcursionSet, args['exc_set_id'],
+                        coord_space=excset_coordspace, visu=excset_visu,
+                        clust_map=cluster_map, mip=mip)
+
+                    searchspace_coordspace = self.get_object(
+                        CoordinateSpace, args['search_space_coord_space_id'])
+                    search_space = self.get_object(
+                        SearchSpace, args['search_space_id'],
+                        coord_space=searchspace_coordspace)
+
+                    # TODO
+                    software_id = self.software.id
+
+                    # Find list of clusters
+                    query_clusters = """
+    prefix nidm_SupraThresholdCluster: <http://purl.org/nidash/nidm#NIDM_0000070>
+    prefix nidm_ClusterCenterOfGravity: <http://purl.org/nidash/nidm#NIDM_0000140>
+    prefix nidm_clusterLabelId: <http://purl.org/nidash/nidm#NIDM_0000082>
+
+    SELECT DISTINCT * WHERE {
+        ?cluster_id a nidm_SupraThresholdCluster: ;
+            nidm_clusterLabelId: ?cluster_num ;
+            prov:wasDerivedFrom <""" + str(args['exc_set_id']) + """> .
+
+        OPTIONAL {
+        ?cog_id a nidm_ClusterCenterOfGravity: ;
+            prov:wasDerivedFrom ?cluster_id .
+        }
+    }
+                    """
+                    clusters = list()
+                    sd_clusters = self.graph.query(query_clusters)
+                    if sd_clusters:
+                        for row_cluster in sd_clusters:
+                            args_cl = row_cluster.asdict()
+
+                            if 'cog_id' in args_cl:
+                                cog = self.get_object(
+                                    CenterOfGravity, args_cl['cog_id'],
+                                    cluster_num=args_cl['cluster_num'].toPython())
+                            else:
+                                cog = None
+
+                            # Find list of peaks
+                            query_peaks = """
+    prefix nidm_Peak: <http://purl.org/nidash/nidm#NIDM_0000062>
+
+    SELECT DISTINCT * WHERE {
+        ?peak_id a nidm_Peak: ;
+        prov:wasDerivedFrom <""" + str(args_cl['cluster_id']) + """> .
+    }
+                            """
+                            peaks = list()
+                            sd_peaks = self.graph.query(query_peaks)
+                            if sd_peaks:
+                                for row_peak in sd_peaks:
+                                    args_peak = row_peak.asdict()
+
+                                    peaks.append(self.get_object(
+                                        Peak, args_peak['peak_id']))
+
+                            clusters.append(self.get_object(
+                                Cluster, args_cl['cluster_id'], peaks=peaks,
+                                cog=cog))
+
+                    # Dictionary of (key, value) pairs where key is the identifier
+                    # of a ContrastEstimation object and value is an object of type
+                    # Inference describing the inference step in NIDM-Results (main
+                    # activity: Inference)
+                    # TODO: if key exist we need to append!
+                    inferences[NIIRI.qname(args['con_est_id'])] = [
+                        Inference(
+                            inference, height_thresh, extent_thresh,
+                            peak_criteria, cluster_criteria, disp_mask,
+                            excursion_set, clusters, search_space, software_id)]
+
+        elif self.json_file is not None:
+            inferences = Inference.load(self.json, self.json_path, 
+                                        self.software.id)
 
         return inferences
 
