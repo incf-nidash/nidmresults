@@ -43,24 +43,20 @@ class Contrast(NIDMObject):
     def load_from_json(klass, json_dict, base_dir, software_id):
         contrasts = list()
 
-        activity = ModelParametersEstimation.load(json_dict, software_id)
-        design = DesignMatrix.load(json_dict)
-        data = Data.load(json_dict)
-        error = ErrorModel.load(json_dict)
-        param_estimates = ParameterEstimateMap.load(json_dict, base_dir)
-        rms_map = ResidualMeanSquares.load(json_dict, base_dir)
-        mask_map = MaskMap.load(json_dict, base_dir)
-        grand_mean_map = GrandMeanMap.load(json_dict, base_dir)
-        machine = ImagingInstrument.load(json_dict)
-        subjects = Group.load(json_dict)
+        weights = ContrastWeights.load(json_dict)
+        estimation = ContrastEstimation.load(json_dict)
+        contrast_map = ContrastMap.load(json_dict, base_dir)
+        stderr_or_expl_mean_sq_map = ContrastStdErrMap.load(json_dict, base_dir)
+        stat_map = StatisticMap.load(json_dict, base_dir)
 
+        contrast_num = '1' # TODO deal with more than 1 contrast
+        contrast_name = json_dict['Contrasts']['StatisticMap_contrastName']
         con = Contrast(contrast_num, contrast_name, weights, estimation,
-                 contrast_map, stderr_or_expl_mean_sq_map, stat_map,
-                 z_stat_map)
+                 contrast_map, stderr_or_expl_mean_sq_map, stat_map)
 
         contrasts.append(con)
 
-        return mf
+        return contrasts
 
 
 class ContrastWeights(NIDMObject):
@@ -106,6 +102,13 @@ SELECT DISTINCT * WHERE {
 }
         """
         return query
+
+    @classmethod
+    def load_from_json(self, json_dict):
+        conname = json_dict['Contrasts']['StatisticMap_contrastName']
+        weights = json_dict['Contrasts']['ContrastWeightMatrix_value']
+        stat_type = json_dict['Contrasts']['StatisticMap_statisticType']
+        return ContrastWeights(None, conname, weights, stat_type)
 
     def export(self, nidm_version, export_dir):
         """
@@ -200,6 +203,17 @@ class ContrastMap(NIDMObject):
         }
         """
         return query
+
+    @classmethod
+    def load_from_json(self, json_dict, base_dir):
+        contrast_file = json_dict['Contrasts']['ContrastMap_atLocation']
+        contrast_name = json_dict['Contrasts']['StatisticMap_contrastName']
+        contrast_num = '1' # TODO deal with more than 1 contrast
+        # FIXME: deal with varying coordsys across maps
+        coordspace = CoordinateSpace.load_from_json(json_dict, 
+            os.path.join(base_dir, contrast_file))
+        return ContrastMap(contrast_file, contrast_num, contrast_name,
+                 coordspace)
 
     def export(self, nidm_version, export_dir):
         """
@@ -397,6 +411,17 @@ SELECT DISTINCT * WHERE {
         """
         return query
 
+    @classmethod
+    def load_from_json(self, json_dict, base_dir):
+        filepath = json_dict['Contrasts']['ContrastStandardErrorMap_atLocation']
+        contrast_num = '1' # TODO deal with more than 1 contrast
+        # FIXME: deal with varying coordsys across maps
+        coordspace = CoordinateSpace.load_from_json(json_dict, 
+            os.path.join(base_dir, filepath))
+        is_variance = False
+        return ContrastStdErrMap(contrast_num, filepath, is_variance, 
+                                 coordspace, None)
+
     def export(self, nidm_version, export_dir):
         """
         Create prov graph.
@@ -543,6 +568,19 @@ SELECT DISTINCT * WHERE {
         """
         return query
 
+    @classmethod
+    def load_from_json(self, json_dict, base_dir):
+        location = json_dict['Contrasts']['StatisticMap_atLocation']
+        stat_type = json_dict['Contrasts']['StatisticMap_statisticType']
+        contrast_name = json_dict['Contrasts']['StatisticMap_contrastName']
+        dof = json_dict['Contrasts']['StatisticMap_errorDegreesOfFreedom']
+        # FIXME: deal with varying coordsys across maps
+        coordspace = CoordinateSpace.load_from_json(json_dict, 
+            os.path.join(base_dir, location))
+        is_variance = False
+        return StatisticMap(location, stat_type, contrast_name, dof, 
+                            coordspace)
+
     def export(self, nidm_version, export_dir):
         """
         Create prov graph.
@@ -612,6 +650,11 @@ SELECT DISTINCT * WHERE {
 }
         """
         return query
+
+    @classmethod
+    def load_from_json(self, json_dict):
+        conname = json_dict['Contrasts']['StatisticMap_contrastName']
+        return ContrastEstimation(None, conname)
 
     def export(self, nidm_version, export_dir):
         """
