@@ -109,6 +109,13 @@ SELECT * WHERE
         """
         return query
 
+    @classmethod
+    def load_from_json(klass, json_dict):
+        nidm_version = json_dict["NIDMResults_version"]
+        bd = NIDMResultsBundle(nidm_version)
+
+        return bd
+
     def export(self, nidm_version, export_dir):
         """
         Create prov entity.
@@ -556,6 +563,14 @@ SELECT DISTINCT * WHERE
         """
         return query
 
+    @classmethod
+    def load_from_json(klass, json_dict):
+        software_type = json_dict["NIDMResultsExporter_type"]
+        version = json_dict["NIDMResultsExporter_softwareVersion"]
+        exp = ExporterSoftware(software_type, version)
+
+        return exp
+
     def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
@@ -598,6 +613,14 @@ SELECT DISTINCT * WHERE
     }
         """
         return query
+
+    @classmethod
+    def load_from_json(klass, json_dict):
+        software_type = json_dict["NIDMResultsExporter_type"]
+        version = json_dict["NIDMResultsExporter_softwareVersion"]
+        exp = ExporterSoftware(software_type, version)
+
+        return exp
 
     def export(self, nidm_version, export_dir):
         """

@@ -22,6 +22,7 @@ import rdflib
 import zipfile
 import csv
 import warnings
+import datetime
 
 
 class NIDMResults():
@@ -492,63 +493,69 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
         return software
 
     def load_bundle_export(self):
-        # query =  """
-        # prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_00001\
-        # 22>
-        # prefix nidm_NIDMResultsExport: <http://purl.org/nidash/nidm#NIDM_000\
-        # 0166>
+        if self.nidm_zip is not None:
+            # query =  """
+            # prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_00001\
+            # 22>
+            # prefix nidm_NIDMResultsExport: <http://purl.org/nidash/nidm#NIDM_000\
+            # 0166>
 
-        # SELECT DISTINCT * WHERE
-        #     {
-        #         ?bundle_id a prov:Bundle .
+            # SELECT DISTINCT * WHERE
+            #     {
+            #         ?bundle_id a prov:Bundle .
 
-        #         ?exporter_id a prov:SoftwareAgent .
+            #         ?exporter_id a prov:SoftwareAgent .
 
-        #         ?export_id  a nidm_NIDMResultsExport: ;
-        #             prov:wasAssociatedWith ?exporter_id .
+            #         ?export_id  a nidm_NIDMResultsExport: ;
+            #             prov:wasAssociatedWith ?exporter_id .
 
-        #     }
-        # """
+            #     }
+            # """
 
-        query = """
-prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
-prefix nidm_NIDMResultsExport: <http://purl.org/nidash/nidm#NIDM_0000166>
+            query = """
+    prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
+    prefix nidm_NIDMResultsExport: <http://purl.org/nidash/nidm#NIDM_0000166>
 
-SELECT DISTINCT * WHERE
-    {
-        ?bundle_id a prov:Bundle ;
-            prov:qualifiedGeneration ?blank_node .
+    SELECT DISTINCT * WHERE
+        {
+            ?bundle_id a prov:Bundle ;
+                prov:qualifiedGeneration ?blank_node .
 
-        ?blank_node a prov:Generation ;
-            prov:activity ?export_id ;
-            prov:atTime ?export_time .
+            ?blank_node a prov:Generation ;
+                prov:activity ?export_id ;
+                prov:atTime ?export_time .
 
-        ?exporter_id a prov:SoftwareAgent .
+            ?exporter_id a prov:SoftwareAgent .
 
-        ?export_id a nidm_NIDMResultsExport: ;
-            prov:wasAssociatedWith ?exporter_id .
+            ?export_id a nidm_NIDMResultsExport: ;
+                prov:wasAssociatedWith ?exporter_id .
 
-    }
-        """
+        }
+            """
 
-        sd = self.graph.query(query)
+            sd = self.graph.query(query)
 
-        # if len(sd) > 1:
-        #     raise Exception('More than one result found for query:' + query)
+            # if len(sd) > 1:
+            #     raise Exception('More than one result found for query:' + query)
 
-        exporter = None
-        export = None
-        bundle = None
-        if sd:
-            for row in sd:
-                args = row.asdict()
-                exporter = self.get_object(
-                    ExporterSoftware, args['exporter_id'])
-                export = self.get_object(NIDMResultsExport, args['export_id'])
-                bundle = self.get_object(NIDMResultsBundle, args['bundle_id'])
-                export_time = args['export_time'].toPython()
-        else:
-            raise Exception('No results found for query:' + query)
+            exporter = None
+            export = None
+            bundle = None
+            if sd:
+                for row in sd:
+                    args = row.asdict()
+                    exporter = self.get_object(
+                        ExporterSoftware, args['exporter_id'])
+                    export = self.get_object(NIDMResultsExport, args['export_id'])
+                    bundle = self.get_object(NIDMResultsBundle, args['bundle_id'])
+                    export_time = args['export_time'].toPython()
+            else:
+                raise Exception('No results found for query:' + query)
+        elif self.json_file is not None:
+            bundle = NIDMResultsBundle.load(self.json)
+            exporter = ExporterSoftware.load(self.json)
+            export = NIDMResultsExport.load(self.json)
+            export_time = str(datetime.datetime.now().time())
 
         return (bundle, exporter, export, export_time)
 
@@ -700,8 +707,9 @@ SELECT DISTINCT * WHERE
             else:
                 raise Exception('No model fitting found')
         elif self.json_file is not None:
-            model_fittings = ModelFitting.load(self.json, self.json_path, 
-                                               self.software.id)
+            model_fittings = list()
+            model_fittings.append(ModelFitting.load(self.json, self.json_path,
+                                               self.software.id))
 
         return model_fittings
 
