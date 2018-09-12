@@ -136,8 +136,6 @@ SELECT DISTINCT * WHERE {
                 param_estimates, rms_map, mask_map, grand_mean_map,
                 machine, subjects, rpv_map=None)
 
-        print(mf)
-
         return mf
 
 
@@ -283,7 +281,7 @@ SELECT DISTINCT * WHERE {
                 grp = Group(num_subjects, group_name)
                 grps.append(grp)
         else:
-            grps = Person()
+            grps.append(Person())
 
         return grps
 
@@ -1190,12 +1188,11 @@ class GrandMeanMap(NIDMObject):
 
     @classmethod
     def load_from_json(klass, json_dict, base_dir):
-        gm_file = json_dict['GrandMeanMap_atLocation']
+        gm_file = os.path.join(base_dir, json_dict['GrandMeanMap_atLocation'])
         # FIXME: deal with varying coordsys across maps
-        coordspace = CoordinateSpace.load_from_json(json_dict, 
-            os.path.join(base_dir, gm_file))
+        coordspace = CoordinateSpace.load_from_json(json_dict, gm_file)
         mask = GrandMeanMap(gm_file, gm_file, coordspace)
-       
+
         return mask
 
     def export(self, nidm_version, export_dir):

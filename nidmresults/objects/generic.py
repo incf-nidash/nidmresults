@@ -347,6 +347,7 @@ class NIDMFile(NIDMObject):
 
                     if self.temporary:
                         os.remove(self.path)
+
             else:
                 new_file = self.path
 

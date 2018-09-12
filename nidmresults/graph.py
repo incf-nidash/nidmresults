@@ -34,10 +34,12 @@ class NIDMResults():
                  workaround=False, to_replace=dict()):
         self.zip_path = None
         self.nidm_zip = None
+        self.prepend_path = None
 
         if nidm_zip is not None:
             self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")
             self.zip_path = nidm_zip
+            self.prepend_path = zip_path
 
             # Load the turtle file
             with zipfile.ZipFile(self.zip_path, 'r') as z:
@@ -57,6 +59,7 @@ class NIDMResults():
                 self.json = json.load(json_data)
 
             self.json_path = os.path.dirname(json_file)
+            self.prepend_path = self.json_path
 
             # TODO: add validation here of the JSON file according to JSON API
 
@@ -891,8 +894,13 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
             if not contrasts:
                 raise Exception('No contrast found')
         elif self.json_file is not None:
-            contrasts = Contrast.load(self.json, self.json_path, 
-                                      self.software.id)
+            contrasts = dict()
+            con = Contrast.load(self.json, self.json_path, self.software.id)
+            # TODO: get actual ids -- if more than 1
+            mpe_id = self.model_fittings[0].activity.id
+            pe_ids = (self.model_fittings[0].param_estimates[0].id,)
+
+            contrasts[(mpe_id, pe_ids)] = con
 
         return contrasts
 
@@ -1128,7 +1136,7 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
                             excursion_set, clusters, search_space, software_id)]
 
         elif self.json_file is not None:
-            inferences = Inference.load(self.json, self.json_path, 
+            inferences = Inference.load(self.json, self.json_path,
                                         self.software.id)
 
         return inferences
@@ -1147,7 +1155,7 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
             # exporter.exporter = ExporterSoftware(
             #   'nidmresults', nidmresults.__version__)
             exporter.software = self.software
-            exporter.prepend_path = self.zip_path
+            exporter.prepend_path = self.prepend_path
             exporter.exporter = self.exporter
             exporter.bundle_ent = self.bundle
             exporter.export_act = self.export_act
