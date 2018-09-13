@@ -36,7 +36,9 @@ class NIDMResults():
         self.prepend_path = None
 
         if nidm_zip is not None:
+            self.json_file = None
             self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")
+            self.nidm_zip = nidm_zip
             self.zip_path = nidm_zip
             self.prepend_path = self.zip_path
 
