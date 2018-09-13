@@ -38,8 +38,9 @@ class NIDMResults():
 
         if nidm_zip is not None:
             self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")
+            self.nidm_zip = nidm_zip
             self.zip_path = nidm_zip
-            self.prepend_path = zip_path
+            self.prepend_path = self.zip_path
 
             # Load the turtle file
             with zipfile.ZipFile(self.zip_path, 'r') as z:
@@ -51,6 +52,7 @@ class NIDMResults():
 
             # Parse turtle into RDF graph
             self.graph = self.parse(rdf_data)
+            self.json_file = None
 
         else:
             self.study_name = os.path.basename(json_file).replace(".json", "")
