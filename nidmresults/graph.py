@@ -33,12 +33,10 @@ class NIDMResults():
     def __init__(self, nidm_zip=None, rdf_file=None, json_file=None,
                  workaround=False, to_replace=dict()):
         self.zip_path = None
-        self.nidm_zip = None
         self.prepend_path = None
 
         if nidm_zip is not None:
             self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")
-            self.nidm_zip = nidm_zip
             self.zip_path = nidm_zip
             self.prepend_path = self.zip_path
 
@@ -468,7 +466,7 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
         return(to_return)
 
     def load_software(self):
-        if self.nidm_zip is not None:
+        if self.zip_path is not None:
             query = """
     prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_000005\
     6>
@@ -498,7 +496,7 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
         return software
 
     def load_bundle_export(self):
-        if self.nidm_zip is not None:
+        if self.zip_path is not None:
             # query =  """
             # prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_00001\
             # 22>
@@ -566,7 +564,7 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
 
     def load_modelfitting(self):
 
-        if self.nidm_zip is not None:
+        if self.zip_path is not None:
             sd = self.graph.query(ModelFitting.get_query())
 
             model_fittings = list()
@@ -719,7 +717,7 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
         return model_fittings
 
     def load_contrasts(self, workaround=False):
-        if self.nidm_zip is not None:
+        if self.zip_path is not None:
             if workaround:
                 warnings.warn('Using workaround: links between contrast weights' +
                               'and contrast estimations are not assessed')
@@ -907,7 +905,7 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
         return contrasts
 
     def load_inferences(self):
-        if self.nidm_zip is not None:
+        if self.zip_path is not None:
             query = """
     prefix nidm_ContrastEstimation: <http://purl.org/nidash/nidm#NIDM_0000001>
 
