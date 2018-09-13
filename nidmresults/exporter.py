@@ -719,7 +719,6 @@ class NIDMExporter():
                 zf.close()
                 # Need to move up before deleting the folder
                 os.chdir("..")
-                print("DELETING IT!!!")
                 shutil.rmtree(os.path.join("..", self.export_dir))
 
         # ttl_fid = open(ttl_file, 'w');

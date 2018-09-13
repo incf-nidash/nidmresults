@@ -661,16 +661,16 @@ SELECT DISTINCT * WHERE {
         clusts = list()
 
         clid = 1
-        if clusts is not None:
-            for cl in clusts:
+        if clusters is not None:
+            for cl in clusters:
                 size = cl['SupraThresholdCluster_clusterSizeInVoxels']
                 pFWER = cl['SupraThresholdCluster_pValueFWER']
 
-                peaks = load_from_json(clust['peaks'])
+                peaks = Peak.load_from_json(cl['Peaks'])
                 clust = Cluster(clid, size, pFWER, peaks)
                 clusts.append(clust)
 
-        return clusters
+        return clusts
 
 
     def export(self, nidm_version, export_dir):
@@ -1099,8 +1099,8 @@ SELECT DISTINCT * WHERE {
         vol_in_resels = json_dict["Inferences"]["SearchSpaceMaskMap_searchVolumeInResels"]
         resel_size_in_voxels = json_dict["Inferences"]["SearchSpaceMaskMap_reselSizeInVoxels"]
         unused = json_dict["Inferences"]["SearchSpaceMaskMap_searchVolumeReselsGeometry"]
-        noise_fwhm_in_voxels = json_dict["Inferences"]["SearchSpaceMaskMap_noiseFWHMInVoxels"]
-        noise_fwhm_in_units = json_dict["Inferences"]["SearchSpaceMaskMap_noiseFWHMInUnits"]
+        noise_fwhm_in_voxels = json.dumps(json_dict["Inferences"]["SearchSpaceMaskMap_noiseFWHMInVoxels"])
+        noise_fwhm_in_units = json.dumps(json_dict["Inferences"]["SearchSpaceMaskMap_noiseFWHMInUnits"])
         random_field_stationarity = json_dict["Inferences"]["SearchSpaceMaskMap_randomFieldStationarity"]
 
         # "SearchSpaceMaskMap_expectedNumberOfVoxelsPerCluster": 4.028346559086133,
@@ -1181,7 +1181,8 @@ SELECT DISTINCT * WHERE {
                             self.noise_roughness),)
 
         # Create "Search Space Mask map" entity
-        self.add_attributes(atts)
+        for att in atts:
+            self.add_attributes((att,))
 
 
 class Coordinate(NIDMObject):
@@ -1335,10 +1336,10 @@ SELECT DISTINCT * WHERE {
             value = pk.get('Peak_value', None)
 
             peaks = load_from_json(clust['peaks'])
-            clust = Peak(equiv_z, p_unc, p_fwer, p_fdr=p_fdr, value=value)
-            clusts.append(clust)
+            peak = Peak(equiv_z, p_unc, p_fwer, p_fdr=p_fdr, value=value)
+            pks.append(peak)
 
-        return clusters
+        return pks
 
     def __str__(self):
         return '%s \tz=%.2f \tp=%.2e (unc.) \t%s' % (

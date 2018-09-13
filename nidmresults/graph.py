@@ -1136,8 +1136,17 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
                             excursion_set, clusters, search_space, software_id)]
 
         elif self.json_file is not None:
-            inferences = Inference.load(self.json, self.json_path,
-                                        self.software.id)
+            inferences = dict()
+
+            # TODO: get actual ids -- if more than 1
+            mpe_id = self.model_fittings[0].activity.id
+            pe_ids = (self.model_fittings[0].param_estimates[0].id,)
+
+            con_id = self.contrasts[(mpe_id, pe_ids)][0].estimation.id
+
+            inferences[con_id] = Inference.load(
+                self.json, self.json_path,
+                self.software.id)
 
         return inferences
 
