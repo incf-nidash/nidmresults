@@ -23,7 +23,7 @@ import tempfile
 import zipfile
 from builtins import input
 # Needed for export using JSON-LD 1.1
-import pyld as ld 
+import pyld as ld
 import json
 
 
