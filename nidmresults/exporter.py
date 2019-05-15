@@ -24,8 +24,7 @@ import zipfile
 from builtins import input
 # Needed for export using JSON-LD 1.1
 import pyld as ld 
-# Needed to read context from URL (at some point will be embeded)
-import urllib.request, json 
+import json
 
 
 class NIDMExporter():
@@ -697,14 +696,11 @@ class NIDMExporter():
             jsonld_fid.write(jsonld_txt)
 
         # JSON-LD using specification 1.1 (a.k.a "nice" JSON-LD)
-        with urllib.request.urlopen("http://purl.org/nidash/context") as url:
-            context = json.loads(url.read().decode())
-
-        # context = {"@context":
-        #            os.path.join(TPL_DIR, "..", "nidmr.json")}
-        foo = ld.jsonld.compact(jsonld_txt, context)
-        with open(self.file.replace('.ttl', '.json'), "w") as fid:
-            fid.write(json.dumps(foo, indent=2))
+        jsonld_11 = ld.jsonld.compact(
+            json.loads(jsonld_txt), "http://purl.org/nidash/context")
+        jsonld_11_file = os.path.join(self.export_dir, 'nidm.json')
+        with open(jsonld_11_file, "w") as fid:
+            fid.write(json.dumps(jsonld_11, indent=2))
 
         # provjsonld_file = os.path.join(self.export_dir, 'nidm.provjsonld')
         # provjsonld_txt = self.doc.serialize(format='jsonld')
