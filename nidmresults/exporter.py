@@ -700,7 +700,7 @@ class NIDMExporter():
             json.loads(jsonld_txt), "http://purl.org/nidash/context")
         jsonld_11_file = os.path.join(self.export_dir, 'nidm.json')
         with open(jsonld_11_file, "w") as fid:
-            fid.write(json.dumps(jsonld_11, indent=2))
+            json.dump(jsonld_11, fid, indent=2)
 
         # provjsonld_file = os.path.join(self.export_dir, 'nidm.provjsonld')
         # provjsonld_txt = self.doc.serialize(format='jsonld')
