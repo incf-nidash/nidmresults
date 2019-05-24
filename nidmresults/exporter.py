@@ -698,6 +698,8 @@ class NIDMExporter():
         jsonld_11 = ld.jsonld.compact(
             json.loads(jsonld_txt), "http://purl.org/nidash/context")
         jsonld_11_file = os.path.join(self.export_dir, 'nidm.json')
+        if isinstance(jsonld_11, str):
+            jsonld_11 = unicode(jsonld_11)
         with open(jsonld_11_file, "w") as fid:
             json.dump(jsonld_11, fid, indent=2)
 
