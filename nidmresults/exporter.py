@@ -8,7 +8,7 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 @copyright: University of Warwick 2013-2014
 """
 
-
+from __future__ import unicode_literals
 from prov.model import ProvBundle, ProvDocument
 import os
 import datetime
@@ -25,7 +25,6 @@ from builtins import input
 # Needed for export using JSON-LD 1.1
 import pyld as ld
 import json
-
 
 class NIDMExporter():
 
