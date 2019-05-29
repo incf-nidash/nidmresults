@@ -698,7 +698,7 @@ class NIDMExporter():
         jsonld_11 = json.dumps(ld.jsonld.compact(
             json.loads(jsonld_txt), "http://purl.org/nidash/context"))
 
-        # If python 2 convert string to unicode to avoid 
+        # If python 2 convert string to unicode to avoid
         # 'must be unicode not str' error
         if (sys.version_info < (3, 0)):
             jsonld_11 = unicode(jsonld_11)
