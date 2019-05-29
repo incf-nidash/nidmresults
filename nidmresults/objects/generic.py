@@ -37,6 +37,25 @@ class NIDMObject(object):
                 oid = NIIRI.qname(Identifier(oid))
             self.id = oid
 
+    # the next three methods build a .file property
+    # with a dedicated function call on "set" that can
+    # be used to implement external ID mappings
+    # e.g. DataLad can replace '_map_fileid()' to provides
+    # its internal file IDs based on the filename associated
+    # with a NIDMFile object
+    @property
+    def file(self):
+        return getattr(self, '_file', None)
+
+    @file.setter
+    def file(self, fileobj):
+        if isinstance(fileobj, NIDMFile):
+            self._map_fileid(fileobj)
+        self._file = fileobj
+
+    def _map_fileid(self, fileobj):
+        pass
+
     def __str__(self):
         value = ""
         if hasattr(self, 'value'):
