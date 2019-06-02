@@ -911,10 +911,10 @@ class SearchSpace(NIDMObject):
                  extent_critical_fwe05=None, extent_critical_fdr05=None,
                  search_vol_geom=None, noise_roughness=None,
                  filename=None, sha=None, fmt=None,
-                 label=None, oid=None):
+                 label=None, oid=None, suffix=''):
         super(SearchSpace, self).__init__(oid=oid)
         if not filename:
-            filename = 'SearchSpaceMask.nii.gz'
+            filename = 'SearchSpaceMask' + suffix + '.nii.gz'
         self.file = NIDMFile(self.id, search_space_file, filename,
                              sha=sha, fmt=fmt)
         self.coord_space = coord_space

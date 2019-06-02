@@ -8,7 +8,6 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 @copyright: University of Warwick 2013-2014
 """
 
-
 from prov.model import ProvBundle, ProvDocument
 import os
 import datetime
@@ -22,7 +21,10 @@ import csv
 import tempfile
 import zipfile
 from builtins import input
-
+# Needed for export using JSON-LD 1.1
+import pyld as ld
+import json
+import sys
 
 class NIDMExporter():
 
@@ -685,12 +687,26 @@ class NIDMExporter():
         with open(ttl_file, 'w') as ttl_fid:
             ttl_fid.write(ttl_txt)
 
-        # print(json_context)
-        jsonld_file = os.path.join(self.export_dir, 'nidm.json')
+        # JSON-LD (deprecated kept for background compatibility w/ viewers)
+        jsonld_file = os.path.join(self.export_dir, 'nidm_deprecated.json')
         jsonld_txt = self.doc.serialize(format='rdf', rdf_format='json-ld',
                                         context=json_context)
         with open(jsonld_file, 'w') as jsonld_fid:
             jsonld_fid.write(jsonld_txt)
+
+        # JSON-LD using specification 1.1 (a.k.a "nice" JSON-LD)
+        jsonld_11 = json.dumps(ld.jsonld.compact(
+            json.loads(jsonld_txt), "http://purl.org/nidash/context"))
+
+        # If python 2 convert string to unicode to avoid
+        # 'must be unicode not str' error
+        if (sys.version_info < (3, 0)):
+            jsonld_11 = unicode(jsonld_11)
+
+        jsonld_11_file = os.path.join(self.export_dir, 'nidm.json')
+
+        with open(jsonld_11_file, "w") as fid:
+            fid.write(jsonld_11)
 
         # provjsonld_file = os.path.join(self.export_dir, 'nidm.provjsonld')
         # provjsonld_txt = self.doc.serialize(format='jsonld')
