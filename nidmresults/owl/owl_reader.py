@@ -49,7 +49,7 @@ class OwlReader():
         labels = self.graph.subject_objects(RDFS['label'])
         # Ignore deprecated
         self.labels = collections.OrderedDict(
-            (str(key), value) for (value, key) in labels
+            (key, value) for (value, key) in labels
             if not self.is_deprecated(value))
 
     def get_class_names(self):
