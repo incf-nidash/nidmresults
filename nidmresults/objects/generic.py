@@ -298,7 +298,7 @@ class NIDMFile(NIDMObject):
 
     def get_sha_sum(self, nifti_file):
         nifti_img = nib.load(nifti_file)
-        data = nifti_img.get_data()
+        data = nifti_img.get_fdata()
         # Fix needed as in https://github.com/pymc-devs/pymc/issues/327
         if not data.flags["C_CONTIGUOUS"]:
             data = np.ascontiguousarray(data)

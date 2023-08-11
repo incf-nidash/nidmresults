@@ -964,11 +964,11 @@ class GrandMeanMap(NIDMObject):
         if self.masked_median is None:
             grand_mean_file = self.file.path
             grand_mean_img = nib.load(grand_mean_file)
-            grand_mean_data = grand_mean_img.get_data()
+            grand_mean_data = grand_mean_img.get_fdata()
             grand_mean_data = np.ndarray.flatten(grand_mean_data)
 
             mask_img = nib.load(self.mask_file)
-            mask_data = mask_img.get_data()
+            mask_data = mask_img.get_fdata()
             mask_data = np.ndarray.flatten(mask_data)
 
             grand_mean_data_in_mask = grand_mean_data[mask_data > 0]

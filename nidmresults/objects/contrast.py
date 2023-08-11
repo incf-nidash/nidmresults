@@ -254,10 +254,10 @@ SELECT DISTINCT * WHERE {
             # Create Contrast Explained Mean Square Map as fstat<num>.nii.gz
             # multiplied by sigmasquareds.nii.gz and save it in export_dir
             fstat_img = nib.load(self.stat_file)
-            fstat = fstat_img.get_data()
+            fstat = fstat_img.get_fdata()
 
             sigma_sq_img = nib.load(self.sigma_sq_file)
-            sigma_sq = sigma_sq_img.get_data()
+            sigma_sq = sigma_sq_img.get_fdata()
 
             expl_mean_sq = nib.Nifti1Image(
                 fstat*sigma_sq, fstat_img.get_qform())
@@ -320,7 +320,7 @@ class ContrastStdErrMap(NIDMObject):
 
             # Create standard error map from contrast variance map
             var_cope_img = nib.load(self.file)
-            contrast_variance = var_cope_img.get_data()
+            contrast_variance = var_cope_img.get_fdata()
 
             standard_error_img = nib.Nifti1Image(np.sqrt(contrast_variance),
                                                  var_cope_img.get_qform())
