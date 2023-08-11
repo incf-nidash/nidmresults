@@ -158,7 +158,7 @@ class CoordinateSpace(NIDMObject):
                 (units is None) and \
                 (nifti_file is not None):
             thresImg = nib.load(nifti_file)
-            thresImgHdr = thresImg.get_header()
+            thresImgHdr = thresImg.header
 
             numdim = len(thresImg.shape)
             dimensions = np.asarray(thresImg.shape)
