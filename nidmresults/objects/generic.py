@@ -129,7 +129,7 @@ SELECT * WHERE
         self.add_attributes([
             (PROV['type'], self.type),
             (PROV['type'], PROV['Bundle']),
-            # Explicitely add bundle type
+            # Explicitly add bundle type
             (PROV['label'], self.label),
             (NIDM_VERSION, self.nidm_version),
         ])

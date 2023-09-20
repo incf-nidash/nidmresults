@@ -4,12 +4,12 @@ A Python library to read and write [NIDM-Results](http://nidm.nidash.org/specs/n
 You are free to copy, modify, and distribute nidmresults with attribution under the terms of the MIT license. See the [LICENSE file](LICENSE.md) for details.
 
 ## Install
-nidmresults is distributed with [PyPI](https://pypi.org/project/nidmresults/), to install the latest relase you can use:
+nidmresults is distributed with [PyPI](https://pypi.org/project/nidmresults/), to install the latest release you can use:
 ```
 pip install nidmresults
 ```
 
-To work with the current developement version we recommend cloning this repository locally and then install using
+To work with the current development version we recommend cloning this repository locally and then install using
 ```
 python setup.py install
 ```

@@ -324,8 +324,8 @@ def get_property_names_in_owl(my_owl_graph):
 #                     if o.value >= owl_restrictions[p]['maxExclusive'].value:
 #                         restrictions_ok = False
 #                 if not restrictions_ok:
-#                     key = "\n Contraints: value "+str(o.value)+\
-#                         ' for '+example_graph.qname(p)+' does not observe contraints '+\
+#                     key = "\n Constraints: value "+str(o.value)+\
+#                         ' for '+example_graph.qname(p)+' does not observe constraints '+\
 #                         ', '.join(sorted(owl_restrictions[p]))
 #                     if not key in my_restriction_exception:
 #                         my_restriction_exception[key] = set([example_name])
