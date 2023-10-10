@@ -77,7 +77,6 @@ class NIDMExporter():
 
         # A temp directory that will contain the exported data
         self.export_dir = tempfile.mkdtemp(prefix="nidm-", dir=out_path)
-
         self.prepend_path = ''
 
     def parse(self):
@@ -294,12 +293,14 @@ class NIDMExporter():
 
             # Add contrast estimation steps
             analysis_masks = dict()
+
             for (model_fitting_id, pe_ids), contrasts in list(
                     self.contrasts.items()):
                 for contrast in contrasts:
                     model_fitting = self._get_model_fitting(model_fitting_id)
                     # for contrast in contrasts:
                     # contrast.estimation.used(model_fitting.rms_map)
+
                     self.bundle.used(contrast.estimation.id,
                                      model_fitting.rms_map.id)
                     # contrast.estimation.used(model_fitting.mask_map)

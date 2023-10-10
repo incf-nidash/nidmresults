@@ -87,6 +87,12 @@ class NIDMObject(object):
         else:
             self.attributes = attributes
 
+    @classmethod
+    def load(klass, loaded_from, *args, **kwargs):
+        if type(loaded_from) is dict:
+            obj = klass.load_from_json(loaded_from, *args, **kwargs)
+        return obj
+
 
 class NIDMResultsBundle(NIDMObject):
     """
@@ -121,6 +127,13 @@ SELECT * WHERE
 }
         """
         return query
+
+    @classmethod
+    def load_from_json(klass, json_dict):
+        nidm_version = json_dict["NIDMResults_version"]
+        bd = NIDMResultsBundle(nidm_version)
+
+        return bd
 
     def export(self, nidm_version, export_dir):
         """
@@ -210,6 +223,32 @@ class CoordinateSpace(NIDMObject):
             return True
         else:
             return False
+
+    @classmethod
+    def load_from_json(klass, json_dict, nifti_file):
+        COORD_SYS = {
+            'MNICoordinateSystem': NIDM_MNI_COORDINATE_SYSTEM,
+            'IcbmMni152LinearCoordinateSystem': NIDM_ICBM_MNI152_LINEAR_COORDINATE_SYSTEM,
+            'IcbmMni152NonLinear2009aAsymmetricCoordinateSystem': NIDM_ICBM_MNI152_NON_LINEAR2009A_ASYMMETRIC_COORDINATE_SYSTEM,
+            'IcbmMni152NonLinear2009aSymmetricCoordinateSystem': NIDM_ICBM_MNI152_NON_LINEAR2009A_SYMMETRIC_COORDINATE_SYSTEM,
+            'IcbmMni152NonLinear2009bAsymmetricCoordinateSystem': NIDM_ICBM_MNI152_NON_LINEAR2009B_ASYMMETRIC_COORDINATE_SYSTEM,
+            'IcbmMni152NonLinear2009bSymmetricCoordinateSystem': NIDM_ICBM_MNI152_NON_LINEAR2009B_SYMMETRIC_COORDINATE_SYSTEM,
+            'IcbmMni152NonLinear2009cAsymmetricCoordinateSystem': NIDM_ICBM_MNI152_NON_LINEAR2009C_ASYMMETRIC_COORDINATE_SYSTEM,
+            'IcbmMni152NonLinear2009cSymmetricCoordinateSystem': NIDM_ICBM_MNI152_NON_LINEAR2009C_SYMMETRIC_COORDINATE_SYSTEM,
+            'IcbmMni152NonLinear6thGenerationCoordinateSystem': NIDM_ICBM_MNI152_NON_LINEAR6TH_GENERATION_COORDINATE_SYSTEM,
+            'Icbm452AirCoordinateSystem': NIDM_ICBM452_AIR_COORDINATE_SYSTEM,
+            'Icbm452Warp5CoordinateSystem': NIDM_ICBM452_WARP5_COORDINATE_SYSTEM,
+            'Ixi549CoordinateSystem': NIDM_IXI549_COORDINATE_SYSTEM,
+            'Mni305CoordinateSystem': NIDM_MNI305_COORDINATE_SYSTEM,
+            'TalairachCoordinateSystem': NIDM_TALAIRACH_COORDINATE_SYSTEM,
+            'SubjectCoordinateSystem': NIDM_SUBJECT_COORDINATE_SYSTEM,
+            'CustomCoordinateSystem': NIDM_CUSTOM_COORDINATE_SYSTEM,
+        }      
+        coordsys = COORD_SYS[
+            json_dict['CoordinateSpace_inWorldCoordinateSystem']]
+        coord_space = CoordinateSpace(coordsys, nifti_file)
+        
+        return coord_space
 
     @classmethod
     def get_query(klass, oid=None):
@@ -327,6 +366,7 @@ class NIDMFile(NIDMObject):
 
                     if self.temporary:
                         os.remove(self.path)
+
             else:
                 new_file = self.path
 
@@ -420,6 +460,8 @@ class NeuroimagingSoftware(NIDMObject):
                 self.type = Identifier(software_type)
             elif software_type.lower() == "fsl":
                 self.type = SCR_FSL
+            elif software_type.lower() == "spm":
+                self.type = SCR_SPM
             else:
                 warnings.warn('Unrecognised software: ' + str(software_type))
                 self.name = str(software_type)
@@ -440,6 +482,14 @@ class NeuroimagingSoftware(NIDMObject):
             self.label = label
         self.prov_type = PROV['Agent']
         self.feat_version = feat_version
+
+    @classmethod
+    def load_from_json(klass, json_dict):
+        soft_type = json_dict['NeuroimagingAnalysisSoftware_type']
+        version = json_dict['NeuroimagingAnalysisSoftware_type']
+        label = json_dict.get('NeuroimagingAnalysisSoftware_label', None)
+        soft = NeuroimagingSoftware(soft_type, version, label)
+        return soft
 
     @classmethod
     def get_query(klass, oid=None):
@@ -533,6 +583,14 @@ SELECT DISTINCT * WHERE
         """
         return query
 
+    @classmethod
+    def load_from_json(klass, json_dict):
+        software_type = json_dict["NIDMResultsExporter_type"]
+        version = json_dict["NIDMResultsExporter_softwareVersion"]
+        exp = ExporterSoftware(software_type, version)
+
+        return exp
+
     def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
@@ -575,6 +633,14 @@ SELECT DISTINCT * WHERE
     }
         """
         return query
+
+    @classmethod
+    def load_from_json(klass, json_dict):
+        software_type = json_dict["NIDMResultsExporter_type"]
+        version = json_dict["NIDMResultsExporter_softwareVersion"]
+        exp = ExporterSoftware(software_type, version)
+
+        return exp
 
     def export(self, nidm_version, export_dir):
         """

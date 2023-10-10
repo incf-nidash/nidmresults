@@ -21,7 +21,7 @@ from numpy import genfromtxt
 from prov.identifier import QualifiedName
 
 
-class ModelFitting(object):
+class ModelFitting(NIDMObject):
 
     """
     Object representing a Model fitting step: including a
@@ -43,6 +43,101 @@ class ModelFitting(object):
         self.machine = machine
         self.subjects = subjects
 
+        # Useful for printing
+        self.label = 'Model fitting'
+
+    @classmethod
+    def get_query(klass):
+        query = """
+prefix nidm_DesignMatrix: <http://purl.org/nidash/nidm#NIDM_0000019>
+prefix nidm_hasDriftModel: <http://purl.org/nidash/nidm#NIDM_0000088>
+prefix nidm_Data: <http://purl.org/nidash/nidm#NIDM_0000169>
+prefix nidm_ErrorModel: <http://purl.org/nidash/nidm#NIDM_0000023>
+prefix nidm_ModelParameterEstimation: <http://purl.org/nidash/nidm#NIDM_000005\
+6>
+prefix nidm_ResidualMeanSquaresMap: <http://purl.org/nidash/nidm#NIDM_0000066>
+prefix nidm_MaskMap: <http://purl.org/nidash/nidm#NIDM_0000054>
+prefix nidm_GrandMeanMap: <http://purl.org/nidash/nidm#NIDM_0000033>
+prefix nlx_Imaginginstrument: <http://uri.neuinfo.org/nif/nifstd/birnlex_2094>
+prefix nlx_MagneticResonanceImagingScanner: <http://uri.neuinfo.org/nif/nifstd\
+/birnlex_2100>
+prefix nlx_PositronEmissionTomographyScanner: <http://uri.neuinfo.org/nif/nifs\
+td/ixl_0050000>
+prefix nlx_SinglePhotonEmissionComputedTomographyScanner: <http://uri.neuinfo.\
+org/nif/nifstd/ixl_0050001>
+prefix nlx_MagnetoencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/i\
+xl_0050002>
+prefix nlx_ElectroencephalographyMachine: <http://uri.neuinfo.org/nif/nifstd/i\
+xl_0050003>
+prefix nidm_ReselsPerVoxelMap: <http://purl.org/nidash/nidm#NIDM_0000144>
+
+SELECT DISTINCT * WHERE {
+
+    ?design_id a nidm_DesignMatrix: .
+    OPTIONAL { ?design_id dc:description ?png_id . } .
+    OPTIONAL { ?design_id nidm_hasDriftModel: ?drift_model_id . } .
+
+    ?data_id a nidm_Data: ;
+        prov:wasAttributedTo ?machine_id .
+
+    {?machine_id a nlx_Imaginginstrument: .} UNION
+    {?machine_id a nlx_MagneticResonanceImagingScanner: .} UNION
+    {?machine_id a nlx_PositronEmissionTomographyScanner: .} UNION
+    {?machine_id a nlx_SinglePhotonEmissionComputedTomographyScanner: .} UNION
+    {?machine_id a nlx_MagnetoencephalographyMachine: .} UNION
+    {?machine_id a nlx_ElectroencephalographyMachine: .}
+
+    ?error_id a nidm_ErrorModel: .
+
+    ?mpe_id a nidm_ModelParameterEstimation: ;
+        prov:used ?design_id ;
+        prov:used ?data_id ;
+        prov:used ?error_id .
+
+    ?rms_id a nidm_ResidualMeanSquaresMap: ;
+        nidm_inCoordinateSpace: ?rms_coordspace_id ;
+        prov:wasGeneratedBy ?mpe_id .
+
+    ?mask_id a nidm_MaskMap: ;
+        nidm_inCoordinateSpace: ?mask_coordspace_id ;
+        prov:wasGeneratedBy ?mpe_id .
+
+    ?gm_id a nidm_GrandMeanMap: ;
+        nidm_inCoordinateSpace: ?gm_coordspace_id ;
+        prov:wasGeneratedBy ?mpe_id .
+
+    OPTIONAL {
+        ?rpv_id a nidm_ReselsPerVoxelMap: ;
+            nidm_inCoordinateSpace: ?rpv_coordspace_id ;
+            prov:wasGeneratedBy ?mpe_id .
+    }
+}
+        """
+        return query
+
+    @classmethod
+    def load_from_json(klass, json_dict, base_dir, software_id):
+        # TODO: currently assuming list of 1 ==> should be extended
+        model_fittings = list()
+
+        activity = ModelParametersEstimation.load(json_dict, software_id)
+        design = DesignMatrix.load(json_dict)
+        data = Data.load(json_dict)
+        error = ErrorModel.load(json_dict)
+        param_estimates = ParameterEstimateMap.load(json_dict, base_dir)
+        rms_map = ResidualMeanSquares.load(json_dict, base_dir)
+        mask_map = MaskMap.load(json_dict, base_dir)
+        grand_mean_map = GrandMeanMap.load(json_dict, base_dir)
+        machine = ImagingInstrument.load(json_dict)
+        subjects = Group.load(json_dict)
+
+        mf = ModelFitting(
+                activity, design, data, error,
+                param_estimates, rms_map, mask_map, grand_mean_map,
+                machine, subjects, rpv_map=None)
+
+        return mf
+
 
 class ImagingInstrument(NIDMObject):
     """
@@ -52,14 +147,18 @@ class ImagingInstrument(NIDMObject):
     def __init__(self, machine_type, label=None, oid=None):
         super(ImagingInstrument, self).__init__(oid=oid)
 
+        machine_label = dict()
+        machine_label[NIF_MRI] = 'MRI Scanner'
+        machine_label[NIF_EEG] = 'EEG Machine'
+        machine_label[NIF_MEG] = 'MEG Machine'
+        machine_label[NIF_PET] = 'PET Scanner'
+        machine_label[NIF_SPECT] = 'SPECT Machine'
+
         if not isinstance(machine_type, QualifiedName):
             machine_type = machine_type.lower()
             machine_term = dict(
                 mri=NIF_MRI, eeg=NIF_EEG, meg=NIF_MEG, pet=NIF_PET,
                 spect=NIF_SPECT)
-            machine_label = dict(
-                mri='MRI Scanner', eeg='EEG Machine', meg='MEG Machine',
-                pet='PET Scanner', spect='SPECT Machine')
 
             if not machine_type.startswith('http:'):
                 self.type = machine_term[machine_type]
@@ -69,9 +168,22 @@ class ImagingInstrument(NIDMObject):
         self.prov_type = PROV['Agent']
 
         if label is None:
-            self.label = machine_label[machine_type]
+            self.label = machine_label[self.type]
         else:
             self.label = label
+
+    @classmethod
+    def load_from_json(klass, json_dict):
+        MACHINES = {
+            'nlx_ElectroencephalographyMachine': NIF_EEG,
+            'nlx_MagnetoencephalographyMachine': NIF_MEG,
+            'nlx_PositronEmissionTomographyScanner': NIF_PET,
+            'nlx_SinglePhotonEmissionComputedTomographyScanner': NIF_SPECT,
+            'nlx_MagneticResonanceImagingScanner': NIF_MRI
+        }
+        machine_type = MACHINES[json_dict['ImagingInstrument_type']]
+        instrument = ImagingInstrument(machine_type)
+        return instrument
 
     @classmethod
     def get_query(klass, oid=None):
@@ -157,6 +269,22 @@ SELECT DISTINCT * WHERE {
         """
         return query
 
+    @classmethod
+    def load_from_json(klass, json_dict):
+        groups = json_dict.get('groups', None)
+        grps = list()
+
+        if groups is not None:
+            for group in groups:
+                group_name = group['StudyGroupPopulation_groupName']
+                num_subjects = group['StudyGroupPopulation_numberOfSubjects']
+                grp = Group(num_subjects, group_name)
+                grps.append(grp)
+        else:
+            grps.append(Person())
+
+        return grps
+
     def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
@@ -224,7 +352,10 @@ class DesignMatrix(NIDMObject):
             self.image = image_file
         else:
             self.image = Image(image_file, img_filename)
-        if not type(regressors) is list:
+
+        # Note: changed to fit regressors passed as loaded json when creating
+        # NIDM pack from JSON --> check if this cause issue in the tests TODO
+        if not type(regressors) is not list:
             regressors = json.loads(regressors)
         self.regressors = regressors
 
@@ -249,6 +380,28 @@ class DesignMatrix(NIDMObject):
             self.label = label
         else:
             self.label = "Design Matrix"
+
+    @classmethod
+    def load_from_json(klass, json_dict):
+        if 'DesignMatrix_atLocation' in json_dict:
+            mat_csv = json_dict['DesignMatrix_atLocation']
+            # Note: this could be removed and the csv passed directly
+            matrix = genfromtxt(mat_csv, delimiter=',')
+        else:
+            matrix = json_dict['DesignMatrix_value']
+
+        # TODO: deal with optional png of design matric
+        image_file = None
+
+        regressors = json_dict['DesignMatrix_regressorNames']
+        # TODO deal with optional arguments
+
+        design = DesignMatrix(
+                    matrix, image_file, regressors=None,
+                    design_type=None, hrf_models=None, drift_model=None,
+                    suffix='', csv_file=None, filename=None, label=None,
+                    oid=None)
+        return design
 
     @classmethod
     def get_query(klass, oid=None):
@@ -403,6 +556,15 @@ class Data(NIDMObject):
         self.group_or_sub = group_or_sub
 
     @classmethod
+    def load_from_json(klass, json_dict):
+        grand_mean_scaling = json_dict['Data_grandMeanScaling']
+        target = json_dict['Data_targetIntensity']
+        # TODO deal with optional arguments
+        data = Data(grand_mean_scaling, mri_protocol=None,
+                 label=None, group_or_sub=None, oid=None)
+        return data
+
+    @classmethod
     def get_query(klass, oid=None):
         if oid is None:
             oid_var = "?oid"
@@ -468,6 +630,29 @@ class ErrorModel(NIDMObject):
         self.dependance_spatial = dependance_spatial
         self.type = NIDM_ERROR_MODEL
         self.prov_type = PROV['Entity']
+
+    @classmethod
+    def load_from_json(klass, json_dict):
+        DEP = {
+            'nidm_ConstantParameter': SPATIALLY_GLOBAL,
+            'nidm_IndependentParameter': SPATIALLY_LOCAL,
+            'nidm_RegularizedParameter': SPATIALLY_REGUL,
+        }
+        DIST = {
+            'obo_NormalDistribution': STATO_NORMAL_DISTRIBUTION,
+        }
+
+        error_distribution = DIST[json_dict['ErrorModel_hasErrorDistribution']]
+        variance_homo = json_dict['ErrorModel_errorVarianceHomogeneous']
+        variance_spatial = DEP[
+            json_dict['ErrorModel_varianceMapWiseDependence']]
+        dep = json_dict['ErrorModel_hasErrorDependence']
+        dep_spatial = DEP[json_dict['ErrorModel_dependenceMapWiseDependence']]
+
+        error = ErrorModel(
+                    error_distribution, variance_homo, variance_spatial,
+                    dep, dep_spatial, oid=None)
+        return error
 
     @classmethod
     def get_query(klass, oid=None):
@@ -561,6 +746,11 @@ SELECT DISTINCT * WHERE {
         """
         return query
 
+    @classmethod
+    def load_from_json(self, json_dict, software_id):
+        est_method = json_dict['ModelParameterEstimation_withEstimationMethod']
+        return ModelParametersEstimation(est_method, software_id)
+
     def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
@@ -578,16 +768,20 @@ class ParameterEstimateMap(NIDMObject):
     Object representing an ParameterEstimateMap entity.
     """
 
-    def __init__(self, coord_space, pe_file=None, pe_num=None, filename=None,
+    def __init__(self, coord_space=None, pe_file=None, pe_num=None, filename=None,
                  sha=None, label=None, suffix='', model_param_estimation=None,
                  oid=None, fmt=None, derfrom_id=None, derfrom_filename=None,
                  derfrom_fmt=None, derfrom_sha=None, isderfrommap=False):
         super(ParameterEstimateMap, self).__init__(oid=oid)
         # Column index in the corresponding design matrix
         self.num = pe_num
+
         self.coord_space = coord_space
+
         # Parameter Estimate Map is going to be copied over to export_dir
         if not filename:
+            if suffix is None and pe_num is not None:
+                suffix = str(pe_num)
             filename = 'ParameterEstimate' + suffix + '.nii.gz'
 
         self.file = NIDMFile(self.id, pe_file, filename=filename, sha=sha,
@@ -613,6 +807,21 @@ class ParameterEstimateMap(NIDMObject):
         else:
             self.derfrom = None
         self.isderfrommap = isderfrommap
+
+    @classmethod
+    def load_from_json(klass, json_dict, base_dir):
+        pe_list = list()
+        params = json_dict['ParameterEstimateMaps']
+
+        for idx, pe_file in enumerate(params):
+            # FIXME: deal with varying coordsys across maps
+            coordspace = CoordinateSpace.load_from_json(json_dict, 
+                os.path.join(base_dir, pe_file))
+
+            pe = ParameterEstimateMap(coordspace, pe_file, idx+1)
+            pe_list.append(pe)
+        
+        return pe_list
 
     @classmethod
     def get_query(klass, oid=None):
@@ -701,6 +910,16 @@ class ResidualMeanSquares(NIDMObject):
         else:
             self.derfrom = None
         self.isderfrommap = isderfrommap
+
+    @classmethod
+    def load_from_json(klass, json_dict, base_dir):
+        rms_file = json_dict['ResidualMeanSquaresMap_atLocation']
+        # FIXME: deal with varying coordsys across maps
+        coordspace = CoordinateSpace.load_from_json(json_dict, 
+            os.path.join(base_dir, rms_file))
+        rms = ResidualMeanSquares(rms_file, coordspace)
+       
+        return rms
 
     @classmethod
     def get_query(klass, oid=None):
@@ -892,6 +1111,17 @@ class MaskMap(NIDMObject):
         """
         return query
 
+    @classmethod
+    def load_from_json(klass, json_dict, base_dir):
+        mask_file = json_dict['MaskMap_atLocation']
+        # FIXME: deal with varying coordsys across maps
+        coordspace = CoordinateSpace.load_from_json(json_dict, 
+            os.path.join(base_dir, mask_file))
+        mask = MaskMap(mask_file, coordspace, False)
+       
+        return mask
+
+
     def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
@@ -955,6 +1185,15 @@ class GrandMeanMap(NIDMObject):
         }
         """
         return query
+
+    @classmethod
+    def load_from_json(klass, json_dict, base_dir):
+        gm_file = os.path.join(base_dir, json_dict['GrandMeanMap_atLocation'])
+        # FIXME: deal with varying coordsys across maps
+        coordspace = CoordinateSpace.load_from_json(json_dict, gm_file)
+        mask = GrandMeanMap(gm_file, gm_file, coordspace)
+
+        return mask
 
     def export(self, nidm_version, export_dir):
         """
