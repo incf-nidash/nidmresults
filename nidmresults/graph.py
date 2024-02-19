@@ -7,8 +7,6 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>
 @copyright: University of Warwick 2013-2014
 """
-
-import nidmresults
 from nidmresults.objects.constants_rdflib import *
 from nidmresults.objects.modelfitting import *
 from nidmresults.objects.contrast import *
