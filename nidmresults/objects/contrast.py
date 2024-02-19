@@ -28,7 +28,7 @@ class Contrast(object):
                  contrast_map, stderr_or_expl_mean_sq_map, stat_map,
                  z_stat_map=None):
         super(Contrast, self).__init__()
-        # FIXME: contrast_num migth only be defined in FSL if this is not
+        # FIXME: contrast_num might only be defined in FSL if this is not
         # generic the class should be overloaded in fsl_objects
         self.contrast_num = contrast_num
         self.contrast_name = contrast_name

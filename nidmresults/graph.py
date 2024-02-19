@@ -65,7 +65,7 @@ class NIDMResults():
         # Load the graph as is so that we can query
         g = self.parse(rdf_data)
 
-        # Retreive the exporter name and version
+        # Retrieve the exporter name and version
         query = """
 prefix nidm_spm_results_nidm: <http://purl.org/nidash/nidm#NIDM_0000168>
 prefix nidm_nidmfsl: <http://purl.org/nidash/nidm#NIDM_0000167>
@@ -129,7 +129,7 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
 
             # TODO: here we assume that there is a single mpe activity per
             # nidm-results pack, this should
-            # be stated explicitely in the spec?
+            # be stated explicitly in the spec?
             if len(self.model_fittings) > 1:
                 raise Exception("Can't handle NIDM-Results packs with \
                     multiple model parameter estimation activities")
@@ -153,7 +153,7 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
             self.info['ErrorModel_varianceMapWiseDependence'] = \
                 str(self.model_fittings[0].error_model.variance_spatial)
             self.info['ErrorModel_hasErrorDependence'] = \
-                str(self.model_fittings[0].error_model.dependance)
+                str(self.model_fittings[0].error_model.dependence)
             self.info['ErrorModel_dependenceMapWiseDependence'] = \
                 str(self.model_fittings[0].error_model.dependance_spatial)
             self.info['ModelParameterEstimation_withEstimationMethod'] = \
@@ -234,7 +234,7 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
                         'PeakDefinitionCriteria_maxNumberOfPeaksPerCluster'
                     if clustdef not in self.info:
                         # Assume that all inference have the same cluster def
-                        # and peak def > should be stated explicitely in JSON
+                        # and peak def > should be stated explicitly in JSON
                         # spec and tested
                         self.info[clustdef] = (
                             str(inference.cluster_criteria.connectivity))
@@ -357,7 +357,7 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
 
     def _get_model_fitting(self, con_est_id):
         """
-        Retreive model fitting that corresponds to contrast with identifier
+        Retrieve model fitting that corresponds to contrast with identifier
         'con_id'
         from the list of model fitting objects stored in self.model_fittings
         """
@@ -377,7 +377,7 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
 
     def _get_contrast(self, con_id):
         """
-        Retreive contrast with identifier 'con_id' from the list of contrast
+        Retrieve contrast with identifier 'con_id' from the list of contrast
         objects stored in self.contrasts
         """
         for contrasts in list(self.contrasts.values()):

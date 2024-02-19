@@ -1,0 +1,4 @@
+[codespell]
+skip = .git,*.pdf,*.svg
+ignore-regex = \bwww3\.nd\.edu\b
+ignore-words-list = fwe

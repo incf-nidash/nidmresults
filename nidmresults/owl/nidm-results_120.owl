@@ -4869,7 +4869,7 @@ obo:STATO_0000346 rdf:type owl:Class ;
                                   "Alejandra Gonzalez-Beltran" ,
                                   "Philippe Rocca-Serra" ;
                   
-                  obo:IAO_0000115 "a covariance structure is a data item which is part of a regression model and which indicates a pattern in the covariance matrix. The nature of covariance structure is specified before the regression analysis and various covariance structure may be tested and evaluated using information criteria to help choose the most suiteable model"@en ;
+                  obo:IAO_0000115 "a covariance structure is a data item which is part of a regression model and which indicates a pattern in the covariance matrix. The nature of covariance structure is specified before the regression analysis and various covariance structure may be tested and evaluated using information criteria to help choose the most suitable model"@en ;
                   
                   obo:IAO_0000119 "http://www3.nd.edu/~kyuan/courses/sem/readpapers/benter.pdf" ;
                   
@@ -5335,7 +5335,7 @@ prov:AgentInfluence
 
 prov:Association
     a owl:Class ;
-    rdfs:comment "An instance of prov:Association provides additional descriptions about the binary prov:wasAssociatedWith relation from an prov:Activity to some prov:Agent that had some responsiblity for it. For example, prov:baking prov:wasAssociatedWith prov:baker; prov:qualifiedAssociation [ a prov:Association; prov:agent prov:baker; prov:foo prov:bar ]."@en ;
+    rdfs:comment "An instance of prov:Association provides additional descriptions about the binary prov:wasAssociatedWith relation from an prov:Activity to some prov:Agent that had some responsibility for it. For example, prov:baking prov:wasAssociatedWith prov:baker; prov:qualifiedAssociation [ a prov:Association; prov:agent prov:baker; prov:foo prov:bar ]."@en ;
     rdfs:isDefinedBy <http://www.w3.org/ns/prov-o#> ;
     rdfs:label "Association" ;
     rdfs:subClassOf prov:AgentInfluence ;

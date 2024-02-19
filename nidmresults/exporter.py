@@ -535,7 +535,7 @@ class NIDMExporter():
 
     def _get_model_fitting(self, mf_id):
         """
-        Retreive model fitting with identifier 'mf_id' from the list of model
+        Retrieve model fitting with identifier 'mf_id' from the list of model
         fitting objects stored in self.model_fitting
         """
         for model_fitting in self.model_fittings:
@@ -547,7 +547,7 @@ class NIDMExporter():
 
     def _get_contrast(self, con_id):
         """
-        Retreive contrast with identifier 'con_id' from the list of contrast
+        Retrieve contrast with identifier 'con_id' from the list of contrast
         objects stored in self.contrasts
         """
         for contrasts in list(self.contrasts.values()):
@@ -627,7 +627,7 @@ class NIDMExporter():
         Infer model estimation method from the 'error_model'. Return an object
         of type ModelParametersEstimation.
         """
-        if error_model.dependance == NIDM_INDEPEDENT_ERROR:
+        if error_model.dependence == NIDM_INDEPEDENT_ERROR:
             if error_model.variance_homo:
                 estimation_method = STATO_OLS
             else:
