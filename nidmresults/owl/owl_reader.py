@@ -37,7 +37,7 @@ class OwlReader():
         self.import_files = import_owl_files
         self.graph = self.get_graph()
 
-        # Retreive all classes defined in the owl file
+        # Retrieve all classes defined in the owl file
         self.classes = self.get_class_names()
         self.properties = self.get_property_names()
         self.individuals = self.get_individuals()
@@ -423,7 +423,7 @@ class OwlReader():
                             if prov_class is not None:
                                 break
 
-        # Get mor generic PROV types
+        # Get more generic PROV types
         if prov_class in set([PROV['SoftwareAgent'], PROV['Organization'],
                               PROV['Person']]):
             prov_class = PROV['Agent']
@@ -787,9 +787,9 @@ class OwlReader():
                                 owl_restrictions[p]['maxExclusive'].value:
                             restrictions_ok = False
                     if not restrictions_ok:
-                        key = "\n Contraints: value "+str(o.value) + \
+                        key = "\n Constraints: value "+str(o.value) + \
                             ' for '+ex_graph.qname(p) + \
-                            ' does not observe contraints ' + \
+                            ' does not observe constraints ' + \
                             ', '.join(sorted(owl_restrictions[p]))
                         if key not in my_restriction_exception:
                             my_restriction_exception[key] = set([ex_name])

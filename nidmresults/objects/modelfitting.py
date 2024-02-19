@@ -459,12 +459,12 @@ class ErrorModel(NIDMObject):
     """
 
     def __init__(self, error_distribution, variance_homo, variance_spatial,
-                 dependance, dependance_spatial=None, oid=None):
+                 dependence, dependance_spatial=None, oid=None):
         super(ErrorModel, self).__init__(oid=oid)
         self.error_distribution = error_distribution
         self.variance_homo = variance_homo
         self.variance_spatial = variance_spatial
-        self.dependance = dependance
+        self.dependence = dependence
         self.dependance_spatial = dependance_spatial
         self.type = NIDM_ERROR_MODEL
         self.prov_type = PROV['Entity']
@@ -492,7 +492,7 @@ SELECT DISTINCT * WHERE {
         nidm_hasErrorDistribution: $error_distribution ;
         nidm_errorVarianceHomogeneous: $variance_homo ;
         nidm_varianceMapWiseDependence: $variance_spatial ;
-        nidm_hasErrorDependence: $dependance .
+        nidm_hasErrorDependence: $dependence .
 
     OPTIONAL {""" + oid_var + """ rdfs:label ?label . } .
     OPTIONAL {""" + oid_var + """ nidm_dependenceMapWiseDependence: ?dependance_spatial . } .
@@ -509,7 +509,7 @@ SELECT DISTINCT * WHERE {
             (NIDM_HAS_ERROR_DISTRIBUTION, self.error_distribution),
             (NIDM_ERROR_VARIANCE_HOMOGENEOUS, self.variance_homo),
             (NIDM_VARIANCE_SPATIAL_MODEL, self.variance_spatial),
-            (NIDM_HAS_ERROR_DEPENDENCE, self.dependance))
+            (NIDM_HAS_ERROR_DEPENDENCE, self.dependence))
 
         # If the error covariance is independent then there is no associated
         # spatial model
@@ -534,7 +534,7 @@ class ModelParametersEstimation(NIDMObject):
         self.software_id = software_id
         self.type = NIDM_MODEL_PARAMETERS_ESTIMATION
         self.prov_type = PROV['Activity']
-        # currenlty only used for reading
+        # currently only used for reading
         self.data = data
         if label is None:
             label = "Model Parameters Estimation"

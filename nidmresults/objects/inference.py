@@ -1100,7 +1100,7 @@ class Coordinate(NIDMObject):
         """
         Create prov entities and activities.
         """
-        # We can not have this as a dictionnary because we want to keep the
+        # We can not have this as a dictionary because we want to keep the
         # duplicate prov:type attribute
         atts = (  # (PROV['type'],PROV['Location']),
             (PROV['type'], NIDM_COORDINATE),
