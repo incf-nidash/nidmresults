@@ -8,11 +8,12 @@ Create a database suitable for use with MKDA toolbox
 
 from __future__ import division, print_function, absolute_import
 import os
+import sys
 import argparse
 from nidmresults.graph import Graph
 from nidmresults import __version__
 
-if __name__ == "__main__":
+def main(argv = sys.argv):
     parser = argparse.ArgumentParser(
         description='Convert a set of NIDM-Results packs to an MKDA-compliant \
         csv file.')
@@ -27,7 +28,7 @@ if __name__ == "__main__":
         '--version', action='version',
         version='{version}'.format(version=__version__))
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv[1:])
 
     nidmpacks = args.nidmpacks
 
@@ -52,3 +53,7 @@ if __name__ == "__main__":
         nidmgraph = Graph(nidm_zip=nidmpack)
         con_ids = nidmgraph.serialize(outfile, "mkda", overwrite=overwrite,
                                       last_used_con_id=max(con_ids.values()))
+
+
+if __name__ == "__main__":
+    main()

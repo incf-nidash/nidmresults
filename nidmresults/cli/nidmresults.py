@@ -6,14 +6,19 @@ Return version of nidmresults module
 @copyright: University of Warwick 2016
 """
 
+import sys
 import argparse
 import nidmresults
 
-if __name__ == "__main__":
+def main(argv = sys.argv):
     parser = argparse.ArgumentParser(
         description='NIDM-Results module.')
     parser.add_argument(
         '-v', '--version', action='version',
         version='{version}'.format(version=nidmresults.__version__))
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv[1:])
+
+
+if __name__ == "__main__":
+    main()

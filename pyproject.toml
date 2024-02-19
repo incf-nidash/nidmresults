@@ -43,9 +43,9 @@ name = "nidmresults"
 readme = "README.md"
 requires-python = ">=3.8"
 [project.scripts]
-nidmreader = "bin/nidmreader:main"
-nidm_mkda_convert = "bin/nidm_mkda_convert:main"
-nidmresults = "bin/nidmresults:main"
+nidmreader = "nidmresults.cli.nidmreader:main"
+nidm_mkda_convert = "nidmresults.cli.nidm_mkda_convert:main"
+nidmresults = "nidmresults.cli.nidmresults:main"
 # url='https://github.com/incf-nidash/nidmresults'
 # package_data={'':
 #                 ['prefixes.csv',
