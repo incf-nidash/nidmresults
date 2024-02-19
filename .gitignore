@@ -1,11 +1,16 @@
 *.bak
 
-build/*
-*egg*/*
-dist/*
 .DS_Store
+
+.vscode
+
+*egg*/*
 *.pyc
+build/*
+dist/*
 
 *.nidm.zip
+
+debug.log
 
 test/data

@@ -1,6 +1,9 @@
 # nidmresults
 A Python library to read and write [NIDM-Results](http://nidm.nidash.org/specs/nidm-results.html) packs.
 
+specification: http://nidm.nidash.org/specs/nidm-results.html
+manuscript: https://dx.doi.org/10.1038/sdata.2016.102
+
 You are free to copy, modify, and distribute nidmresults with attribution under the terms of the MIT license. See the [LICENSE file](LICENSE.md) for details.
 
 ## Install
