@@ -11,7 +11,7 @@ import os
 import sys
 
 from nidmresults import __version__
-from nidmresults.graph import Graph
+from nidmresults.graph import NIDMResults
 
 
 def main(argv=sys.argv):
@@ -28,7 +28,7 @@ def main(argv=sys.argv):
         nargs="+",
     )
     parser.add_argument(
-        "--version", action="version", version=f"{__version__}"
+        "-v", "--version", action="version", version=f"{__version__}"
     )
 
     args = parser.parse_args(argv[1:])
@@ -52,7 +52,7 @@ def main(argv=sys.argv):
         if not os.path.isfile(nidmpack):
             raise Exception(f"Unknown file: {str(nidmpack)}")
 
-        nidmgraph = Graph(nidm_zip=nidmpack)
+        nidmgraph = NIDMResults(nidm_zip=nidmpack)
         con_ids = nidmgraph.serialize(
             outfile,
             "mkda",

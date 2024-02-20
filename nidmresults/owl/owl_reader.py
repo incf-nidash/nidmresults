@@ -448,21 +448,12 @@ class OwlReader:
     def get_graph(self):
         # Read owl (turtle) file
         owl_graph = Graph()
-        # if self.file[0:4] == "http":
-        #     owl_txt = urllib2.urlopen(self.file).read()
-        # else:
-        #     owl_txt = open(self.file, 'r').read()
         owl_graph.parse(self.file, format="turtle")
-        # owl_graph.parse(data=owl_txt, format='turtle')
 
         if self.import_files:
             for import_file in self.import_files:
                 # Read owl (turtle) file
                 import_graph = Graph()
-                # if self.file[0:4] == "http":
-                #     import_txt = urllib2.urlopen(import_file).read()
-                # else:
-                #     import_txt = open(import_file, 'r').read()
 
                 # This is a workaround to avoid issue with "#" in base prefix
                 # as described in https://github.com/RDFLib/rdflib/issues/379,

@@ -550,11 +550,6 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
                     for k, v in argums.items()
                 }
 
-                # for k,v in argums.items():
-                #     if not isinstance(drift_type, QualifiedName):
-                #         drift_type = namespace_manager.valid_qualified_name(
-                # drift_type)
-
                 # Combine with passed arguments
                 argums.update(kwargs)
                 objects[oid] = klass(oid=oid, **argums)
@@ -642,9 +637,6 @@ SELECT DISTINCT * WHERE
         """
 
         sd = self.graph.query(query)
-
-        # if len(sd) > 1:
-        #     raise Exception('More than one result found for query:' + query)
 
         exporter = None
         export = None
@@ -1457,8 +1449,6 @@ SELECT DISTINCT * WHERE {
             exporter.contrasts = self.contrasts
             exporter.inferences = self.inferences
             exporter.bundle = self.bundle
-            # exporter.exporter = ExporterSoftware(
-            #   'nidmresults', nidmresults.__version__)
             exporter.software = self.software
             exporter.prepend_path = self.zip_path
             exporter.exporter = self.exporter
@@ -1516,7 +1506,7 @@ SELECT DISTINCT * WHERE {
                 con_ids = {}
                 con_ids[None] = last_used_con_id
 
-                for oid, peak in list(self.get_peaks().items()):
+                for _, peak in list(self.get_peaks().items()):
                     exc_set = self.objects[peak.exc_set_id]
 
                     if exc_set.coord_space.is_mni():
