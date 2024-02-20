@@ -26,9 +26,6 @@ from nidmresults.objects.constants_rdflib import (
 )
 from nidmresults.owl.owl_reader import OwlReader
 
-# Append parent script directory to path
-RELPATH = os.path.dirname(os.path.abspath(__file__))
-
 logger = logging.getLogger(__name__)
 
 
@@ -82,7 +79,7 @@ class TestResultDataModel:
     """
 
     def setUp(self, parent_gt_dir=None):
-        self.my_execption = ""
+        self.my_exception = ""
         self.gt_dir = parent_gt_dir
         self.ex_graphs = {}
 
@@ -141,13 +138,13 @@ class TestResultDataModel:
     def successful_retreive(self, res, info_str=""):
         """Check if the results query 'res' contains a value for each field."""
         if not res.bindings:
-            self.my_execption = f"""{info_str}: Empty query results"""
+            self.my_exception = f"""{info_str}: Empty query results"""
             return False
         for row in res.bindings:
             for key, val in sorted(row.items()):
                 logging.debug(f"{key}-->{val.decode()}")
                 if not val.decode():
-                    self.my_execption += "\nMissing: \t %s" % (key)
+                    self.my_exception += "\nMissing: \t %s" % (key)
                     return False
         return True
 

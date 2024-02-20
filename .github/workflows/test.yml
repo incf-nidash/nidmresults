@@ -30,3 +30,8 @@ jobs:
             run: pip install tox
         -   name: Run tests
             run: tox run -e tests
+        -   name: Upload coverage to CodeCov
+            uses: codecov/codecov-action@v4
+            with:
+                flags: ${{ matrix.os }}_${{ matrix.python-version }}
+            if: success()

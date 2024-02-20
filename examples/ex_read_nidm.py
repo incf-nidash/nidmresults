@@ -1,8 +1,8 @@
 """Example: reading a NIDM pack available on NeuroVault."""
 
 import json
-import os
 import urllib.request
+from pathlib import Path
 
 import nidmresults as nidm
 
@@ -10,7 +10,7 @@ import nidmresults as nidm
 nidm_url = "https://neurovault.org/collections/2210/fsl_default_130.nidm.zip"
 nidmpack = "2210_fsl_default_130.nidm.zip"
 
-if not os.path.isfile(nidmpack):
+if not Path(nidmpack).exists():
     print(f"Downloading {nidmpack}")
     urllib.request.urlretrieve(nidm_url, nidmpack)
 
