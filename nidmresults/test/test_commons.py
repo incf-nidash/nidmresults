@@ -55,9 +55,13 @@ example_filenames = import_test_filenames.union(
     set(glob.glob(os.path.join(NIDM_RESULTS_PATH, "test", "ground_truth", "*", "*.ttl")))
 )
 
-# If True turtle file will be downloaded from the prov store using the address specified in the README.
-# If False the turtle version will be retrieved on the fly using the prov translator. By default set to True
-# to check as README should be up to date but setting to False can be useful for local testing.
+"""
+If True turtle file will be downloaded
+from the prov store using the address specified in the README.
+If False the turtle version will be retrieved on the fly using the prov translator.
+By default set to True to check as README should be up to date
+but setting to False can be useful for local testing.
+"""
 ttl_from_readme = False
 
 

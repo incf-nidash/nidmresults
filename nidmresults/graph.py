@@ -1402,7 +1402,7 @@ SELECT DISTINCT * WHERE {
 
                     # FIXME: need to deal with more than one group
                     self.N = (
-                        stat_map.contrast_estimation.param_estimate.model_param_estimation.data.group_or_sub.num_subjects
+                        stat_map.contrast_estimation.param_estimate.model_param_estimation.data.group_or_sub.num_subjects  # noqa
                     )
 
                     if con_name in con_ids:
