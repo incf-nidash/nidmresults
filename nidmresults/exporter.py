@@ -119,9 +119,7 @@ class NIDMExporter:
             shutil.rmtree(self.export_dir)
 
     def add_object(self, nidm_object, export_file=True):
-        """
-        Add a NIDMObject to a NIDM-Results export.
-        """
+        """Add a NIDMObject to a NIDM-Results export."""
         if not export_file:
             export_dir = None
         else:
@@ -141,9 +139,7 @@ class NIDMExporter:
         # self.bundle.update(nidm_object.p)
 
     def export(self):
-        """
-        Generate a NIDM-Results export.
-        """
+        """Generate a NIDM-Results export."""
         try:
             if not os.path.isdir(self.export_dir):
                 os.mkdir(self.export_dir)
@@ -553,9 +549,7 @@ class NIDMExporter:
         raise Exception("Contrast activity with id: " + str(con_id) + " not found.")
 
     def _add_namespaces(self):
-        """
-        Add namespaces to NIDM document.
-        """
+        """Add namespaces to NIDM document."""
         self.doc.add_namespace(NIDM)
         self.doc.add_namespace(NIIRI)
         self.doc.add_namespace(CRYPTO)
@@ -567,9 +561,7 @@ class NIDMExporter:
         self.doc.add_namespace(NIF)
 
     def _create_bundle(self, version):
-        """
-        Initialise NIDM-Results bundle.
-        """
+        """Initialise NIDM-Results bundle."""
         # *** Bundle entity
         if not hasattr(self, "bundle_ent"):
             self.bundle_ent = NIDMResultsBundle(nidm_version=version["num"])
@@ -654,9 +646,7 @@ class NIDMExporter:
         return (ttl, context)
 
     def save_prov_to_files(self, showattributes=False):
-        """
-        Write-out provn serialisation to nidm.provn.
-        """
+        """Write-out provn serialisation to nidm.provn."""
         self.doc.add_bundle(self.bundle)
         # provn_file = os.path.join(self.export_dir, 'nidm.provn')
         # provn_fid = open(provn_file, 'w')

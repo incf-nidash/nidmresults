@@ -92,9 +92,7 @@ class NIDMObject:
 
 
 class NIDMResultsBundle(NIDMObject):
-    """
-    Object representing a NIDM-Results bundle entity.
-    """
+    """Object representing a NIDM-Results bundle entity."""
 
     def __init__(self, nidm_version=None, label=None, oid=None):
         super().__init__(oid=oid)
@@ -130,9 +128,7 @@ SELECT * WHERE
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entity.
-        """
+        """Create prov entity."""
         self.add_attributes(
             [
                 (PROV["type"], self.type),
@@ -145,9 +141,7 @@ SELECT * WHERE
 
 
 class CoordinateSpace(NIDMObject):
-    """
-    Object representing a CoordinateSpace entity.
-    """
+    """Object representing a CoordinateSpace entity."""
 
     def __init__(
         self,
@@ -272,9 +266,7 @@ SELECT ?oid ?label ?vox_to_world ?units ?vox_size ?coordinate_system ?numdim
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         self.add_attributes(
             {
                 PROV["type"]: self.type,
@@ -383,9 +375,7 @@ class NIDMFile(NIDMObject):
 
 
 class Image(NIDMObject):
-    """
-    Object representing an Image entity.
-    """
+    """Object representing an Image entity."""
 
     def __init__(self, image_file, filename, fmt="png", oid=None):
         super().__init__(oid=oid)
@@ -420,9 +410,7 @@ class Image(NIDMObject):
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entity.
-        """
+        """Create prov entity."""
         if self.file is not None:
             self.add_attributes(
                 [
@@ -433,9 +421,7 @@ class Image(NIDMObject):
 
 
 class NeuroimagingSoftware(NIDMObject):
-    """
-    Class representing a NeuroimagingSoftware Agent.
-    """
+    """Class representing a NeuroimagingSoftware Agent."""
 
     def __init__(self, software_type, version, label=None, feat_version=None, oid=None):
         super().__init__(oid=oid)
@@ -509,9 +495,7 @@ SELECT DISTINCT * WHERE
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         if nidm_version["major"] < 1 or (
             nidm_version["major"] == 1 and nidm_version["minor"] < 3
         ):
@@ -531,9 +515,7 @@ SELECT DISTINCT * WHERE
 
 
 class ExporterSoftware(NIDMObject):
-    """
-    Class representing a Software Agent.
-    """
+    """Class representing a Software Agent."""
 
     def __init__(self, software_type, version, oid=None, label=None):
         super().__init__(oid=oid)
@@ -577,9 +559,7 @@ SELECT DISTINCT * WHERE
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         self.add_attributes(
             (
                 (PROV["type"], self.type),
@@ -591,9 +571,7 @@ SELECT DISTINCT * WHERE
 
 
 class NIDMResultsExport(NIDMObject):
-    """
-    Class representing a NIDM-Results Export activity.
-    """
+    """Class representing a NIDM-Results Export activity."""
 
     def __init__(self, oid=None, label=None):
         super().__init__(oid=oid)
@@ -627,7 +605,5 @@ SELECT DISTINCT * WHERE
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         self.add_attributes([(PROV["label"], self.label), (PROV["type"], self.type)])

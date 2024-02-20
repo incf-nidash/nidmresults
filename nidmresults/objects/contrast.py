@@ -49,9 +49,7 @@ class Contrast:
 
 
 class ContrastWeights(NIDMObject):
-    """
-    Object representing a ContrastWeight entity.
-    """
+    """Object representing a ContrastWeight entity."""
 
     def __init__(
         self,
@@ -103,9 +101,7 @@ SELECT DISTINCT * WHERE {
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov graph.
-        """
+        """Create prov graph."""
         self.stat = None
         if isinstance(self.stat_type, QualifiedName):
             stat = self.stat_type
@@ -131,9 +127,7 @@ SELECT DISTINCT * WHERE {
 
 
 class ContrastMap(NIDMObject):
-    """
-    Object representing a ContrastMap entity.
-    """
+    """Object representing a ContrastMap entity."""
 
     def __init__(
         self,
@@ -222,9 +216,7 @@ class ContrastMap(NIDMObject):
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov graph.
-        """
+        """Create prov graph."""
         # Contrast Map entity
         atts = ((PROV["type"], NIDM_CONTRAST_MAP), (NIDM_CONTRAST_NAME, self.name))
 
@@ -242,9 +234,7 @@ class ContrastMap(NIDMObject):
 
 
 class ContrastExplainedMeanSquareMap(NIDMObject):
-    """
-    Object representing a ContrastExplainedMeanSquareMap entity.
-    """
+    """Object representing a ContrastExplainedMeanSquareMap entity."""
 
     def __init__(
         self,
@@ -299,9 +289,7 @@ SELECT DISTINCT * WHERE {
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov graph.
-        """
+        """Create prov graph."""
         if self.expl_mean_sq_file is None:
             # Create Contrast Explained Mean Square Map as fstat<num>.nii.gz
             # multiplied by sigmasquareds.nii.gz and save it in export_dir
@@ -337,14 +325,7 @@ SELECT DISTINCT * WHERE {
 
 
 class ContrastStdErrMap(NIDMObject):
-    """
-    Object representing a ContrastStdErrMap entity.
-    """
-
-    # stderr_or_expl_mean_sq_map = self.get_object(
-    # ContrastStdErrMap, args['constdm_id'],
-    #  coord_space=contraststd_map_coordspace,
-    # contrast_num=contrast_num, is_variance=False, var_coord_space=None)
+    """Object representing a ContrastStdErrMap entity."""
 
     def __init__(
         self,
@@ -459,9 +440,7 @@ SELECT DISTINCT * WHERE {
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov graph.
-        """
+        """Create prov graph."""
         self.add_attributes(
             (
                 (PROV["type"], self.type),
@@ -490,9 +469,7 @@ class ContrastVariance(NIDMObject):
 
 
 class StatisticMap(NIDMObject):
-    """
-    Object representing a StatisticMap entity.
-    """
+    """Object representing a StatisticMap entity."""
 
     def __init__(
         self,
@@ -630,9 +607,7 @@ SELECT DISTINCT * WHERE {
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov graph.
-        """
+        """Create prov graph."""
         attributes = [(PROV["type"], NIDM_STATISTIC_MAP), (DCT["format"], self.fmt)]
 
         if not self.isderfrommap:
@@ -659,9 +634,7 @@ SELECT DISTINCT * WHERE {
 
 
 class ContrastEstimation(NIDMObject):
-    """
-    Object representing a ContrastEstimation entity.
-    """
+    """Object representing a ContrastEstimation entity."""
 
     def __init__(
         self,
@@ -707,7 +680,5 @@ SELECT DISTINCT * WHERE {
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov graph.
-        """
+        """Create prov graph."""
         self.add_attributes(((PROV["type"], self.type), (PROV["label"], self.label)))

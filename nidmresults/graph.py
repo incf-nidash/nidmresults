@@ -25,9 +25,7 @@ from nidmresults.objects.modelfitting import *
 
 
 class NIDMResults:
-    """
-    NIDM-result object containing all metadata and link to image files.
-    """
+    """NIDM-result object containing all metadata and link to image files."""
 
     def __init__(self, nidm_zip=None, rdf_file=None, workaround=False, to_replace=dict()):
         self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")

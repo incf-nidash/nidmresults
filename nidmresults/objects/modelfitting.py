@@ -54,9 +54,7 @@ class ModelFitting:
 
 
 class ImagingInstrument(NIDMObject):
-    """
-    Object representing a ImagingInstrument entity.
-    """
+    """Object representing a ImagingInstrument entity."""
 
     def __init__(self, machine_type, label=None, oid=None):
         super().__init__(oid=oid)
@@ -141,9 +139,7 @@ instrument:) )
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         self.add_attributes(
             (
                 (PROV["type"], self.type),
@@ -154,9 +150,7 @@ instrument:) )
 
 
 class Group(NIDMObject):
-    """
-    Object representing a ImagingInstrument entity.
-    """
+    """Object representing a ImagingInstrument entity."""
 
     def __init__(self, num_subjects, group_name, label=None, oid=None):
         super().__init__(oid=oid)
@@ -194,9 +188,7 @@ SELECT DISTINCT * WHERE {
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         self.add_attributes(
             (
                 (PROV["type"], self.type),
@@ -208,9 +200,7 @@ SELECT DISTINCT * WHERE {
 
 
 class Person(NIDMObject):
-    """
-    Object representing a ImagingInstrument entity.
-    """
+    """Object representing a ImagingInstrument entity."""
 
     def __init__(self, label=None, oid=None):
         super().__init__(oid=oid)
@@ -240,9 +230,7 @@ class Person(NIDMObject):
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         self.add_attributes(
             (
                 (PROV["type"], self.prov_type),
@@ -253,9 +241,7 @@ class Person(NIDMObject):
 
 
 class DesignMatrix(NIDMObject):
-    """
-    Object representing a DesignMatrix entity.
-    """
+    """Object representing a DesignMatrix entity."""
 
     def __init__(
         self,
@@ -337,9 +323,7 @@ SELECT DISTINCT * WHERE {
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         # Create cvs file containing design matrix
         np.savetxt(
             os.path.join(export_dir, self.csv_file),
@@ -381,9 +365,7 @@ SELECT DISTINCT * WHERE {
 
 
 class DriftModel(NIDMObject):
-    """
-    Object representing a DriftModel entity.
-    """
+    """Object representing a DriftModel entity."""
 
     def __init__(self, drift_type, parameter, label=None, oid=None):
         super().__init__(oid=oid)
@@ -439,9 +421,7 @@ SELECT DISTINCT * WHERE {
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         attributes = [(PROV["type"], self.drift_type), (PROV["label"], self.label)]
 
         if self.drift_type == FSL_GAUSSIAN_RUNNING_LINE_DRIFT_MODEL:
@@ -455,9 +435,7 @@ SELECT DISTINCT * WHERE {
 
 
 class Data(NIDMObject):
-    """
-    Object representing a Data entity.
-    """
+    """Object representing a Data entity."""
 
     def __init__(
         self,
@@ -516,9 +494,7 @@ SELECT DISTINCT * WHERE {
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         if nidm_version["major"] < 1 or (
             nidm_version["major"] == 1 and nidm_version["minor"] < 3
         ):
@@ -544,9 +520,7 @@ SELECT DISTINCT * WHERE {
 
 
 class ErrorModel(NIDMObject):
-    """
-    Object representing an ErrorModel entity.
-    """
+    """Object representing an ErrorModel entity."""
 
     def __init__(
         self,
@@ -606,9 +580,7 @@ SELECT DISTINCT * WHERE {
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         atts = (
             (PROV["type"], NIDM_ERROR_MODEL),
             (NIDM_HAS_ERROR_DISTRIBUTION, self.error_distribution),
@@ -627,9 +599,7 @@ SELECT DISTINCT * WHERE {
 
 
 class ModelParametersEstimation(NIDMObject):
-    """
-    Object representing an ModelParametersEstimation activity.
-    """
+    """Object representing an ModelParametersEstimation activity."""
 
     def __init__(self, estimation_method, software_id, data=None, label=None, oid=None):
         super().__init__(oid=oid)
@@ -669,9 +639,7 @@ SELECT DISTINCT * WHERE {
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         # Create "Model Parameter estimation" activity
         self.add_attributes(
             (
@@ -683,9 +651,7 @@ SELECT DISTINCT * WHERE {
 
 
 class ParameterEstimateMap(NIDMObject):
-    """
-    Object representing an ParameterEstimateMap entity.
-    """
+    """Object representing an ParameterEstimateMap entity."""
 
     def __init__(
         self,
@@ -786,9 +752,7 @@ SELECT DISTINCT * WHERE {
 
     # Generate prov for contrast map
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         atts = ((PROV["type"], self.type),)
 
         if not self.isderfrommap:
@@ -802,9 +766,7 @@ SELECT DISTINCT * WHERE {
 
 
 class ResidualMeanSquares(NIDMObject):
-    """
-    Object representing an ResidualMeanSquares entity.
-    """
+    """Object representing an ResidualMeanSquares entity."""
 
     def __init__(
         self,
@@ -886,9 +848,7 @@ SELECT DISTINCT * WHERE {
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         atts = (
             (
                 PROV["type"],
@@ -906,9 +866,7 @@ SELECT DISTINCT * WHERE {
 
 
 class ReselsPerVoxelMap(NIDMObject):
-    """
-    Object representing an ResidualMeanSquares entity.
-    """
+    """Object representing an ResidualMeanSquares entity."""
 
     def __init__(
         self,
@@ -995,9 +953,7 @@ SELECT DISTINCT * WHERE {
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         atts = (
             (
                 PROV["type"],
@@ -1015,9 +971,7 @@ SELECT DISTINCT * WHERE {
 
 
 class MaskMap(NIDMObject):
-    """
-    Object representing an MaskMap entity.
-    """
+    """Object representing an MaskMap entity."""
 
     def __init__(
         self,
@@ -1100,9 +1054,7 @@ class MaskMap(NIDMObject):
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         atts = (
             (
                 PROV["type"],
@@ -1121,9 +1073,7 @@ class MaskMap(NIDMObject):
 
 
 class GrandMeanMap(NIDMObject):
-    """
-    Object representing an GrandMeanMap entity.
-    """
+    """Object representing an GrandMeanMap entity."""
 
     # TODO: we should remove mask_file here and ask for masked data instead?
     def __init__(
@@ -1180,9 +1130,7 @@ class GrandMeanMap(NIDMObject):
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         if self.masked_median is None:
             grand_mean_file = self.file.path
             grand_mean_img = nib.load(grand_mean_file)

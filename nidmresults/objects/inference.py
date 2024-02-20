@@ -49,9 +49,7 @@ class Inference:
 
 
 class InferenceActivity(NIDMObject):
-    """
-    Object representing an Inference activity.
-    """
+    """Object representing an Inference activity."""
 
     def __init__(
         self,
@@ -127,9 +125,7 @@ prefix spm_PartialConjunctionDegree: <http://purl.org/nidash/spm#SPM_0000015>
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         # In FSL we have a single thresholding (extent, height) applied to all
         # contrasts
         # FIXME: Deal with two-tailed inference?
@@ -146,9 +142,7 @@ prefix spm_PartialConjunctionDegree: <http://purl.org/nidash/spm#SPM_0000015>
 
 
 class ExcursionSet(NIDMObject):
-    """
-    Object representing a ExcursionSet entity.
-    """
+    """Object representing a ExcursionSet entity."""
 
     def __init__(
         self,
@@ -231,9 +225,7 @@ ORDER BY ?peak_label
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         # Create "Excursion set" entity
         self.add_attributes(
             (
@@ -260,9 +252,7 @@ ORDER BY ?peak_label
 
 
 class ClusterLabelsMap(NIDMObject):
-    """
-    Object representing a ClusterLabelsMap entity.
-    """
+    """Object representing a ClusterLabelsMap entity."""
 
     def __init__(
         self,
@@ -313,9 +303,7 @@ SELECT DISTINCT * WHERE {
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         # Create "Cluster Labels Map" entity
         self.add_attributes(
             (
@@ -327,9 +315,7 @@ SELECT DISTINCT * WHERE {
 
 
 class HeightThreshold(NIDMObject):
-    """
-    Object representing a HeightThreshold entity.
-    """
+    """Object representing a HeightThreshold entity."""
 
     def __init__(
         self,
@@ -424,9 +410,7 @@ prefix nidm_hasAlternativeHypothesis: <http://purl.org/nidash/nidm#NIDM_000009\
         return query
 
     def export(self, version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         atts = [
             (PROV["type"], self.type),
             (PROV["label"], self.label),
@@ -450,9 +434,7 @@ prefix nidm_hasAlternativeHypothesis: <http://purl.org/nidash/nidm#NIDM_000009\
 
 
 class ExtentThreshold(NIDMObject):
-    """
-    Object representing an ExtentThreshold entity.
-    """
+    """Object representing an ExtentThreshold entity."""
 
     def __init__(
         self,
@@ -562,9 +544,7 @@ prefix nidm_clusterSizeInResels: <http://purl.org/nidash/nidm#NIDM_0000156>
         return query
 
     def export(self, version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         atts = [
             (PROV["type"], self.type),
         ]
@@ -600,9 +580,7 @@ prefix nidm_clusterSizeInResels: <http://purl.org/nidash/nidm#NIDM_0000156>
 
 
 class Cluster(NIDMObject):
-    """
-    Object representing a Cluster entity.
-    """
+    """Object representing a Cluster entity."""
 
     def __init__(
         self,
@@ -693,9 +671,7 @@ SELECT DISTINCT * WHERE {
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         if nidm_version["num"] in ["1.0.0", "1.1.0"]:
             self.label = self.label.replace("Supra-Threshold", "Significant")
 
@@ -725,9 +701,7 @@ SELECT DISTINCT * WHERE {
 
 
 class DisplayMaskMap(NIDMObject):
-    """
-    Object representing a DisplayMaskMap entity.
-    """
+    """Object representing a DisplayMaskMap entity."""
 
     def __init__(
         self,
@@ -810,9 +784,7 @@ SELECT DISTINCT * WHERE {
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         atts = ((PROV["type"], self.type),)
 
         if not self.isderfrommap:
@@ -825,9 +797,7 @@ SELECT DISTINCT * WHERE {
 
 
 class PeakCriteria(NIDMObject):
-    """
-    Object representing a PeakCriteria entity.
-    """
+    """Object representing a PeakCriteria entity."""
 
     def __init__(self, contrast_num, peak_dist, num_peak=None, label=None, oid=None):
         super().__init__(oid=oid)
@@ -870,9 +840,7 @@ prefix nidm_maxNumberOfPeaksPerCluster: <http://purl.org/nidash/nidm#NIDM_0000\
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         num_peak = ()
         if self.num_peak:
             num_peak = ((NIDM_MAX_NUMBER_OF_PEAKS_PER_CLUSTER, self.num_peak),)
@@ -889,9 +857,7 @@ prefix nidm_maxNumberOfPeaksPerCluster: <http://purl.org/nidash/nidm#NIDM_0000\
 
 
 class ClusterCriteria(NIDMObject):
-    """
-    Object representing a ClusterCriteria entity.
-    """
+    """Object representing a ClusterCriteria entity."""
 
     def __init__(self, contrast_num, connectivity, label=None, oid=None):
         super().__init__(oid=oid)
@@ -929,9 +895,7 @@ prefix nidm_hasConnectivityCriterion: <http://purl.org/nidash/nidm#NIDM_000009\
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         # Create "Cluster definition criteria" entity
         if isinstance(self.connectivity, int):
             if self.connectivity == 6:
@@ -958,9 +922,7 @@ prefix nidm_hasConnectivityCriterion: <http://purl.org/nidash/nidm#NIDM_000009\
 
 
 class CenterOfGravity(NIDMObject):
-    """
-    Object representing a CenterOfGravity entity.
-    """
+    """Object representing a CenterOfGravity entity."""
 
     def __init__(
         self,
@@ -1031,9 +993,7 @@ prefix nidm_coordinateVectorInVoxels: <http://purl.org/nidash/nidm#NIDM_000013\
         return query
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         self.add_attributes(
             (
                 (PROV["type"], self.type),
@@ -1044,9 +1004,7 @@ prefix nidm_coordinateVectorInVoxels: <http://purl.org/nidash/nidm#NIDM_000013\
 
 
 class SearchSpace(NIDMObject):
-    """
-    Object representing a SearchSpace entity.
-    """
+    """Object representing a SearchSpace entity."""
 
     def __init__(
         self,
@@ -1182,9 +1140,7 @@ SELECT DISTINCT * WHERE {
 
     # Generate prov for search space entity generated by the inference activity
     def export(self, version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         atts = (
             (PROV["label"], self.label),
             (PROV["type"], NIDM_SEARCH_SPACE_MASK_MAP),
@@ -1254,9 +1210,7 @@ SELECT DISTINCT * WHERE {
 
 
 class Coordinate(NIDMObject):
-    """
-    Object representing a Coordinate entity.
-    """
+    """Object representing a Coordinate entity."""
 
     def __init__(
         self,
@@ -1299,9 +1253,7 @@ class Coordinate(NIDMObject):
         return f"{self.label}\t{self.coord_vector}"
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         # We can not have this as a dictionary because we want to keep the
         # duplicate prov:type attribute
         atts = (  # (PROV['type'],PROV['Location']),
@@ -1324,9 +1276,7 @@ class Coordinate(NIDMObject):
 
 
 class Peak(NIDMObject):
-    """
-    Object representing a Peak entity.
-    """
+    """Object representing a Peak entity."""
 
     def __init__(
         self,
@@ -1426,9 +1376,7 @@ SELECT DISTINCT * WHERE {
         )
 
     def export(self, nidm_version, export_dir):
-        """
-        Create prov entities and activities.
-        """
+        """Create prov entities and activities."""
         if self.p_unc is None:
             norm_cdf_z = (1.0 + erf(self.equiv_z / sqrt(2.0))) / 2.0
             self.p_unc = 1 - norm_cdf_z
