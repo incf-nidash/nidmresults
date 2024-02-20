@@ -20,3 +20,5 @@ nidmresults/_version.py
 debug.log
 
 test/data
+
+.tox
