@@ -17,7 +17,8 @@ dependencies = [
     "numpy",
     "future",
     "requests",
-    "pyld"
+    "pyld",
+    "vcrpy"
 ]
 description = "Export of neuroimaging statistical results using NIDM as specified at http://nidm.nidash.org/specs/nidm-results.html."
 # Version from setuptools_scm
@@ -36,15 +37,15 @@ requires-python = ">=3.8"
 [project.optional-dependencies]
 # A combination of dependencies useful for developers
 dev = [
+    "tox",
     "nidmresults[test]",
     "pre-commit"
 ]
 # For running unit and docstring tests
 test = [
-    "ddt",
-    "vcrpy",
-    "pytest",
-    "tox"
+    "coverage",
+    "pytest>=6.0.0",
+    "pytest-cov"
 ]
 
 [project.scripts]

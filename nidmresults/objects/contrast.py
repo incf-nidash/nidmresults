@@ -7,6 +7,7 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 @copyright: University of Warwick 2013-2014
 """
 
+import json
 import os
 
 import nibabel as nib
@@ -14,8 +15,25 @@ import numpy as np
 from prov.identifier import QualifiedName
 from prov.model import Identifier
 
-from nidmresults.objects.constants import *
-from nidmresults.objects.generic import *
+from nidmresults.objects.constants import (
+    NIDM_CONTRAST_ESTIMATION,
+    NIDM_CONTRAST_EXPLAINED_MEAN_SQUARE_MAP,
+    NIDM_CONTRAST_MAP,
+    NIDM_CONTRAST_NAME,
+    NIDM_CONTRAST_STANDARD_ERROR_MAP,
+    NIDM_CONTRAST_VARIANCE_MAP,
+    NIDM_EFFECT_DEGREES_OF_FREEDOM,
+    NIDM_ERROR_DEGREES_OF_FREEDOM,
+    NIDM_IN_COORDINATE_SPACE,
+    NIDM_STATISTIC_MAP,
+    NIDM_STATISTIC_TYPE,
+    PROV,
+    STATO_CONTRAST_WEIGHT_MATRIX,
+    STATO_FSTATISTIC,
+    STATO_TSTATISTIC,
+    STATO_ZSTATISTIC,
+)
+from nidmresults.objects.generic import DCT, NIDMFile, NIDMObject
 
 
 class Contrast:

@@ -11,7 +11,7 @@ import csv
 import datetime
 import json
 import os
-import sys
+import shutil
 import tempfile
 import zipfile
 
@@ -19,10 +19,29 @@ import zipfile
 import pyld as ld
 from prov.model import ProvBundle, ProvDocument
 
-from nidmresults.objects.constants import *
-from nidmresults.objects.contrast import *
-from nidmresults.objects.inference import *
-from nidmresults.objects.modelfitting import *
+from nidmresults.objects.constants import (
+    CRYPTO,
+    DC,
+    DCT,
+    NFO,
+    NIDM,
+    NIDM_INDEPEDENT_ERROR,
+    NIF,
+    NIIRI,
+    OBO,
+    PROV,
+    SCR,
+    STATO_GLS,
+    STATO_OLS,
+    STATO_WLS,
+)
+from nidmresults.objects.contrast import ContrastStdErrMap
+from nidmresults.objects.generic import (
+    NIDMFile,
+    NIDMResultsBundle,
+    NIDMResultsExport,
+)
+from nidmresults.objects.modelfitting import ModelParametersEstimation
 
 
 class NIDMExporter:
@@ -37,16 +56,16 @@ class NIDMExporter:
         # Create output path from output name
         self.zipped = zipped
         if not self.zipped:
-            out_dirname = out_dirname + ".nidm"
+            out_dirname = f"{out_dirname}.nidm"
         else:
-            out_dirname = out_dirname + ".nidm.zip"
+            out_dirname = f"{out_dirname}.nidm.zip"
         out_dir = os.path.join(out_path, out_dirname)
 
-        # Quit if output path already exists and user doesn't want to overwrite
-        # it
+        # Quit if output path already exists
+        # and user doesn't want to overwrite it
         if os.path.exists(out_dir):
-            msg = out_dir + " already exists, overwrite?"
-            if not input("%s (y/N) " % msg).lower() == "y":
+            msg = f"{out_dir} already exists, overwrite?"
+            if input(f"{msg} (y/N) ").lower() != "y":
                 quit("Bye.")
             if os.path.isdir(out_dir):
                 shutil.rmtree(out_dir)
@@ -315,7 +334,7 @@ class NIDMExporter:
                 # self.add_object(model_fitting)
 
             # Add contrast estimation steps
-            analysis_masks = dict()
+            analysis_masks = {}
             for (model_fitting_id, pe_ids), contrasts in list(
                 self.contrasts.items()
             ):
@@ -597,7 +616,7 @@ class NIDMExporter:
                 return model_fitting
 
         raise Exception(
-            "Model fitting activity with id: " + str(mf_id) + " not found."
+            f"Model fitting activity with id: {str(mf_id)} not found."
         )
 
     def _get_contrast(self, con_id):
@@ -608,9 +627,7 @@ class NIDMExporter:
             for contrast in contrasts:
                 if contrast.estimation.id == con_id:
                     return contrast
-        raise Exception(
-            "Contrast activity with id: " + str(con_id) + " not found."
-        )
+        raise Exception(f"Contrast activity with id: {str(con_id)} not found.")
 
     def _add_namespaces(self):
         """Add namespaces to NIDM document."""
@@ -698,21 +715,21 @@ class NIDMExporter:
 
     def use_prefixes(self, ttl):
         prefix_file = os.path.join(os.path.dirname(__file__), "prefixes.csv")
-        context = dict()
+        context = {}
         with open(prefix_file, encoding="ascii") as csvfile:
             reader = csv.reader(csvfile)
             next(reader, None)  # skip the headers
             for alphanum_id, prefix, uri in reader:
                 if alphanum_id in ttl:
                     context[prefix] = uri
-                    ttl = "@prefix " + prefix + ": <" + uri + "> .\n" + ttl
-                    ttl = ttl.replace(alphanum_id, prefix + ":")
+                    ttl = f"@prefix {prefix}: <{uri}" + "> .\n" + ttl
+                    ttl = ttl.replace(alphanum_id, f"{prefix}:")
                     if uri in ttl:
-                        ttl = ttl.replace(alphanum_id, prefix + ":")
+                        ttl = ttl.replace(alphanum_id, f"{prefix}:")
                 elif uri in ttl:
                     context[prefix] = uri
-                    ttl = "@prefix " + prefix + ": <" + uri + "> .\n" + ttl
-                    ttl = ttl.replace(alphanum_id, prefix + ":")
+                    ttl = f"@prefix {prefix}: <{uri}" + "> .\n" + ttl
+                    ttl = ttl.replace(alphanum_id, f"{prefix}:")
         return (ttl, context)
 
     def save_prov_to_files(self, showattributes=False):
@@ -757,11 +774,6 @@ class NIDMExporter:
                 json.loads(jsonld_txt), "http://purl.org/nidash/context"
             )
         )
-
-        # If python 2 convert string to unicode to avoid
-        # 'must be unicode not str' error
-        if sys.version_info < (3, 0):
-            jsonld_11 = unicode(jsonld_11)
 
         jsonld_11_file = os.path.join(self.export_dir, "nidm.json")
 

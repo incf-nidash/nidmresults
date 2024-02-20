@@ -8,22 +8,35 @@
 import collections
 import csv
 import logging
-
-# import vcr
 import os
 import re
 import warnings
+from urllib.request import urlopen
 
-from future.standard_library import hooks
+import vcr
 from rdflib import RDF, term
 from rdflib.graph import Graph
 from rdflib.term import Literal
 
-from nidmresults.objects.constants_rdflib import *
-from nidmresults.objects.constants_rdflib import namespaces as namespace_names
-
-with hooks():
-    from urllib.request import urlopen
+from nidmresults.objects.constants_rdflib import (
+    AFNI,
+    CRYPTO,
+    FSL,
+    HAS_CURATION_STATUS,
+    NIDM,
+    OBO_DEFINITION,
+    OBO_EDITOR_NOTE,
+    OBO_EXAMPLE,
+    OBO_TERM_EDITOR,
+    OBO_UNCURATED,
+    OWL,
+    PROV,
+    RDFS,
+    SKOS_DEFINITION,
+    SPM,
+    XSD,
+    namespaces as namespace_names,
+)
 
 RELPATH = os.path.dirname(os.path.abspath(__file__))
 NIDM_PATH = os.path.dirname(RELPATH)
@@ -122,10 +135,11 @@ class OwlReader:
         # FIXME: Is there a more efficient way?
         if prefix:
             original_classes = classes
-            classes = list()
-            for class_name in original_classes:
-                if class_name.startswith(prefix):
-                    classes.append(class_name)
+            classes = [
+                class_name
+                for class_name in original_classes
+                if class_name.startswith(prefix)
+            ]
         if but:
             classes = list(set(classes) - set(but))
 
@@ -136,7 +150,7 @@ class OwlReader:
         return self.all_of_rdf_type(OWL["Class"], prefix, but)
 
     def get_by_namespaces(self, term_list, but=None):
-        by_nsp = dict()
+        by_nsp = {}
         ignored = []
 
         for uri in term_list:
@@ -184,11 +198,11 @@ class OwlReader:
             "prov",
         )
 
-        counter_dict = dict()
+        counter_dict = {}
 
         counter = 0
 
-        all_terms = dict()
+        all_terms = {}
         for owl_type in owl_types:
             terms = self.get_by_namespaces(self.all_of_rdf_type(owl_type), but)
             keys = set(all_terms).union(terms)
@@ -248,7 +262,7 @@ class OwlReader:
     def get_class_names_by_prov_type(
         self, classes=None, prefix=None, but=None
     ):
-        class_names = dict()
+        class_names = {}
         # We at least want to have an output for Entity, Activity and Agent
         class_names[PROV["Entity"]] = list()
         class_names[PROV["Activity"]] = list()
@@ -324,13 +338,13 @@ class OwlReader:
         return list(individuals)
 
     def get_attributes(self):
-        attributes = dict()
+        attributes = {}
         # For each ObjectProperty found out corresponding range
-        ranges = dict()
+        ranges = {}
 
-        parent_ranges = dict()
+        parent_ranges = {}
 
-        restrictions = dict()
+        restrictions = {}
 
         # Check owl restrictions on classes
         for class_name in self.graph.subjects(RDF["type"], OWL["Class"]):
@@ -725,7 +739,7 @@ class OwlReader:
         return sub_types
 
     def check_class_names(self, ex_graph, ex_name, raise_now=False):
-        my_exception = dict()
+        my_exception = {}
         error_msg = ""
         class_names = self.get_class_names()
 
@@ -771,9 +785,9 @@ class OwlReader:
             CRYPTO["sha512"],
         }
 
-        my_exception = dict()
-        my_range_exception = dict()
-        my_restriction_exception = dict()
+        my_exception = {}
+        my_range_exception = {}
+        my_restriction_exception = {}
 
         owl_attributes = self.attributes
         owl_ranges = self.ranges
