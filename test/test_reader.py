@@ -9,11 +9,11 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from conftest import data_dir, output_dir
-
 from nidmresults.graph import NIDMResults
 from nidmresults.owl.owl_reader import OwlReader
 from nidmresults.test.utils import TestResultDataModel
+
+from .conftest import data_dir, output_dir
 
 
 def return_list_nidm_zip(path: Path) -> list[str]:
