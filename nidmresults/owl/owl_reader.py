@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Read an owl file and extract interesting information
+"""Read an owl file and extract interesting information.
 
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>
 @copyright: University of Warwick 2014

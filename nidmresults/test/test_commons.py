@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Common functions for test procedures
+"""Common functions for test procedures.
 
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>, Satrajit Ghosh
 @copyright: University of Warwick 2014

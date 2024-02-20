@@ -290,9 +290,7 @@ SELECT ?oid ?label ?vox_to_world ?units ?vox_size ?coordinate_system ?numdim
 
 
 class NIDMFile(NIDMObject):
-    """
-    Object representing a File (to be used as attribute of another class)
-    """
+    """Object representing a File (to be used as attribute of another class)."""
 
     def __init__(
         self, rdf_id, location, filename=None, sha=None, fmt=None, temporary=False
@@ -338,9 +336,7 @@ class NIDMFile(NIDMObject):
         return hashlib.sha512(data).hexdigest()
 
     def export(self, nidm_version, export_dir, prepend_path):
-        """
-        Copy file over of export_dir and create corresponding triples
-        """
+        """Copy file over of export_dir and create corresponding triples."""
         if self.path is not None:
             if export_dir is not None:
                 # Copy file only if export_dir is not None

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Check that a given provn file is consistent with nidm-results.owl
+"""Check that a given provn file is consistent with nidm-results.owl.
 
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>
 @copyright: University of Warwick 2014

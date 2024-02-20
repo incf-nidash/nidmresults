@@ -137,7 +137,7 @@ class TestResultDataModel:
         # inspect.getfile(inspect.currentframe())))
 
     def print_results(self, res):
-        """Print the results query 'res' to the console"""
+        """Print the results query 'res' to the console."""
         for idx, row in enumerate(res.bindings):
             rowfmt = []
             print("Item %d" % idx)
@@ -146,7 +146,7 @@ class TestResultDataModel:
             print("\n".join(rowfmt))
 
     def successful_retreive(self, res, info_str=""):
-        """Check if the results query 'res' contains a value for each field"""
+        """Check if the results query 'res' contains a value for each field."""
         if not res.bindings:
             self.my_execption = info_str + """: Empty query results"""
             return False
@@ -337,7 +337,7 @@ class TestResultDataModel:
         reconcile=True,
         to_ignore=None,
     ):
-        """Compare gt_graph and other_graph"""
+        """Compare gt_graph and other_graph."""
         my_exception = ""
 
         # We reconcile gt_graph with other_graph
