@@ -1,5 +1,6 @@
 #!/usr/bin/python
-"""Export neuroimaging results created with FSL feat following NIDM-Results specification.
+"""Export neuroimaging results created with FSL feat \
+   following NIDM-Results specification.
 
 The path to feat directory must be passed as first argument.
 
@@ -7,7 +8,6 @@ The path to feat directory must be passed as first argument.
 @copyright: University of Warwick 2013-2014
 """
 
-from __future__ import absolute_import, division, print_function
 
 import argparse
 import os
@@ -21,7 +21,7 @@ def main(argv=sys.argv):
     parser = argparse.ArgumentParser(description="NIDM-Results reader.")
     parser.add_argument("nidm_pack", help="Path to NIDM-Results pack.")
     parser.add_argument(
-        "--version", action="version", version="{version}".format(version=__version__)
+        "--version", action="version", version=f"{__version__}"
     )
 
     args = parser.parse_args(argv[1:])

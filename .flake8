@@ -1,0 +1,20 @@
+[flake8]
+--select = A,B,C,D,E,F,W,C90,FS
+max-line-length = 93
+# For PEP8 error codes see
+# http://pep8.readthedocs.org/en/latest/intro.html#error-codes
+ignore =
+	D101,
+	D102,
+	D103,
+	D104,
+	D105,
+	D107,
+	F403,
+	F405,
+	F841,
+	FS,
+	W503
+# for compatibility with black
+# https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#flake8
+extend-ignore = E203

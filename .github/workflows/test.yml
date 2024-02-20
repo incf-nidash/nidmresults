@@ -3,7 +3,7 @@ name: Test
 
 on:
     push:
-        branches: ['master']
+        branches: [master]
     pull_request:
         branches: ['*']
 
@@ -16,7 +16,7 @@ jobs:
         runs-on: ${{ matrix.os }}
         strategy:
             matrix:
-                os: [ubuntu-latest, macOS-latest, windows-latest] 
+                os: [ubuntu-latest, macOS-latest, windows-latest]
                 python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
             fail-fast: false
         steps:
@@ -30,4 +30,3 @@ jobs:
             run: pip install tox
         -   name: Run tests
             run: tox run -e tests
-

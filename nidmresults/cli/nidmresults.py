@@ -17,7 +17,7 @@ def main(argv=sys.argv):
         "-v",
         "--version",
         action="version",
-        version="{version}".format(version=nidmresults.__version__),
+        version=f"{nidmresults.__version__}",
     )
 
     parser.parse_args(argv[1:])

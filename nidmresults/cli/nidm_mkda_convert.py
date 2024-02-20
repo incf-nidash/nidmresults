@@ -5,7 +5,6 @@
 @copyright: University of Warwick 2013-2014
 """
 
-from __future__ import absolute_import, division, print_function
 
 import argparse
 import os
@@ -29,7 +28,7 @@ def main(argv=sys.argv):
         nargs="+",
     )
     parser.add_argument(
-        "--version", action="version", version="{version}".format(version=__version__)
+        "--version", action="version", version=f"{__version__}"
     )
 
     args = parser.parse_args(argv[1:])
@@ -56,7 +55,10 @@ def main(argv=sys.argv):
 
         nidmgraph = Graph(nidm_zip=nidmpack)
         con_ids = nidmgraph.serialize(
-            outfile, "mkda", overwrite=overwrite, last_used_con_id=max(con_ids.values())
+            outfile,
+            "mkda",
+            overwrite=overwrite,
+            last_used_con_id=max(con_ids.values()),
         )
 
 

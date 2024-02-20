@@ -1,7 +1,0 @@
-include requirements.txt
-include nidmresults/prefixes.csv
-include nidmresults/owl/nidm-results_020.owl
-include nidmresults/owl/nidm-results_100.owl
-include nidmresults/owl/nidm-results_110.owl
-include nidmresults/owl/nidm-results_120.owl
-include nidmresults/owl/nidm-results_130.owl
