@@ -10,7 +10,7 @@ import sys
 
 from rdflib import RDF
 
-from nidmresults.objects.constants import *
+from nidmresults.objects.constants import OWL
 
 RELPATH = os.path.dirname(os.path.abspath(__file__))
 
