@@ -14,14 +14,14 @@ import os
 import sys
 
 from nidmresults import __version__
-from nidmresults.graph import Graph
+from nidmresults.graph import NIDMResults
 
 
 def main(argv=sys.argv):
     parser = argparse.ArgumentParser(description="NIDM-Results reader.")
     parser.add_argument("nidm_pack", help="Path to NIDM-Results pack.")
     parser.add_argument(
-        "--version", action="version", version=f"{__version__}"
+        "-v", "--version", action="version", version=f"{__version__}"
     )
 
     args = parser.parse_args(argv[1:])
@@ -30,7 +30,7 @@ def main(argv=sys.argv):
     if not os.path.isfile(nidm_pack):
         raise Exception(f"Unknown file: {str(nidm_pack)}")
 
-    nidm_graph = Graph(nidm_zip=nidm_pack)
+    nidm_graph = NIDMResults(nidm_zip=nidm_pack)
     nidm_graph.parse()
 
     nidm_graph.get_peaks()
