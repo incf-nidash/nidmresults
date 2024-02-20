@@ -1,13 +1,16 @@
 #!/usr/bin/env python
-'''Check that a given provn file is consistent with nidm-results.owl
+"""Check that a given provn file is consistent with nidm-results.owl
 
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>
 @copyright: University of Warwick 2014
-'''
+"""
+
+import os
+
+# from rdflib.graph import Graph
+import sys
 
 from rdflib import RDF, term
-# from rdflib.graph import Graph
-import sys, os
 
 RELPATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -15,14 +18,14 @@ RELPATH = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(RELPATH, os.pardir, os.pardir, os.pardir, "scripts"))
 from nidmresults.objects.constants import *
 
-# ignored_attributes = set([   
-#                         RDFS['label'], 
+# ignored_attributes = set([
+#                         RDFS['label'],
 #                         RDF['type'],
 #                         PROV['value'], PROV['atTime'], PROV['used'], PROV['wasAssociatedWith'],
-#                         PROV['qualifiedGeneration'], PROV['wasGeneratedBy'], PROV['atLocation'], 
-#                         PROV['wasDerivedFrom'], 
+#                         PROV['qualifiedGeneration'], PROV['wasGeneratedBy'], PROV['atLocation'],
+#                         PROV['wasDerivedFrom'],
 #                         CRYPTO['sha512']
-#                         ])  
+#                         ])
 
 # def get_sub_class_names(my_graph):
 #     sub_types = set()
@@ -45,13 +48,15 @@ from nidmresults.objects.constants import *
 
 #     return sub_types
 
+
 def get_property_names_in_owl(my_owl_graph):
-    properties = set();
-    for class_name in my_owl_graph.subjects(RDF['type'], OWL['DatatypeProperty']):
+    properties = set()
+    for class_name in my_owl_graph.subjects(RDF["type"], OWL["DatatypeProperty"]):
         properties.add(class_name)
-    for class_name in my_owl_graph.subjects(RDF['type'], OWL['ObjectProperty']):
+    for class_name in my_owl_graph.subjects(RDF["type"], OWL["ObjectProperty"]):
         properties.add(class_name)
     return properties
+
 
 # def get_attributes_from_owl(my_owl_graph):
 #     attributes = dict()
@@ -66,7 +71,7 @@ def get_property_names_in_owl(my_owl_graph):
 #             if isinstance(class_restr, term.BNode):
 #                 for prop in my_owl_graph.objects(class_restr,OWL['onProperty']):
 #                     attributes.setdefault(class_name, set([prop])).add(prop)
-#                     for child_class in my_owl_graph.subjects(RDFS['subClassOf'], class_name): 
+#                     for child_class in my_owl_graph.subjects(RDFS['subClassOf'], class_name):
 #                         attributes.setdefault(child_class, set([prop])).add(prop)
 
 #     # Attributes that can be found in all classes
@@ -80,7 +85,7 @@ def get_property_names_in_owl(my_owl_graph):
 #                     attributes[class_name].add(prop)
 #                 else:
 #                     attributes[class_name] = set([prop])
-                
+
 #                 # Add attribute to children of current class
 #                 for child_class in my_owl_graph.subjects(RDFS['subClassOf'], class_name):
 #                     # Add attribute to current class
@@ -143,17 +148,17 @@ def get_property_names_in_owl(my_owl_graph):
 #                                 else:
 #                                     ranges[prop] = set([child_class])
 #                                 range_name = child_class
-            
+
 #     return list((attributes, ranges, restrictions))
 
 # def get_owl_graph(owl_file, import_files=None):
 #     # Read owl (turtle) file
 #     owl_graph = Graph()
-#     # This is a workaround to avoid issue with "#" in base prefix as 
+#     # This is a workaround to avoid issue with "#" in base prefix as
 #     # described in https://github.com/RDFLib/rdflib/issues/379,
 #     # When the fix is introduced in rdflib these 2 lines will be replaced by:
 #     # self.owl.parse(owl_file, format='turtle')
-#     owl_txt = open(owl_file, 'r').read().replace("http://www.w3.org/2002/07/owl#", 
+#     owl_txt = open(owl_file, 'r').read().replace("http://www.w3.org/2002/07/owl#",
 #                     "http://www.w3.org/2002/07/owl")
 #     owl_graph.parse(data=owl_txt, format='turtle')
 
@@ -163,11 +168,11 @@ def get_property_names_in_owl(my_owl_graph):
 #             import_graph = Graph()
 #             import_txt = open(import_file, 'r').read()
 
-#             # This is a workaround to avoid issue with "#" in base prefix as 
+#             # This is a workaround to avoid issue with "#" in base prefix as
 #             # described in https://github.com/RDFLib/rdflib/issues/379,
 #             # When the fix is introduced in rdflib these 2 lines will be replaced by:
 #             # self.owl.parse(owl_file, format='turtle')
-#             import_txt = import_txt.replace("http://www.w3.org/2002/07/owl#", 
+#             import_txt = import_txt.replace("http://www.w3.org/2002/07/owl#",
 #                             "http://www.w3.org/2002/07/owl")
 #             import_graph.parse(data=import_txt, format='turtle')
 
@@ -176,7 +181,7 @@ def get_property_names_in_owl(my_owl_graph):
 #     return owl_graph
 
 
-# def check_class_names(example_graph, example_name, class_names=None, 
+# def check_class_names(example_graph, example_name, class_names=None,
 #     owl_file=None, owl_imports=None):
 #     my_exception = dict()
 #     if not class_names:
@@ -200,7 +205,7 @@ def get_property_names_in_owl(my_owl_graph):
 
 #     return my_exception
 
-# def check_attributes(example_graph, example_name, owl_attributes=None, owl_ranges=None, 
+# def check_attributes(example_graph, example_name, owl_attributes=None, owl_ranges=None,
 #     owl_restrictions=None, owl_graph=None, owl_file=None, owl_imports=None):
 #     my_exception = dict()
 #     my_range_exception = dict()
@@ -214,7 +219,7 @@ def get_property_names_in_owl(my_owl_graph):
 
 #             attributes_ranges = get_attributes_from_owl(owl_graph)
 #             owl_attributes = attributes_ranges[0]
-#             owl_ranges = attributes_ranges[1]   
+#             owl_ranges = attributes_ranges[1]
 #             owl_restrictions = attributes_ranges[2]
 
 #     # Find all attributes
@@ -278,7 +283,7 @@ def get_property_names_in_owl(my_owl_graph):
 #                     if p in owl_ranges:
 #                         # A bit more complicated to deal with "positiveInteger"
 #                         for owl_range in owl_ranges[p]:
-#                             # FIXME: we should be able to do better than that to check that XSD['positiveInteger'] is 
+#                             # FIXME: we should be able to do better than that to check that XSD['positiveInteger'] is
 #                             # in owl_ranges[p]
 #                             if (XSD['positiveInteger'] == owl_range) and\
 #                                  (next(iter(found_range)) == XSD['int']) and\

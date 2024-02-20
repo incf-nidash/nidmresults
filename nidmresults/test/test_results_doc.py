@@ -1,23 +1,24 @@
 #!/usr/bin/env python
-'''Common tests across-software for NI-DM export.
+"""Common tests across-software for NI-DM export.
 The software-specific test classes must inherit from this class.
 
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>, Satrajit Ghosh
 @copyright: University of Warwick 2014
-'''
+"""
+import glob
+import json
+import logging
+import os
+import re
+
+import numpy as np
+import rdflib
+from rdflib.compare import graph_diff
+from rdflib.graph import Graph
+from rdflib.namespace import RDF
+
 from nidmresults.objects.constants_rdflib import *
 from nidmresults.owl.owl_reader import OwlReader
-from rdflib.namespace import RDF
-from rdflib.graph import Graph
-from rdflib.compare import graph_diff
-import os
-import rdflib
-import re
-import numpy as np
-import json
-import glob
-
-import logging
 
 # Append parent script directory to path
 RELPATH = os.path.dirname(os.path.abspath(__file__))
@@ -25,14 +26,14 @@ RELPATH = os.path.dirname(os.path.abspath(__file__))
 logger = logging.getLogger(__name__)
 
 
-class TestResultDataModel(object):
+class TestResultDataModel:
 
     def get_readable_name(self, owl, graph, item):
         if isinstance(item, rdflib.term.Literal):
             if item.datatype:
                 typeStr = graph.qname(item.datatype)
             else:
-                typeStr = ''
+                typeStr = ""
             if typeStr:
                 typeStr = "(" + typeStr + ")"
             name = "'" + item + "'" + typeStr
@@ -47,11 +48,10 @@ class TestResultDataModel(object):
                 name = graph.qname(item)
 
             if not name.startswith("niiri"):
-                m = re.search(r'\d\d\d\d$', name)
+                m = re.search(r"\d\d\d\d$", name)
                 # alphanumeric identifier
                 if m is not None:
-                    name += " (i.e. " + \
-                        owl.get_label(item).split(":")[1] + ")"
+                    name += " (i.e. " + owl.get_label(item).split(":")[1] + ")"
         else:
             name = "unsupported type: " + item
         return name
@@ -59,10 +59,14 @@ class TestResultDataModel(object):
     def get_alternatives(self, owl, graph, s=None, p=None, o=None):
         found = ""
 
-        for (s_in,  p_in, o_in) in graph.triples((s,  p, o)):
+        for s_in, p_in, o_in in graph.triples((s, p, o)):
             if not o:
                 if not o_in.startswith(str(PROV)):
-                    found += "; " + self.get_readable_name(owl, graph, o_in,)
+                    found += "; " + self.get_readable_name(
+                        owl,
+                        graph,
+                        o_in,
+                    )
             if not p:
                 if not p_in.startswith(str(PROV)):
                     found += "; " + self.get_readable_name(owl, graph, p_in)
@@ -70,19 +74,19 @@ class TestResultDataModel(object):
                 if not s_in.startswith(str(PROV)):
                     found += "; " + self.get_readable_name(owl, graph, s_in)
         if len(found) > 200:
-            found = '<many alternatives>'
+            found = "<many alternatives>"
         else:
             found = found[2:]
         return found
 
     # FIXME: Extend tests to more than one dataset (group analysis, ...)
 
-    '''Tests based on the analysis of single-subject auditory data based on
+    """Tests based on the analysis of single-subject auditory data based on
     test01_spm_batch.m using SPM12b r5918.
 
     @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>, Satrajit Ghosh
     @copyright: University of Warwick 2014
-    '''
+    """
 
     def setUp(self, parent_gt_dir=None):
         self.my_execption = ""
@@ -94,22 +98,25 @@ class TestResultDataModel(object):
             ttl = ttl_name
             test_dir = os.path.dirname(ttl)
 
-            configfile = os.path.join(test_dir, 'config.json')
+            configfile = os.path.join(test_dir, "config.json")
             if not os.path.isfile(configfile):
                 configfile = os.path.join(
-                    os.path.abspath(
-                        os.path.join(test_dir, os.pardir)), 'config.json')
+                    os.path.abspath(os.path.join(test_dir, os.pardir)), "config.json"
+                )
 
             with open(configfile) as data_file:
                 metadata = json.load(data_file)
             try:
-                gt_file = [os.path.join(self.gt_dir, metadata["version"], x)
-                           for x in metadata["ground_truth"]]
+                gt_file = [
+                    os.path.join(self.gt_dir, metadata["version"], x)
+                    for x in metadata["ground_truth"]
+                ]
             except Exception:
                 # This part should be removed once SPM can modify json files
-                gt_file = [os.path.join(self.gt_dir, metadata["versions"][0],
-                           x)
-                           for x in metadata["ground_truth"]]
+                gt_file = [
+                    os.path.join(self.gt_dir, metadata["versions"][0], x)
+                    for x in metadata["ground_truth"]
+                ]
             inclusive = metadata["inclusive"]
             if "version" in metadata:
                 version = metadata["version"]
@@ -119,7 +126,8 @@ class TestResultDataModel(object):
             name = ttl.replace(test_dir, "")
 
             self.ex_graphs[ttl_name] = ExampleGraph(
-                name, ttl, gt_file, inclusive, version)
+                name, ttl, gt_file, inclusive, version
+            )
 
         return self.ex_graphs[ttl_name]
 
@@ -128,22 +136,22 @@ class TestResultDataModel(object):
         # inspect.getfile(inspect.currentframe())))
 
     def print_results(self, res):
-        '''Print the results query 'res' to the console'''
+        """Print the results query 'res' to the console"""
         for idx, row in enumerate(res.bindings):
             rowfmt = []
             print("Item %d" % idx)
             for key, val in sorted(row.items()):
-                rowfmt.append('%s-->%s' % (key, val.decode()))
-            print('\n'.join(rowfmt))
+                rowfmt.append(f"{key}-->{val.decode()}")
+            print("\n".join(rowfmt))
 
     def successful_retreive(self, res, info_str=""):
-        '''Check if the results query 'res' contains a value for each field'''
+        """Check if the results query 'res' contains a value for each field"""
         if not res.bindings:
             self.my_execption = info_str + """: Empty query results"""
             return False
         for idx, row in enumerate(res.bindings):
             for key, val in sorted(row.items()):
-                logging.debug('%s-->%s' % (key, val.decode()))
+                logging.debug(f"{key}-->{val.decode()}")
                 if not val.decode():
                     self.my_execption += "\nMissing: \t %s" % (key)
                     return False
@@ -170,24 +178,18 @@ class TestResultDataModel(object):
         # inCoordinateSpace might be the same for all)
         MIN_MAP_MATCHING = 4
 
-        if rdf_type == PROV['Activity']:
+        if rdf_type == PROV["Activity"]:
             activity = True
-        elif rdf_type == PROV['Entity']:
+        elif rdf_type == PROV["Entity"]:
             # FIXME: This would be more efficiently done using the prov owl
             # file
-            g1_terms = g1_terms.union(set(
-                graph1.subjects(RDF.type, PROV['Bundles'])))
-            g1_terms = g1_terms.union(set(
-                graph1.subjects(RDF.type, PROV['Coordinate'])))
-            g1_terms = g1_terms.union(set(
-                graph1.subjects(RDF.type, PROV['Person'])))
-            g2_terms = g2_terms.union(set(
-                graph2.subjects(RDF.type, PROV['Bundles'])))
-            g2_terms = g2_terms.union(
-                set(graph2.subjects(RDF.type, PROV['Coordinate'])))
-            g2_terms = g2_terms.union(
-                set(graph2.subjects(RDF.type, PROV['Person'])))
-        elif rdf_type == PROV['Agent']:
+            g1_terms = g1_terms.union(set(graph1.subjects(RDF.type, PROV["Bundles"])))
+            g1_terms = g1_terms.union(set(graph1.subjects(RDF.type, PROV["Coordinate"])))
+            g1_terms = g1_terms.union(set(graph1.subjects(RDF.type, PROV["Person"])))
+            g2_terms = g2_terms.union(set(graph2.subjects(RDF.type, PROV["Bundles"])))
+            g2_terms = g2_terms.union(set(graph2.subjects(RDF.type, PROV["Coordinate"])))
+            g2_terms = g2_terms.union(set(graph2.subjects(RDF.type, PROV["Person"])))
+        elif rdf_type == PROV["Agent"]:
             agent = True
 
         for g1_term in g1_terms:
@@ -199,14 +201,18 @@ class TestResultDataModel(object):
             format_found = False
 
             for p, o in graph1.predicate_objects(g1_term):
-                logging.debug("Trying to find a match for " +
-                              str(graph1.qname(g1_term)) + " " +
-                              str(graph1.qname(p)) + " " +
-                              str(o))
+                logging.debug(
+                    "Trying to find a match for "
+                    + str(graph1.qname(g1_term))
+                    + " "
+                    + str(graph1.qname(p))
+                    + " "
+                    + str(o)
+                )
 
                 if p == NIDM_IN_COORDINATE_SPACE:
                     coord_space_found = True
-                if p == DCT['format']:
+                if p == DCT["format"]:
                     format_found = True
                 if coord_space_found and format_found:
                     min_matching = MIN_MAP_MATCHING
@@ -216,27 +222,27 @@ class TestResultDataModel(object):
                 # if activity or \
                 #        (isinstance(o, rdflib.term.Literal) or p == RDF.type):
                 # if graph2.subjects(p, o):
-                for g2_term in \
-                        (x for x in graph2.subjects(p, o) if x in g2_match):
+                for g2_term in (x for x in graph2.subjects(p, o) if x in g2_match):
                     g2_match[g2_term] += 1
-                    logging.debug(
-                        "Match found with " + str(graph1.qname(g2_term)))
+                    logging.debug("Match found with " + str(graph1.qname(g2_term)))
                 # else:
                 # print(sum(g2_match.values()))
-                    # logging.debug("NO --- Match found")
+                # logging.debug("NO --- Match found")
 
                 # If o is a string that is likely to be json check if we have
                 # an equivalent json string
                 same_json_array = False
                 close_float = False
-                if hasattr(o, 'datatype') and o.datatype == XSD['string']:
+                if hasattr(o, "datatype") and o.datatype == XSD["string"]:
                     for g2_term, g2_o in graph2.subject_objects(p):
-                        same_json_array, close_float, same_str = \
-                            self._same_json_or_float(o, g2_o)
+                        same_json_array, close_float, same_str = self._same_json_or_float(
+                            o, g2_o
+                        )
                         if same_json_array or close_float or same_str:
                             g2_match[g2_term] += 1
-                            logging.debug("Match found with " +
-                                          str(graph1.qname(g2_term)))
+                            logging.debug(
+                                "Match found with " + str(graph1.qname(g2_term))
+                            )
 
             if activity or agent:
                 for s, p in graph1.subject_predicates(g1_term):
@@ -249,20 +255,25 @@ class TestResultDataModel(object):
             g2_matched = set()
             for g2_term, match_index in list(g2_match.items()):
                 if max(g2_match.values()) >= min_matching:
-                    if (match_index == max(g2_match.values())) \
-                            and g2_term not in g2_matched:
+                    if (
+                        match_index == max(g2_match.values())
+                    ) and g2_term not in g2_matched:
                         # Found matching term
                         g2_matched.add(g2_term)
 
                         if not g1_term == g2_term:
                             g2_name = graph2.qname(g2_term).split(":")[-1]
-                            new_id = g1_term + '_' + g2_name
-                            logging.debug(graph1.qname(g1_term) +
-                                          " is matched to " +
-                                          graph2.qname(g2_term) +
-                                          " and replaced by " +
-                                          graph2.qname(new_id) +
-                                          " (match=" + str(match_index) + ")")
+                            new_id = g1_term + "_" + g2_name
+                            logging.debug(
+                                graph1.qname(g1_term)
+                                + " is matched to "
+                                + graph2.qname(g2_term)
+                                + " and replaced by "
+                                + graph2.qname(new_id)
+                                + " (match="
+                                + str(match_index)
+                                + ")"
+                            )
 
                             for p, o in graph1.predicate_objects(g1_term):
                                 graph1.remove((g1_term, p, o))
@@ -280,10 +291,14 @@ class TestResultDataModel(object):
                             g2_terms.remove(g2_term)
                             g2_terms.add(new_id)
                         else:
-                            logging.debug(graph1.qname(g1_term) +
-                                          " is matched to " +
-                                          graph2.qname(g2_term) +
-                                          " (match=" + str(match_index) + ")")
+                            logging.debug(
+                                graph1.qname(g1_term)
+                                + " is matched to "
+                                + graph2.qname(g2_term)
+                                + " (match="
+                                + str(match_index)
+                                + ")"
+                            )
 
                         match_found = True
                         break
@@ -308,21 +323,28 @@ class TestResultDataModel(object):
 
         # We reconcile first entities and agents (based on data properties) and
         # then activities (based on all relations)
-        graph1, graph2 = self._replace_match(graph1, graph2, PROV['Entity'])
-        graph1, graph2 = self._replace_match(graph1, graph2, PROV['Agent'])
-        graph1, graph2 = self._replace_match(graph1, graph2, PROV['Activity'])
+        graph1, graph2 = self._replace_match(graph1, graph2, PROV["Entity"])
+        graph1, graph2 = self._replace_match(graph1, graph2, PROV["Agent"])
+        graph1, graph2 = self._replace_match(graph1, graph2, PROV["Activity"])
 
         return list([graph1, graph2])
 
-    def compare_full_graphs(self, gt_graph, other_graph, owl, include=False,
-                            raise_now=False, reconcile=True, to_ignore=None):
-        ''' Compare gt_graph and other_graph '''
+    def compare_full_graphs(
+        self,
+        gt_graph,
+        other_graph,
+        owl,
+        include=False,
+        raise_now=False,
+        reconcile=True,
+        to_ignore=None,
+    ):
+        """Compare gt_graph and other_graph"""
         my_exception = ""
 
         # We reconcile gt_graph with other_graph
         if reconcile:
-            gt_graph, other_graph = self._reconcile_graphs(
-                gt_graph, other_graph)
+            gt_graph, other_graph = self._reconcile_graphs(gt_graph, other_graph)
 
         in_both, in_gt, in_other = graph_diff(gt_graph, other_graph)
 
@@ -331,22 +353,24 @@ class TestResultDataModel(object):
         for s, p, o in in_gt:
             # If there is a corresponding s,p check if
             # there is an equivalent o
-            for o_other in in_other.objects(s,  p):
-                same_json_array, close_float, same_str = \
-                            self._same_json_or_float(o, o_other)
+            for o_other in in_other.objects(s, p):
+                same_json_array, close_float, same_str = self._same_json_or_float(
+                    o, o_other
+                )
                 if same_json_array or close_float or same_str:
                     # Remove equivalent o from other as well
                     in_other.remove((s, p, o_other))
                     break
             else:
-                if (p not in to_ignore):
+                if p not in to_ignore:
                     exc_missing.append(
                         "\nMissing :\t '%s %s %s'"
                         % (
                             self.get_readable_name(owl, gt_graph, s),
                             self.get_readable_name(owl, gt_graph, p),
-                            self.get_readable_name(owl, gt_graph, o)
-                        ))
+                            self.get_readable_name(owl, gt_graph, o),
+                        )
+                    )
 
         exc_added = list()
         if not include:
@@ -357,8 +381,9 @@ class TestResultDataModel(object):
                         % (
                             self.get_readable_name(owl, other_graph, s),
                             self.get_readable_name(owl, other_graph, p),
-                            self.get_readable_name(owl, other_graph, o)
-                        ))
+                            self.get_readable_name(owl, other_graph, o),
+                        )
+                    )
 
         my_exception += "".join(sorted(exc_missing) + sorted(exc_added))
 
@@ -380,7 +405,8 @@ class TestResultDataModel(object):
         same_str = False
 
         if isinstance(o, rdflib.term.Literal) and isinstance(
-                o_other, rdflib.term.Literal):
+            o_other, rdflib.term.Literal
+        ):
             if o.startswith("[") and o.endswith("]"):
                 try:
                     if json.loads(o) == json.loads(o_other):
@@ -409,12 +435,11 @@ class TestResultDataModel(object):
         return (same_json_array, close_float, same_str)
 
 
-class ExampleGraph(object):
-    '''Class representing a NIDM-Results examples graph to be compared to some
-    ground truth graph'''
+class ExampleGraph:
+    """Class representing a NIDM-Results examples graph to be compared to some
+    ground truth graph"""
 
-    def __init__(self, name, ttl_file, gt_ttl_files,
-                 exact_comparison, version):
+    def __init__(self, name, ttl_file, gt_ttl_files, exact_comparison, version):
         self.name = name
         self.ttl_file = ttl_file
 
@@ -424,27 +449,34 @@ class ExampleGraph(object):
 
         print(ttl_file)
 
-        self.graph.parse(ttl_file, format='turtle')
+        self.graph.parse(ttl_file, format="turtle")
 
         # Get NIDM-Results version for each example
         self.version = version
 
         if self.version != "dev":
             self.gt_ttl_files = [
-                x.replace(os.path.join("nidm", "nidm"),
-                          os.path.join("nidm_releases", self.version, "nidm"))
-                for x in self.gt_ttl_files]
+                x.replace(
+                    os.path.join("nidm", "nidm"),
+                    os.path.join("nidm_releases", self.version, "nidm"),
+                )
+                for x in self.gt_ttl_files
+            ]
 
         # Owl file corresponding to version
         owl_file = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), 'owl',
-            "nidm-results_" + version.replace(".", "") + ".owl")
+            os.path.dirname(os.path.dirname(__file__)),
+            "owl",
+            "nidm-results_" + version.replace(".", "") + ".owl",
+        )
 
         self.owl_file = owl_file
 
         owl_imports = None
         if self.version == "dev":
             owl_imports = glob.glob(
-                os.path.join(os.path.dirname(owl_file),
-                             os.pardir, os.pardir, "imports", '*.ttl'))
+                os.path.join(
+                    os.path.dirname(owl_file), os.pardir, os.pardir, "imports", "*.ttl"
+                )
+            )
         self.owl = OwlReader(self.owl_file, owl_imports)

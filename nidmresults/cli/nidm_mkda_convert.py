@@ -5,7 +5,6 @@
 @copyright: University of Warwick 2013-2014
 """
 
-from __future__ import absolute_import, division, print_function
 
 import argparse
 import os
@@ -28,9 +27,7 @@ def main(argv=sys.argv):
         help="Path to NIDM-Results packs (.nidm.zip) separated by spaces.",
         nargs="+",
     )
-    parser.add_argument(
-        "--version", action="version", version="{version}".format(version=__version__)
-    )
+    parser.add_argument("--version", action="version", version=f"{__version__}")
 
     args = parser.parse_args(argv[1:])
 

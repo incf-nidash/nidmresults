@@ -6,24 +6,25 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>
 @copyright: University of Warwick 2013-2014
 """
-from prov.model import Identifier
-from prov.identifier import QualifiedName
-import numpy as np
-import os
-from nidmresults.objects.constants import *
-import nibabel as nib
-import shutil
+
 import hashlib
-import uuid
 import json
-from prov.model import Literal
-from prov.constants import XSD_STRING
+import os
+import shutil
+import uuid
 import warnings
 import zipfile
 
+import nibabel as nib
+import numpy as np
+from prov.constants import XSD_STRING
+from prov.identifier import QualifiedName
+from prov.model import Identifier, Literal
 
-class NIDMObject(object):
+from nidmresults.objects.constants import *
 
+
+class NIDMObject:
     """
     Generic class, parent of all objects describing a NIDM entity, activity
     or agent
@@ -45,7 +46,7 @@ class NIDMObject(object):
     # with a NIDMFile object
     @property
     def file(self):
-        return getattr(self, '_file', None)
+        return getattr(self, "_file", None)
 
     @file.setter
     def file(self, fileobj):
@@ -58,21 +59,25 @@ class NIDMObject(object):
 
     def __str__(self):
         value = ""
-        if hasattr(self, 'value'):
+        if hasattr(self, "value"):
             value = ": " + self.value
         location = ""
-        if hasattr(self, 'file'):
-            if hasattr(self.file, 'path'):
+        if hasattr(self, "file"):
+            if hasattr(self.file, "path"):
                 location = " - " + self.file.path
         return '"' + self.label + '"' + value + location
 
     def __repr__(self):
-        return '<"' + self.label + '" ' + \
-               str(self.id).replace("niiri:", "").replace(NIIRI._uri, "")[0:8]\
-               + '>'
+        return (
+            '<"'
+            + self.label
+            + '" '
+            + str(self.id).replace("niiri:", "").replace(NIIRI._uri, "")[0:8]
+            + ">"
+        )
 
     def add_attributes(self, attributes):
-        if hasattr(self, 'attributes'):
+        if hasattr(self, "attributes"):
             if isinstance(attributes, tuple):
                 attributes = list(attributes)
             if isinstance(self.attributes, tuple):
@@ -94,14 +99,14 @@ class NIDMResultsBundle(NIDMObject):
     """
 
     def __init__(self, nidm_version=None, label=None, oid=None):
-        super(NIDMResultsBundle, self).__init__(oid=oid)
+        super().__init__(oid=oid)
         self.type = NIDM_RESULTS
         self.nidm_version = nidm_version
         if label is None:
             self.label = "NIDM-Results"
         else:
             self.label = label
-        self.prov_type = PROV['Bundle']
+        self.prov_type = PROV["Bundle"]
 
     @classmethod
     def get_query(klass, oid=None):
@@ -110,29 +115,35 @@ class NIDMResultsBundle(NIDMObject):
         else:
             oid_var = "<" + str(oid) + ">"
 
-        query = """
+        query = (
+            """
 prefix dctype: <http://purl.org/dc/dcmitype/>
 
 SELECT * WHERE
 {
-    """ + oid_var + """ a nidm_NIDMResults: ;
+    """
+            + oid_var
+            + """ a nidm_NIDMResults: ;
     rdfs:label ?label ;
     nidm_version: ?nidm_version .
 }
         """
+        )
         return query
 
     def export(self, nidm_version, export_dir):
         """
         Create prov entity.
         """
-        self.add_attributes([
-            (PROV['type'], self.type),
-            (PROV['type'], PROV['Bundle']),
-            # Explicitly add bundle type
-            (PROV['label'], self.label),
-            (NIDM_VERSION, self.nidm_version),
-        ])
+        self.add_attributes(
+            [
+                (PROV["type"], self.type),
+                (PROV["type"], PROV["Bundle"]),
+                # Explicitly add bundle type
+                (PROV["label"], self.label),
+                (NIDM_VERSION, self.nidm_version),
+            ]
+        )
 
 
 class CoordinateSpace(NIDMObject):
@@ -140,23 +151,36 @@ class CoordinateSpace(NIDMObject):
     Object representing a CoordinateSpace entity.
     """
 
-    def __init__(self, coordinate_system, nifti_file=None, vox_to_world=None,
-                 vox_size=None, dimensions=None, numdim=None, units=None,
-                 oid=None, label="Coordinate space"):
-        super(CoordinateSpace, self).__init__(oid)
-        
+    def __init__(
+        self,
+        coordinate_system,
+        nifti_file=None,
+        vox_to_world=None,
+        vox_size=None,
+        dimensions=None,
+        numdim=None,
+        units=None,
+        oid=None,
+        label="Coordinate space",
+    ):
+        super().__init__(oid)
+
         if not isinstance(coordinate_system, QualifiedName):
             coordinate_system = NIDM.qname(coordinate_system)
 
         self.coordinate_system = coordinate_system
         self.type = NIDM_COORDINATE_SPACE
-        self.prov_type = PROV['Entity']
+        self.prov_type = PROV["Entity"]
         self.label = label
 
-        if (vox_to_world is None) and (vox_size is None) and\
-                (dimensions is None) and (numdim is None) and\
-                (units is None) and \
-                (nifti_file is not None):
+        if (
+            (vox_to_world is None)
+            and (vox_size is None)
+            and (dimensions is None)
+            and (numdim is None)
+            and (units is None)
+            and (nifti_file is not None)
+        ):
             thresImg = nib.load(nifti_file)
             thresImgHdr = thresImg.get_header()
 
@@ -164,7 +188,7 @@ class CoordinateSpace(NIDMObject):
             dimensions = np.asarray(thresImg.shape)
             # FIXME: is vox_to_world the qform?
             vox_to_world = thresImg.get_qform()
-            vox_size = thresImgHdr['pixdim'][1:(numdim + 1)]
+            vox_size = thresImgHdr["pixdim"][1 : (numdim + 1)]
             # FIXME: this gives mm, sec => what is wrong: FSL file, nibabel,
             # other?
             # units = str(thresImgHdr.get_xyzt_units()).strip('()')
@@ -197,7 +221,8 @@ class CoordinateSpace(NIDMObject):
             NIDM_ICBM452_AIR_COORDINATE_SYSTEM.uri,
             NIDM_ICBM452_WARP5_COORDINATE_SYSTEM.uri,
             NIDM_IXI549_COORDINATE_SYSTEM.uri,
-            NIDM_MNI305_COORDINATE_SYSTEM.uri]
+            NIDM_MNI305_COORDINATE_SYSTEM.uri,
+        ]
 
         if str(self.coordinate_system) in mni_coords:
             return True
@@ -205,8 +230,7 @@ class CoordinateSpace(NIDMObject):
             return False
 
     def is_talairach(self):
-        if str(self.coordinate_system) in \
-                [NIDM_TALAIRACH_COORDINATE_SYSTEM.uri]:
+        if str(self.coordinate_system) in [NIDM_TALAIRACH_COORDINATE_SYSTEM.uri]:
             return True
         else:
             return False
@@ -218,7 +242,8 @@ class CoordinateSpace(NIDMObject):
         else:
             oid_var = "<" + str(oid) + ">"
 
-        query = """
+        query = (
+            """
 prefix nidm_CoordinateSpace: <http://purl.org/nidash/nidm#NIDM_0000016>
 prefix nidm_voxelToWorldMapping: <http://purl.org/nidash/nidm#NIDM_0000132>
 prefix nidm_voxelUnits: <http://purl.org/nidash/nidm#NIDM_0000133>
@@ -233,7 +258,9 @@ SELECT ?oid ?label ?vox_to_world ?units ?vox_size ?coordinate_system ?numdim
 ?dimensions
         WHERE
         {
-    """ + oid_var + """ a nidm_CoordinateSpace: ;
+    """
+            + oid_var
+            + """ a nidm_CoordinateSpace: ;
     rdfs:label ?label ;
     nidm_voxelToWorldMapping: ?vox_to_world ;
     nidm_voxelUnits: ?units ;
@@ -243,32 +270,37 @@ SELECT ?oid ?label ?vox_to_world ?units ?vox_size ?coordinate_system ?numdim
     nidm_dimensionsInVoxels: ?dimensions .
     }
         """
+        )
         return query
 
     def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
-        self.add_attributes({
-            PROV['type']: self.type,
-            NIDM_DIMENSIONS_IN_VOXELS: json.dumps(self.dimensions.tolist()),
-            NIDM_NUMBER_OF_DIMENSIONS: self.number_of_dimensions,
-            NIDM_VOXEL_TO_WORLD_MAPPING:
-            json.dumps(self.voxel_to_world.tolist()),
-            NIDM_IN_WORLD_COORDINATE_SYSTEM: self.coordinate_system,
-            NIDM_VOXEL_UNITS: json.dumps(self.units),
-            NIDM_VOXEL_SIZE: json.dumps(self.voxel_size.tolist()),
-            PROV['label']: self.label})
+        self.add_attributes(
+            {
+                PROV["type"]: self.type,
+                NIDM_DIMENSIONS_IN_VOXELS: json.dumps(self.dimensions.tolist()),
+                NIDM_NUMBER_OF_DIMENSIONS: self.number_of_dimensions,
+                NIDM_VOXEL_TO_WORLD_MAPPING: json.dumps(self.voxel_to_world.tolist()),
+                NIDM_IN_WORLD_COORDINATE_SYSTEM: self.coordinate_system,
+                NIDM_VOXEL_UNITS: json.dumps(self.units),
+                NIDM_VOXEL_SIZE: json.dumps(self.voxel_size.tolist()),
+                PROV["label"]: self.label,
+            }
+        )
 
 
 class NIDMFile(NIDMObject):
     """
     Object representing a File (to be used as attribute of another class)
     """
-    def __init__(self, rdf_id, location, filename=None,
-                 sha=None, fmt=None, temporary=False):
-        super(NIDMFile, self).__init__()
-        self.prov_type = PROV['Entity']
+
+    def __init__(
+        self, rdf_id, location, filename=None, sha=None, fmt=None, temporary=False
+    ):
+        super().__init__()
+        self.prov_type = PROV["Entity"]
         self.path = location
         if filename is None:
             # Keep same file name
@@ -291,10 +323,12 @@ class NIDMFile(NIDMObject):
         else:
             name = self.filename
 
-        return name.endswith(".nii") or \
-            name.endswith(".nii.gz") or \
-            name.endswith(".img") or \
-            name.endswith(".hrd")
+        return (
+            name.endswith(".nii")
+            or name.endswith(".nii.gz")
+            or name.endswith(".img")
+            or name.endswith(".hrd")
+        )
 
     def get_sha_sum(self, nifti_file):
         nifti_img = nib.load(nifti_file)
@@ -314,7 +348,7 @@ class NIDMFile(NIDMObject):
                 # Copy file only if export_dir is not None
                 new_file = os.path.join(export_dir, self.filename)
                 if not self.path == new_file:
-                    if prepend_path.endswith('.zip'):
+                    if prepend_path.endswith(".zip"):
                         with zipfile.ZipFile(prepend_path) as z:
                             extracted = z.extract(str(self.path), export_dir)
                             shutil.move(extracted, new_file)
@@ -330,21 +364,20 @@ class NIDMFile(NIDMObject):
             else:
                 new_file = self.path
 
-        if nidm_version['num'] in ["1.0.0", "1.1.0"]:
+        if nidm_version["num"] in ["1.0.0", "1.1.0"]:
             loc = Identifier("file://./" + self.filename)
         else:
             loc = Identifier(self.filename)
 
-        self.add_attributes([(NFO['fileName'], self.filename)])
+        self.add_attributes([(NFO["fileName"], self.filename)])
 
         if export_dir:
-            self.add_attributes([(PROV['atLocation'], loc)])
+            self.add_attributes([(PROV["atLocation"], loc)])
 
-        if nidm_version['num'] in ("1.0.0", "1.1.0"):
+        if nidm_version["num"] in ("1.0.0", "1.1.0"):
             path, org_filename = os.path.split(self.path)
-            if (org_filename is not self.filename) \
-                    and (not self.temporary):
-                self.add_attributes([(NFO['fileName'], org_filename)])
+            if (org_filename is not self.filename) and (not self.temporary):
+                self.add_attributes([(NFO["fileName"], org_filename)])
 
         if self.is_nifti():
             if self.sha is None:
@@ -352,22 +385,18 @@ class NIDMFile(NIDMObject):
             if self.fmt is None:
                 self.fmt = "image/nifti"
 
-            self.add_attributes([
-                (CRYPTO['sha512'], self.sha),
-                (DCT['format'], self.fmt)
-            ])
+            self.add_attributes([(CRYPTO["sha512"], self.sha), (DCT["format"], self.fmt)])
 
 
 class Image(NIDMObject):
-
     """
     Object representing an Image entity.
     """
 
-    def __init__(self, image_file, filename, fmt='png', oid=None):
-        super(Image, self).__init__(oid=oid)
-        self.type = DCTYPE['Image']
-        self.prov_type = PROV['Entity']
+    def __init__(self, image_file, filename, fmt="png", oid=None):
+        super().__init__(oid=oid)
+        self.type = DCTYPE["Image"]
+        self.prov_type = PROV["Entity"]
         self.file = NIDMFile(self.id, image_file, filename)
         self.label = ""  # Enable printing
 
@@ -378,18 +407,22 @@ class Image(NIDMObject):
         else:
             oid_var = "<" + str(oid) + ">"
 
-        query = """
+        query = (
+            """
         prefix dctype: <http://purl.org/dc/dcmitype/>
 
 
         SELECT * WHERE
                 {
-            """ + oid_var + """ a dctype:Image ;
+            """
+            + oid_var
+            + """ a dctype:Image ;
             prov:atLocation ?image_file ;
             nfo:fileName ?filename ;
             dct:format ?fmt .
             }
         """
+        )
         return query
 
     def export(self, nidm_version, export_dir):
@@ -397,10 +430,12 @@ class Image(NIDMObject):
         Create prov entity.
         """
         if self.file is not None:
-            self.add_attributes([
-                (PROV['type'], self.type),
-                (DCT['format'], "image/png"),
-            ])
+            self.add_attributes(
+                [
+                    (PROV["type"], self.type),
+                    (DCT["format"], "image/png"),
+                ]
+            )
 
 
 class NeuroimagingSoftware(NIDMObject):
@@ -408,20 +443,19 @@ class NeuroimagingSoftware(NIDMObject):
     Class representing a NeuroimagingSoftware Agent.
     """
 
-    def __init__(self, software_type, version, label=None, feat_version=None,
-                 oid=None):
-        super(NeuroimagingSoftware, self).__init__(oid=oid)
+    def __init__(self, software_type, version, label=None, feat_version=None, oid=None):
+        super().__init__(oid=oid)
         self.version = version
 
         if isinstance(software_type, QualifiedName):
             self.type = software_type
         else:
-            if software_type.startswith('http'):
+            if software_type.startswith("http"):
                 self.type = Identifier(software_type)
             elif software_type.lower() == "fsl":
                 self.type = SCR_FSL
             else:
-                warnings.warn('Unrecognised software: ' + str(software_type))
+                warnings.warn("Unrecognised software: " + str(software_type))
                 self.name = str(software_type)
                 self.type = None
 
@@ -431,14 +465,14 @@ class NeuroimagingSoftware(NIDMObject):
         elif self.type == SCR_SPM:
             self.name = "SPM"
         else:
-            warnings.warn('Unrecognised software: ' + str(software_type))
+            warnings.warn("Unrecognised software: " + str(software_type))
             self.name = str(software_type)
 
         if not label:
             self.label = self.name
         else:
             self.label = label
-        self.prov_type = PROV['Agent']
+        self.prov_type = PROV["Agent"]
         self.feat_version = feat_version
 
     @classmethod
@@ -448,7 +482,8 @@ class NeuroimagingSoftware(NIDMObject):
         else:
             oid_var = "<" + str(oid) + ">"
 
-        query = """
+        query = (
+            """
 prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
 prefix fsl_featVersion: <http://purl.org/nidash/fsl#FSL_0000005>
 prefix nidm_ModelParametersEstimation: <http://purl.org/nidash/nidm#NIDM_00000\
@@ -456,34 +491,44 @@ prefix nidm_ModelParametersEstimation: <http://purl.org/nidash/nidm#NIDM_00000\
 
 SELECT DISTINCT * WHERE
         {
-    """ + oid_var + """ a prov:SoftwareAgent ;
+    """
+            + oid_var
+            + """ a prov:SoftwareAgent ;
         nidm_softwareVersion: ?version .
 
     [] a nidm_ModelParametersEstimation: ;
-        prov:wasAssociatedWith """ + oid_var + """ .
+        prov:wasAssociatedWith """
+            + oid_var
+            + """ .
 
-    OPTIONAL {""" + oid_var + """ a ?software_type .} .
-    OPTIONAL {""" + oid_var + """ fsl_featVersion: ?feat_version .} .
+    OPTIONAL {"""
+            + oid_var
+            + """ a ?software_type .} .
+    OPTIONAL {"""
+            + oid_var
+            + """ fsl_featVersion: ?feat_version .} .
 
     FILTER ( ?software_type NOT IN (prov:SoftwareAgent, prov:Agent) )
     }
         """
+        )
         return query
 
     def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
-        if nidm_version['major'] < 1 or \
-                (nidm_version['major'] == 1 and nidm_version['minor'] < 3):
+        if nidm_version["major"] < 1 or (
+            nidm_version["major"] == 1 and nidm_version["minor"] < 3
+        ):
             self.type = NLX_OLD_FSL
 
         atts = (
-            (PROV['type'], self.type),
-            (PROV['type'], PROV['SoftwareAgent']),
-            (PROV['label'], Literal(self.label, datatype=XSD_STRING)),
-            (NIDM_SOFTWARE_VERSION, self.version)
-            )
+            (PROV["type"], self.type),
+            (PROV["type"], PROV["SoftwareAgent"]),
+            (PROV["label"], Literal(self.label, datatype=XSD_STRING)),
+            (NIDM_SOFTWARE_VERSION, self.version),
+        )
 
         if self.feat_version:
             atts = atts + ((FSL_FEAT_VERSION, self.feat_version),)
@@ -497,9 +542,9 @@ class ExporterSoftware(NIDMObject):
     """
 
     def __init__(self, software_type, version, oid=None, label=None):
-        super(ExporterSoftware, self).__init__(oid=oid)
+        super().__init__(oid=oid)
         self.type = software_type
-        self.prov_type = PROV['Agent']
+        self.prov_type = PROV["Agent"]
         self.version = version
 
         if label is None:
@@ -517,13 +562,16 @@ class ExporterSoftware(NIDMObject):
         else:
             oid_var = "<" + str(oid) + ">"
 
-        query = """
+        query = (
+            """
 prefix nidm_softwareVersion: <http://purl.org/nidash/nidm#NIDM_0000122>
 prefix nidm_NIDMResultsExport: <http://purl.org/nidash/nidm#NIDM_0000166>
 
 SELECT DISTINCT * WHERE
         {
-    """ + oid_var + """ a prov:SoftwareAgent ;
+    """
+            + oid_var
+            + """ a prov:SoftwareAgent ;
         rdfs:label  ?label ;
         rdf:type ?software_type ;
         nidm_softwareVersion: ?version .
@@ -531,17 +579,20 @@ SELECT DISTINCT * WHERE
     FILTER ( ?software_type NOT IN (prov:SoftwareAgent, prov:Agent) )
     }
         """
+        )
         return query
 
     def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
-        self.add_attributes((
-            (PROV['type'], self.type),
-            (PROV['type'], PROV['SoftwareAgent']),
-            (PROV['label'], self.label),
-            (NIDM_SOFTWARE_VERSION, self.version))
+        self.add_attributes(
+            (
+                (PROV["type"], self.type),
+                (PROV["type"], PROV["SoftwareAgent"]),
+                (PROV["label"], self.label),
+                (NIDM_SOFTWARE_VERSION, self.version),
+            )
         )
 
 
@@ -549,10 +600,11 @@ class NIDMResultsExport(NIDMObject):
     """
     Class representing a NIDM-Results Export activity.
     """
+
     def __init__(self, oid=None, label=None):
-        super(NIDMResultsExport, self).__init__(oid=oid)
+        super().__init__(oid=oid)
         self.type = NIDM_NIDM_RESULTS_EXPORT
-        self.prov_type = PROV['Activity']
+        self.prov_type = PROV["Activity"]
         if label is None:
             self.label = "NIDM-Results export"
         else:
@@ -565,21 +617,23 @@ class NIDMResultsExport(NIDMObject):
         else:
             oid_var = "<" + str(oid) + ">"
 
-        query = """
+        query = (
+            """
 prefix nidm_NIDMResultsExport: <http://purl.org/nidash/nidm#NIDM_0000166>
 
 SELECT DISTINCT * WHERE
     {
-    """ + oid_var + """ a nidm_NIDMResultsExport: ;
+    """
+            + oid_var
+            + """ a nidm_NIDMResultsExport: ;
         rdfs:label ?label .
     }
         """
+        )
         return query
 
     def export(self, nidm_version, export_dir):
         """
         Create prov entities and activities.
         """
-        self.add_attributes([
-            (PROV['label'], self.label),
-            (PROV['type'], self.type)])
+        self.add_attributes([(PROV["label"], self.label), (PROV["type"], self.type)])
