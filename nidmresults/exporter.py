@@ -82,7 +82,6 @@ class NIDMExporter:
     def parse(self):
         """Parse a result directory to extract the pieces information \
            to be stored in NIDM-Results."""
-
         try:
             # Methods: find_software, find_model_fitting, find_contrasts and
             # find_inferences should be defined in the children classes and

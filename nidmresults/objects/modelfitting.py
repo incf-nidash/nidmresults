@@ -1183,7 +1183,6 @@ class GrandMeanMap(NIDMObject):
         """
         Create prov entities and activities.
         """
-
         if self.masked_median is None:
             grand_mean_file = self.file.path
             grand_mean_img = nib.load(grand_mean_file)

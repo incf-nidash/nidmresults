@@ -6,17 +6,17 @@
 """
 
 import os
-
-# from rdflib.graph import Graph
 import sys
 
 from rdflib import RDF
+
+from nidmresults.objects.constants import *
 
 RELPATH = os.path.dirname(os.path.abspath(__file__))
 
 # Append parent script directory to path
 sys.path.append(os.path.join(RELPATH, os.pardir, os.pardir, os.pardir, "scripts"))
-from nidmresults.objects.constants import *
+
 
 # ignored_attributes = set([
 #                         RDFS['label'],

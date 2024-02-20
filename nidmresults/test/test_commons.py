@@ -26,6 +26,8 @@ import rdflib
 from rdflib.compare import *
 from rdflib.graph import Graph
 
+from nidmresults.objects.constants import FSL_FEAT_VERSION, NIDM_SOFTWARE_VERSION
+
 RELPATH = os.path.dirname(os.path.abspath(__file__))
 
 NIDM_RESULTS_PATH = os.path.join(RELPATH, os.pardir)
@@ -33,7 +35,6 @@ NIDM_PATH = os.path.join(NIDM_RESULTS_PATH, os.pardir, os.pardir)
 
 # Append parent script directory to path
 sys.path.append(os.path.join(NIDM_PATH, "scripts"))
-from nidmresults.objects.constants import FSL_FEAT_VERSION, NIDM_SOFTWARE_VERSION
 
 # Save debug info in a log file (debug.log)
 logging.basicConfig(filename="debug.log", level=logging.DEBUG, filemode="w")

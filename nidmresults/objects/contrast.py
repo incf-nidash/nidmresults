@@ -462,7 +462,6 @@ SELECT DISTINCT * WHERE {
         """
         Create prov graph.
         """
-
         self.add_attributes(
             (
                 (PROV["type"], self.type),

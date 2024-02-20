@@ -62,7 +62,6 @@ class NIDMResults:
         All of these are workaround
         to circumvent known issues of the SPM and FSL exporters.
         """
-
         # Load the graph as is so that we can query
         g = self.parse(rdf_data)
 

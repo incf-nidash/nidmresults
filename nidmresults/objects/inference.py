@@ -130,7 +130,6 @@ prefix spm_PartialConjunctionDegree: <http://purl.org/nidash/spm#SPM_0000015>
         """
         Create prov entities and activities.
         """
-
         # In FSL we have a single thresholding (extent, height) applied to all
         # contrasts
         # FIXME: Deal with two-tailed inference?
@@ -428,7 +427,6 @@ prefix nidm_hasAlternativeHypothesis: <http://purl.org/nidash/nidm#NIDM_000009\
         """
         Create prov entities and activities.
         """
-
         atts = [
             (PROV["type"], self.type),
             (PROV["label"], self.label),
