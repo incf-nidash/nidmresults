@@ -12,10 +12,8 @@ import json
 import os
 import shutil
 import unittest
-import zipfile
 
 from future.standard_library import hooks
-from rdflib.compare import graph_diff, isomorphic
 
 from nidmresults.graph import *
 from nidmresults.owl.owl_reader import OwlReader

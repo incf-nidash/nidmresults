@@ -1,6 +1,6 @@
 import os
 
-from nidmresults._version import __version__
+from nidmresults._version import __version__  # noqa
 from nidmresults.load import load
 
 latest_owlfile = os.path.join(

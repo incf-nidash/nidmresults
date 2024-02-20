@@ -10,7 +10,7 @@ import os
 # from rdflib.graph import Graph
 import sys
 
-from rdflib import RDF, term
+from rdflib import RDF
 
 RELPATH = os.path.dirname(os.path.abspath(__file__))
 

@@ -13,7 +13,6 @@ import json
 import os
 import sys
 import tempfile
-import uuid
 import zipfile
 
 # Needed for export using JSON-LD 1.1

@@ -7,10 +7,8 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 @copyright: University of Warwick 2013-2014
 """
 
-import uuid
 from math import erf, sqrt
 
-import rdflib
 from prov.constants import XSD_FLOAT
 from prov.model import Identifier, Literal
 

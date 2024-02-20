@@ -23,7 +23,7 @@ from nidmresults.objects.constants_rdflib import *
 from nidmresults.objects.constants_rdflib import namespaces as namespace_names
 
 with hooks():
-    from urllib.request import Request, urlopen
+    from urllib.request import urlopen
 
 RELPATH = os.path.dirname(os.path.abspath(__file__))
 NIDM_PATH = os.path.dirname(RELPATH)

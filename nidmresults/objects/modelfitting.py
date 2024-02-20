@@ -9,12 +9,10 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 
 import json
 import os
-import uuid
 import warnings
 
 import nibabel as nib
 import numpy as np
-from numpy import genfromtxt
 from prov.identifier import QualifiedName
 from prov.model import Identifier
 

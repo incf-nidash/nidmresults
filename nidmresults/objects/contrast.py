@@ -8,7 +8,6 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 """
 
 import os
-import uuid
 
 import nibabel as nib
 import numpy as np
