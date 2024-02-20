@@ -2,19 +2,9 @@
 build-backend = "hatchling.build"
 requires = ["hatchling", "hatch-vcs"]
 
-[tool.hatch.build.targets.wheel]
-packages = ["nidmresults"]
-
-# [tool.hatch.build.hooks.vcs]
-# version-file = "neuropower/_version.py"
-
-# [tool.hatch.version]
-# source = "vcs"
-
 [project]
-# # Version from setuptools_scm
-# dynamic = ["version"]
-version="2.1.0"
+# Version from setuptools_scm
+dynamic = ["version"]
 authors = [{name = "Camille Maumet"}]
 classifiers = [
         "Development Status :: 3 - Alpha",
@@ -46,7 +36,6 @@ requires-python = ">=3.8"
 nidmreader = "nidmresults.cli.nidmreader:main"
 nidm_mkda_convert = "nidmresults.cli.nidm_mkda_convert:main"
 nidmresults = "nidmresults.cli.nidmresults:main"
-# url='https://github.com/incf-nidash/nidmresults'
 # package_data={'':
 #                 ['prefixes.csv',
 #                 'owl/nidm-results_020.owl',
@@ -54,6 +43,9 @@ nidmresults = "nidmresults.cli.nidmresults:main"
 #                 'owl/nidm-results_110.owl',
 #                 'owl/nidm-results_120.owl',
 #                 'owl/nidm-results_130.owl']},
+
+[project.urls]
+Development = "https://github.com/incf-nidash/nidmresults"
 
 [project.optional-dependencies]
 # A combination of dependencies useful for developers
@@ -64,3 +56,12 @@ dev = [
 test = [
     "ddt",
 ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["nidmresults"]
+
+[tool.hatch.build.hooks.vcs]
+version-file = "nidmresults/_version.py"
+
+[tool.hatch.version]
+source = "vcs"
