@@ -42,6 +42,8 @@ dev = [
 # For running unit and docstring tests
 test = [
     "ddt",
+    "vcrpy",
+    "pytest",
     "tox"
 ]
 
