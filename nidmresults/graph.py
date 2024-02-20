@@ -1,5 +1,4 @@
-"""
-Export neuroimaging results created by neuroimaging software packages
+"""Export neuroimaging results created by neuroimaging software packages \
 (FSL, AFNI, ...) following NIDM-Results specification.
 
 Specification: http://nidm.nidash.org/specs/nidm-results.html
@@ -58,8 +57,9 @@ class NIDMResults:
         self.inferences = self.load_inferences()
 
     def fix_for_specific_versions(self, rdf_data, to_replace):
-        """
-        Fixes of the RDF before loading the graph. All of these are workaround
+        """Fix of the RDF before loading the graph.
+
+        All of these are workaround
         to circumvent known issues of the SPM and FSL exporters.
         """
 
@@ -403,11 +403,10 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
         return self.objects
 
     def _get_model_fitting(self, con_est_id):
-        """
-        Retrieve model fitting that corresponds to contrast with identifier
-        'con_id'
-        from the list of model fitting objects stored in self.model_fittings
-        """
+        """Retrieve model fitting that corresponds \
+           to contrast with identifier 'con_id' \
+           from the list of model fitting objects \
+           stored in self.model_fittings."""
         for (mpe_id, pe_ids), contrasts in self.contrasts.items():
             for contrast in contrasts:
                 if contrast.estimation.id == con_est_id:
@@ -422,10 +421,8 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
         raise Exception("Model fitting of contrast : " + str(con_est_id) + " not found.")
 
     def _get_contrast(self, con_id):
-        """
-        Retrieve contrast with identifier 'con_id' from the list of contrast
-        objects stored in self.contrasts
-        """
+        """Retrieve contrast with identifier 'con_id' from the list of contrast \
+           objects stored in self.contrasts."""
         for contrasts in list(self.contrasts.values()):
             for contrast in contrasts:
                 if contrast.estimation.id == con_id:

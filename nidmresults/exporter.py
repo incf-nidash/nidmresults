@@ -1,5 +1,4 @@
-"""
-Export neuroimaging results created by neuroimaging software packages
+"""Export neuroimaging results created by neuroimaging software packages \
 (FSL, AFNI, ...) following NIDM-Results specification.
 
 Specification: http://nidm.nidash.org/specs/nidm-results.html
@@ -28,11 +27,9 @@ from nidmresults.objects.modelfitting import *
 
 
 class NIDMExporter:
-    """
-    Generic class to parse a result directory to extract the pieces of
-    information to be stored in NIDM-Results and to generate a NIDM-Results
-    export.
-    """
+    """Generic class to parse a result directory \
+       to extract the pieces of information to be stored in NIDM-Results \
+       and to generate a NIDM-Results export."""
 
     def __init__(self, version, out_dir, zipped=True):
         out_dirname = os.path.basename(out_dir)
@@ -84,10 +81,8 @@ class NIDMExporter:
         self.prepend_path = ""
 
     def parse(self):
-        """
-        Parse a result directory to extract the pieces information to be
-        stored in NIDM-Results.
-        """
+        """Parse a result directory to extract the pieces information \
+           to be stored in NIDM-Results."""
 
         try:
             # Methods: find_software, find_model_fitting, find_contrasts and
@@ -542,10 +537,8 @@ class NIDMExporter:
             raise
 
     def _get_model_fitting(self, mf_id):
-        """
-        Retrieve model fitting with identifier 'mf_id' from the list of model
-        fitting objects stored in self.model_fitting
-        """
+        """Retrieve model fitting with identifier 'mf_id' \
+           from the list of model fitting objects stored in self.model_fitting."""
         for model_fitting in self.model_fittings:
             if model_fitting.activity.id == mf_id:
                 return model_fitting
@@ -553,10 +546,8 @@ class NIDMExporter:
         raise Exception("Model fitting activity with id: " + str(mf_id) + " not found.")
 
     def _get_contrast(self, con_id):
-        """
-        Retrieve contrast with identifier 'con_id' from the list of contrast
-        objects stored in self.contrasts
-        """
+        """Retrieve contrast with identifier 'con_id' from the list of contrast \
+           objects stored in self.contrasts."""
         for contrasts in list(self.contrasts.values()):
             for contrast in contrasts:
                 if contrast.estimation.id == con_id:
@@ -629,9 +620,9 @@ class NIDMExporter:
             self.doc.wasAssociatedWith(self.export_act.id, self.exporter.id)
 
     def _get_model_parameters_estimations(self, error_model):
-        """
-        Infer model estimation method from the 'error_model'. Return an object
-        of type ModelParametersEstimation.
+        """Infer model estimation method from the 'error_model'.
+
+        Return an object of type ModelParametersEstimation.
         """
         if error_model.dependence == NIDM_INDEPEDENT_ERROR:
             if error_model.variance_homo:

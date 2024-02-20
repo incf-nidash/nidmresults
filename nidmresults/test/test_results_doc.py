@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Common tests across-software for NI-DM export.
+
 The software-specific test classes must inherit from this class.
 
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>, Satrajit Ghosh
@@ -309,11 +310,8 @@ class TestResultDataModel:
         return list([graph1, graph2])
 
     def _reconcile_graphs(self, graph1, graph2, recursive=10):
-        """
-        Reconcile: if two entities have exactly the same attributes: they
-        are considered to be the same (set the same id for both)
-        """
-
+        """Reconcile: if two entities have exactly the same attributes: \
+           they are considered to be the same (set the same id for both)."""
         # FIXME: reconcile entities+agents first (ignoring non attributes)
         # then reconcile activities based on everything
         # for each item select the closest match in the other graph (instead of
@@ -436,8 +434,8 @@ class TestResultDataModel:
 
 
 class ExampleGraph:
-    """Class representing a NIDM-Results examples graph to be compared to some
-    ground truth graph"""
+    """Class representing a NIDM-Results examples graph \
+       to be compared to some ground truth graph."""
 
     def __init__(self, name, ttl_file, gt_ttl_files, exact_comparison, version):
         self.name = name

@@ -1,6 +1,5 @@
-"""
-Objects describing the Contrast Estimation activity, its inputs and outputs as
-specified in NIDM-Results.
+"""Objects describing the Contrast Estimation activity, \
+   its inputs and outputs as specified in NIDM-Results.
 
 Specification: http://nidm.nidash.org/specs/nidm-results.html
 
@@ -21,9 +20,9 @@ from nidmresults.objects.generic import *
 
 
 class Contrast:
-    """
-    Object representing a Contrast Estimation step: including a
-    ContrastEstimation activity, its inputs and outputs.
+    """Object representing a Contrast Estimation step.
+
+    Includes a ContrastEstimation activity, its inputs and outputs.
     """
 
     def __init__(

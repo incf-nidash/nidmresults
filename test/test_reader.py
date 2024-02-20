@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-"""
-Test NIDM FSL export tool installation
-
+"""Test NIDM FSL export tool installation.
 
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>
 @copyright: University of Warwick 2013-2015
@@ -80,9 +78,10 @@ class TestReader(unittest.TestCase, TestResultDataModel):
         os.mkdir(self.out_dir)
 
     def test_read_object(self):
-        """
-        Round-trip test. Check that we can read all NIDM packs, rewrite them
-        and get the same pack again
+        """Round-trip test.
+
+        Check that we can read all NIDM packs,
+        rewrite them and get the same pack again
         """
         all_excs = ""
         for nidmpack in self.packs:

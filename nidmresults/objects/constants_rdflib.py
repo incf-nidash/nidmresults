@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""" Definition of constants
+"""Definition of constants.
 
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>
 @copyright: University of Warwick 2014

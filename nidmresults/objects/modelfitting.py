@@ -1,6 +1,5 @@
-"""
-Objects describing the Model Parameters Estimation activity, its inputs and
-outputs as specified in NIDM-Results.
+"""Objects describing the Model Parameters Estimation activity, \
+   its inputs and outputs as specified in NIDM-Results.
 
 Specification: http://nidm.nidash.org/specs/nidm-results.html
 
@@ -24,9 +23,9 @@ from nidmresults.objects.generic import *
 
 
 class ModelFitting:
-    """
-    Object representing a Model fitting step: including a
-    ModelParametersEstimation activity, its inputs and outputs.
+    """Object representing a Model fitting step.
+
+    Include a ModelParametersEstimation activity, its inputs and outputs.
     """
 
     def __init__(

@@ -1,4 +1,4 @@
-""" Load and save NIDM-Results objects """
+"""Load and save NIDM-Results objects."""
 
 import os
 
@@ -6,8 +6,9 @@ from nidmresults.graph import NIDMResults
 
 
 def load(filename, to_replace=dict()):
-    """Load NIDM-Results file given filename, guessing if it is a
-    NIDM-Results pack or a JSON file
+    """Load NIDM-Results file given filename.
+
+    Guessing if it is a NIDM-Results pack or a JSON file.
 
     Parameters
     ----------

@@ -25,10 +25,8 @@ from nidmresults.objects.constants import *
 
 
 class NIDMObject:
-    """
-    Generic class, parent of all objects describing a NIDM entity, activity
-    or agent
-    """
+    """Generic class, parent of all objects describing a NIDM entity, \
+       activity or agent."""
 
     def __init__(self, oid=None):
         if oid is None:

@@ -1,6 +1,5 @@
-"""
-Objects describing the Inference activity, its inputs and outputs as specified
-in NIDM-Results.
+"""Objects describing the Inference activity, \
+   its inputs and outputs as specified in NIDM-Results.
 
 Specification: http://nidm.nidash.org/specs/nidm-results.html
 
@@ -20,9 +19,9 @@ from nidmresults.objects.generic import *
 
 
 class Inference:
-    """
-    Object representing an Inference step: including an Inference activity, its
-    inputs and outputs.
+    """Object representing an Inference step.
+
+    Include an Inference activity, its inputs and outputs.
     """
 
     def __init__(
