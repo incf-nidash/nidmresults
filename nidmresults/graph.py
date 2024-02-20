@@ -27,7 +27,9 @@ from nidmresults.objects.modelfitting import *
 class NIDMResults:
     """NIDM-result object containing all metadata and link to image files."""
 
-    def __init__(self, nidm_zip=None, rdf_file=None, workaround=False, to_replace=dict()):
+    def __init__(
+        self, nidm_zip=None, rdf_file=None, workaround=False, to_replace=dict()
+    ):
         self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")
         self.zip_path = nidm_zip
 
@@ -86,10 +88,12 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
             for row in sd:
                 argums = row.asdict()
                 if argums["type"] == NIDM_SPM_RESULTS_NIDM and (
-                    argums["version"].eq("12.6903") or argums["version"].eq("12.575ac2c")
+                    argums["version"].eq("12.6903")
+                    or argums["version"].eq("12.575ac2c")
                 ):
                     warnings.warn(
-                        "Applying fixes for SPM exporter " + str(argums["version"])
+                        "Applying fixes for SPM exporter "
+                        + str(argums["version"])
                     )
                     # crypto namespace inconsistent with NIDM-Results spec
                     to_replace[
@@ -152,7 +156,9 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
             self.info["NeuroimagingAnalysisSoftware_softwareVersion"] = (
                 self.software.version
             )
-            self.info["Data_grandMeanScaling"] = self.model_fittings[0].data.grand_mean_sc
+            self.info["Data_grandMeanScaling"] = self.model_fittings[
+                0
+            ].data.grand_mean_sc
             self.info["Data_targetIntensity"] = self.model_fittings[
                 0
             ].data.target_intensity
@@ -165,9 +171,9 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
             self.info["ErrorModel_hasErrorDistribution"] = str(
                 self.model_fittings[0].error_model.error_distribution
             )
-            self.info["ErrorModel_errorVarianceHomogeneous"] = self.model_fittings[
-                0
-            ].error_model.variance_homo
+            self.info["ErrorModel_errorVarianceHomogeneous"] = (
+                self.model_fittings[0].error_model.variance_homo
+            )
             # TODO: replace IRIs by preferred prefixes for readability
             self.info["ErrorModel_varianceMapWiseDependence"] = str(
                 self.model_fittings[0].error_model.variance_spatial
@@ -181,9 +187,9 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
             self.info["ModelParameterEstimation_withEstimationMethod"] = str(
                 self.model_fittings[0].activity.estimation_method
             )
-            self.info["ResidualMeanSquaresMap_atLocation"] = self.model_fittings[
-                0
-            ].rms_map.file.filename
+            self.info["ResidualMeanSquaresMap_atLocation"] = (
+                self.model_fittings[0].rms_map.file.filename
+            )
             self.info["ResidualMeanSquaresMap_inWorldCoordinateSystem"] = str(
                 self.model_fittings[0].rms_map.coord_space.coordinate_system
             )
@@ -214,14 +220,16 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
                     self.info["Contrasts"][-1][
                         "ContrastWeightMatrix_value"
                     ] = contrast.weights.contrast_weights
-                    self.info["Contrasts"][-1]["StatisticMap_statisticType"] = str(
-                        contrast.stat_map.stat_type
-                    )
+                    self.info["Contrasts"][-1][
+                        "StatisticMap_statisticType"
+                    ] = str(contrast.stat_map.stat_type)
                     dof = "StatisticMap_errorDegreesOfFreedom"
                     self.info["Contrasts"][-1][dof] = contrast.stat_map.dof
                     if contrast.stat_map.effdof:
                         edof = "StatisticMap_effectDegreesOfFreedom"
-                        self.info["Contrasts"][-1][edof] = contrast.stat_map.effdof
+                        self.info["Contrasts"][-1][
+                            edof
+                        ] = contrast.stat_map.effdof
                     self.info["Contrasts"][-1][
                         "StatisticMap_atLocation"
                     ] = contrast.stat_map.file.filename
@@ -249,8 +257,12 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
                         )
                         # TODO: deal when this is not created yet...
                         stderr_loc = "ContrastStandardErrorMap_atLocation"
-                        stderr_sys = "ContrastStandardErrorMap_inWorldCoordinateSystem"
-                        sderr_explmeansq_map = contrast.stderr_or_expl_mean_sq_map
+                        stderr_sys = (
+                            "ContrastStandardErrorMap_inWorldCoordinateSystem"
+                        )
+                        sderr_explmeansq_map = (
+                            contrast.stderr_or_expl_mean_sq_map
+                        )
                         self.info["Contrasts"][-1][
                             stderr_loc
                         ] = sderr_explmeansq_map.file.filename
@@ -261,20 +273,32 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
             self.info["Inferences"] = list()
             for con_est_id, inferences in self.inferences.items():
                 for inference in inferences:
-                    clustdef = "ClusterDefinitionCriteria_hasConnectivityCriterion"
-                    peakdef_mindist = "PeakDefinitionCriteria_minDistanceBetweenPeaks"
-                    peakdef_maxpeak = "PeakDefinitionCriteria_maxNumberOfPeaksPerCluster"
+                    clustdef = (
+                        "ClusterDefinitionCriteria_hasConnectivityCriterion"
+                    )
+                    peakdef_mindist = (
+                        "PeakDefinitionCriteria_minDistanceBetweenPeaks"
+                    )
+                    peakdef_maxpeak = (
+                        "PeakDefinitionCriteria_maxNumberOfPeaksPerCluster"
+                    )
                     if clustdef not in self.info:
                         # Assume that all inference have the same cluster def
                         # and peak def > should be stated explicitly in JSON
                         # spec and tested
-                        self.info[clustdef] = str(inference.cluster_criteria.connectivity)
-                        self.info[peakdef_mindist] = inference.peak_criteria.peak_dist
-                        self.info[peakdef_maxpeak] = inference.peak_criteria.num_peak
+                        self.info[clustdef] = str(
+                            inference.cluster_criteria.connectivity
+                        )
+                        self.info[peakdef_mindist] = (
+                            inference.peak_criteria.peak_dist
+                        )
+                        self.info[peakdef_maxpeak] = (
+                            inference.peak_criteria.num_peak
+                        )
                     else:
-                        if not str(inference.cluster_criteria.connectivity) == str(
-                            self.info[clustdef]
-                        ):
+                        if not str(
+                            inference.cluster_criteria.connectivity
+                        ) == str(self.info[clustdef]):
                             raise Exception(
                                 "Inferences using multiple connectivity"
                                 + " criteria "
@@ -364,13 +388,21 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
                         self.info["Inferences"][-1][clus].append(
                             collections.OrderedDict()
                         )
-                        self.info["Inferences"][-1][clus][-1][cl_size_vox] = cluster.size
+                        self.info["Inferences"][-1][clus][-1][
+                            cl_size_vox
+                        ] = cluster.size
                         if cluster.punc is not None:
-                            self.info["Inferences"][-1][clus][-1][cl_punc] = cluster.punc
+                            self.info["Inferences"][-1][clus][-1][
+                                cl_punc
+                            ] = cluster.punc
                         if cluster.pFWER is not None:
-                            self.info["Inferences"][-1][clus][-1][cl_pfwe] = cluster.pFWER
+                            self.info["Inferences"][-1][clus][-1][
+                                cl_pfwe
+                            ] = cluster.pFWER
                         if cluster.pFDR is not None:
-                            self.info["Inferences"][-1][clus][-1][cl_pfdr] = cluster.pFDR
+                            self.info["Inferences"][-1][clus][-1][
+                                cl_pfdr
+                            ] = cluster.pFDR
                         self.info["Inferences"][-1][clus][-1][pk] = list()
                         peaks = list()
                         for peak in cluster.peaks:
@@ -381,14 +413,20 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
                                 "Coordinate_coordinateVector"
                             ] = peak.coordinate.coord_vector_std
                             if peak.p_unc is not None:
-                                peaks[-1]["Peak_pValueUncorrected"] = peak.p_unc
+                                peaks[-1][
+                                    "Peak_pValueUncorrected"
+                                ] = peak.p_unc
                             if peak.p_fwer is not None:
                                 peaks[-1]["Peak_pValueFWER"] = peak.p_fwer
                             if peak.p_fdr is not None:
                                 peaks[-1]["Peak_qValueFDR"] = peak.p_fdr
                             if peak.equiv_z is not None:
-                                peaks[-1]["Peak_equivalentZStatistic"] = peak.equiv_z
-                            self.info["Inferences"][-1][clus][-1][pk].append(peaks)
+                                peaks[-1][
+                                    "Peak_equivalentZStatistic"
+                                ] = peak.equiv_z
+                            self.info["Inferences"][-1][clus][-1][pk].append(
+                                peaks
+                            )
 
         # TODO: if all world coord system are identical then use
         # self.info['CoordinateSpace_inWorldCoordinateSystem'] = ''
@@ -415,7 +453,9 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
             if model_fitting.activity.id == model_fitting_id:
                 return (model_fitting, pe_map_ids)
 
-        raise Exception("Model fitting of contrast : " + str(con_est_id) + " not found.")
+        raise Exception(
+            "Model fitting of contrast : " + str(con_est_id) + " not found."
+        )
 
     def _get_contrast(self, con_id):
         """Retrieve contrast with identifier 'con_id' from the list of contrast \
@@ -424,14 +464,18 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
             for contrast in contrasts:
                 if contrast.estimation.id == con_id:
                     return contrast
-        raise Exception("Contrast activity with id: " + str(con_id) + " not found.")
+        raise Exception(
+            "Contrast activity with id: " + str(con_id) + " not found."
+        )
 
     def parse(self, rdf_data, fmt="turtle"):
         g = rdflib.Graph()
         try:
             g.parse(data=rdf_data, format=fmt)
         except BadSyntax:
-            raise self.ParseException("RDFLib was unable to parse the RDF file.")
+            raise self.ParseException(
+                "RDFLib was unable to parse the RDF file."
+            )
         return g
 
     def get_object(self, klass, oid=None, err_if_none=True, **kwargs):
@@ -454,7 +498,8 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
                 argums = {
                     k: (
                         namespace_manager.valid_qualified_name(v)
-                        if namespace_manager.valid_qualified_name(v) is not None
+                        if namespace_manager.valid_qualified_name(v)
+                        is not None
                         else v
                     )
                     for k, v in argums.items()
@@ -502,7 +547,9 @@ SELECT DISTINCT * WHERE {
         if sd:
             for row in sd:
                 args = row.asdict()
-                software = self.get_object(NeuroimagingSoftware, args["ni_software_id"])
+                software = self.get_object(
+                    NeuroimagingSoftware, args["ni_software_id"]
+                )
 
         if software is None:
             raise Exception("No results found for query:" + query)
@@ -560,7 +607,9 @@ SELECT DISTINCT * WHERE
         if sd:
             for row in sd:
                 args = row.asdict()
-                exporter = self.get_object(ExporterSoftware, args["exporter_id"])
+                exporter = self.get_object(
+                    ExporterSoftware, args["exporter_id"]
+                )
                 export = self.get_object(NIDMResultsExport, args["export_id"])
                 bundle = self.get_object(NIDMResultsBundle, args["bundle_id"])
                 export_time = args["export_time"].toPython()
@@ -644,7 +693,9 @@ SELECT DISTINCT * WHERE {
                 args = row.asdict()
 
                 # TODO: should software_id really be an input?
-                activity = self.get_object(ModelParametersEstimation, args["mpe_id"])
+                activity = self.get_object(
+                    ModelParametersEstimation, args["mpe_id"]
+                )
 
                 # Find list of HRF basis
                 query_hrf_bases = (
@@ -667,7 +718,9 @@ SELECT DISTINCT * WHERE {
                     for row_hrf in sd_hrf:
                         args_hrf = row_hrf.asdict()
                         hrf_models.append(
-                            namespace_manager.valid_qualified_name(args_hrf["hrf_basis"])
+                            namespace_manager.valid_qualified_name(
+                                args_hrf["hrf_basis"]
+                            )
                         )
 
                 if "png_id" in args:
@@ -676,7 +729,9 @@ SELECT DISTINCT * WHERE {
                     design_matrix_png = None
 
                 if "drift_model_id" in args:
-                    drift_model = self.get_object(DriftModel, args["drift_model_id"])
+                    drift_model = self.get_object(
+                        DriftModel, args["drift_model_id"]
+                    )
                 else:
                     drift_model = None
 
@@ -728,7 +783,9 @@ SELECT DISTINCT * WHERE {
                     CoordinateSpace, args["rms_coordspace_id"]
                 )
                 rms_map = self.get_object(
-                    ResidualMeanSquares, args["rms_id"], coord_space=rms_coord_space
+                    ResidualMeanSquares,
+                    args["rms_id"],
+                    coord_space=rms_coord_space,
                 )
 
                 mask_coord_space = self.get_object(
@@ -753,12 +810,16 @@ SELECT DISTINCT * WHERE {
                         CoordinateSpace, args["rpv_coordspace_id"]
                     )
                     rpv_map = self.get_object(
-                        ReselsPerVoxelMap, args["rpv_id"], coord_space=mask_coord_space
+                        ReselsPerVoxelMap,
+                        args["rpv_id"],
+                        coord_space=mask_coord_space,
                     )
                 else:
                     rpv_map = None
 
-                machine = self.get_object(ImagingInstrument, args["machine_id"])
+                machine = self.get_object(
+                    ImagingInstrument, args["machine_id"]
+                )
 
                 # Find subject or group(s)
                 query_subjects = (
@@ -787,7 +848,9 @@ SELECT DISTINCT * WHERE {
                     for row_sub in sd_subjects:
                         args_sub = row_sub.asdict()
                         group = self.get_object(
-                            Group, args_sub["person_or_group_id"], err_if_none=False
+                            Group,
+                            args_sub["person_or_group_id"],
+                            err_if_none=False,
                         )
 
                         if group is None:
@@ -920,7 +983,9 @@ SELECT DISTINCT * WHERE {
                     ContrastWeights, args["conw_id"], contrast_num=contrast_num
                 )
                 estimation = self.get_object(
-                    ContrastEstimation, args["conest_id"], contrast_num=contrast_num
+                    ContrastEstimation,
+                    args["conest_id"],
+                    contrast_num=contrast_num,
                 )
 
                 contraststd_map_coordspace = self.get_object(
@@ -964,7 +1029,9 @@ SELECT DISTINCT * WHERE {
                     CoordinateSpace, args["statm_coordspace_id"]
                 )
                 stat_map = self.get_object(
-                    StatisticMap, args["statm_id"], coord_space=stat_map_coordspace
+                    StatisticMap,
+                    args["statm_id"],
+                    coord_space=stat_map_coordspace,
                 )
 
                 zstat_exist = False
@@ -1128,7 +1195,8 @@ SELECT DISTINCT * WHERE {
 
                         equiv_h_threshs.append(
                             self.get_object(
-                                HeightThreshold, args_hequiv["equiv_h_thresh_id"]
+                                HeightThreshold,
+                                args_hequiv["equiv_h_thresh_id"],
                             )
                         )
 
@@ -1158,7 +1226,8 @@ SELECT DISTINCT * WHERE {
 
                         equiv_e_threshs.append(
                             self.get_object(
-                                ExtentThreshold, args_eequiv["equiv_e_thresh_id"]
+                                ExtentThreshold,
+                                args_eequiv["equiv_e_thresh_id"],
                             )
                         )
 
@@ -1171,7 +1240,9 @@ SELECT DISTINCT * WHERE {
                     PeakCriteria, args["peak_criteria_id"], contrast_num=None
                 )
                 cluster_criteria = self.get_object(
-                    ClusterCriteria, args["cluster_criteria_id"], contrast_num=None
+                    ClusterCriteria,
+                    args["cluster_criteria_id"],
+                    contrast_num=None,
                 )
 
                 if "display_mask_id" in args:
@@ -1192,7 +1263,9 @@ SELECT DISTINCT * WHERE {
                     disp_mask = None
 
                 if "excset_visu_id" in args:
-                    excset_visu = self.get_object(Image, args["excset_visu_id"])
+                    excset_visu = self.get_object(
+                        Image, args["excset_visu_id"]
+                    )
                 else:
                     excset_visu = None
 
@@ -1292,11 +1365,16 @@ SELECT DISTINCT * WHERE {
                             for row_peak in sd_peaks:
                                 args_peak = row_peak.asdict()
 
-                                peaks.append(self.get_object(Peak, args_peak["peak_id"]))
+                                peaks.append(
+                                    self.get_object(Peak, args_peak["peak_id"])
+                                )
 
                         clusters.append(
                             self.get_object(
-                                Cluster, args_cl["cluster_id"], peaks=peaks, cog=cog
+                                Cluster,
+                                args_cl["cluster_id"],
+                                peaks=peaks,
+                                cog=cog,
                             )
                         )
 
@@ -1322,7 +1400,9 @@ SELECT DISTINCT * WHERE {
 
         return inferences
 
-    def serialize(self, destination, fmt="nidm", overwrite=False, last_used_con_id=0):
+    def serialize(
+        self, destination, fmt="nidm", overwrite=False, last_used_con_id=0
+    ):
 
         if fmt == "nidm":
             exporter = NIDMExporter(
@@ -1358,7 +1438,17 @@ SELECT DISTINCT * WHERE {
                 writer = csv.writer(fid, delimiter="\t")
                 if add_header:
                     writer.writerow(
-                        ["9", "NaN", "NaN", "NaN", "NaN", "NaN", "NaN", "NaN", "NaN"]
+                        [
+                            "9",
+                            "NaN",
+                            "NaN",
+                            "NaN",
+                            "NaN",
+                            "NaN",
+                            "NaN",
+                            "NaN",
+                            "NaN",
+                        ]
                     )
                     writer.writerow(
                         [
@@ -1396,7 +1486,9 @@ SELECT DISTINCT * WHERE {
 
                     stat_map = exc_set.inference.stat_map
 
-                    con_name = stat_map.contrast_name.replace(" ", "_").replace(":", "")
+                    con_name = stat_map.contrast_name.replace(
+                        " ", "_"
+                    ).replace(":", "")
 
                     # FIXME: need to deal with more than one group
                     self.N = (

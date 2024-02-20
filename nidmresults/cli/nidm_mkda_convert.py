@@ -27,7 +27,9 @@ def main(argv=sys.argv):
         help="Path to NIDM-Results packs (.nidm.zip) separated by spaces.",
         nargs="+",
     )
-    parser.add_argument("--version", action="version", version=f"{__version__}")
+    parser.add_argument(
+        "--version", action="version", version=f"{__version__}"
+    )
 
     args = parser.parse_args(argv[1:])
 
@@ -53,7 +55,10 @@ def main(argv=sys.argv):
 
         nidmgraph = Graph(nidm_zip=nidmpack)
         con_ids = nidmgraph.serialize(
-            outfile, "mkda", overwrite=overwrite, last_used_con_id=max(con_ids.values())
+            outfile,
+            "mkda",
+            overwrite=overwrite,
+            last_used_con_id=max(con_ids.values()),
         )
 
 

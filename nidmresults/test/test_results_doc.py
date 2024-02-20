@@ -102,7 +102,8 @@ class TestResultDataModel:
             configfile = os.path.join(test_dir, "config.json")
             if not os.path.isfile(configfile):
                 configfile = os.path.join(
-                    os.path.abspath(os.path.join(test_dir, os.pardir)), "config.json"
+                    os.path.abspath(os.path.join(test_dir, os.pardir)),
+                    "config.json",
                 )
 
             with open(configfile) as data_file:
@@ -181,12 +182,24 @@ class TestResultDataModel:
         elif rdf_type == PROV["Entity"]:
             # FIXME: This would be more efficiently done using the prov owl
             # file
-            g1_terms = g1_terms.union(set(graph1.subjects(RDF.type, PROV["Bundles"])))
-            g1_terms = g1_terms.union(set(graph1.subjects(RDF.type, PROV["Coordinate"])))
-            g1_terms = g1_terms.union(set(graph1.subjects(RDF.type, PROV["Person"])))
-            g2_terms = g2_terms.union(set(graph2.subjects(RDF.type, PROV["Bundles"])))
-            g2_terms = g2_terms.union(set(graph2.subjects(RDF.type, PROV["Coordinate"])))
-            g2_terms = g2_terms.union(set(graph2.subjects(RDF.type, PROV["Person"])))
+            g1_terms = g1_terms.union(
+                set(graph1.subjects(RDF.type, PROV["Bundles"]))
+            )
+            g1_terms = g1_terms.union(
+                set(graph1.subjects(RDF.type, PROV["Coordinate"]))
+            )
+            g1_terms = g1_terms.union(
+                set(graph1.subjects(RDF.type, PROV["Person"]))
+            )
+            g2_terms = g2_terms.union(
+                set(graph2.subjects(RDF.type, PROV["Bundles"]))
+            )
+            g2_terms = g2_terms.union(
+                set(graph2.subjects(RDF.type, PROV["Coordinate"]))
+            )
+            g2_terms = g2_terms.union(
+                set(graph2.subjects(RDF.type, PROV["Person"]))
+            )
         elif rdf_type == PROV["Agent"]:
             agent = True
 
@@ -220,9 +233,13 @@ class TestResultDataModel:
                 # if activity or \
                 #        (isinstance(o, rdflib.term.Literal) or p == RDF.type):
                 # if graph2.subjects(p, o):
-                for g2_term in (x for x in graph2.subjects(p, o) if x in g2_match):
+                for g2_term in (
+                    x for x in graph2.subjects(p, o) if x in g2_match
+                ):
                     g2_match[g2_term] += 1
-                    logging.debug("Match found with " + str(graph1.qname(g2_term)))
+                    logging.debug(
+                        "Match found with " + str(graph1.qname(g2_term))
+                    )
                 # else:
                 # print(sum(g2_match.values()))
                 # logging.debug("NO --- Match found")
@@ -233,13 +250,14 @@ class TestResultDataModel:
                 close_float = False
                 if hasattr(o, "datatype") and o.datatype == XSD["string"]:
                     for g2_term, g2_o in graph2.subject_objects(p):
-                        same_json_array, close_float, same_str = self._same_json_or_float(
-                            o, g2_o
+                        same_json_array, close_float, same_str = (
+                            self._same_json_or_float(o, g2_o)
                         )
                         if same_json_array or close_float or same_str:
                             g2_match[g2_term] += 1
                             logging.debug(
-                                "Match found with " + str(graph1.qname(g2_term))
+                                "Match found with "
+                                + str(graph1.qname(g2_term))
                             )
 
             if activity or agent:
@@ -339,7 +357,9 @@ class TestResultDataModel:
 
         # We reconcile gt_graph with other_graph
         if reconcile:
-            gt_graph, other_graph = self._reconcile_graphs(gt_graph, other_graph)
+            gt_graph, other_graph = self._reconcile_graphs(
+                gt_graph, other_graph
+            )
 
         in_both, in_gt, in_other = graph_diff(gt_graph, other_graph)
 
@@ -349,8 +369,8 @@ class TestResultDataModel:
             # If there is a corresponding s,p check if
             # there is an equivalent o
             for o_other in in_other.objects(s, p):
-                same_json_array, close_float, same_str = self._same_json_or_float(
-                    o, o_other
+                same_json_array, close_float, same_str = (
+                    self._same_json_or_float(o, o_other)
                 )
                 if same_json_array or close_float or same_str:
                     # Remove equivalent o from other as well
@@ -434,7 +454,9 @@ class ExampleGraph:
     """Class representing a NIDM-Results examples graph \
        to be compared to some ground truth graph."""
 
-    def __init__(self, name, ttl_file, gt_ttl_files, exact_comparison, version):
+    def __init__(
+        self, name, ttl_file, gt_ttl_files, exact_comparison, version
+    ):
         self.name = name
         self.ttl_file = ttl_file
 
@@ -471,7 +493,11 @@ class ExampleGraph:
         if self.version == "dev":
             owl_imports = glob.glob(
                 os.path.join(
-                    os.path.dirname(owl_file), os.pardir, os.pardir, "imports", "*.ttl"
+                    os.path.dirname(owl_file),
+                    os.pardir,
+                    os.pardir,
+                    "imports",
+                    "*.ttl",
                 )
             )
         self.owl = OwlReader(self.owl_file, owl_imports)

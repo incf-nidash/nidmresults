@@ -15,7 +15,9 @@ from nidmresults.objects.constants import *
 RELPATH = os.path.dirname(os.path.abspath(__file__))
 
 # Append parent script directory to path
-sys.path.append(os.path.join(RELPATH, os.pardir, os.pardir, os.pardir, "scripts"))
+sys.path.append(
+    os.path.join(RELPATH, os.pardir, os.pardir, os.pardir, "scripts")
+)
 
 
 # ignored_attributes = set([
@@ -51,9 +53,13 @@ sys.path.append(os.path.join(RELPATH, os.pardir, os.pardir, os.pardir, "scripts"
 
 def get_property_names_in_owl(my_owl_graph):
     properties = set()
-    for class_name in my_owl_graph.subjects(RDF["type"], OWL["DatatypeProperty"]):
+    for class_name in my_owl_graph.subjects(
+        RDF["type"], OWL["DatatypeProperty"]
+    ):
         properties.add(class_name)
-    for class_name in my_owl_graph.subjects(RDF["type"], OWL["ObjectProperty"]):
+    for class_name in my_owl_graph.subjects(
+        RDF["type"], OWL["ObjectProperty"]
+    ):
         properties.add(class_name)
     return properties
 

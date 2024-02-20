@@ -37,7 +37,9 @@ class TestReader(unittest.TestCase, TestResultDataModel):
         )
         self.owl = OwlReader(owl_file)
 
-        pwd = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+        pwd = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe()))
+        )
 
         # Store test data in a 'data' folder until 'test'
         data_dir = os.path.join(pwd, "data")
@@ -46,7 +48,9 @@ class TestReader(unittest.TestCase, TestResultDataModel):
             os.makedirs(data_dir)
 
         # Collection containing examples of NIDM-Results packs (1.3.0)
-        req = Request("http://neurovault.org/api/collections/2210/nidm_results")
+        req = Request(
+            "http://neurovault.org/api/collections/2210/nidm_results"
+        )
         rep = urlopen(req)
 
         response = rep.read()

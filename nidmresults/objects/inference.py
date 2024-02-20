@@ -239,13 +239,19 @@ ORDER BY ?peak_label
             self.add_attributes(((DC["description"], self.visu.id),))
 
         if self.clust_map is not None:
-            self.add_attributes(((NIDM_HAS_CLUSTER_LABELS_MAP, self.clust_map.id),))
+            self.add_attributes(
+                ((NIDM_HAS_CLUSTER_LABELS_MAP, self.clust_map.id),)
+            )
 
         if self.mip is not None:
-            self.add_attributes(((NIDM_HAS_MAXIMUM_INTENSITY_PROJECTION, self.mip.id),))
+            self.add_attributes(
+                ((NIDM_HAS_MAXIMUM_INTENSITY_PROJECTION, self.mip.id),)
+            )
 
         if self.num_clusters is not None:
-            self.add_attributes(((NIDM_NUMBER_OF_CLUSTERS, self.num_clusters),))
+            self.add_attributes(
+                ((NIDM_NUMBER_OF_CLUSTERS, self.num_clusters),)
+            )
 
         if self.p_value is not None:
             self.add_attributes(((NIDM_P_VALUE, self.p_value),))
@@ -270,7 +276,9 @@ class ClusterLabelsMap(NIDMObject):
         if not filename:
             filename = "ClusterLabels" + suffix + ".nii.gz"
         self.filename = filename
-        self.file = NIDMFile(self.id, location, filename, sha, temporary=temporary)
+        self.file = NIDMFile(
+            self.id, location, filename, sha, temporary=temporary
+        )
         self.type = NIDM_CLUSTER_LABELS_MAP
         self.prov_type = PROV["Entity"]
         if label is None:
@@ -424,7 +432,10 @@ prefix nidm_hasAlternativeHypothesis: <http://purl.org/nidash/nidm#NIDM_000009\
                 (NIDM_P_VALUE_FWER, self.p_corr_threshold),
             ]
         else:
-            atts += [(PROV["type"], self.threshold_type), (PROV["value"], self.value)]
+            atts += [
+                (PROV["type"], self.threshold_type),
+                (PROV["value"], self.value),
+            ]
 
         if self.equiv_thresh is not None:
             for equiv in self.equiv_thresh:
@@ -609,7 +620,13 @@ class Cluster(NIDMObject):
         else:
             if x and y and z:
                 self.cog = CenterOfGravity(
-                    cluster_num, x=x, y=y, z=z, x_std=x_std, y_std=y_std, z_std=z_std
+                    cluster_num,
+                    x=x,
+                    y=y,
+                    z=z,
+                    x_std=x_std,
+                    y_std=y_std,
+                    z_std=z_std,
                 )
             else:
                 self.cog = None
@@ -684,18 +701,27 @@ SELECT DISTINCT * WHERE {
         )
 
         if self.clust_size_resels is not None:
-            atts = atts + ((NIDM_CLUSTER_SIZE_IN_RESELS, self.clust_size_resels),)
+            atts = atts + (
+                (NIDM_CLUSTER_SIZE_IN_RESELS, self.clust_size_resels),
+            )
 
         if self.punc is not None:
             atts = atts + (
-                (NIDM_P_VALUE_UNCORRECTED, Literal(self.punc, datatype=XSD_FLOAT)),
+                (
+                    NIDM_P_VALUE_UNCORRECTED,
+                    Literal(self.punc, datatype=XSD_FLOAT),
+                ),
             )
 
         if self.pFDR is not None:
-            atts = atts + ((NIDM_Q_VALUE_FDR, Literal(self.pFDR, datatype=XSD_FLOAT)),)
+            atts = atts + (
+                (NIDM_Q_VALUE_FDR, Literal(self.pFDR, datatype=XSD_FLOAT)),
+            )
 
         if self.pFWER is not None:
-            atts = atts + ((NIDM_P_VALUE_FWER, Literal(self.pFWER, datatype=XSD_FLOAT)),)
+            atts = atts + (
+                (NIDM_P_VALUE_FWER, Literal(self.pFWER, datatype=XSD_FLOAT)),
+            )
 
         self.add_attributes(atts)
 
@@ -799,7 +825,9 @@ SELECT DISTINCT * WHERE {
 class PeakCriteria(NIDMObject):
     """Object representing a PeakCriteria entity."""
 
-    def __init__(self, contrast_num, peak_dist, num_peak=None, label=None, oid=None):
+    def __init__(
+        self, contrast_num, peak_dist, num_peak=None, label=None, oid=None
+    ):
         super().__init__(oid=oid)
         self.num_peak = num_peak
         self.peak_dist = peak_dist
@@ -865,7 +893,9 @@ class ClusterCriteria(NIDMObject):
         self.type = NIDM_CLUSTER_DEFINITION_CRITERIA
         self.prov_type = PROV["Entity"]
         if not label:
-            self.label = "Cluster Connectivity Criterion: " + str(self.connectivity)
+            self.label = "Cluster Connectivity Criterion: " + str(
+                self.connectivity
+            )
         else:
             self.label = label
 
@@ -1035,7 +1065,9 @@ class SearchSpace(NIDMObject):
         super().__init__(oid=oid)
         if not filename:
             filename = "SearchSpaceMask" + suffix + ".nii.gz"
-        self.file = NIDMFile(self.id, search_space_file, filename, sha=sha, fmt=fmt)
+        self.file = NIDMFile(
+            self.id, search_space_file, filename, sha=sha, fmt=fmt
+        )
         self.coord_space = coord_space
         self.resel_size_in_voxels = resel_size_in_voxels
         self.search_volume_in_voxels = vol_in_voxels
@@ -1165,7 +1197,10 @@ SELECT DISTINCT * WHERE {
 
         if self.expected_num_voxels is not None:
             atts = atts + (
-                (NIDM_EXPECTED_NUMBER_OF_VOXELS_PER_CLUSTER, self.expected_num_voxels),
+                (
+                    NIDM_EXPECTED_NUMBER_OF_VOXELS_PER_CLUSTER,
+                    self.expected_num_voxels,
+                ),
             )
 
         if self.expected_num_clusters is not None:
@@ -1175,12 +1210,18 @@ SELECT DISTINCT * WHERE {
 
         if self.height_critical_fwe05 is not None:
             atts = atts + (
-                (NIDM_HEIGHT_CRITICAL_THRESHOLD_FWE_05, self.height_critical_fwe05),
+                (
+                    NIDM_HEIGHT_CRITICAL_THRESHOLD_FWE_05,
+                    self.height_critical_fwe05,
+                ),
             )
 
         if self.height_critical_fdr05 is not None:
             atts = atts + (
-                (NIDM_HEIGHT_CRITICAL_THRESHOLD_FDR_05, self.height_critical_fdr05),
+                (
+                    NIDM_HEIGHT_CRITICAL_THRESHOLD_FDR_05,
+                    self.height_critical_fdr05,
+                ),
             )
 
         if self.extent_critical_fwe05 is not None:
@@ -1200,10 +1241,14 @@ SELECT DISTINCT * WHERE {
             )
 
         if self.search_vol_geom is not None:
-            atts = atts + ((SPM_SEARCH_VOLUME_RESELS_GEOMETRY, self.search_vol_geom),)
+            atts = atts + (
+                (SPM_SEARCH_VOLUME_RESELS_GEOMETRY, self.search_vol_geom),
+            )
 
         if self.noise_roughness:
-            atts = atts + ((NIDM_NOISE_ROUGHNESS_IN_VOXELS, self.noise_roughness),)
+            atts = atts + (
+                (NIDM_NOISE_ROUGHNESS_IN_VOXELS, self.noise_roughness),
+            )
 
         # Create "Search Space Mask map" entity
         self.add_attributes(atts)
@@ -1264,13 +1309,18 @@ class Coordinate(NIDMObject):
 
         if self.coord_vector is not None:
             atts = atts + (
-                (NIDM_COORDINATE_VECTOR_IN_VOXELS, json.dumps(self.coord_vector)),
+                (
+                    NIDM_COORDINATE_VECTOR_IN_VOXELS,
+                    json.dumps(self.coord_vector),
+                ),
             )
 
         # FSL unnormalised subject-level analyses do not provide coordinates in
         # voxels
         if self.coord_vector_std is not None:
-            atts = atts + ((NIDM_COORDINATE_VECTOR, json.dumps(self.coord_vector_std)),)
+            atts = atts + (
+                (NIDM_COORDINATE_VECTOR, json.dumps(self.coord_vector_std)),
+            )
 
         self.add_attributes(atts)
 
@@ -1392,18 +1442,28 @@ SELECT DISTINCT * WHERE {
 
         if self.p_unc is not None:
             atts = atts + (
-                (NIDM_P_VALUE_UNCORRECTED, Literal(self.p_unc, datatype=XSD_FLOAT)),
+                (
+                    NIDM_P_VALUE_UNCORRECTED,
+                    Literal(self.p_unc, datatype=XSD_FLOAT),
+                ),
             )
 
         if self.equiv_z is not None:
             atts = atts + (
-                (NIDM_EQUIVALENT_ZSTATISTIC, Literal(self.equiv_z, datatype=XSD_FLOAT)),
+                (
+                    NIDM_EQUIVALENT_ZSTATISTIC,
+                    Literal(self.equiv_z, datatype=XSD_FLOAT),
+                ),
             )
 
         if self.p_fdr is not None:
-            atts = atts + ((NIDM_Q_VALUE_FDR, Literal(self.p_fdr, datatype=XSD_FLOAT)),)
+            atts = atts + (
+                (NIDM_Q_VALUE_FDR, Literal(self.p_fdr, datatype=XSD_FLOAT)),
+            )
 
         if self.p_fwer is not None:
-            atts = atts + ((NIDM_P_VALUE_FWER, Literal(self.p_fwer, datatype=XSD_FLOAT)),)
+            atts = atts + (
+                (NIDM_P_VALUE_FWER, Literal(self.p_fwer, datatype=XSD_FLOAT)),
+            )
 
         self.add_attributes(atts)

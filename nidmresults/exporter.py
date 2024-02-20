@@ -55,7 +55,12 @@ class NIDMExporter:
         self.out_dir = out_dir
 
         if version == "dev":
-            self.version = {"major": 10000, "minor": 0, "revision": 0, "num": version}
+            self.version = {
+                "major": 10000,
+                "minor": 0,
+                "revision": 0,
+                "num": version,
+            }
         else:
             major, minor, revision = version.split(".")
             if "-rc" in revision:
@@ -131,11 +136,17 @@ class NIDMExporter:
             nidm_object.export(self.version, export_dir, self.prepend_path)
         # ProvDocument: add object to the bundle
         if nidm_object.prov_type == PROV["Activity"]:
-            self.bundle.activity(nidm_object.id, other_attributes=nidm_object.attributes)
+            self.bundle.activity(
+                nidm_object.id, other_attributes=nidm_object.attributes
+            )
         elif nidm_object.prov_type == PROV["Entity"]:
-            self.bundle.entity(nidm_object.id, other_attributes=nidm_object.attributes)
+            self.bundle.entity(
+                nidm_object.id, other_attributes=nidm_object.attributes
+            )
         elif nidm_object.prov_type == PROV["Agent"]:
-            self.bundle.agent(nidm_object.id, other_attributes=nidm_object.attributes)
+            self.bundle.agent(
+                nidm_object.id, other_attributes=nidm_object.attributes
+            )
         # self.bundle.update(nidm_object.p)
 
     def export(self):
@@ -184,16 +195,22 @@ class NIDMExporter:
                     for sub in model_fitting.subjects:
                         self.add_object(sub)
                         # model_fitting.data.wasAttributedTo(sub)
-                        self.bundle.wasAttributedTo(model_fitting.data.id, sub.id)
+                        self.bundle.wasAttributedTo(
+                            model_fitting.data.id, sub.id
+                        )
 
                 # Data
                 # model_fitting.activity.used(model_fitting.data)
-                self.bundle.used(model_fitting.activity.id, model_fitting.data.id)
+                self.bundle.used(
+                    model_fitting.activity.id, model_fitting.data.id
+                )
                 self.add_object(model_fitting.data)
 
                 # Error Model
                 # model_fitting.activity.used(model_fitting.error_model)
-                self.bundle.used(model_fitting.activity.id, model_fitting.error_model.id)
+                self.bundle.used(
+                    model_fitting.activity.id, model_fitting.error_model.id
+                )
                 self.add_object(model_fitting.error_model)
 
                 # Parameter Estimate Maps
@@ -211,7 +228,9 @@ class NIDMExporter:
                             param_estimate.id, param_estimate.derfrom.id
                         )
                         self.add_object(param_estimate.derfrom)
-                        self.add_object(param_estimate.derfrom.file, export_file=False)
+                        self.add_object(
+                            param_estimate.derfrom.file, export_file=False
+                        )
 
                 # Residual Mean Squares Map
                 # model_fitting.rms_map.wasGeneratedBy(model_fitting.activity)
@@ -223,10 +242,13 @@ class NIDMExporter:
                 self.add_object(model_fitting.rms_map.file)
                 if model_fitting.rms_map.derfrom is not None:
                     self.bundle.wasDerivedFrom(
-                        model_fitting.rms_map.id, model_fitting.rms_map.derfrom.id
+                        model_fitting.rms_map.id,
+                        model_fitting.rms_map.derfrom.id,
                     )
                     self.add_object(model_fitting.rms_map.derfrom)
-                    self.add_object(model_fitting.rms_map.derfrom.file, export_file=False)
+                    self.add_object(
+                        model_fitting.rms_map.derfrom.file, export_file=False
+                    )
 
                 # Resels per Voxel Map
                 if model_fitting.rpv_map is not None:
@@ -238,15 +260,18 @@ class NIDMExporter:
                     self.add_object(model_fitting.rpv_map.file)
                     if model_fitting.rpv_map.inf_id is not None:
                         self.bundle.used(
-                            model_fitting.rpv_map.inf_id, model_fitting.rpv_map.id
+                            model_fitting.rpv_map.inf_id,
+                            model_fitting.rpv_map.id,
                         )
                     if model_fitting.rpv_map.derfrom is not None:
                         self.bundle.wasDerivedFrom(
-                            model_fitting.rpv_map.id, model_fitting.rpv_map.derfrom.id
+                            model_fitting.rpv_map.id,
+                            model_fitting.rpv_map.derfrom.id,
                         )
                         self.add_object(model_fitting.rpv_map.derfrom)
                         self.add_object(
-                            model_fitting.rpv_map.derfrom.file, export_file=False
+                            model_fitting.rpv_map.derfrom.file,
+                            export_file=False,
                         )
 
                 # Mask
@@ -257,7 +282,8 @@ class NIDMExporter:
                 self.add_object(model_fitting.mask_map)
                 if model_fitting.mask_map.derfrom is not None:
                     self.bundle.wasDerivedFrom(
-                        model_fitting.mask_map.id, model_fitting.mask_map.derfrom.id
+                        model_fitting.mask_map.id,
+                        model_fitting.mask_map.derfrom.id,
                     )
                     self.add_object(model_fitting.mask_map.derfrom)
                     self.add_object(
@@ -282,22 +308,34 @@ class NIDMExporter:
 
                 # Model Parameters Estimation activity
                 self.add_object(model_fitting.activity)
-                self.bundle.wasAssociatedWith(model_fitting.activity.id, self.software.id)
+                self.bundle.wasAssociatedWith(
+                    model_fitting.activity.id, self.software.id
+                )
                 # model_fitting.activity.wasAssociatedWith(self.software)
                 # self.add_object(model_fitting)
 
             # Add contrast estimation steps
             analysis_masks = dict()
-            for (model_fitting_id, pe_ids), contrasts in list(self.contrasts.items()):
+            for (model_fitting_id, pe_ids), contrasts in list(
+                self.contrasts.items()
+            ):
                 for contrast in contrasts:
                     model_fitting = self._get_model_fitting(model_fitting_id)
                     # for contrast in contrasts:
                     # contrast.estimation.used(model_fitting.rms_map)
-                    self.bundle.used(contrast.estimation.id, model_fitting.rms_map.id)
+                    self.bundle.used(
+                        contrast.estimation.id, model_fitting.rms_map.id
+                    )
                     # contrast.estimation.used(model_fitting.mask_map)
-                    self.bundle.used(contrast.estimation.id, model_fitting.mask_map.id)
-                    analysis_masks[contrast.estimation.id] = model_fitting.mask_map.id
-                    self.bundle.used(contrast.estimation.id, contrast.weights.id)
+                    self.bundle.used(
+                        contrast.estimation.id, model_fitting.mask_map.id
+                    )
+                    analysis_masks[contrast.estimation.id] = (
+                        model_fitting.mask_map.id
+                    )
+                    self.bundle.used(
+                        contrast.estimation.id, contrast.weights.id
+                    )
                     self.bundle.used(
                         contrast.estimation.id, model_fitting.design_matrix.id
                     )
@@ -329,11 +367,13 @@ class NIDMExporter:
 
                         if contrast.contrast_map.derfrom is not None:
                             self.bundle.wasDerivedFrom(
-                                contrast.contrast_map.id, contrast.contrast_map.derfrom.id
+                                contrast.contrast_map.id,
+                                contrast.contrast_map.derfrom.id,
                             )
                             self.add_object(contrast.contrast_map.derfrom)
                             self.add_object(
-                                contrast.contrast_map.derfrom.file, export_file=False
+                                contrast.contrast_map.derfrom.file,
+                                export_file=False,
                             )
 
                     # Create Std Err. Map (T-tests) or Explained Mean Sq. Map
@@ -352,13 +392,16 @@ class NIDMExporter:
                     ):
                         self.add_object(stderr_explmeansq_map.contrast_var)
                         if stderr_explmeansq_map.var_coord_space:
-                            self.add_object(stderr_explmeansq_map.var_coord_space)
+                            self.add_object(
+                                stderr_explmeansq_map.var_coord_space
+                            )
                         if stderr_explmeansq_map.contrast_var.coord_space:
                             self.add_object(
                                 stderr_explmeansq_map.contrast_var.coord_space
                             )
                         self.add_object(
-                            stderr_explmeansq_map.contrast_var.file, export_file=False
+                            stderr_explmeansq_map.contrast_var.file,
+                            export_file=False,
                         )
                         self.bundle.wasDerivedFrom(
                             stderr_explmeansq_map.id,
@@ -381,7 +424,9 @@ class NIDMExporter:
                             contrast.stat_map.id, contrast.stat_map.derfrom.id
                         )
                         self.add_object(contrast.stat_map.derfrom)
-                        self.add_object(contrast.stat_map.derfrom.file, export_file=False)
+                        self.add_object(
+                            contrast.stat_map.derfrom.file, export_file=False
+                        )
 
                     # Create Z Statistic Map
                     if contrast.z_stat_map:
@@ -429,7 +474,9 @@ class NIDMExporter:
                     if inference.excursion_set.clust_map is not None:
                         self.add_object(inference.excursion_set.clust_map)
                         self.add_object(inference.excursion_set.clust_map.file)
-                        self.add_object(inference.excursion_set.clust_map.coord_space)
+                        self.add_object(
+                            inference.excursion_set.clust_map.coord_space
+                        )
 
                     if inference.excursion_set.mip is not None:
                         self.add_object(inference.excursion_set.mip)
@@ -451,7 +498,9 @@ class NIDMExporter:
                     if inference.disp_mask:
                         for mask in inference.disp_mask:
                             # inference.inference_act.used(mask)
-                            self.bundle.used(inference.inference_act.id, mask.id)
+                            self.bundle.used(
+                                inference.inference_act.id, mask.id
+                            )
                             self.add_object(mask)
                             # Create coordinate space entity
                             self.add_object(mask.coord_space)
@@ -459,9 +508,13 @@ class NIDMExporter:
                             self.add_object(mask.file)
 
                             if mask.derfrom is not None:
-                                self.bundle.wasDerivedFrom(mask.id, mask.derfrom.id)
+                                self.bundle.wasDerivedFrom(
+                                    mask.id, mask.derfrom.id
+                                )
                                 self.add_object(mask.derfrom)
-                                self.add_object(mask.derfrom.file, export_file=False)
+                                self.add_object(
+                                    mask.derfrom.file, export_file=False
+                                )
 
                     # Search Space
                     self.bundle.wasGeneratedBy(
@@ -477,7 +530,8 @@ class NIDMExporter:
                     if inference.peak_criteria:
                         # inference.inference_act.used(inference.peak_criteria)
                         self.bundle.used(
-                            inference.inference_act.id, inference.peak_criteria.id
+                            inference.inference_act.id,
+                            inference.peak_criteria.id,
                         )
                         self.add_object(inference.peak_criteria)
 
@@ -485,7 +539,8 @@ class NIDMExporter:
                     if inference.cluster_criteria:
                         # inference.inference_act.used(inference.cluster_criteria)
                         self.bundle.used(
-                            inference.inference_act.id, inference.cluster_criteria.id
+                            inference.inference_act.id,
+                            inference.cluster_criteria.id,
                         )
                         self.add_object(inference.cluster_criteria)
 
@@ -503,7 +558,9 @@ class NIDMExporter:
                                 self.add_object(peak.coordinate)
 
                             if cluster.cog is not None:
-                                self.bundle.wasDerivedFrom(cluster.cog.id, cluster.id)
+                                self.bundle.wasDerivedFrom(
+                                    cluster.cog.id, cluster.id
+                                )
                                 self.add_object(cluster.cog)
                                 self.add_object(cluster.cog.coordinate)
 
@@ -518,7 +575,8 @@ class NIDMExporter:
                         inference.inference_act.id, inference.extent_thresh.id
                     )
                     self.bundle.used(
-                        inference.inference_act.id, analysis_masks[contrast.estimation.id]
+                        inference.inference_act.id,
+                        analysis_masks[contrast.estimation.id],
                     )
                     self.add_object(inference.inference_act)
 
@@ -537,7 +595,9 @@ class NIDMExporter:
             if model_fitting.activity.id == mf_id:
                 return model_fitting
 
-        raise Exception("Model fitting activity with id: " + str(mf_id) + " not found.")
+        raise Exception(
+            "Model fitting activity with id: " + str(mf_id) + " not found."
+        )
 
     def _get_contrast(self, con_id):
         """Retrieve contrast with identifier 'con_id' from the list of contrast \
@@ -546,7 +606,9 @@ class NIDMExporter:
             for contrast in contrasts:
                 if contrast.estimation.id == con_id:
                     return contrast
-        raise Exception("Contrast activity with id: " + str(con_id) + " not found.")
+        raise Exception(
+            "Contrast activity with id: " + str(con_id) + " not found."
+        )
 
     def _add_namespaces(self):
         """Add namespaces to NIDM document."""
@@ -573,7 +635,9 @@ class NIDMExporter:
         # # provn export
         # self.bundle = ProvBundle(identifier=bundle_id)
 
-        self.doc.entity(self.bundle_ent.id, other_attributes=self.bundle_ent.attributes)
+        self.doc.entity(
+            self.bundle_ent.id, other_attributes=self.bundle_ent.attributes
+        )
 
         # *** NIDM-Results Export Activity
         if version["num"] not in ["1.0.0", "1.1.0"]:
@@ -590,7 +654,9 @@ class NIDMExporter:
             self.export_time = str(datetime.datetime.now().time())
 
         if version["num"] in ["1.0.0", "1.1.0"]:
-            self.doc.wasGeneratedBy(entity=self.bundle_ent.id, time=self.export_time)
+            self.doc.wasGeneratedBy(
+                entity=self.bundle_ent.id, time=self.export_time
+            )
         else:
             # provn
             self.doc.wasGeneratedBy(
@@ -605,7 +671,9 @@ class NIDMExporter:
                 self.exporter = self._get_exporter()
             self.exporter.export(self.version, self.export_dir)
             # self.doc.update(self.exporter.p)
-            self.doc.agent(self.exporter.id, other_attributes=self.exporter.attributes)
+            self.doc.agent(
+                self.exporter.id, other_attributes=self.exporter.attributes
+            )
 
             self.doc.wasAssociatedWith(self.export_act.id, self.exporter.id)
 
@@ -661,7 +729,9 @@ class NIDMExporter:
         # Add namespaces to json-ld context
         for namespace in self.doc._namespaces.get_registered_namespaces():
             json_context[namespace._prefix] = namespace._uri
-        for namespace in list(self.doc._namespaces._default_namespaces.values()):
+        for namespace in list(
+            self.doc._namespaces._default_namespaces.values()
+        ):
             json_context[namespace._prefix] = namespace._uri
         json_context["xsd"] = "http://www.w3.org/2000/01/rdf-schema#"
 
@@ -681,7 +751,9 @@ class NIDMExporter:
 
         # JSON-LD using specification 1.1 (a.k.a "nice" JSON-LD)
         jsonld_11 = json.dumps(
-            ld.jsonld.compact(json.loads(jsonld_txt), "http://purl.org/nidash/context")
+            ld.jsonld.compact(
+                json.loads(jsonld_txt), "http://purl.org/nidash/context"
+            )
         )
 
         # If python 2 convert string to unicode to avoid

@@ -151,7 +151,9 @@ class ContrastMap(NIDMObject):
         self.name = contrast_name
         if filename is None:
             filename = "Contrast" + self.num + ".nii.gz"
-        self.file = NIDMFile(self.id, contrast_file, filename, sha=sha, fmt=fmt)
+        self.file = NIDMFile(
+            self.id, contrast_file, filename, sha=sha, fmt=fmt
+        )
         self.coord_space = coord_space
         self.type = NIDM_CONTRAST_MAP
         self.prov_type = PROV["Entity"]
@@ -218,7 +220,10 @@ class ContrastMap(NIDMObject):
     def export(self, nidm_version, export_dir):
         """Create prov graph."""
         # Contrast Map entity
-        atts = ((PROV["type"], NIDM_CONTRAST_MAP), (NIDM_CONTRAST_NAME, self.name))
+        atts = (
+            (PROV["type"], NIDM_CONTRAST_MAP),
+            (NIDM_CONTRAST_NAME, self.name),
+        )
 
         if not self.isderfrommap:
             atts = atts + ((NIDM_IN_COORDINATE_SPACE, self.coord_space.id),)
@@ -299,9 +304,13 @@ SELECT DISTINCT * WHERE {
             sigma_sq_img = nib.load(self.sigma_sq_file)
             sigma_sq = sigma_sq_img.get_data()
 
-            expl_mean_sq = nib.Nifti1Image(fstat * sigma_sq, fstat_img.get_qform())
+            expl_mean_sq = nib.Nifti1Image(
+                fstat * sigma_sq, fstat_img.get_qform()
+            )
 
-            self.filename = "ContrastExplainedMeanSquareMap" + self.num + ".nii.gz"
+            self.filename = (
+                "ContrastExplainedMeanSquareMap" + self.num + ".nii.gz"
+            )
             self.expl_mean_sq_file = os.path.join(export_dir, self.filename)
             nib.save(expl_mean_sq, self.expl_mean_sq_file)
 
@@ -452,7 +461,9 @@ SELECT DISTINCT * WHERE {
 
 
 class ContrastVariance(NIDMObject):
-    def __init__(self, coord_space, var_file, filename, fmt=None, sha=None, oid=None):
+    def __init__(
+        self, coord_space, var_file, filename, fmt=None, sha=None, oid=None
+    ):
         super().__init__(oid=oid)
         self.coord_space = coord_space
         self.type = NIDM_CONTRAST_VARIANCE_MAP
@@ -460,7 +471,11 @@ class ContrastVariance(NIDMObject):
         self.fmt = fmt
         self.sha = sha
         self.file = NIDMFile(
-            self.id, var_file, filename=self.filename, fmt=self.fmt, sha=self.sha
+            self.id,
+            var_file,
+            filename=self.filename,
+            fmt=self.fmt,
+            sha=self.sha,
         )
         self.prov_type = PROV["Entity"]
 
@@ -510,7 +525,9 @@ class StatisticMap(NIDMObject):
             elif self.stat_type.startswith("http"):
                 self.stat = Identifier(self.stat_type)
             else:
-                raise Exception("Unrecognised statistic: " + str(self.stat_type))
+                raise Exception(
+                    "Unrecognised statistic: " + str(self.stat_type)
+                )
 
         if derfrom_id is not None:
             self.derfrom = StatisticMap(
@@ -530,7 +547,9 @@ class StatisticMap(NIDMObject):
 
         # FIXME use new 'preferred mathematical notation from stato'
         if self.num is not None:
-            filename = self.stat_type.upper() + "Statistic" + self.num + ".nii.gz"
+            filename = (
+                self.stat_type.upper() + "Statistic" + self.num + ".nii.gz"
+            )
         self.file = NIDMFile(self.id, location, filename, sha=sha)
         self.coord_space = coord_space
 
@@ -549,7 +568,9 @@ class StatisticMap(NIDMObject):
         self.fmt = fmt
 
         # Effect degrees of freedom for T-test is always 1
-        if (effdof is None) and (self.stat in [STATO_TSTATISTIC, STATO_ZSTATISTIC]):
+        if (effdof is None) and (
+            self.stat in [STATO_TSTATISTIC, STATO_ZSTATISTIC]
+        ):
             effdof = 1.0
 
         self.effdof = effdof
@@ -608,10 +629,15 @@ SELECT DISTINCT * WHERE {
 
     def export(self, nidm_version, export_dir):
         """Create prov graph."""
-        attributes = [(PROV["type"], NIDM_STATISTIC_MAP), (DCT["format"], self.fmt)]
+        attributes = [
+            (PROV["type"], NIDM_STATISTIC_MAP),
+            (DCT["format"], self.fmt),
+        ]
 
         if not self.isderfrommap:
-            attributes.insert(0, (NIDM_IN_COORDINATE_SPACE, self.coord_space.id))
+            attributes.insert(
+                0, (NIDM_IN_COORDINATE_SPACE, self.coord_space.id)
+            )
             attributes.insert(0, (PROV["label"], self.label))
 
         if not self.stat_type == "Z":
@@ -681,4 +707,6 @@ SELECT DISTINCT * WHERE {
 
     def export(self, nidm_version, export_dir):
         """Create prov graph."""
-        self.add_attributes(((PROV["type"], self.type), (PROV["label"], self.label)))
+        self.add_attributes(
+            ((PROV["type"], self.type), (PROV["label"], self.label))
+        )

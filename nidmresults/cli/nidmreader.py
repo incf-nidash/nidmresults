@@ -19,7 +19,9 @@ from nidmresults.graph import Graph
 def main(argv=sys.argv):
     parser = argparse.ArgumentParser(description="NIDM-Results reader.")
     parser.add_argument("nidm_pack", help="Path to NIDM-Results pack.")
-    parser.add_argument("--version", action="version", version=f"{__version__}")
+    parser.add_argument(
+        "--version", action="version", version=f"{__version__}"
+    )
 
     args = parser.parse_args(argv[1:])
 

@@ -62,7 +62,11 @@ class ImagingInstrument(NIDMObject):
         if not isinstance(machine_type, QualifiedName):
             machine_type = machine_type.lower()
             machine_term = dict(
-                mri=NIF_MRI, eeg=NIF_EEG, meg=NIF_MEG, pet=NIF_PET, spect=NIF_SPECT
+                mri=NIF_MRI,
+                eeg=NIF_EEG,
+                meg=NIF_MEG,
+                pet=NIF_PET,
+                spect=NIF_SPECT,
             )
             machine_label = dict(
                 mri="MRI Scanner",
@@ -422,7 +426,10 @@ SELECT DISTINCT * WHERE {
 
     def export(self, nidm_version, export_dir):
         """Create prov entities and activities."""
-        attributes = [(PROV["type"], self.drift_type), (PROV["label"], self.label)]
+        attributes = [
+            (PROV["type"], self.drift_type),
+            (PROV["label"], self.label),
+        ]
 
         if self.drift_type == FSL_GAUSSIAN_RUNNING_LINE_DRIFT_MODEL:
             attributes.append((FSL_DRIFT_CUTOFF_PERIOD, self.parameter))
@@ -516,7 +523,9 @@ SELECT DISTINCT * WHERE {
             nidm_version["major"] == 1 and nidm_version["minor"] > 2
         ):
             if self.mri_protocol is not None:
-                self.add_attributes([(NIDM_HAS_MRI_PROTOCOL, self.mri_protocol)])
+                self.add_attributes(
+                    [(NIDM_HAS_MRI_PROTOCOL, self.mri_protocol)]
+                )
 
 
 class ErrorModel(NIDMObject):
@@ -592,7 +601,9 @@ SELECT DISTINCT * WHERE {
         # If the error covariance is independent then there is no associated
         # spatial model
         if self.dependance_spatial is not None:
-            atts = atts + (((NIDM_DEPENDENCE_SPATIAL_MODEL, self.dependance_spatial),))
+            atts = atts + (
+                ((NIDM_DEPENDENCE_SPATIAL_MODEL, self.dependance_spatial),)
+            )
 
         # Create "Error Model" entity
         self.add_attributes(atts)
@@ -601,7 +612,9 @@ SELECT DISTINCT * WHERE {
 class ModelParametersEstimation(NIDMObject):
     """Object representing an ModelParametersEstimation activity."""
 
-    def __init__(self, estimation_method, software_id, data=None, label=None, oid=None):
+    def __init__(
+        self, estimation_method, software_id, data=None, label=None, oid=None
+    ):
         super().__init__(oid=oid)
         self.estimation_method = estimation_method
         self.software_id = software_id
@@ -679,7 +692,9 @@ class ParameterEstimateMap(NIDMObject):
         if not filename:
             filename = "ParameterEstimate" + suffix + ".nii.gz"
 
-        self.file = NIDMFile(self.id, pe_file, filename=filename, sha=sha, fmt=fmt)
+        self.file = NIDMFile(
+            self.id, pe_file, filename=filename, sha=sha, fmt=fmt
+        )
 
         self.type = NIDM_PARAMETER_ESTIMATE_MAP
         self.prov_type = PROV["Entity"]
@@ -790,7 +805,12 @@ class ResidualMeanSquares(NIDMObject):
         if filename is None:
             filename = "ResidualMeanSquares" + suffix + ".nii.gz"
         self.file = NIDMFile(
-            self.id, residual_file, filename, temporary=temporary, fmt=fmt, sha=sha
+            self.id,
+            residual_file,
+            filename,
+            temporary=temporary,
+            fmt=fmt,
+            sha=sha,
         )
         if label is None:
             label = "Residual Mean Squares Map"
@@ -1142,7 +1162,9 @@ class GrandMeanMap(NIDMObject):
             mask_data = np.ndarray.flatten(mask_data)
 
             grand_mean_data_in_mask = grand_mean_data[mask_data > 0]
-            self.masked_median = np.median(np.array(grand_mean_data_in_mask, dtype=float))
+            self.masked_median = np.median(
+                np.array(grand_mean_data_in_mask, dtype=float)
+            )
 
         self.add_attributes(
             (

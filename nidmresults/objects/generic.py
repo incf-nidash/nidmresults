@@ -222,7 +222,9 @@ class CoordinateSpace(NIDMObject):
             return False
 
     def is_talairach(self):
-        if str(self.coordinate_system) in [NIDM_TALAIRACH_COORDINATE_SYSTEM.uri]:
+        if str(self.coordinate_system) in [
+            NIDM_TALAIRACH_COORDINATE_SYSTEM.uri
+        ]:
             return True
         else:
             return False
@@ -270,9 +272,13 @@ SELECT ?oid ?label ?vox_to_world ?units ?vox_size ?coordinate_system ?numdim
         self.add_attributes(
             {
                 PROV["type"]: self.type,
-                NIDM_DIMENSIONS_IN_VOXELS: json.dumps(self.dimensions.tolist()),
+                NIDM_DIMENSIONS_IN_VOXELS: json.dumps(
+                    self.dimensions.tolist()
+                ),
                 NIDM_NUMBER_OF_DIMENSIONS: self.number_of_dimensions,
-                NIDM_VOXEL_TO_WORLD_MAPPING: json.dumps(self.voxel_to_world.tolist()),
+                NIDM_VOXEL_TO_WORLD_MAPPING: json.dumps(
+                    self.voxel_to_world.tolist()
+                ),
                 NIDM_IN_WORLD_COORDINATE_SYSTEM: self.coordinate_system,
                 NIDM_VOXEL_UNITS: json.dumps(self.units),
                 NIDM_VOXEL_SIZE: json.dumps(self.voxel_size.tolist()),
@@ -285,7 +291,13 @@ class NIDMFile(NIDMObject):
     """Object representing a File (to be used as attribute of another class)."""
 
     def __init__(
-        self, rdf_id, location, filename=None, sha=None, fmt=None, temporary=False
+        self,
+        rdf_id,
+        location,
+        filename=None,
+        sha=None,
+        fmt=None,
+        temporary=False,
     ):
         super().__init__()
         self.prov_type = PROV["Entity"]
@@ -371,7 +383,9 @@ class NIDMFile(NIDMObject):
             if self.fmt is None:
                 self.fmt = "image/nifti"
 
-            self.add_attributes([(CRYPTO["sha512"], self.sha), (DCT["format"], self.fmt)])
+            self.add_attributes(
+                [(CRYPTO["sha512"], self.sha), (DCT["format"], self.fmt)]
+            )
 
 
 class Image(NIDMObject):
@@ -423,7 +437,9 @@ class Image(NIDMObject):
 class NeuroimagingSoftware(NIDMObject):
     """Class representing a NeuroimagingSoftware Agent."""
 
-    def __init__(self, software_type, version, label=None, feat_version=None, oid=None):
+    def __init__(
+        self, software_type, version, label=None, feat_version=None, oid=None
+    ):
         super().__init__(oid=oid)
         self.version = version
 
@@ -606,4 +622,6 @@ SELECT DISTINCT * WHERE
 
     def export(self, nidm_version, export_dir):
         """Create prov entities and activities."""
-        self.add_attributes([(PROV["label"], self.label), (PROV["type"], self.type)])
+        self.add_attributes(
+            [(PROV["label"], self.label), (PROV["type"], self.type)]
+        )
