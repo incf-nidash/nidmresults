@@ -32,7 +32,7 @@ class NIDMObject:
         if oid is None:
             self.id = NIIRI[str(uuid.uuid4())]
         else:
-            if not type(oid) is QualifiedName:
+            if type(oid) is not QualifiedName:
                 oid = NIIRI.qname(Identifier(oid))
             self.id = oid
 
@@ -187,7 +187,7 @@ class CoordinateSpace(NIDMObject):
             units = ["mm", "mm", "mm"]
 
         self.number_of_dimensions = numdim
-        if not type(vox_to_world) is np.ndarray:
+        if type(vox_to_world) is not np.ndarray:
             # This is useful if info was read from a NIDM pack
             vox_to_world = np.array(json.loads(vox_to_world))
             dimensions = np.array(json.loads(dimensions))

@@ -1232,13 +1232,13 @@ class Coordinate(NIDMObject):
         if x is not None and y is not None and z is not None:
             self.coord_vector = [x, y, z]
         else:
-            if coord_vector and not type(coord_vector) is list:
+            if coord_vector and type(coord_vector) is not list:
                 coord_vector = json.loads(coord_vector)
             self.coord_vector = coord_vector
         if x_std is not None and y_std is not None and z_std is not None:
             self.coord_vector_std = [x_std, y_std, z_std]
         else:
-            if coord_vector_std and not type(coord_vector_std) is list:
+            if coord_vector_std and type(coord_vector_std) is not list:
                 coord_vector_std = json.loads(coord_vector_std)
             self.coord_vector_std = coord_vector_std
 

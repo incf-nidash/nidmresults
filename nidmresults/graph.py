@@ -1023,7 +1023,7 @@ SELECT DISTINCT * WHERE {
                         pe_ids = pe_ids + (NIIRI.qname(str(args_pe["pe_id"])),)
 
                 mpe_id = NIIRI.qname(str(args["mpe_id"]))
-                if not (mpe_id, pe_ids) in contrasts:
+                if (mpe_id, pe_ids) not in contrasts:
                     contrasts[(mpe_id, pe_ids)] = [con]
                 else:
                     contrasts[(mpe_id, pe_ids)].append(con)
