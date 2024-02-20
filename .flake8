@@ -4,17 +4,14 @@ max-line-length = 121
 # For PEP8 error codes see
 # http://pep8.readthedocs.org/en/latest/intro.html#error-codes
 ignore =
-	D100,
 	D101,
 	D102,
 	D103,
 	D104,
 	D105,
 	D107,
-	E741,
 	F403,
 	F405,
-	F821,
 	F841,
 	FS,
 	W503

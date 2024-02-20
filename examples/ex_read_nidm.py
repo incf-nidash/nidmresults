@@ -1,4 +1,5 @@
-# Example: reading a NIDM pack available on NeuroVault
+"""Example: reading a NIDM pack available on NeuroVault."""
+
 import json
 import os
 import urllib.request

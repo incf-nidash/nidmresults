@@ -20,7 +20,7 @@ def load(filename, to_replace=dict()):
        NIDM-Results object
     """
     if not os.path.exists(filename):
-        raise IOException("File does not exist: %s" % filename)
+        raise OSError("File does not exist: %s" % filename)
 
     if filename.endswith(".json"):
         raise Exception("Minimal json file: not handled yet")
