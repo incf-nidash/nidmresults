@@ -57,7 +57,7 @@ class NIDMResults():
     def fix_for_specific_versions(self, rdf_data, to_replace):
         """
         Fixes of the RDF before loading the graph. All of these are workaround
-        to circuvent known issues of the SPM and FSL exporters.
+        to circumvent known issues of the SPM and FSL exporters.
         """
 
         # Load the graph as is so that we can query

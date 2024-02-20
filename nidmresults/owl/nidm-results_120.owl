@@ -1845,7 +1845,7 @@ afni:BLOCK rdf:type owl:Class ;
 
 afni:LegendrePolynomialDriftModel rdf:type owl:Class ;
                                   
-                                  rdfs:label "AFNI's Legendre Polinomial Drift Model" ;
+                                  rdfs:label "AFNI's Legendre Polynomial Drift Model" ;
                                   
                                   rdfs:subClassOf nidm:NIDM_0000087 ;
                                   

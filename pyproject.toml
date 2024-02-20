@@ -3,13 +3,11 @@ build-backend = "hatchling.build"
 requires = ["hatchling", "hatch-vcs"]
 
 [project]
-# Version from setuptools_scm
-dynamic = ["version"]
 authors = [{name = "Camille Maumet"}]
 classifiers = [
-        "Development Status :: 3 - Alpha",
-        "Topic :: Utilities",
-        "License :: OSI Approved :: MIT License",
+    "Development Status :: 3 - Alpha",
+    "Topic :: Utilities",
+    "License :: OSI Approved :: MIT License"
 ]
 dependencies = [
     "rdflib>=4.2.0",
@@ -19,49 +17,51 @@ dependencies = [
     "numpy",
     "future",
     "requests",
-    "pyld",
+    "pyld"
 ]
 description = "Export of neuroimaging statistical results using NIDM as specified at http://nidm.nidash.org/specs/nidm-results.html."
+# Version from setuptools_scm
+dynamic = ["version"]
 keywords = [
     "Prov",
     "NIDM",
-    "Provenance",
+    "Provenance"
 ]
 license = {text = "MIT"}
 maintainers = [{name = "Camille Maumet", email = "c.m.j.maumet@warwick.ac.uk"}]
 name = "nidmresults"
 readme = "README.md"
 requires-python = ">=3.8"
-[project.scripts]
-nidmreader = "nidmresults.cli.nidmreader:main"
-nidm_mkda_convert = "nidmresults.cli.nidm_mkda_convert:main"
-nidmresults = "nidmresults.cli.nidmresults:main"
-# package_data={'':
-#                 ['prefixes.csv',
-#                 'owl/nidm-results_020.owl',
-#                 'owl/nidm-results_100.owl',
-#                 'owl/nidm-results_110.owl',
-#                 'owl/nidm-results_120.owl',
-#                 'owl/nidm-results_130.owl']},
-
-[project.urls]
-Development = "https://github.com/incf-nidash/nidmresults"
 
 [project.optional-dependencies]
 # A combination of dependencies useful for developers
 dev = [
     "nidmresults[test]",
+    "pre-commit"
 ]
 # For running unit and docstring tests
 test = [
     "ddt",
+    "tox"
 ]
 
-[tool.hatch.build.targets.wheel]
-packages = ["nidmresults"]
+[project.scripts]
+nidm_mkda_convert = "nidmresults.cli.nidm_mkda_convert:main"
+nidmreader = "nidmresults.cli.nidmreader:main"
+nidmresults = "nidmresults.cli.nidmresults:main"
+
+[project.urls]
+Development = "https://github.com/incf-nidash/nidmresults"
+
+[tool.codespell]
+ignore-words-list = "fwe,re-use,nd"
+skip = ".git,*.pdf,*.svg"
 
 [tool.hatch.build.hooks.vcs]
 version-file = "nidmresults/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["nidmresults"]
 
 [tool.hatch.version]
 source = "vcs"
