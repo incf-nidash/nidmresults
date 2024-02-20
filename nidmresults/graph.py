@@ -9,6 +9,7 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 
 import collections
 import csv
+import os
 import warnings
 import zipfile
 
@@ -16,19 +17,63 @@ import rdflib
 from rdflib.plugins.parsers.notation3 import BadSyntax
 
 from nidmresults.exporter import NIDMExporter
-from nidmresults.objects.constants_rdflib import *
-from nidmresults.objects.contrast import *
-from nidmresults.objects.inference import *
-from nidmresults.objects.modelfitting import *
-
-# from rdflib.term import Literal
+from nidmresults.objects.constants import NIIRI, namespace_manager
+from nidmresults.objects.constants_rdflib import NIDM_SPM_RESULTS_NIDM
+from nidmresults.objects.contrast import (
+    Contrast,
+    ContrastEstimation,
+    ContrastExplainedMeanSquareMap,
+    ContrastMap,
+    ContrastStdErrMap,
+    ContrastWeights,
+    StatisticMap,
+)
+from nidmresults.objects.generic import (
+    CoordinateSpace,
+    ExporterSoftware,
+    Image,
+    NeuroimagingSoftware,
+    NIDMResultsBundle,
+    NIDMResultsExport,
+)
+from nidmresults.objects.inference import (
+    CenterOfGravity,
+    Cluster,
+    ClusterCriteria,
+    ClusterLabelsMap,
+    DisplayMaskMap,
+    ExcursionSet,
+    ExtentThreshold,
+    HeightThreshold,
+    Inference,
+    InferenceActivity,
+    Peak,
+    PeakCriteria,
+    SearchSpace,
+)
+from nidmresults.objects.modelfitting import (
+    Data,
+    DesignMatrix,
+    DriftModel,
+    ErrorModel,
+    GrandMeanMap,
+    Group,
+    ImagingInstrument,
+    MaskMap,
+    ModelFitting,
+    ModelParametersEstimation,
+    ParameterEstimateMap,
+    Person,
+    ReselsPerVoxelMap,
+    ResidualMeanSquares,
+)
 
 
 class NIDMResults:
     """NIDM-result object containing all metadata and link to image files."""
 
     def __init__(
-        self, nidm_zip=None, rdf_file=None, workaround=False, to_replace=dict()
+        self, nidm_zip=None, rdf_file=None, workaround=False, to_replace={}
     ):
         self.study_name = os.path.basename(nidm_zip).replace(".nidm.zip", "")
         self.zip_path = nidm_zip
@@ -44,7 +89,7 @@ class NIDMResults:
         # Parse turtle into RDF graph
         self.graph = self.parse(rdf_data)
 
-        self.objects = dict()
+        self.objects = {}
         self.info = None
 
         # Query the RDF document and create the objects
@@ -83,7 +128,7 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
         """
 
         sd = g.query(query)
-        objects = dict()
+        objects = {}
         if sd:
             for row in sd:
                 argums = row.asdict()
@@ -133,7 +178,7 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
         return rdf_data
 
     @classmethod
-    def load_from_pack(klass, nidm_zip, workaround=False, to_replace=dict()):
+    def load_from_pack(klass, nidm_zip, workaround=False, to_replace={}):
         nidmr = NIDMResults(
             nidm_zip=nidm_zip, workaround=workaround, to_replace=to_replace
         )
@@ -487,7 +532,7 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
         query = klass.get_query(oid)
         sd = self.graph.query(query)
 
-        objects = dict()
+        objects = {}
         if sd:
             for row in sd:
                 argums = row.asdict()
@@ -971,7 +1016,7 @@ SELECT DISTINCT * WHERE {
 
         sd = self.graph.query(query)
 
-        contrasts = dict()
+        contrasts = {}
         if sd:
             con_num = 0
             for row in sd:
@@ -1167,7 +1212,7 @@ SELECT DISTINCT * WHERE {
     """
         sd = self.graph.query(query)
 
-        inferences = dict()
+        inferences = {}
         if sd:
             for row in sd:
                 args = row.asdict()
@@ -1468,7 +1513,7 @@ SELECT DISTINCT * WHERE {
                 self.FixedRandom = "random"
 
                 # For anything that has a label
-                con_ids = dict()
+                con_ids = {}
                 con_ids[None] = last_used_con_id
 
                 for oid, peak in list(self.get_peaks().items()):

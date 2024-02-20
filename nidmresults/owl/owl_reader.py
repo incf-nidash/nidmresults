@@ -138,10 +138,11 @@ class OwlReader:
         # FIXME: Is there a more efficient way?
         if prefix:
             original_classes = classes
-            classes = list()
-            for class_name in original_classes:
-                if class_name.startswith(prefix):
-                    classes.append(class_name)
+            classes = [
+                class_name
+                for class_name in original_classes
+                if class_name.startswith(prefix)
+            ]
         if but:
             classes = list(set(classes) - set(but))
 
@@ -741,7 +742,7 @@ class OwlReader:
         return sub_types
 
     def check_class_names(self, ex_graph, ex_name, raise_now=False):
-        my_exception = dict()
+        my_exception = {}
         error_msg = ""
         class_names = self.get_class_names()
 
@@ -787,9 +788,9 @@ class OwlReader:
             CRYPTO["sha512"],
         }
 
-        my_exception = dict()
-        my_range_exception = dict()
-        my_restriction_exception = dict()
+        my_exception = {}
+        my_range_exception = {}
+        my_restriction_exception = {}
 
         owl_attributes = self.attributes
         owl_ranges = self.ranges

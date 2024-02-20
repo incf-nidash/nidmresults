@@ -37,13 +37,12 @@ def main(argv=sys.argv):
 
     outfile = args.outfile
     if not outfile.endswith(".csv"):
-        outfile = outfile + ".csv"
+        outfile = f"{outfile}.csv"
 
     first = True
-    con_ids = dict()
-    con_ids[None] = 0
+    con_ids = {None: 0}
     for nidmpack in nidmpacks:
-        print("Exporting " + nidmpack)
+        print(f"Exporting {nidmpack}")
 
         overwrite = False
         if first:
@@ -51,7 +50,7 @@ def main(argv=sys.argv):
             first = False
 
         if not os.path.isfile(nidmpack):
-            raise Exception("Unknown file: " + str(nidmpack))
+            raise Exception(f"Unknown file: {str(nidmpack)}")
 
         nidmgraph = Graph(nidm_zip=nidmpack)
         con_ids = nidmgraph.serialize(

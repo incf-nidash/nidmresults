@@ -5,7 +5,7 @@ import os
 from nidmresults.graph import NIDMResults
 
 
-def load(filename, to_replace=dict()):
+def load(filename, to_replace={}):
     """Load NIDM-Results file given filename.
 
     Guessing if it is a NIDM-Results pack or a JSON file.
@@ -20,13 +20,13 @@ def load(filename, to_replace=dict()):
        NIDM-Results object
     """
     if not os.path.exists(filename):
-        raise OSError("File does not exist: %s" % filename)
+        raise OSError(f"File does not exist: {filename}")
 
     if filename.endswith(".json"):
         raise Exception("Minimal json file: not handled yet")
     elif filename.endswith(".nidm.zip"):
         nidm = NIDMResults.load_from_pack(filename, to_replace=to_replace)
     else:
-        raise Exception("Unhandled format " + filename)
+        raise Exception(f"Unhandled format {filename}")
 
     return nidm

@@ -5,25 +5,20 @@
 @copyright: University of Warwick 2014
 """
 
-import os
-import re
-import sys
-
-import vcr
-from future.standard_library import hooks
-
-with hooks():
-    from urllib.request import urlopen, Request
-    from urllib.error import URLError
-
 import glob
 import logging
+import os
+import re
 import signal
 import socket
 import ssl
+import sys
+from urllib.error import URLError
+from urllib.request import Request, urlopen
 
 import rdflib
-from rdflib.compare import *
+import vcr
+from rdflib.compare import graph_diff, to_isomorphic
 from rdflib.graph import Graph
 
 from nidmresults.objects.constants import (
