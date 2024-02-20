@@ -11,9 +11,9 @@ import logging
 import os
 import re
 import warnings
+from urllib.request import urlopen
 
 import vcr
-from future.standard_library import hooks
 from rdflib import RDF, term
 from rdflib.graph import Graph
 from rdflib.term import Literal
@@ -37,9 +37,6 @@ from nidmresults.objects.constants_rdflib import (
     XSD,
     namespaces as namespace_names,
 )
-
-with hooks():
-    from urllib.request import urlopen
 
 RELPATH = os.path.dirname(os.path.abspath(__file__))
 NIDM_PATH = os.path.dirname(RELPATH)
