@@ -288,7 +288,10 @@ SELECT ?oid ?label ?vox_to_world ?units ?vox_size ?coordinate_system ?numdim
 
 
 class NIDMFile(NIDMObject):
-    """Object representing a File (to be used as attribute of another class)."""
+    """Object representing a File.
+
+    To be used as attribute of another class.
+    """
 
     def __init__(
         self,

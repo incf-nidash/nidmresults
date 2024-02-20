@@ -164,7 +164,8 @@ class TestResultDataModel:
         #     raise Exception(self.my_execption)
 
     def _replace_match(self, graph1, graph2, rdf_type):
-        """Match classes of type 'rdf_type' across documents based on attributes."""
+        """Match classes of type 'rdf_type' across documents \
+           based on attributes."""
         # Retrieve objects of type 'rdf_type' (e.g. prov:Entities)
         g1_terms = set(graph1.subjects(RDF.type, rdf_type))
         g2_terms = set(graph2.subjects(RDF.type, rdf_type))

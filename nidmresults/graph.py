@@ -458,8 +458,8 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
         )
 
     def _get_contrast(self, con_id):
-        """Retrieve contrast with identifier 'con_id' from the list of contrast \
-           objects stored in self.contrasts."""
+        """Retrieve contrast with identifier 'con_id' \
+           from the list of contrast objects stored in self.contrasts."""
         for contrasts in list(self.contrasts.values()):
             for contrast in contrasts:
                 if contrast.estimation.id == con_id:

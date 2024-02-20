@@ -73,9 +73,13 @@ def get_property_names_in_owl(my_owl_graph):
 
 #     # Check owl restrictions on classes
 #     for class_name in my_owl_graph.subjects(RDF["type"], OWL["Class"]):
-#         for class_restr in my_owl_graph.objects(class_name, RDFS["subClassOf"]):
+#         for class_restr in my_owl_graph.objects(
+#             class_name, RDFS["subClassOf"]
+#         ):
 #             if isinstance(class_restr, term.BNode):
-#                 for prop in my_owl_graph.objects(class_restr, OWL["onProperty"]):
+#                 for prop in my_owl_graph.objects(
+#                     class_restr, OWL["onProperty"]
+#                 ):
 #                     attributes.setdefault(class_name, {prop}).add(prop)
 #                     for child_class in my_owl_graph.subjects(
 #                         RDFS["subClassOf"], class_name
@@ -95,7 +99,9 @@ def get_property_names_in_owl(my_owl_graph):
 #                     attributes[class_name] = {prop}
 
 #                 # Add attribute to children of current class
-#                 for child_class in my_owl_graph.subjects(RDFS["subClassOf"], class_name):
+#                 for child_class in my_owl_graph.subjects(
+#                     RDFS["subClassOf"], class_name
+#                 ):
 #                     # Add attribute to current class
 #                     if child_class in attributes:
 #                         attributes[child_class].add(prop)
@@ -123,9 +129,14 @@ def get_property_names_in_owl(my_owl_graph):
 #                                     first_restriction, XSD[xsd_restriction]
 #                                 ):
 #                                     if prop in restrictions:
-#                                         if xsd_restriction in restrictions[prop]:
+#                                         if (
+#                                             xsd_restriction
+#                                             in restrictions[prop]
+#                                         ):
 #                                             restrictions[prop] = max(
-#                                                 restrictions[prop][xsd_restriction],
+#                                                 restrictions[prop][
+#                                                     xsd_restriction
+#                                                 ],
 #                                                 min_incl,
 #                                             )
 #                                         else:
@@ -133,7 +144,9 @@ def get_property_names_in_owl(my_owl_graph):
 #                                                 xsd_restriction: min_incl
 #                                             }
 #                                     else:
-#                                         restrictions[prop] = {xsd_restriction: min_incl}
+#                                         restrictions[prop] = {
+#                                             xsd_restriction: min_incl
+#                                         }
 
 #                     for sub_range_name in my_owl_graph.objects(
 #                         range_name, OWL["onDatatype"]
@@ -146,7 +159,9 @@ def get_property_names_in_owl(my_owl_graph):
 #                     ranges[prop] = {range_name}
 #                 # FIXME: more elegant?
 #                 # Add child_class to range (for ObjectProperty)
-#                 for child_class in my_owl_graph.subjects(RDFS["subClassOf"], range_name):
+#                 for child_class in my_owl_graph.subjects(
+#                     RDFS["subClassOf"], range_name
+#                 ):
 #                     # Add range to current class
 #                     if prop in ranges:
 #                         ranges[prop].add(child_class)
@@ -194,7 +209,9 @@ def get_property_names_in_owl(my_owl_graph):
 #     owl_txt = (
 #         open(owl_file)
 #         .read()
-#         .replace("http://www.w3.org/2002/07/owl#", "http://www.w3.org/2002/07/owl")
+#         .replace(
+#             "http://www.w3.org/2002/07/owl#", "http://www.w3.org/2002/07/owl"
+#         )
 #     )
 #     owl_graph.parse(data=owl_txt, format="turtle")
 
@@ -206,10 +223,12 @@ def get_property_names_in_owl(my_owl_graph):
 
 #             # This is a workaround to avoid issue with "#" in base prefix as
 #             # described in https://github.com/RDFLib/rdflib/issues/379,
-#             # When the fix is introduced in rdflib these 2 lines will be replaced by:
+#             # When the fix is introduced in rdflib these 2 lines
+#             # will be replaced by:
 #             # self.owl.parse(owl_file, format='turtle')
 #             import_txt = import_txt.replace(
-#                 "http://www.w3.org/2002/07/owl#", "http://www.w3.org/2002/07/owl"
+#                 "http://www.w3.org/2002/07/owl#",
+#                 "http://www.w3.org/2002/07/owl",
 #             )
 #             import_graph.parse(data=import_txt, format="turtle")
 
@@ -219,12 +238,17 @@ def get_property_names_in_owl(my_owl_graph):
 
 
 # def check_class_names(
-#     example_graph, example_name, class_names=None, owl_file=None, owl_imports=None
+#     example_graph,
+#     example_name,
+#     class_names=None,
+#     owl_file=None,
+#     owl_imports=None,
 # ):
 #     my_exception = dict()
 #     if not class_names:
 #         if owl_file is None:
-#             raise Exception("One of class_names or owl_file must be not None.")
+#             raise Exception(
+#                "One of class_names or owl_file must be not None.")
 #         else:
 #             owl_graph = get_owl_graph(owl_file)
 #             class_names = get_class_names_in_owl(owl_graph)
@@ -262,7 +286,8 @@ def get_property_names_in_owl(my_owl_graph):
 
 #     if not owl_attributes or not owl_ranges:
 #         if owl_file is None:
-#             raise Exception("One of class_names or owl_file must be not None.")
+#             raise Exception(
+#               "One of class_names or owl_file must be not None.")
 #         else:
 #             owl_graph = get_owl_graph(owl_file, owl_imports)
 
@@ -283,8 +308,8 @@ def get_property_names_in_owl(my_owl_graph):
 #             for class_name in sorted(example_graph.objects(s, RDF["type"])):
 #                 attributes = owl_attributes.get(class_name)
 
-#                 # If the current class was defined in the owl file check if current
-#                 # attribute was also defined.
+#                 # If the current class was defined in the owl file check
+#                 # if current attribute was also defined.
 #                 if attributes:
 #                     if p in attributes:
 #                         found_attributes = True
@@ -301,14 +326,15 @@ def get_property_names_in_owl(my_owl_graph):
 #                     + " in "
 #                     + class_names[2:]
 #                 )
-#                 if not key in my_exception:
+#                 if key not in my_exception:
 #                     my_exception[key] = {example_name}
 #                 else:
 #                     my_exception[key].add(example_name)
 
 #             # *** Check range for ObjectProperties and DataProperties
 #             if isinstance(o, term.URIRef):
-#                 # An ObjectProperty can point to an instance, then we look for its type:
+#                 # An ObjectProperty can point to an instance,
+#                 # then we look for its type:
 #                 found_range = set(example_graph.objects(o, RDF["type"]))
 
 #                 # An ObjectProperty can point to a term
@@ -316,7 +342,9 @@ def get_property_names_in_owl(my_owl_graph):
 #                     found_range = {o}
 
 #                     # If the term is an individual, look for its type
-#                     if OWL["NamedIndividual"] in set(owl_graph.objects(o, RDF["type"])):
+#                     if OWL["NamedIndividual"] in set(
+#                         owl_graph.objects(o, RDF["type"])
+#                     ):
 #                         found_range = set(owl_graph.objects(o, RDF["type"]))
 
 #             elif isinstance(o, term.Literal):
@@ -324,18 +352,22 @@ def get_property_names_in_owl(my_owl_graph):
 
 #             correct_range = False
 #             if p in owl_ranges:
-#                 # If none of the class found for current ObjectProperty value is part of the range
+#                 # If none of the class found for current ObjectProperty value
+#                 # is part of the range
 #                 # throw an error
 
-#                 # If the type of current value is within the authorised ranges
+#                 # If the type of current value
+#                 # is within the authorised ranges
 #                 if found_range.intersection(owl_ranges[p]):
 #                     correct_range = True
 #                 else:
 #                     if p in owl_ranges:
-#                         # A bit more complicated to deal with "positiveInteger"
+#                         # A bit more complicated to deal
+#                         # with "positiveInteger"
 #                         for owl_range in owl_ranges[p]:
-#                             # FIXME: we should be able to do better than that to check that XSD['positiveInteger'] is
-#                             # in owl_ranges[p]
+#                             # FIXME: we should be able to do better
+#                             # than that to check that XSD['positiveInteger']
+#                             # is in owl_ranges[p]
 #                             if (
 #                                 (XSD["positiveInteger"] == owl_range)
 #                                 and (next(iter(found_range)) == XSD["int"])
@@ -344,8 +376,9 @@ def get_property_names_in_owl(my_owl_graph):
 #                                 correct_range = True
 #                 if not correct_range:
 #                     found_range_line = ""
-#                     # FIXME: This should be better handled to be able to do "if found_range"
-#                     if not None in found_range:
+#                     # FIXME: This should be better handled to be able
+#                     # to do "if found_range"
+#                     if None not in found_range:
 #                         found_range_line = ", ".join(
 #                             map(example_graph.qname, sorted(found_range))
 #                         )
@@ -369,7 +402,7 @@ def get_property_names_in_owl(my_owl_graph):
 #                 key = "\n No range defined for: " + example_graph.qname(p)
 
 #             if not correct_range:
-#                 if not key in my_range_exception:
+#                 if key not in my_range_exception:
 #                     my_range_exception[key] = {example_name}
 #                 else:
 #                     my_range_exception[key].add(example_name)
@@ -397,7 +430,7 @@ def get_property_names_in_owl(my_owl_graph):
 #                         + " does not observe constraints "
 #                         + ", ".join(sorted(owl_restrictions[p]))
 #                     )
-#                     if not key in my_restriction_exception:
+#                     if key not in my_restriction_exception:
 #                         my_restriction_exception[key] = {example_name}
 #                     else:
 #                         my_restriction_exception[key].add(example_name)

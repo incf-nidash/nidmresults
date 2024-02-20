@@ -590,7 +590,8 @@ class NIDMExporter:
 
     def _get_model_fitting(self, mf_id):
         """Retrieve model fitting with identifier 'mf_id' \
-           from the list of model fitting objects stored in self.model_fitting."""
+           from the list of model fitting objects stored \
+           in self.model_fitting."""
         for model_fitting in self.model_fittings:
             if model_fitting.activity.id == mf_id:
                 return model_fitting
@@ -600,8 +601,9 @@ class NIDMExporter:
         )
 
     def _get_contrast(self, con_id):
-        """Retrieve contrast with identifier 'con_id' from the list of contrast \
-           objects stored in self.contrasts."""
+        """Retrieve contrast with identifier 'con_id' \
+           from the list of contrast objects stored \
+           in self.contrasts."""
         for contrasts in list(self.contrasts.values()):
             for contrast in contrasts:
                 if contrast.estimation.id == con_id:

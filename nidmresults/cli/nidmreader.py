@@ -1,5 +1,6 @@
 #!/usr/bin/python
-"""Export neuroimaging results created with FSL feat following NIDM-Results specification.
+"""Export neuroimaging results created with FSL feat \
+   following NIDM-Results specification.
 
 The path to feat directory must be passed as first argument.
 
