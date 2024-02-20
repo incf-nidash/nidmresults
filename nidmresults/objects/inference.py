@@ -13,8 +13,8 @@ from math import erf, sqrt
 from prov.constants import XSD_FLOAT
 from prov.model import Identifier, Literal
 
-from nidmresults.objects.constants import DC, PROV
-from nidmresults.objects.generic import (
+from nidmresults.objects.constants import (
+    DC,
     NIDM_CLUSTER_CENTER_OF_GRAVITY,
     NIDM_CLUSTER_DEFINITION_CRITERIA,
     NIDM_CLUSTER_LABEL_ID,
@@ -67,13 +67,13 @@ from nidmresults.objects.generic import (
     NIDM_VOXEL26CONNECTED,
     OBO_P_VALUE_FWER,
     OBO_STATISTIC,
+    PROV,
     SPM_PARTIAL_CONJUNCTION_DEGREE,
     SPM_SEARCH_VOLUME_RESELS_GEOMETRY,
     SPM_SMALLEST_SIGNIFICANT_CLUSTER_SIZE_IN_VOXELS_FDR05,
     SPM_SMALLEST_SIGNIFICANT_CLUSTER_SIZE_IN_VOXELS_FWE05,
-    NIDMFile,
-    NIDMObject,
 )
+from nidmresults.objects.generic import NIDMFile, NIDMObject
 
 
 class Inference:

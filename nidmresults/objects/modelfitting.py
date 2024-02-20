@@ -16,10 +16,12 @@ import numpy as np
 from prov.identifier import QualifiedName
 from prov.model import Identifier
 
-from nidmresults.objects.constants import DC, DCT, NFO, PROV
-from nidmresults.objects.generic import (
+from nidmresults.objects.constants import (
+    DC,
+    DCT,
     FSL_DRIFT_CUTOFF_PERIOD,
     FSL_GAUSSIAN_RUNNING_LINE_DRIFT_MODEL,
+    NFO,
     NIDM_DATA,
     NIDM_DATA_SCALING,
     NIDM_DEPENDENCE_SPATIAL_MODEL,
@@ -55,13 +57,12 @@ from nidmresults.objects.generic import (
     NIF_SPECT,
     NLX_FMRI_PROTOCOL,
     NLX_IMAGING_INSTRUMENT,
+    PROV,
     SPM_DCT_DRIFT_MODEL,
     SPM_SPMS_DRIFT_CUT_OFF_PERIOD,
     STATO_GROUP,
-    Image,
-    NIDMFile,
-    NIDMObject,
 )
+from nidmresults.objects.generic import Image, NIDMFile, NIDMObject
 
 
 class ModelFitting:

@@ -15,9 +15,7 @@ import numpy as np
 from prov.identifier import QualifiedName
 from prov.model import Identifier
 
-from nidmresults.objects.constants import PROV
-from nidmresults.objects.generic import (
-    DCT,
+from nidmresults.objects.constants import (
     NIDM_CONTRAST_ESTIMATION,
     NIDM_CONTRAST_EXPLAINED_MEAN_SQUARE_MAP,
     NIDM_CONTRAST_MAP,
@@ -29,13 +27,13 @@ from nidmresults.objects.generic import (
     NIDM_IN_COORDINATE_SPACE,
     NIDM_STATISTIC_MAP,
     NIDM_STATISTIC_TYPE,
+    PROV,
     STATO_CONTRAST_WEIGHT_MATRIX,
     STATO_FSTATISTIC,
     STATO_TSTATISTIC,
     STATO_ZSTATISTIC,
-    NIDMFile,
-    NIDMObject,
 )
+from nidmresults.objects.generic import DCT, NIDMFile, NIDMObject
 
 
 class Contrast:
