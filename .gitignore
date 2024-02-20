@@ -1,11 +1,24 @@
 *.bak
 
-build/*
-*egg*/*
-dist/*
 .DS_Store
+
+.vscode
+
+*egg*/*
 *.pyc
+build/
+dist/
+
+env/
+venv/
+
+# handled by hatch
+nidmresults/_version.py
 
 *.nidm.zip
 
+debug.log
+
 test/data
+
+.tox

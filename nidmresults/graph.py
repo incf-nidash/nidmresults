@@ -7,8 +7,6 @@ Specification: http://nidm.nidash.org/specs/nidm-results.html
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>
 @copyright: University of Warwick 2013-2014
 """
-
-import nidmresults
 from nidmresults.objects.constants_rdflib import *
 from nidmresults.objects.modelfitting import *
 from nidmresults.objects.contrast import *
@@ -59,7 +57,7 @@ class NIDMResults():
     def fix_for_specific_versions(self, rdf_data, to_replace):
         """
         Fixes of the RDF before loading the graph. All of these are workaround
-        to circuvent known issues of the SPM and FSL exporters.
+        to circumvent known issues of the SPM and FSL exporters.
         """
 
         # Load the graph as is so that we can query

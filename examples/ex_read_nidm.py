@@ -1,8 +1,6 @@
 # Example: reading a NIDM pack available on NeuroVault
 import os
 import json
-import shutil
-import tempfile
 import nidmresults as nidm
 import urllib.request
 
@@ -11,7 +9,7 @@ nidm_url = 'https://neurovault.org/collections/2210/fsl_default_130.nidm.zip'
 nidmpack = "2210_fsl_default_130.nidm.zip"
 
 if not os.path.isfile(nidmpack):
-    print('Downloading ' + nidmpack)
+    print(f'Downloading {nidmpack}')
     urllib.request.urlretrieve(nidm_url, nidmpack)
 
 # Known issues with NIDM packs in collection 2210

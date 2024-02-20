@@ -1,5 +1,5 @@
 """ Load and save NIDM-Results objects """
-from .graph import NIDMResults
+from nidmresults.graph import NIDMResults
 
 import os
 
