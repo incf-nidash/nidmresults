@@ -4783,7 +4783,7 @@ obo:STATO_0000119 rdf:type owl:Class ;
 
                   obo:IAO_0000115 "model parameter estimation is a data transformation that finds parameter values (the model parameter estimates) most compatible with the data as judged by the model."@en ;
 
-                  obo:IAO_0000116 """textual definition modified following contributiong by Thomas Nichols:
+                  obo:IAO_0000116 """textual definition modified following contribution by Thomas Nichols:
 https://github.com/ISA-tools/stato/issues/18"""@en ;
 
                   obo:IAO_0000114 obo:IAO_0000125 .
