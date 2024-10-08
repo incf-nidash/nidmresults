@@ -32,7 +32,7 @@ license = {text = "MIT"}
 maintainers = [{name = "Camille Maumet", email = "c.m.j.maumet@warwick.ac.uk"}]
 name = "nidmresults"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 
 [project.optional-dependencies]
 # A combination of dependencies useful for developers
