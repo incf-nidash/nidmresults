@@ -212,7 +212,7 @@ class CoordinateSpace(NIDMObject):
             and (nifti_file is not None)
         ):
             thresImg = nib.load(nifti_file)
-            thresImgHdr = thresImg.get_header()
+            thresImgHdr = thresImg.header
 
             numdim = len(thresImg.shape)
             dimensions = np.asarray(thresImg.shape)
@@ -373,7 +373,7 @@ class NIDMFile(NIDMObject):
 
     def get_sha_sum(self, nifti_file):
         nifti_img = nib.load(nifti_file)
-        data = nifti_img.get_data()
+        data = nifti_img.get_fdata()
         # Fix needed as in https://github.com/pymc-devs/pymc/issues/327
         if not data.flags["C_CONTIGUOUS"]:
             data = np.ascontiguousarray(data)
