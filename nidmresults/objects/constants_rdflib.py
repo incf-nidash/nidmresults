@@ -16,10 +16,8 @@ AFNI = Namespace("http://purl.org/nidash/afni#")
 SPM = Namespace("http://purl.org/nidash/spm#")
 FSL = Namespace("http://purl.org/nidash/fsl#")
 RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
-CRYPTO = Namespace(
-    "http://id.loc.gov/vocabulary/preservation/\
-cryptographicHashFunctions#"
-)
+CRYPTO = Namespace("http://id.loc.gov/vocabulary/preservation/\
+cryptographicHashFunctions#")
 DC = Namespace("http://purl.org/dc/elements/1.1/")
 DCT = Namespace("http://purl.org/dc/terms/")
 OWL = Namespace("http://www.w3.org/2002/07/owl#")

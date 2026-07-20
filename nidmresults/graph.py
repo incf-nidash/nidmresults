@@ -94,7 +94,7 @@ class NIDMResults:
 
         # Query the RDF document and create the objects
         self.software = self.load_software()
-        (self.bundle, self.exporter, self.export_act, self.export_time) = (
+        self.bundle, self.exporter, self.export_act, self.export_time = (
             self.load_bundle_export()
         )
         self.model_fittings = self.load_modelfitting()
@@ -192,10 +192,8 @@ SELECT DISTINCT ?type ?version ?exp_act WHERE {
             # nidm-results pack, this should
             # be stated explicitly in the spec?
             if len(self.model_fittings) > 1:
-                raise Exception(
-                    "Can't handle NIDM-Results packs with \
-                    multiple model parameter estimation activities"
-                )
+                raise Exception("Can't handle NIDM-Results packs with \
+                    multiple model parameter estimation activities")
 
             self.info["NeuroimagingAnalysisSoftware_type"] = self.software.name
             self.info["NeuroimagingAnalysisSoftware_softwareVersion"] = (

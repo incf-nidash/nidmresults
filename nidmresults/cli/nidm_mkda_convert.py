@@ -5,7 +5,6 @@
 @copyright: University of Warwick 2013-2014
 """
 
-
 import argparse
 import os
 import sys

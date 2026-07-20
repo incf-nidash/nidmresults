@@ -6,6 +6,7 @@ The software-specific test classes must inherit from this class.
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>, Satrajit Ghosh
 @copyright: University of Warwick 2014
 """
+
 import glob
 import json
 import logging
