@@ -28,7 +28,8 @@ def request_nidm_results_from_neurovault(collection: str = None):
         # Collection containing examples of NIDM-Results packs (1.3.0)
         collection = "2210"
     req = Request(
-        f"http://neurovault.org/api/collections/{collection}/nidm_results"
+        f"https://neurovault.org/api/collections/{collection}/nidm_results",
+        headers={"User-Agent": "Mozilla/5.0"},
     )
     rep = urlopen(req)
     response = rep.read()
