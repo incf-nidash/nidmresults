@@ -4,6 +4,7 @@
 @author: Camille Maumet <c.m.j.maumet@warwick.ac.uk>
 @copyright: University of Warwick 2013-2015
 """
+
 from __future__ import annotations
 
 import os
