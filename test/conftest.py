@@ -53,7 +53,7 @@ def download_nidm_results_from_neurovault() -> None:
             continue
 
         url = nidm_res["zip_file"]
-        f = urlopen(url)
+        f = urlopen(Request(url, headers={"User-Agent": "Mozilla/5.0"}))
         print(f"downloading {url} at {nidmpack}")
         with open(nidmpack, "wb") as local_file:
             local_file.write(f.read())
