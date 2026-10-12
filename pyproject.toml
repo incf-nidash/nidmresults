@@ -3,7 +3,7 @@ build-backend = "hatchling.build"
 requires = ["hatchling", "hatch-vcs"]
 
 [project]
-authors = [{name = "Camille Maumet"}]
+authors = [{ name = "Camille Maumet" }]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Topic :: Utilities",
@@ -28,8 +28,8 @@ keywords = [
     "NIDM",
     "Provenance"
 ]
-license = {text = "MIT"}
-maintainers = [{name = "Camille Maumet", email = "c.m.j.maumet@warwick.ac.uk"}]
+license = { text = "MIT" }
+maintainers = [{ name = "Camille Maumet", email = "c.m.j.maumet@warwick.ac.uk" }]
 name = "nidmresults"
 readme = "README.md"
 requires-python = ">=3.10"
